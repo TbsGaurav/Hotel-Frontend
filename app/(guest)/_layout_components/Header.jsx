@@ -1,0 +1,218 @@
+import React from 'react';
+
+export default function Header() {
+    return (
+        <header className="py-2 py-md-4">
+            <div className="container">
+                <div className="row">
+                    <div className="col-6 col-md-3 d-flex justify-content-between justify-content-md-start">
+                        <a href="index.html" className="my-auto">
+                            <img src="image/logo.webp" alt="" />
+                        </a>
+                    </div>
+                    <div className="col-6 col-md-9 d-flex">
+                        <div className="w-100 my-auto d-flex justify-content-end justify-content-md-end">
+                            <div className="dropdown me-2 me-md-4 d-none d-lg-block">
+                                <button
+                                    className="dropdown-toggle language-switcher"
+                                    type="button"
+                                    id="languageSwitcher"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <span className="me-2 d-none d-md-inline-block">AUD</span>
+                                </button>
+                                <ul className="dropdown-menu language-switcher-menu-item" aria-labelledby="languageSwitcher">
+                                    <li>
+                                        <a className="dropdown-item" href="#">
+                                            AUD
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a className="dropdown-item" href="#">
+                                            USD
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a className="dropdown-item" href="#">
+                                            INR
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div className="dropdown d-none d-lg-block">
+                                <button
+                                    className="dropdown-toggle language-switcher"
+                                    type="button"
+                                    id="languageSwitcher"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <i className="fa-sharp fa-light fa-globe me-2"></i>{' '}
+                                    <span className="me-2 d-none d-md-inline-block">English</span>
+                                </button>
+                                <ul className="dropdown-menu language-switcher-menu-item" aria-labelledby="languageSwitcher">
+                                    <li>
+                                        <a className="dropdown-item" href="#">
+                                            English
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a className="dropdown-item" href="#">
+                                            Hindi
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a className="dropdown-item" href="#">
+                                            Japanese
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <a
+                                href="#"
+                                className="theme-button-orange rounded rounded rounded rounded mx-2 mx-md-4 d-none d-lg-block"
+                                data-bs-toggle="modal"
+                                data-bs-target="#loginMadal"
+                            >
+                                Sign In / Sign Up
+                            </a>
+
+                            <button
+                                className="theme-bordered-button rounded"
+                                type="button"
+                                data-bs-toggle="offcanvas"
+                                data-bs-target="#offcanvasExample"
+                                aria-controls="offcanvasExample"
+                            >
+                                <i className="fa-light fa-bars me-2"></i> Menu
+                            </button>
+                            <div
+                                className="offcanvas offcanvas-end"
+                                tabIndex="-1"
+                                id="offcanvasExample"
+                                aria-labelledby="offcanvasExampleLabel"
+                            >
+                                <div className="offcanvas-header">
+                                    <h5 className="offcanvas-title" id="offcanvasExampleLabel">
+                                        Menu
+                                    </h5>
+                                    <button
+                                        type="button"
+                                        className="btn-close text-reset"
+                                        data-bs-dismiss="offcanvas"
+                                        aria-label="Close"
+                                    ></button>
+                                </div>
+                                <div className="offcanvas-body d-flex justify-content-between flex-column">
+                                    <div>
+                                        <ul className="list-unstyled main-menu">
+                                            <li>
+                                                <a href="hotel-list.html">Find Hotel Deals</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">Help</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">My Hotel</a>
+                                            </li>
+                                            <li>
+                                                <a href="index.html">Home</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">Popular Destinations</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">Blogs</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div>
+                                        <div className="d-flex mt-5">
+                                            <div className="dropdown me-2 mx-lg-4 d-block d-lg-none w-50">
+                                                <button
+                                                    className="dropdown-toggle language-switcher w-100 d-flex justify-content-between align-items-center"
+                                                    type="button"
+                                                    id="languageSwitcher"
+                                                    data-bs-toggle="dropdown"
+                                                    aria-expanded="false"
+                                                >
+                                                    <span>AUD</span>
+                                                </button>
+                                                <ul
+                                                    className="dropdown-menu language-switcher-menu-item"
+                                                    aria-labelledby="languageSwitcher"
+                                                >
+                                                    <li>
+                                                        <a className="dropdown-item" href="#">
+                                                            AUD
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a className="dropdown-item" href="#">
+                                                            USD
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a className="dropdown-item" href="#">
+                                                            INR
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                            <div className="dropdown d-block d-lg-none w-50">
+                                                <button
+                                                    className="dropdown-toggle language-switcher w-100 d-flex justify-content-between align-items-center"
+                                                    type="button"
+                                                    id="languageSwitcher"
+                                                    data-bs-toggle="dropdown"
+                                                    aria-expanded="false"
+                                                >
+                                                    <i className="fa-sharp fa-light fa-globe me-2"></i>{' '}
+                                                    <span className="me-2 d-inline-block">English</span>
+                                                </button>
+                                                <ul
+                                                    className="dropdown-menu language-switcher-menu-item"
+                                                    aria-labelledby="languageSwitcher"
+                                                >
+                                                    <li>
+                                                        <a className="dropdown-item" href="#">
+                                                            English
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a className="dropdown-item" href="#">
+                                                            Hindi
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a className="dropdown-item" href="#">
+                                                            Japanese
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <a
+                                            href="#"
+                                            className="theme-button-orange rounded rounded rounded rounded w-100 mt-3 text-center d-block d-lg-none"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#loginMadal"
+                                        >
+                                            Sign In / Sign Up
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+}

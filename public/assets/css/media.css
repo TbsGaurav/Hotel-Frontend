@@ -1,0 +1,95 @@
+@media screen and (max-width:1281px){
+    .hero-heading{
+        font-size: 50px;
+    }
+    .small-heading-hero{
+        font-size: 25px;
+    }
+    .space-100px{
+        padding: 60px 0px;
+    }
+    .owl-nav{
+        left:0px;
+        right: 0px;
+    }
+}
+
+
+@media screen and (max-width:1024px){
+    .container{
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+
+@media screen and (max-width:885px){
+
+}
+
+
+@media screen and (max-width:500px){
+    .hero-heading {
+        font-size: 40px;
+    }
+    .small-heading-hero {
+        font-size: 18px;
+    }
+    .owl-nav {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 100%;
+        left: 0px;
+        right: 0px;
+        transform: translateY(-50%);
+        padding: 10px 15px 0 15px;
+    }
+    .heading{
+        font-size: 27px;
+    }
+    .small-heading-19-px{
+        font-size: 17px;
+    }
+    .width-50-on-desktop{
+        width: 100%;
+    }
+    .gallery-item{
+        width: 80px;
+        height: 80px;
+        margin: 10px;
+    }
+    .custom-input-group-textbox, .rooms-guest-dd{
+        height: 50px !important;
+    }
+    .datepicker-icon{
+        top: 7px !important;
+    }
+    .owl-theme .owl-nav {
+        margin-top: 20px !important;
+    }
+    .space-100px{
+        padding: 30px 0;
+    }
+    .small-para-14-px, .custom-form-label{
+        font-size: 16px;
+    }
+    .daterangepicker{
+        position: fixed !important;
+        top: 0px !important;
+        left: 0px !important;
+        right: 0px !important;
+        bottom: 0px !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 999 !important;
+    }
+    .daterangepicker .drp-calendar{
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    .daterangepicker:after, .daterangepicker:before{
+        display: none !important;
+    }
+}
