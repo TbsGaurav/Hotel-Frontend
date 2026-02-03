@@ -1,6 +1,10 @@
-import axiosInstance from './axiosInstance';
+import { fetchClient } from "./fetchClient";
 
 export const getCountriesApi = async () => {
-    const res = await axiosInstance.get('/country/list');
-    return res.data.data;
+    const json = await fetchClient('/country/list', {
+        cache: 'no-store' // SSR
+        // OR: next: { revalidate: 3600 }
+    });
+
+    return json.data || [];
 };

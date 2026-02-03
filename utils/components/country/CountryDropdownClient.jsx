@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 
-export default function CountryDropdown() {
+export default function CountryDropdownClient() {
     const [open, setOpen] = useState(true);
     const [countries, setCountries] = useState([]);
     const [loading, setLoading] = useState(false);
