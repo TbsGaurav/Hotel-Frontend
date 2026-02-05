@@ -8,7 +8,7 @@ export default function CountryIntro({ countryName, descriptionHtml }) {
                     All Countries
                 </Link>
                 {' · '}
-                <Link href={`/country/${countryName}`} className="fw-semibold text-decoration-none">
+                <Link href={`/${countryName}`} className="fw-semibold text-decoration-none">
                     {countryName}
                 </Link>
             </p>

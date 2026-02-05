@@ -11,8 +11,8 @@ export default function CountryDropdownSection({ regions, countryName, data, hot
             <div className="accordion" id="countryAccordion">
                 <Dropdown id="regions" title="All Regions" items={regions} parentId="countryAccordion" />
                 <CityDropdown countryName={countryName} initialCities={cities} parentId="countryAccordion" />
-                <Dropdown id="hotelbrand" title="Top Hotel Brands" items={hotelBrands} parentId="countryAccordion" />
-                <Dropdown id="hoteltype" title="Top Hotel Types" items={hotelTypes} parentId="countryAccordion" />
+                <Dropdown id="hotelbrand" title={`Top Hotel Brands in ${countryName}`} items={hotelBrands} parentId="countryAccordion" />
+                <Dropdown id="hoteltype" title={`Top Hotel Types in ${countryName}`} items={hotelTypes} parentId="countryAccordion" />
             </div>
         </section>
     );

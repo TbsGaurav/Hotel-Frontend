@@ -29,12 +29,14 @@ export default async function CountryPage({ params }) {
         .filter((item) => item.type === 'HotelBrand')
         .map((item) => ({
             label: item.itemName,
+            count: item.hotelCount,
             href: item.urlName ? `/hotelbrand/${item.urlName}` : null
         }));
     const hotelTypes = data?.hotelData
         .filter((item) => item.type === 'HotelType')
         .map((item) => ({
             label: item.itemName,
+            count: item.hotelCount,
             href: item.urlName ? `/hoteltype/${item.urlName}` : null
         }));
     return (

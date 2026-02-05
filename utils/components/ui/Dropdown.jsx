@@ -27,11 +27,39 @@ export default function Dropdown({ id, title, items = [], parentId }) {
                         {items.map((item, index) => (
                             <div key={index} className="col-6 col-md-3 mb-2 fw-semibold">
                                 {item.href ? (
-                                    <Link href={item.href} className="text-decoration-none text-dark">
-                                        • {item.label}
+                                    <Link href={item.href} className="text-decoration-none">
+                                        <div className="fw-semibold text-dark">• {item.label}</div>
+                                        {item.count != null && (
+                                            <div
+                                                className="text-secondary small"
+                                                style={{
+                                                    fontSize: '13px',
+                                                    marginLeft: '14px',
+                                                    marginTop: '2px',
+                                                    lineHeight: '1.2'
+                                                }}
+                                            >
+                                                ({item.count} properties)
+                                            </div>
+                                        )}
                                     </Link>
                                 ) : (
-                                    <>• {item.label}</>
+                                    <>
+                                        <div className="fw-semibold">• {item.label}</div>
+                                        {item.count != null && (
+                                            <div
+                                                className="text-primary small"
+                                                style={{
+                                                    fontSize: '13px',
+                                                    marginLeft: '14px',
+                                                    marginTop: '2px',
+                                                    lineHeight: '1.2'
+                                                }}
+                                            >
+                                                ({item.count} properties)
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         ))}
