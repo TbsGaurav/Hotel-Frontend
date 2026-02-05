@@ -4,7 +4,7 @@ export default function CountryIntro({ countryName, descriptionHtml }) {
     return (
         <section className="container py-5">
             <p className="text-muted mb-2">
-                <Link href="/country" className="text-muted text-decoration-none">
+                <Link href="/destinations" className="text-muted text-decoration-none">
                     All Countries
                 </Link>
                 {' · '}

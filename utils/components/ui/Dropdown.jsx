@@ -27,7 +27,7 @@ export default function Dropdown({ id, title, items = [], parentId }) {
                         {items.map((item, index) => (
                             <div key={index} className="col-6 col-md-3 mb-2 fw-semibold">
                                 {item.href ? (
-                                    <Link href={item.href} className="text-decoration-none">
+                                    <Link href={item.href} className="text-decoration-none d-block">
                                         <div className="fw-semibold text-dark">• {item.label}</div>
                                         {item.count != null && (
                                             <div

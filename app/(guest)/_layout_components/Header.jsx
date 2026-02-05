@@ -1,5 +1,3 @@
-
-
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -119,8 +117,8 @@ export default function Header() {
                                             </li>
 
                                             <li>
-                                                <Link href="/country" className="d-flex align-items-center">
-                                                    All Countries
+                                                <Link href="/destinations" className="d-flex align-items-center">
+                                                    Destinations
                                                 </Link>
                                             </li>
 
