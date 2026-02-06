@@ -1,9 +1,20 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
+import React, { useRef } from 'react';
 
 export default function Header() {
+    const offcanvasRef = useRef(null);
+
+    const handleCloseOffcanvas = () => {
+        if (offcanvasRef.current) {
+            const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasRef.current);
+            if (bsOffcanvas) {
+                bsOffcanvas.hide();
+            }
+        }
+    };
+
     return (
         <header className="py-2 py-md-4">
             <div className="container">
@@ -97,6 +108,7 @@ export default function Header() {
                                 tabIndex="-1"
                                 id="offcanvasExample"
                                 aria-labelledby="offcanvasExampleLabel"
+                                ref={offcanvasRef}
                             >
                                 <div className="offcanvas-header">
                                     <h5 className="offcanvas-title" id="offcanvasExampleLabel">
@@ -113,33 +125,62 @@ export default function Header() {
                                     <div>
                                         <ul className="list-unstyled main-menu">
                                             <li>
-                                                <Link href="/hotel-list">Find Hotel Deals</Link>
+                                                <Link
+                                                    href="/hotel-list"
+                                                    onClick={handleCloseOffcanvas}>Find Hotel Deals</Link>
                                             </li>
 
                                             <li>
-                                                <Link href="/destinations" className="d-flex align-items-center">
+                                                <Link
+                                                    href="/destinations"
+                                                    className="d-flex align-items-center"
+                                                    onClick={handleCloseOffcanvas}>
                                                     Destinations
                                                 </Link>
                                             </li>
 
                                             <li>
-                                                <a href="#">Help</a>
+                                                <a
+                                                    href="#"
+                                                    onClick={handleCloseOffcanvas}>
+                                                    Help
+                                                </a>
                                             </li>
 
                                             <li>
-                                                <a href="#">My Hotel</a>
+                                                <a
+                                                    href="#"
+                                                    onClick={handleCloseOffcanvas}
+                                                >
+                                                    My Hotel
+                                                </a>
                                             </li>
 
                                             <li>
-                                                <Link href="/">Home</Link>
+                                                <Link
+                                                    href="/"
+                                                    onClick={handleCloseOffcanvas}
+                                                >
+                                                    Home
+                                                </Link>
                                             </li>
 
                                             <li>
-                                                <a href="#">Popular Destinations</a>
+                                                <a
+                                                    href="#"
+                                                    onClick={handleCloseOffcanvas}
+                                                >
+                                                    Popular Destinations
+                                                </a>
                                             </li>
 
                                             <li>
-                                                <a href="#">Blogs</a>
+                                                <a
+                                                    href="#"
+                                                    onClick={handleCloseOffcanvas}
+                                                >
+                                                    Blogs
+                                                </a>
                                             </li>
                                         </ul>
 
