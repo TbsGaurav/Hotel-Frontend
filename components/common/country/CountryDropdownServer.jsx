@@ -1,4 +1,4 @@
-import { getCountriesApi } from '@/utils/api/countryapi';
+import { getCountriesApi } from '@/lib/api/countryapi';
 import CountryDropdownClient from './CountryDropdownClient';
 
 export default async function CountryDropdownServer() {

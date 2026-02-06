@@ -1,8 +1,8 @@
-import { getCountryByUrlName } from '@/utils/api/countryapi';
-import CountryDropdownSection from '@/utils/components/country/CountryDropdownSection';
-import CountryIntro from '@/utils/components/country/CountryInfo';
-import CountryHeroSection from '@/utils/components/herosection/CountryHeroSection';
-import { formatCountryName } from '@/utils/utils';
+import { getCountryByUrlName } from '@/lib/api/countryapi';
+import CountryDropdownSection from '@/components/common/country/CountryDropdownSection';
+import CountryIntro from '@/components/common/country/CountryInfo';
+import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import { formatCountryName } from '@/lib/utils';
 
 export default async function CountryPage({ params }) {
     const { country } = await params;

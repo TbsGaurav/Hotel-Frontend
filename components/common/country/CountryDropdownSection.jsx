@@ -1,7 +1,7 @@
 'use client';
 
-import Dropdown from '@/utils/components/ui/Dropdown';
-import CityDropdown from '@/utils/components/city/CityDropdown';
+import Dropdown from '@/components/ui/Dropdown';
+import CityDropdown from '@/components/common/city/CityDropdown';
 
 export default function CountryDropdownSection({ regions, countryName, data, hotelBrands, hotelTypes }) {
     const cities = data?.countryData?.filter((i) => i.type === 'City') ?? [];

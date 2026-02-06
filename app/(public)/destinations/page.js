@@ -1,5 +1,5 @@
-import CountryDropdownServer from '@/utils/components/country/CountryDropdownServer';
-import CountryHeroSection from '@/utils/components/herosection/CountryHeroSection';
+import CountryDropdownServer from '@/components/common/country/CountryDropdownServer';
+import CountryHeroSection from '@/components/sections/CountryHeroSection';
 
 export default async function CountryPage({ params }) {
     return (

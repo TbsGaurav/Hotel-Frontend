@@ -1,10 +1,10 @@
-"use client";
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import { addMonths, format } from 'date-fns';
-import "react-datepicker/dist/react-datepicker.css";
-import "./DatePicker.css";
-import { LuCalendarRange } from "react-icons/lu";
+import 'react-datepicker/dist/react-datepicker.css';
+import { LuCalendarRange } from 'react-icons/lu';
+import '../../public/assets/css/DatePicker.css';
 
 function HeroSection() {
     const [checkInDate, setCheckInDate] = useState(new Date());
@@ -18,15 +18,17 @@ function HeroSection() {
     // Handle click outside to close
     useEffect(() => {
         function handleClickOutside(event) {
-            if (datePickerRef.current &&
+            if (
+                datePickerRef.current &&
                 !datePickerRef.current.contains(event.target) &&
                 !event.target.closest('.react-datepicker') &&
-                !event.target.closest('.date-range-picker-popup')) {
+                !event.target.closest('.date-range-picker-popup')
+            ) {
                 setShowDatePicker(false);
             }
         }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const handleDateChange = (dates) => {
@@ -129,13 +131,16 @@ function HeroSection() {
                                             <div className="date-range-labels">
                                                 <div className="check-in-out-label">
                                                     <span className="date-text">
-                                                        {checkInDate ? formatDate(checkInDate) : ''} -  {checkOutDate ? formatDate(checkOutDate) : ''}
+                                                        {checkInDate ? formatDate(checkInDate) : ''} -{' '}
+                                                        {checkOutDate ? formatDate(checkOutDate) : ''}
                                                     </span>
                                                 </div>
-                                                <span className="date-range-icon" onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleOpenDatePicker();
-                                                }}
+                                                <span
+                                                    className="date-range-icon"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOpenDatePicker();
+                                                    }}
                                                 >
                                                     <LuCalendarRange />
                                                 </span>
@@ -182,9 +187,7 @@ function HeroSection() {
                                                                 >
                                                                     ‹
                                                                 </button>
-                                                                <div className="month-year-display">
-                                                                    {format(displayDate, 'MMM yyyy')}
-                                                                </div>
+                                                                <div className="month-year-display">{format(displayDate, 'MMM yyyy')}</div>
                                                                 <button
                                                                     type="button"
                                                                     onClick={increaseMonth}
@@ -205,8 +208,7 @@ function HeroSection() {
                                                 <div className="footer-buttons">
                                                     {tempCheckInDate && tempCheckOutDate
                                                         ? `${formatDate(tempCheckInDate)} - ${formatDate(tempCheckOutDate)}`
-                                                        : `${formatDate(new Date())} - ${formatDate(new Date())}`
-                                                    }
+                                                        : `${formatDate(new Date())} - ${formatDate(new Date())}`}
                                                     <button
                                                         type="button"
                                                         className="cancel-button"

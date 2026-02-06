@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
-import HeroSection from '../../utils/components/herosection/HeroSection';
-import FindingBestHotelSection from './FindingBestHotelSection';
-import WeekendGetawayHotelSection from './WeekendGetawayHotelSection';
+import HeroSection from '../../components/sections/HeroSection';
+import FindingBestHotelSection from '../../components/sections/FindingBestHotelSection';
+import WeekendGetawayHotelSection from '../../components/sections/WeekendGetawayHotelSection';
 
 const page = () => {
     return (
