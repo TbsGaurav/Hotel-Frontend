@@ -1,12 +1,14 @@
-"use client";
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import { addMonths, format } from 'date-fns';
-import "react-datepicker/dist/react-datepicker.css";
-import { LuCalendarRange } from "react-icons/lu";
+import 'react-datepicker/dist/react-datepicker.css';
+import { LuCalendarRange } from 'react-icons/lu';
 import '../../public/assets/css/DatePicker.css';
+import { globalSearchapi } from '@/lib/api/globalsearchapi';
+import { useRouter } from 'next/navigation';
 
-function HeroSection() {
+export default function HeroSection() {
     const [checkInDate, setCheckInDate] = useState(new Date());
     const [checkOutDate, setCheckOutDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -18,22 +20,50 @@ function HeroSection() {
     const [tempRooms, setTempRooms] = useState(1);
     const [childrenCount, setChildrenCount] = useState(0);
     const [childrenAges, setChildrenAges] = useState([]);
-
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState([]);
+    const [show, setShow] = useState(false);
+    const [loading, setLoading] = useState(false);
     const datePickerRef = useRef(null);
-
+    const debounceRef = useRef(null);
+    const router = useRouter();
     // Handle click outside to close
     useEffect(() => {
         function handleClickOutside(event) {
-            if (datePickerRef.current &&
+            if (
+                datePickerRef.current &&
                 !datePickerRef.current.contains(event.target) &&
                 !event.target.closest('.react-datepicker') &&
-                !event.target.closest('.date-range-picker-popup')) {
+                !event.target.closest('.date-range-picker-popup')
+            ) {
                 setShowDatePicker(false);
             }
         }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+    useEffect(() => {
+        if (query.length < 2) {
+            setResults([]);
+            setShow(false);
+            return;
+        }
+
+        clearTimeout(debounceRef.current);
+
+        debounceRef.current = setTimeout(async () => {
+            try {
+                setLoading(true);
+                const data = await globalSearchapi(query);
+                setResults(data || []);
+                setShow(true);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        }, 300);
+    }, [query]);
 
     const handleDateChange = (dates) => {
         const [start, end] = dates;
@@ -72,6 +102,10 @@ function HeroSection() {
         return `${guests} ${guestText}, ${rooms} ${roomText}`;
     };
 
+    const handleSelect = (item) => {
+        setShow(false);
+        router.push(item.urlName ? `/${item.urlName}` : `/search?q=${query}`);
+    };
     return (
         <section className="container-fluid">
             <div className="hero py-5 px-2 px-md-4 px-lg-5 d-flex flex-column justify-content-between">
@@ -124,25 +158,51 @@ function HeroSection() {
 
                 <div className="container p-4 hero-form">
                     <form action="#">
-                        <div className="row">
-                            <div className="col-10 col-md-4 col-lg-2 mb-3 mb-lg-0">
-                                <label htmlFor="cityzip" className="form-label custom-form-label text-white">
-                                    Destination or Hotel Name
-                                </label>
+                        {/* <div className="row"> */}
+                        <div className="row align-items-end">
+                            <div className="col-12 col-md-4 col-lg-3 mb-3 mb-lg-0 position-relative">
+                                {/* <div className="col-12 col-md-4 col-lg-3 d-flex flex-column"> */}
+                                <label className="form-label custom-form-label text-white">Destination or Hotel Name</label>
+
                                 <div className="input-group custom-input-group-textbox">
-                                    <span className="input-group-text bg-white" id="basic-addon1">
-                                        <i className="fa-sharp fa-light fa-magnifying-glass"></i>
+                                    <span className="input-group-text bg-white">
+                                        <i className="fa-regular fa-magnifying-glass"></i>
                                     </span>
+
                                     <input
                                         type="text"
                                         className="form-control"
-                                        id="cityzip"
                                         placeholder="Type city/ZipCode"
-                                        aria-label="Destination or Hotel Name"
-                                        aria-describedby="basic-addon1"
+                                        value={query}
+                                        onChange={(e) => setQuery(e.target.value)}
+                                        onFocus={() => results.length && setShow(true)}
                                     />
                                 </div>
+
+                                {show && (
+                                    <div className="list-group position-absolute mt-1 w-100" style={{ zIndex: 1050 }}>
+                                        {loading && (
+                                            <div className="list-group-item py-2 text-center">
+                                                <span className="spinner-border spinner-border-sm" />
+                                            </div>
+                                        )}
+
+                                        {!loading &&
+                                            results.map((item) => (
+                                                <button
+                                                    key={item.id}
+                                                    type="button"
+                                                    className="list-group-item list-group-item-action d-flex justify-content-between"
+                                                    onClick={() => handleSelect(item)}
+                                                >
+                                                    <span className="text-truncate">{item.displayText}</span>
+                                                    <small className="text-muted">{item.type}</small>
+                                                </button>
+                                            ))}
+                                    </div>
+                                )}
                             </div>
+
                             <div className="col-12 col-md-6 col-lg-3 mb-3 mb-lg-0" ref={datePickerRef}>
                                 <label htmlFor="daterange" className="form-label custom-form-label text-white">
                                     Check-In and Check-Out
@@ -153,13 +213,16 @@ function HeroSection() {
                                             <div className="date-range-labels">
                                                 <div className="check-in-out-label">
                                                     <span className="date-text">
-                                                        {checkInDate ? formatDate(checkInDate) : ''} -  {checkOutDate ? formatDate(checkOutDate) : ''}
+                                                        {checkInDate ? formatDate(checkInDate) : ''} -{' '}
+                                                        {checkOutDate ? formatDate(checkOutDate) : ''}
                                                     </span>
                                                 </div>
-                                                <span className="date-range-icon" onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleOpenDatePicker();
-                                                }}
+                                                <span
+                                                    className="date-range-icon"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOpenDatePicker();
+                                                    }}
                                                 >
                                                     <LuCalendarRange />
                                                 </span>
@@ -206,9 +269,7 @@ function HeroSection() {
                                                                 >
                                                                     ‹
                                                                 </button>
-                                                                <div className="month-year-display">
-                                                                    {format(displayDate, 'MMM yyyy')}
-                                                                </div>
+                                                                <div className="month-year-display">{format(displayDate, 'MMM yyyy')}</div>
                                                                 <button
                                                                     type="button"
                                                                     onClick={increaseMonth}
@@ -229,8 +290,7 @@ function HeroSection() {
                                                 <div className="footer-buttons">
                                                     {tempCheckInDate && tempCheckOutDate
                                                         ? `${formatDate(tempCheckInDate)} - ${formatDate(tempCheckOutDate)}`
-                                                        : `${formatDate(new Date())} - ${formatDate(new Date())}`
-                                                    }
+                                                        : `${formatDate(new Date())} - ${formatDate(new Date())}`}
                                                     <button
                                                         type="button"
                                                         className="cancel-button"
@@ -348,16 +408,16 @@ function HeroSection() {
                                 </div>
                             </div>
                             <div className="col-4 col-md-2 col-lg-1 mb-3 mb-lg-0">
-                                <label className="form-label custom-form-label text-white">
-                                    Children
-                                </label>
+                                <label className="form-label custom-form-label text-white">Children</label>
                                 <select
                                     className="dropdown-toggle rooms-guest-dd form-select custom-input-select-children-dd"
                                     value={childrenCount}
                                     onChange={handleChildrenChange}
                                 >
                                     {[...Array(11)].map((_, i) => (
-                                        <option key={i} value={i}>{i}</option>
+                                        <option key={i} value={i}>
+                                            {i}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
@@ -367,26 +427,18 @@ function HeroSection() {
                                     <img src="image/filter.webp" className="m-auto" alt="" />
                                 </div>
                             </div>
-                            <div className="col-9 col-md-5 col-lg-3 mb-0 mb-lg-0">
-                                <button
-                                    type="submit"
-                                    className="theme-button-orange rounded rounded rounded rounded rounded w-100 font-weight-bold-submit-search"
-                                >
+                            <div className="col-9 col-md-5 col-lg-3 mb-0 mb-lg-0 d-flex">
+                                <button type="submit" className="theme-button-orange rounded font-weight-bold-submit-search">
                                     See Deals Now
                                 </button>
                             </div>
                             {childrenCount > 0 && (
                                 <div className="col-12 mb-3 mb-lg-0">
-                                    <label className="form-label custom-form-label text-white">
-                                        Age
-                                    </label>
+                                    <label className="form-label custom-form-label text-white">Age</label>
 
                                     <div className="row g-2">
                                         {childrenAges.map((age, index) => (
-                                            <div
-                                                key={index}
-                                                className="col-4 col-md-2 col-lg-1"
-                                            >
+                                            <div key={index} className="col-4 col-md-2 col-lg-1">
                                                 <select
                                                     className="dropdown-toggle rooms-guest-dd form-select custom-input-select-children-dd"
                                                     value={age}
@@ -603,5 +655,3 @@ function HeroSection() {
         </section>
     );
 }
-
-export default HeroSection;
