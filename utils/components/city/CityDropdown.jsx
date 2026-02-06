@@ -16,8 +16,8 @@ export default function CityDropdown({ countryName, initialCities, parentId }) {
 
         const url =
             letter === 'Top Cities'
-                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/Country/getByUrlName/${countryName}`
-                : `${process.env.NEXT_PUBLIC_API_BASE_URL}/Country/getByUrlName/${countryName}?alphabet=${letter.toLowerCase()}`;
+                ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/country/getByUrl/${countryName}`
+                : `${process.env.NEXT_PUBLIC_API_BASE_URL}/country/getByUrl/${countryName}?alphabet=${letter.toLowerCase()}`;
 
         const res = await fetch(url, { cache: 'no-store' });
         const json = await res.json();

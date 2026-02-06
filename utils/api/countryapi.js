@@ -9,7 +9,7 @@ export const getCountriesApi = async () => {
 };
 
 export const getCountryByUrlName = async (urlName) => {
-    const json = await fetchClient(`/Country/getByUrlName/${urlName}`, {
+    const json = await fetchClient(`/country/getByUrl/${urlName}`, {
         cache: 'no-store'
     });
 
