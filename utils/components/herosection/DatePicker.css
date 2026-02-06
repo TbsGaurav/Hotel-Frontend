@@ -1,7 +1,7 @@
 .date-range-picker-popup {
     position: absolute !important;
-    top: unset !important; 
-    transform: translateX(-50%) !important; 
+    top: unset !important;
+    transform: translateX(-50%) !important;
     width: 513px !important;
     background: white !important;
     border-radius: 4px !important;
@@ -9,6 +9,22 @@
     margin-top: 5px !important;
     border: 1px solid #e0e0e0 !important;
     display: block !important;
+    z-index: 99999 !important;
+}
+
+.country-date-range-picker-popup {
+    position: absolute !important;
+    top: unset !important;
+    left: 195px !important;
+    transform: none !important;
+    width: 513px !important;
+    background: white !important;
+    border-radius: 4px !important;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15) !important;
+    margin-top: 5px !important;
+    border: 1px solid #e0e0e0 !important;
+    display: block !important;
+    z-index: 99999 !important;
 }
 
 .date-picker-wrapper {
@@ -17,11 +33,11 @@
     height: 60px;
 }
 
-hero-form, 
-.container, 
-.row, 
-.col-12, 
-.col-md-6, 
+hero-form,
+.container,
+.row,
+.col-12,
+.col-md-6,
 .col-lg-3 {
     overflow: visible !important;
 }
@@ -104,7 +120,7 @@ hero-form,
 }
 
 .date-text:empty::before {
-    content: "MM/DD/YYYY";
+    content: 'MM/DD/YYYY';
     color: #adb5bd;
     font-weight: normal;
 }
@@ -228,20 +244,20 @@ hero-form,
         left: 50%;
         transform: translateX(-50%);
     }
-    
+
     .react-datepicker__month-container {
         width: 100% !important;
     }
-    
+
     .react-datepicker__month-container:first-child {
         border-right: none !important;
         border-bottom: 1px solid #e0e0e0;
     }
-    
+
     .date-range-labels {
         flex-direction: column;
     }
-    
+
     .check-in-label {
         border-right: none;
         border-bottom: 1px solid #dee2e6;

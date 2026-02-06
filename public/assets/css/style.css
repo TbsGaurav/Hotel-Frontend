@@ -290,6 +290,13 @@ a:hover.custom-form-label {
     border-radius: 0px !important;
     width: 150px !important;
 }
+
+.custom-input-select-children-dd.form-select {
+    border: 0px #616d82 solid !important;
+    border-bottom: solid 1px #616d82 !important;
+    width: 80px !important;
+}
+
 .custom-input-select-rooms-guest-dd.form-select:focus,
 .custom-input-select-rooms-guest-dd.form-select:active {
     box-shadow: none !important;

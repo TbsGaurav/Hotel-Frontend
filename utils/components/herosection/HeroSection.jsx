@@ -12,6 +12,10 @@ function HeroSection() {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [tempCheckInDate, setTempCheckInDate] = useState(new Date());
     const [tempCheckOutDate, setTempCheckOutDate] = useState(new Date());
+    const [guests, setGuests] = useState(2);
+    const [rooms, setRooms] = useState(1);
+    const [childrenCount, setChildrenCount] = useState(0);
+    const [childrenAges, setChildrenAges] = useState([]);
 
     const datePickerRef = useRef(null);
 
@@ -46,6 +50,25 @@ function HeroSection() {
         setTempCheckInDate(checkInDate);
         setTempCheckOutDate(checkOutDate);
         setShowDatePicker(true);
+    };
+
+    const handleChildrenChange = (e) => {
+        const count = Number(e.target.value);
+        setChildrenCount(count);
+        setChildrenAges(Array(count).fill(7));
+    };
+
+    const handleAgeChange = (index, value) => {
+        const updatedAges = [...childrenAges];
+        updatedAges[index] = Number(value);
+        setChildrenAges(updatedAges);
+    };
+
+    const getRoomsGuestsLabel = () => {
+        const guestText = guests === 1 ? 'Guest' : 'Guests';
+        const roomText = rooms === 1 ? 'Room' : 'Rooms';
+
+        return `${guests} ${guestText}, ${rooms} ${roomText}`;
     };
 
     return (
@@ -101,7 +124,7 @@ function HeroSection() {
                 <div className="container p-4 hero-form">
                     <form action="#">
                         <div className="row">
-                            <div className="col-12 col-md-6 col-lg-3 mb-3 mb-lg-0">
+                            <div className="col-10 col-md-4 col-lg-2 mb-3 mb-lg-0">
                                 <label htmlFor="cityzip" className="form-label custom-form-label text-white">
                                     Destination or Hotel Name
                                 </label>
@@ -246,7 +269,7 @@ function HeroSection() {
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                 >
-                                    <span className="me-2">2 Guests, 1 Room</span>
+                                    <span className="me-2">{getRoomsGuestsLabel()}</span>
                                 </button>
                                 <div className="dropdown-menu language-switcher-menu-item" aria-labelledby="dropdownMenuButton">
                                     <div className="py-3 px-4 d-none d-md-block">
@@ -254,24 +277,28 @@ function HeroSection() {
                                             <label htmlFor="guest" className="form-label custom-form-label">
                                                 Guests
                                             </label>
-                                            <select className="form-select custom-input-select-rooms-guest-dd" id="guest">
+                                            <select className="form-select custom-input-select-rooms-guest-dd" id="guest" value={guests}
+                                                onChange={(e) => setGuests(Number(e.target.value))}
+                                            >
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
                                                 <option value="3">3</option>
                                                 <option value="4">4</option>
-                                                <option value="4">5+</option>
+                                                <option value="5">5+</option>
                                             </select>
                                         </div>
                                         <div className="mb-3">
                                             <label htmlFor="rooms" className="form-label custom-form-label">
                                                 Rooms
                                             </label>
-                                            <select className="form-select custom-input-select-rooms-guest-dd" id="rooms">
+                                            <select className="form-select custom-input-select-rooms-guest-dd" id="rooms" value={rooms}
+                                                onChange={(e) => setRooms(Number(e.target.value))}
+                                            >
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
                                                 <option value="3">3</option>
                                                 <option value="4">4</option>
-                                                <option value="4">5+</option>
+                                                <option value="5">5+</option>
                                             </select>
                                         </div>
                                         <button type="button" className="theme-button-orange rounded rounded rounded rounded w-100">
@@ -306,6 +333,20 @@ function HeroSection() {
                                     </div>
                                 </div>
                             </div>
+                            <div className="col-4 col-md-2 col-lg-1 mb-3 mb-lg-0">
+                                <label className="form-label custom-form-label text-white">
+                                    Children
+                                </label>
+                                <select
+                                    className="dropdown-toggle rooms-guest-dd form-select custom-input-select-children-dd"
+                                    value={childrenCount}
+                                    onChange={handleChildrenChange}
+                                >
+                                    {[...Array(11)].map((_, i) => (
+                                        <option key={i} value={i}>{i}</option>
+                                    ))}
+                                </select>
+                            </div>
                             <div className="col-3 col-md-1 col-lg-1 mb-0 mb-lg-0">
                                 <label className="custom-form-label text-white form-label-maring-bottom">Filter</label>
                                 <div className="filter-button d-flex" id="filterButton">
@@ -320,6 +361,34 @@ function HeroSection() {
                                     See Deals Now
                                 </button>
                             </div>
+                            {childrenCount > 0 && (
+                                <div className="col-12 mb-3 mb-lg-0">
+                                    <label className="form-label custom-form-label text-white">
+                                        Age
+                                    </label>
+
+                                    <div className="row g-2">
+                                        {childrenAges.map((age, index) => (
+                                            <div
+                                                key={index}
+                                                className="col-4 col-md-2 col-lg-1"
+                                            >
+                                                <select
+                                                    className="dropdown-toggle rooms-guest-dd form-select custom-input-select-children-dd"
+                                                    value={age}
+                                                    onChange={(e) => handleAgeChange(index, e.target.value)}
+                                                >
+                                                    {[...Array(18)].map((_, i) => (
+                                                        <option key={i} value={i}>
+                                                            {i}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="advaance-form-field-wrap mt-4 p-3 p-md-5" id="filterSection">
