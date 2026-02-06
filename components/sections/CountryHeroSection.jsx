@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import { LuCalendarRange } from "react-icons/lu";
 import "react-datepicker/dist/react-datepicker.css";
-import "./DatePicker.css";
+import '../../public/assets/css/DatePicker.css';
 
 function CountryHeroSection({ }) {
     const [checkInDate, setCheckInDate] = useState(new Date());
@@ -15,6 +15,8 @@ function CountryHeroSection({ }) {
     const [tempCheckOutDate, setTempCheckOutDate] = useState(new Date());
     const [guests, setGuests] = useState(2);
     const [rooms, setRooms] = useState(1);
+    const [tempGuests, setTempGuests] = useState(2);
+    const [tempRooms, setTempRooms] = useState(1);
     const [childrenCount, setChildrenCount] = useState(0);
     const [childrenAges, setChildrenAges] = useState([]);
 
@@ -68,7 +70,6 @@ function CountryHeroSection({ }) {
     const getRoomsGuestsLabel = () => {
         const guestText = guests === 1 ? 'Guest' : 'Guests';
         const roomText = rooms === 1 ? 'Room' : 'Rooms';
-
         return `${guests} ${guestText}, ${rooms} ${roomText}`;
     };
 
@@ -238,8 +239,11 @@ function CountryHeroSection({ }) {
                                             <label htmlFor="guest" className="form-label custom-form-label">
                                                 Guests
                                             </label>
-                                            <select className="form-select custom-input-select-rooms-guest-dd" id="guest" value={guests}
-                                                onChange={(e) => setGuests(Number(e.target.value))}
+                                            <select
+                                                className="form-select custom-input-select-rooms-guest-dd"
+                                                id="guest"
+                                                value={tempGuests}
+                                                onChange={(e) => setTempGuests(Number(e.target.value))}
                                             >
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -252,8 +256,11 @@ function CountryHeroSection({ }) {
                                             <label htmlFor="rooms" className="form-label custom-form-label">
                                                 Rooms
                                             </label>
-                                            <select className="form-select custom-input-select-rooms-guest-dd" id="rooms" value={rooms}
-                                                onChange={(e) => setRooms(Number(e.target.value))}
+                                            <select
+                                                className="form-select custom-input-select-rooms-guest-dd"
+                                                id="rooms"
+                                                value={tempRooms}
+                                                onChange={(e) => setTempRooms(Number(e.target.value))}
                                             >
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -262,7 +269,14 @@ function CountryHeroSection({ }) {
                                                 <option value="5">5+</option>
                                             </select>
                                         </div>
-                                        <button type="button" className="theme-button-orange rounded rounded rounded rounded w-100">
+                                        <button
+                                            type="button"
+                                            className="theme-button-orange rounded rounded rounded rounded w-100"
+                                            onClick={() => {
+                                                setGuests(tempGuests);
+                                                setRooms(tempRooms);
+                                            }}
+                                        >
                                             Apply
                                         </button>
                                     </div>

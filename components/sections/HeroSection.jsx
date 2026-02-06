@@ -1,9 +1,9 @@
-'use client';
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import { addMonths, format } from 'date-fns';
-import 'react-datepicker/dist/react-datepicker.css';
-import { LuCalendarRange } from 'react-icons/lu';
+import "react-datepicker/dist/react-datepicker.css";
+import { LuCalendarRange } from "react-icons/lu";
 import '../../public/assets/css/DatePicker.css';
 
 function HeroSection() {
@@ -14,6 +14,8 @@ function HeroSection() {
     const [tempCheckOutDate, setTempCheckOutDate] = useState(new Date());
     const [guests, setGuests] = useState(2);
     const [rooms, setRooms] = useState(1);
+    const [tempGuests, setTempGuests] = useState(2);
+    const [tempRooms, setTempRooms] = useState(1);
     const [childrenCount, setChildrenCount] = useState(0);
     const [childrenAges, setChildrenAges] = useState([]);
 
@@ -22,17 +24,15 @@ function HeroSection() {
     // Handle click outside to close
     useEffect(() => {
         function handleClickOutside(event) {
-            if (
-                datePickerRef.current &&
+            if (datePickerRef.current &&
                 !datePickerRef.current.contains(event.target) &&
                 !event.target.closest('.react-datepicker') &&
-                !event.target.closest('.date-range-picker-popup')
-            ) {
+                !event.target.closest('.date-range-picker-popup')) {
                 setShowDatePicker(false);
             }
         }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     const handleDateChange = (dates) => {
@@ -69,7 +69,6 @@ function HeroSection() {
     const getRoomsGuestsLabel = () => {
         const guestText = guests === 1 ? 'Guest' : 'Guests';
         const roomText = rooms === 1 ? 'Room' : 'Rooms';
-
         return `${guests} ${guestText}, ${rooms} ${roomText}`;
     };
 
@@ -154,16 +153,13 @@ function HeroSection() {
                                             <div className="date-range-labels">
                                                 <div className="check-in-out-label">
                                                     <span className="date-text">
-                                                        {checkInDate ? formatDate(checkInDate) : ''} -{' '}
-                                                        {checkOutDate ? formatDate(checkOutDate) : ''}
+                                                        {checkInDate ? formatDate(checkInDate) : ''} -  {checkOutDate ? formatDate(checkOutDate) : ''}
                                                     </span>
                                                 </div>
-                                                <span
-                                                    className="date-range-icon"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleOpenDatePicker();
-                                                    }}
+                                                <span className="date-range-icon" onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenDatePicker();
+                                                }}
                                                 >
                                                     <LuCalendarRange />
                                                 </span>
@@ -210,7 +206,9 @@ function HeroSection() {
                                                                 >
                                                                     ‹
                                                                 </button>
-                                                                <div className="month-year-display">{format(displayDate, 'MMM yyyy')}</div>
+                                                                <div className="month-year-display">
+                                                                    {format(displayDate, 'MMM yyyy')}
+                                                                </div>
                                                                 <button
                                                                     type="button"
                                                                     onClick={increaseMonth}
@@ -231,7 +229,8 @@ function HeroSection() {
                                                 <div className="footer-buttons">
                                                     {tempCheckInDate && tempCheckOutDate
                                                         ? `${formatDate(tempCheckInDate)} - ${formatDate(tempCheckOutDate)}`
-                                                        : `${formatDate(new Date())} - ${formatDate(new Date())}`}
+                                                        : `${formatDate(new Date())} - ${formatDate(new Date())}`
+                                                    }
                                                     <button
                                                         type="button"
                                                         className="cancel-button"
@@ -279,8 +278,11 @@ function HeroSection() {
                                             <label htmlFor="guest" className="form-label custom-form-label">
                                                 Guests
                                             </label>
-                                            <select className="form-select custom-input-select-rooms-guest-dd" id="guest" value={guests}
-                                                onChange={(e) => setGuests(Number(e.target.value))}
+                                            <select
+                                                className="form-select custom-input-select-rooms-guest-dd"
+                                                id="guest"
+                                                value={tempGuests}
+                                                onChange={(e) => setTempGuests(Number(e.target.value))}
                                             >
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -293,8 +295,11 @@ function HeroSection() {
                                             <label htmlFor="rooms" className="form-label custom-form-label">
                                                 Rooms
                                             </label>
-                                            <select className="form-select custom-input-select-rooms-guest-dd" id="rooms" value={rooms}
-                                                onChange={(e) => setRooms(Number(e.target.value))}
+                                            <select
+                                                className="form-select custom-input-select-rooms-guest-dd"
+                                                id="rooms"
+                                                value={tempRooms}
+                                                onChange={(e) => setTempRooms(Number(e.target.value))}
                                             >
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -303,7 +308,14 @@ function HeroSection() {
                                                 <option value="5">5+</option>
                                             </select>
                                         </div>
-                                        <button type="button" className="theme-button-orange rounded rounded rounded rounded w-100">
+                                        <button
+                                            type="button"
+                                            className="theme-button-orange rounded rounded rounded rounded w-100"
+                                            onClick={() => {
+                                                setGuests(tempGuests);
+                                                setRooms(tempRooms);
+                                            }}
+                                        >
                                             Apply
                                         </button>
                                     </div>
