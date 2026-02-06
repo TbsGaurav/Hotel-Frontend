@@ -7,6 +7,7 @@ import { LuCalendarRange } from 'react-icons/lu';
 import '../../public/assets/css/DatePicker.css';
 import { globalSearchapi } from '@/lib/api/globalsearchapi';
 import { useRouter } from 'next/navigation';
+import { MdOutlineStarPurple500 } from 'react-icons/md';
 
 export default function HeroSection() {
     const [checkInDate, setCheckInDate] = useState(new Date());
@@ -64,6 +65,21 @@ export default function HeroSection() {
             }
         }, 300);
     }, [query]);
+    const [showFilters, setShowFilters] = useState(false);
+    const [priceRange, setPriceRange] = useState({
+        min: 100,
+        max: 600
+    });
+
+    const MIN_PRICE = 0;
+    const MAX_PRICE = 1000;
+
+    const valueToPercent = (value) => ((value - MIN_PRICE) / (MAX_PRICE - MIN_PRICE)) * 100;
+
+    const [isSliding, setIsSliding] = useState(null);
+
+    const filterRef = useRef(null);
+    const [selectedLocation, setSelectedLocation] = useState(null);
 
     const handleDateChange = (dates) => {
         const [start, end] = dates;
@@ -71,13 +87,11 @@ export default function HeroSection() {
         setTempCheckOutDate(end);
     };
 
-    // Format date for display
     const formatDate = (date) => {
         if (!date) return '';
         return format(date, 'MM/dd/yyyy');
     };
 
-    // Handle opening the date picker
     const handleOpenDatePicker = () => {
         setTempCheckInDate(checkInDate);
         setTempCheckOutDate(checkOutDate);
@@ -103,9 +117,104 @@ export default function HeroSection() {
     };
 
     const handleSelect = (item) => {
+        setSelectedLocation(item);
+        setQuery(item.displayText);
         setShow(false);
-        router.push(item.urlName ? `/${item.urlName}` : `/search?q=${query}`);
     };
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+
+        const params = new URLSearchParams({
+            destination: selectedLocation?.displayText || query,
+            destinationType: selectedLocation?.type || '',
+            destinationId: selectedLocation?.id || '',
+            checkIn: checkInDate.toISOString(),
+            checkOut: checkOutDate.toISOString(),
+            guests: guests.toString(),
+            rooms: rooms.toString(),
+            children: childrenCount.toString(),
+            childrenAges: childrenAges.join(',')
+        });
+
+        router.push(`/search?${params.toString()}`);
+    };
+
+    const handleSliderMouseDown = (type) => {
+        setIsSliding(type);
+    };
+
+    const handleSliderMouseUp = () => {
+        setIsSliding(null);
+        setPriceRange({ ...priceRange });
+    };
+
+    useEffect(() => {
+        function handleDatePickerOutsideClick(event) {
+            if (
+                datePickerRef.current &&
+                !datePickerRef.current.contains(event.target) &&
+                !event.target.closest('.react-datepicker') &&
+                !event.target.closest('.date-range-picker-popup')
+            ) {
+                setShowDatePicker(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleDatePickerOutsideClick);
+        return () => document.removeEventListener('mousedown', handleDatePickerOutsideClick);
+    }, []);
+
+    useEffect(() => {
+        function handleFilterOutsideClick(event) {
+            if (filterRef.current && !filterRef.current.contains(event.target)) {
+                setShowFilters(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleFilterOutsideClick);
+        return () => document.removeEventListener('mousedown', handleFilterOutsideClick);
+    }, []);
+
+    useEffect(() => {
+        document.body.style.userSelect = isSliding ? 'none' : 'auto';
+    }, [isSliding]);
+
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            if (!isSliding) return;
+
+            const slider = document.getElementById('price-slider-track');
+            const rect = slider.getBoundingClientRect();
+
+            let percent = ((e.clientX - rect.left) / rect.width) * 100;
+            percent = Math.max(0, Math.min(100, percent));
+
+            const value = Math.round(MIN_PRICE + (percent / 100) * (MAX_PRICE - MIN_PRICE));
+
+            if (isSliding === 'min' && value <= priceRange.max) {
+                setPriceRange((prev) => ({ ...prev, min: value }));
+            }
+            if (isSliding === 'max' && value >= priceRange.min) {
+                setPriceRange((prev) => ({ ...prev, max: value }));
+            }
+        };
+
+        const handleMouseUp = () => {
+            if (isSliding) {
+                setPriceRange({ ...priceRange });
+                setIsSliding(null);
+            }
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isSliding, priceRange]);
+
     return (
         <section className="container-fluid">
             <div className="hero py-5 px-2 px-md-4 px-lg-5 d-flex flex-column justify-content-between">
@@ -157,11 +266,9 @@ export default function HeroSection() {
                 <div className="space-100px"></div>
 
                 <div className="container p-4 hero-form">
-                    <form action="#">
-                        {/* <div className="row"> */}
-                        <div className="row align-items-end">
-                            <div className="col-12 col-md-4 col-lg-3 mb-3 mb-lg-0 position-relative">
-                                {/* <div className="col-12 col-md-4 col-lg-3 d-flex flex-column"> */}
+                    <form action="#" onSubmit={handleSearchSubmit}>
+                        <div className="row">
+                            <div className="col-10 col-md-4 col-lg-2 mb-3 mb-lg-0 position-relative">
                                 <label className="form-label custom-form-label text-white">Destination or Hotel Name</label>
 
                                 <div className="input-group custom-input-group-textbox">
@@ -217,12 +324,14 @@ export default function HeroSection() {
                                                         {checkOutDate ? formatDate(checkOutDate) : ''}
                                                     </span>
                                                 </div>
+
                                                 <span
                                                     className="date-range-icon"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         handleOpenDatePicker();
                                                     }}
+                                                    style={{ cursor: 'pointer' }}
                                                 >
                                                     <LuCalendarRange />
                                                 </span>
@@ -423,7 +532,12 @@ export default function HeroSection() {
                             </div>
                             <div className="col-3 col-md-1 col-lg-1 mb-0 mb-lg-0">
                                 <label className="custom-form-label text-white form-label-maring-bottom">Filter</label>
-                                <div className="filter-button d-flex" id="filterButton">
+                                <div
+                                    className="filter-button d-flex"
+                                    id="filterButton"
+                                    onClick={() => setShowFilters((prev) => !prev)}
+                                    style={{ cursor: 'pointer' }}
+                                >
                                     <img src="image/filter.webp" className="m-auto" alt="" />
                                 </div>
                             </div>
@@ -432,7 +546,7 @@ export default function HeroSection() {
                                     See Deals Now
                                 </button>
                             </div>
-                            {childrenCount > 0 && (
+                            {/* {childrenCount > 0 && (
                                 <div className="col-12 mb-3 mb-lg-0">
                                     <label className="form-label custom-form-label text-white">Age</label>
 
@@ -454,201 +568,261 @@ export default function HeroSection() {
                                         ))}
                                     </div>
                                 </div>
-                            )}
+                            )} */}
                         </div>
-
-                        <div className="advaance-form-field-wrap mt-4 p-3 p-md-5" id="filterSection">
-                            <div className="row">
-                                <div className="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
-                                    <div className="mb-5">
-                                        <h4 className="property-grid-title mb-2">Price Range</h4>
-                                        <p className="small-para-14-px">AUD 100 to AUD 600</p>
-                                        <div className="wrapper position-relative">
-                                            <div className="values d-none">
-                                                <span id="range1">0</span>
-                                                <span> &dash; </span>
-                                                <span id="range2">100</span>
+                        {showFilters && (
+                            <div className="advaance-form-field-wrap mt-4 p-3 p-md-5" id="filterSection" ref={filterRef}>
+                                <div className="row">
+                                    <div className="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
+                                        <div className="mb-5">
+                                            <h4 className="property-grid-title mb-2">Price Range</h4>
+                                            <p className="small-para-14-px">
+                                                AUD {priceRange.min} to AUD {priceRange.max}
+                                            </p>
+                                            <div
+                                                id="price-slider-track"
+                                                className="slider-track position-relative"
+                                                style={{ height: '6px', background: '#e0e0e0', borderRadius: '3px' }}
+                                            >
+                                                <div
+                                                    className="slider-selected"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        height: '100%',
+                                                        background: '#f0831e',
+                                                        left: `${valueToPercent(priceRange.min)}%`,
+                                                        width: `${valueToPercent(priceRange.max) - valueToPercent(priceRange.min)}%`
+                                                    }}
+                                                />
                                             </div>
-                                            <div>
-                                                <div className="slider-track"></div>
-                                                {/* <input type="range" min="0" max="100" value="30" id="slider-1" onInput="slideOne()" />
-                                                <input type="range" min="0" max="100" value="70" id="slider-2" onInput="slideTwo()" /> */}
+                                            <div
+                                                className="position-relative"
+                                                style={{ height: '20px', marginTop: '-13px' }}
+                                                onMouseUp={handleSliderMouseUp}
+                                            >
+                                                <div
+                                                    onMouseDown={() => handleSliderMouseDown('min')}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        left: `${valueToPercent(priceRange.min)}%`,
+                                                        width: '20px',
+                                                        height: '20px',
+                                                        background: '#f0831e',
+                                                        borderRadius: '50%',
+                                                        transform: 'translateX(-50%)',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    title={`AUD ${priceRange.min}`}
+                                                    tabIndex={0}
+                                                />
+                                                <div
+                                                    onMouseDown={() => handleSliderMouseDown('max')}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        left: `${valueToPercent(priceRange.max)}%`,
+                                                        width: '20px',
+                                                        height: '20px',
+                                                        background: '#f0831e',
+                                                        borderRadius: '50%',
+                                                        transform: 'translateX(-50%)',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    title={`AUD ${priceRange.max}`}
+                                                    tabIndex={0}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 className="property-grid-title mb-2">Rating</h4>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input className="form-check-input my-auto" type="checkbox" value="5" id="rating5" />
+                                                <label className="form-check-label rating my-auto" htmlFor="rating5">
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input className="form-check-input my-auto" type="checkbox" value="4" id="rating4" />
+                                                <label className="form-check-label rating my-auto" htmlFor="rating4">
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                    <MdOutlineStarPurple500 size={22} />{' '}
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input className="form-check-input my-auto" type="checkbox" value="3" id="rating3" />
+                                                <label className="form-check-label my-auto rating" htmlFor="rating3">
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input className="form-check-input my-auto" type="checkbox" value="2" id="rating2" />
+                                                <label className="form-check-label my-auto rating" htmlFor="rating2">
+                                                    <MdOutlineStarPurple500 size={22} />
+                                                    <MdOutlineStarPurple500 size={22} />{' '}
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input className="form-check-input my-auto" type="checkbox" value="1" id="rating1" />
+                                                <label className="form-check-label my-auto rating" htmlFor="rating1">
+                                                    <MdOutlineStarPurple500 size={22} />{' '}
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex">
+                                                <input className="form-check-input my-auto" type="checkbox" value="1" id="unrated" />
+                                                <label className="form-check-label my-auto custom-form-label" htmlFor="unrated">
+                                                    Unrated Property
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
-                                    <div>
-                                        <h4 className="property-grid-title mb-2">Rating</h4>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input className="form-check-input my-auto" type="checkbox" value="5" id="rating5" />
-                                            <label className="form-check-label rating my-auto" htmlFor="rating5">
-                                                <i className="fa-solid fa-star"></i> <i className="fa-solid fa-star"></i>{' '}
-                                                <i className="fa-solid fa-star"></i> <i className="fa-solid fa-star"></i>{' '}
-                                                <i className="fa-solid fa-star"></i>
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input className="form-check-input my-auto" type="checkbox" value="4" id="rating4" />
-                                            <label className="form-check-label rating my-auto" htmlFor="rating4">
-                                                <i className="fa-solid fa-star"></i> <i className="fa-solid fa-star"></i>{' '}
-                                                <i className="fa-solid fa-star"></i> <i className="fa-solid fa-star"></i>
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input className="form-check-input my-auto" type="checkbox" value="3" id="rating3" />
-                                            <label className="form-check-label my-auto rating" htmlFor="rating3">
-                                                <i className="fa-solid fa-star"></i> <i className="fa-solid fa-star"></i>{' '}
-                                                <i className="fa-solid fa-star"></i>
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input className="form-check-input my-auto" type="checkbox" value="2" id="rating2" />
-                                            <label className="form-check-label my-auto rating" htmlFor="rating2">
-                                                <i className="fa-solid fa-star"></i> <i className="fa-solid fa-star"></i>
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input className="form-check-input my-auto" type="checkbox" value="1" id="rating1" />
-                                            <label className="form-check-label my-auto rating" htmlFor="rating1">
-                                                <i className="fa-solid fa-star"></i>
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex">
-                                            <input className="form-check-input my-auto" type="checkbox" value="1" id="unrated" />
-                                            <label className="form-check-label my-auto custom-form-label" htmlFor="unrated">
-                                                Unrated Property
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
-                                    <div>
-                                        <h4 className="property-grid-title mb-2">Property Type</h4>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input className="form-check-input my-auto" type="checkbox" value="2" id="2bed" />
-                                            <label className="form-check-label custom-form-label my-auto" htmlFor="2bed">
-                                                2 bedroom apartments
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input className="form-check-input my-auto" type="checkbox" value="3" id="3bed" />
-                                            <label className="form-check-label custom-form-label my-auto" htmlFor="3bed">
-                                                3 bedroom apartments
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input
-                                                className="form-check-input my-auto"
-                                                type="checkbox"
-                                                value="AirportShuttle"
-                                                id="AirportShuttle"
-                                            />
-                                            <label className="form-check-label custom-form-label my-auto" htmlFor="AirportShuttle">
-                                                Airport Shuttle
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex">
-                                            <input
-                                                className="form-check-input my-auto"
-                                                type="checkbox"
-                                                value="AllServicedApartments"
-                                                id="AllServicedApartments"
-                                            />
-                                            <label className="form-check-label my-auto custom-form-label" htmlFor="AllServicedApartments">
-                                                All Serviced Apartments
-                                            </label>
-                                        </div>
-                                        <div className="text-start mt-2 ps-4 ms-2">
-                                            <a href="#" className="small-para-14-px text-blue">
-                                                +show more
-                                            </a>
+                                    <div className="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
+                                        <div>
+                                            <h4 className="property-grid-title mb-2">Property Type</h4>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input className="form-check-input my-auto" type="checkbox" value="2" id="2bed" />
+                                                <label className="form-check-label custom-form-label my-auto" htmlFor="2bed">
+                                                    2 bedroom apartments
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input className="form-check-input my-auto" type="checkbox" value="3" id="3bed" />
+                                                <label className="form-check-label custom-form-label my-auto" htmlFor="3bed">
+                                                    3 bedroom apartments
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input
+                                                    className="form-check-input my-auto"
+                                                    type="checkbox"
+                                                    value="AirportShuttle"
+                                                    id="AirportShuttle"
+                                                />
+                                                <label className="form-check-label custom-form-label my-auto" htmlFor="AirportShuttle">
+                                                    Airport Shuttle
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex">
+                                                <input
+                                                    className="form-check-input my-auto"
+                                                    type="checkbox"
+                                                    value="AllServicedApartments"
+                                                    id="AllServicedApartments"
+                                                />
+                                                <label
+                                                    className="form-check-label my-auto custom-form-label"
+                                                    htmlFor="AllServicedApartments"
+                                                >
+                                                    All Serviced Apartments
+                                                </label>
+                                            </div>
+                                            <div className="text-start mt-2 ps-4 ms-2">
+                                                <a href="#" className="small-para-14-px text-blue">
+                                                    +show more
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
-                                    <div>
-                                        <h4 className="property-grid-title mb-2">Facilities</h4>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input
-                                                className="form-check-input my-auto"
-                                                type="checkbox"
-                                                value="Conferencefacilities"
-                                                id="Conferencefacilities"
-                                            />
-                                            <label className="form-check-label custom-form-label my-auto" htmlFor="Conferencefacilities">
-                                                Conference facilities
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input className="form-check-input my-auto" type="checkbox" value="FreeWiFi" id="FreeWiFi" />
-                                            <label className="form-check-label custom-form-label my-auto" htmlFor="FreeWiFi">
-                                                Free WiFi Internet Access
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input className="form-check-input my-auto" type="checkbox" value="Parking" id="Parking" />
-                                            <label className="form-check-label custom-form-label my-auto" htmlFor="Parking">
-                                                Parking
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex">
-                                            <input className="form-check-input my-auto" type="checkbox" value="DaySpa" id="DaySpa" />
-                                            <label className="form-check-label my-auto custom-form-label" htmlFor="DaySpa">
-                                                Day Spa
-                                            </label>
-                                        </div>
-                                        <div className="text-start mt-2 ps-4 ms-2">
-                                            <a href="#" className="small-para-14-px text-blue">
-                                                +show more
-                                            </a>
+                                    <div className="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
+                                        <div>
+                                            <h4 className="property-grid-title mb-2">Facilities</h4>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input
+                                                    className="form-check-input my-auto"
+                                                    type="checkbox"
+                                                    value="Conferencefacilities"
+                                                    id="Conferencefacilities"
+                                                />
+                                                <label
+                                                    className="form-check-label custom-form-label my-auto"
+                                                    htmlFor="Conferencefacilities"
+                                                >
+                                                    Conference facilities
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input
+                                                    className="form-check-input my-auto"
+                                                    type="checkbox"
+                                                    value="FreeWiFi"
+                                                    id="FreeWiFi"
+                                                />
+                                                <label className="form-check-label custom-form-label my-auto" htmlFor="FreeWiFi">
+                                                    Free WiFi Internet Access
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input className="form-check-input my-auto" type="checkbox" value="Parking" id="Parking" />
+                                                <label className="form-check-label custom-form-label my-auto" htmlFor="Parking">
+                                                    Parking
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex">
+                                                <input className="form-check-input my-auto" type="checkbox" value="DaySpa" id="DaySpa" />
+                                                <label className="form-check-label my-auto custom-form-label" htmlFor="DaySpa">
+                                                    Day Spa
+                                                </label>
+                                            </div>
+                                            <div className="text-start mt-2 ps-4 ms-2">
+                                                <a href="#" className="small-para-14-px text-blue">
+                                                    +show more
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="col-12 col-md-6 col-lg-3">
-                                    <div>
-                                        <h4 className="property-grid-title mb-2">Entertainment</h4>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input
-                                                className="form-check-input my-auto"
-                                                type="checkbox"
-                                                value="BarbequeBBQ"
-                                                id="BarbequeBBQ"
-                                            />
-                                            <label className="form-check-label custom-form-label my-auto" htmlFor="BarbequeBBQ">
-                                                Barbeque BBQ
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input className="form-check-input my-auto" type="checkbox" value="Casino" id="Casino" />
-                                            <label className="form-check-label custom-form-label my-auto" htmlFor="Casino">
-                                                Casino
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex mb-2 pb-1">
-                                            <input
-                                                className="form-check-input my-auto"
-                                                type="checkbox"
-                                                value="Golfcourse"
-                                                id="Golfcourse"
-                                            />
-                                            <label className="form-check-label custom-form-label my-auto" htmlFor="Golfcourse">
-                                                Golf Course
-                                            </label>
-                                        </div>
-                                        <div className="form-check d-flex">
-                                            <input className="form-check-input my-auto" type="checkbox" value="Gym" id="Gym" />
-                                            <label className="form-check-label my-auto custom-form-label" htmlFor="Gym">
-                                                Gym
-                                            </label>
-                                        </div>
-                                        <div className="text-start mt-2 ps-4 ms-2">
-                                            <a href="#" className="small-para-14-px text-blue">
-                                                +show more
-                                            </a>
+                                    <div className="col-12 col-md-6 col-lg-3">
+                                        <div>
+                                            <h4 className="property-grid-title mb-2">Entertainment</h4>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input
+                                                    className="form-check-input my-auto"
+                                                    type="checkbox"
+                                                    value="BarbequeBBQ"
+                                                    id="BarbequeBBQ"
+                                                />
+                                                <label className="form-check-label custom-form-label my-auto" htmlFor="BarbequeBBQ">
+                                                    Barbeque BBQ
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input className="form-check-input my-auto" type="checkbox" value="Casino" id="Casino" />
+                                                <label className="form-check-label custom-form-label my-auto" htmlFor="Casino">
+                                                    Casino
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex mb-2 pb-1">
+                                                <input
+                                                    className="form-check-input my-auto"
+                                                    type="checkbox"
+                                                    value="Golfcourse"
+                                                    id="Golfcourse"
+                                                />
+                                                <label className="form-check-label custom-form-label my-auto" htmlFor="Golfcourse">
+                                                    Golf Course
+                                                </label>
+                                            </div>
+                                            <div className="form-check d-flex">
+                                                <input className="form-check-input my-auto" type="checkbox" value="Gym" id="Gym" />
+                                                <label className="form-check-label my-auto custom-form-label" htmlFor="Gym">
+                                                    Gym
+                                                </label>
+                                            </div>
+                                            <div className="text-start mt-2 ps-4 ms-2">
+                                                <a href="#" className="small-para-14-px text-blue">
+                                                    +show more
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </form>
                 </div>
             </div>

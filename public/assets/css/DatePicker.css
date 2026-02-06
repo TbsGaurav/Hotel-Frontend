@@ -1,7 +1,7 @@
 .date-range-picker-popup {
     position: absolute !important;
     top: unset !important;
-    transform: translateX(-50%) !important;
+    left: 28px !important;
     width: 513px !important;
     background: white !important;
     border-radius: 4px !important;
