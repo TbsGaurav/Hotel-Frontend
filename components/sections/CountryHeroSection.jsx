@@ -10,7 +10,7 @@ import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import { globalSearchapi } from '@/lib/api/globalsearchapi';
 
-function CountryHeroSection({}) {
+function CountryHeroSection({ }) {
     const [checkInDate, setCheckInDate] = useState(new Date());
     const [checkOutDate, setCheckOutDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -70,6 +70,12 @@ function CountryHeroSection({}) {
         const [start, end] = dates;
         setTempCheckInDate(start);
         setTempCheckOutDate(end);
+
+        if (start && end) {
+            setCheckInDate(start);
+            setCheckOutDate(end);
+            setShowDatePicker(false);
+        }
     };
 
     const formatDate = (date) => {
@@ -329,7 +335,7 @@ function CountryHeroSection({}) {
                                             </div>
 
                                             {/* Footer with Cancel/Apply buttons */}
-                                            <div className="date-picker-footer">
+                                            {/* <div className="date-picker-footer">
                                                 <div className="selected-range-footer"></div>
                                                 <div className="footer-buttons">
                                                     {tempCheckInDate && tempCheckOutDate
@@ -358,7 +364,7 @@ function CountryHeroSection({}) {
                                                         Apply
                                                     </button>
                                                 </div>
-                                            </div>
+                                            </div> */}
                                         </div>
                                     )}
                                 </div>
@@ -484,7 +490,7 @@ function CountryHeroSection({}) {
                                     See Deals Now
                                 </button>
                             </div>
-                            {/* {childrenCount > 0 && (
+                            {childrenCount > 0 && (
                                 <div className="col-12 mb-3 mb-lg-0">
                                     <label className="form-label custom-form-label text-white">
                                         Age
@@ -511,7 +517,7 @@ function CountryHeroSection({}) {
                                         ))}
                                     </div>
                                 </div>
-                            )} */}
+                            )}
                         </div>
 
                         {showFilters && (

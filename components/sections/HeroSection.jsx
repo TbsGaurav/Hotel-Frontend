@@ -86,6 +86,12 @@ export default function HeroSection() {
         const [start, end] = dates;
         setTempCheckInDate(start);
         setTempCheckOutDate(end);
+
+        if (start && end) {
+            setCheckInDate(start);
+            setCheckOutDate(end);
+            setShowDatePicker(false);
+        }
     };
 
     const formatDate = (date) => {
@@ -405,37 +411,6 @@ export default function HeroSection() {
                                                 />
                                             </div>
 
-                                            {/* Footer with Cancel/Apply buttons */}
-                                            <div className="date-picker-footer">
-                                                <div className="selected-range-footer"></div>
-                                                <div className="footer-buttons">
-                                                    {tempCheckInDate && tempCheckOutDate
-                                                        ? `${formatDate(tempCheckInDate)} - ${formatDate(tempCheckOutDate)}`
-                                                        : `${formatDate(new Date())} - ${formatDate(new Date())}`}
-                                                    <button
-                                                        type="button"
-                                                        className="cancel-button"
-                                                        onClick={() => {
-                                                            setTempCheckInDate(checkInDate);
-                                                            setTempCheckOutDate(checkOutDate);
-                                                            setShowDatePicker(false);
-                                                        }}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="apply-button"
-                                                        onClick={() => {
-                                                            setCheckInDate(tempCheckInDate);
-                                                            setCheckOutDate(tempCheckOutDate);
-                                                            setShowDatePicker(false);
-                                                        }}
-                                                    >
-                                                        Apply
-                                                    </button>
-                                                </div>
-                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -558,7 +533,7 @@ export default function HeroSection() {
                                     See Deals Now
                                 </button>
                             </div>
-                            {/* {childrenCount > 0 && (
+                            {childrenCount > 0 && (
                                 <div className="col-12 mb-3 mb-lg-0">
                                     <label className="form-label custom-form-label text-white">Age</label>
 
@@ -580,7 +555,7 @@ export default function HeroSection() {
                                         ))}
                                     </div>
                                 </div>
-                            )} */}
+                            )}
                         </div>
                         {showFilters && (
                             <div className="advaance-form-field-wrap mt-4 p-3 p-md-5" id="filterSection" ref={filterRef}>
