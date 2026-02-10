@@ -1,7 +1,7 @@
 import CountryDropdownServer from '@/components/common/country/CountryDropdownServer';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 
-export default async function CountryPage({ params }) {
+export default async function DestinationsPage() {
     return (
         <>
             <CountryHeroSection />

@@ -42,9 +42,17 @@ export default function CountryDropdownBootstrap({ countries }) {
                         <div className="row">
                             {countries.map((country) => (
                                 <div key={country.countryID} className="col-6 col-md-4 col-lg-3 mb-2">
-                                    <Link href={`/${country.urlName}`} className="text-decoration-none text-dark fw-semibold">
-                                        • {country.name}
-                                    </Link>
+                                    {country.urlName ? (
+                                        <Link
+                                            href={`/${country.urlName}`}
+                                            className="text-decoration-none text-dark fw-semibold"
+                                            prefetch={false}
+                                        >
+                                            • {country.name}
+                                        </Link>
+                                    ) : (
+                                        <span className="text-decoration-none text-dark fw-semibold">• {country.name}</span>
+                                    )}
                                 </div>
                             ))}
                         </div>
