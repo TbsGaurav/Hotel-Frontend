@@ -62,7 +62,6 @@ export default function HeroSection() {
             try {
                 setLoading(true);
                 const data = await globalSearchapi(query);
-                console.log(data);
                 setResults(data || []);
                 setShow(true);
             } catch (e) {
