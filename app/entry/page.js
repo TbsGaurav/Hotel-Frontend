@@ -4,9 +4,11 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function EntryPage() {
+
   const router = useRouter();
 
   useEffect(() => {
+
     const token = localStorage.getItem('adminToken');
     const role = localStorage.getItem('adminRole');
 
@@ -16,12 +18,12 @@ export default function EntryPage() {
     }
 
     if (role === 'User') {
-      router.replace('/');   
+      router.replace('/');   // PUBLIC SITE
       return;
     }
 
     if (['Admin', 'Editor', 'Viewer'].includes(role)) {
-      router.replace('/dashboard'); 
+      router.replace('/dashboard');
       return;
     }
 

@@ -298,7 +298,7 @@ export default function HeroSection() {
                     <form action="#" onSubmit={handleSearchSubmit}>
                         <div className="row">
                             <div className="col-10 col-md-4 col-lg-2 mb-3 mb-lg-0 position-relative" ref={searchRef}>
-                                <label className="form-label custom-form-label text-white">Destination or Hotel Name</label>
+                                <label className="form-label custom-form-label text-white">Hotel Name</label>
 
                                 <div className="input-group custom-input-group-textbox">
                                     <span className="input-group-text bg-white">
