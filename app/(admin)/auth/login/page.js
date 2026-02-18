@@ -39,7 +39,7 @@ export default function LoginPage() {
 
         try {
             const response = await adminLoginApi(username, password);
-            console.log(response)
+
             const token = response.token;
             const roleName = response.user.roleName;
 
@@ -58,6 +58,7 @@ export default function LoginPage() {
             alert(error.message);
         }
     };
+
     return (
         <div
             className="d-flex align-items-center justify-content-center"
