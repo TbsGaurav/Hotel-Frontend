@@ -1402,3 +1402,17 @@ a.text-sky-blue:hover {
 .custom-indicators .active {
     background-color: #ffffff;
 }
+
+.admin-navbar {
+    background-color: #1e88c8;
+}
+
+.admin-navbar .nav-link:hover {
+    background-color: #a0aab0;
+    color: #fff !important;
+}
+
+.admin-navbar .nav-link.active {
+    background-color: #243e54;
+    color: #fff !important;
+}

@@ -31,6 +31,8 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import AdminHeader from './_layout_components/Header';
+import AdminTopNav from './_layout_components/AdminTopNav';
 
 export default function AdminLayout({ children }) {
     const router = useRouter();
@@ -50,5 +52,15 @@ export default function AdminLayout({ children }) {
         }
     }, []);
 
-    return <>{children}</>;
+    return (
+        <>
+            {' '}
+            <div className="min-vh-100 d-flex flex-column">
+                <AdminHeader />
+                <AdminTopNav />
+
+                <main className="flex-fill p-4 bg-light">{children}</main>
+            </div>
+        </>
+    );
 }

@@ -39,14 +39,12 @@ export default function LoginPage() {
 
         try {
             const response = await adminLoginApi(username, password);
-
             const token = response.token;
             const roleName = response.user.roleName;
 
             localStorage.setItem('adminToken', token);
             localStorage.setItem('adminRole', roleName);
 
-            // ROLE BASED REDIRECTION
             if (roleName === 'User') {
                 router.replace('/');
             } else if (['Admin', 'Editor', 'Viewer'].includes(roleName)) {
