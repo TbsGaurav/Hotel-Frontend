@@ -1,9 +1,12 @@
-import React from 'react'
+'use client';
 
-const page = () => {
-  return (
-    <div>dashboard</div>
-  )
-}
+import { useAuthGuard } from '@/hooks/useAuthGuard';
+import React from 'react';
 
-export default page
+const Page = () => {
+    useAuthGuard(['Admin', 'Editor', 'Viewer']);
+
+    return <div>dashboard</div>;
+};
+
+export default Page;

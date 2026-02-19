@@ -24,18 +24,10 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@/public/assets/css/style.css';
 import '@/public/assets/css/media.css';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 export default function RootLayout({ children }) {
-    const router = useRouter();
-
-    useEffect(() => {
-        window.location.origin.includes('admin') && router.replace('/entry');
-    }, []);
-
     return (
         <html lang="en">
             <body>
