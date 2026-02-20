@@ -1,12 +1,12 @@
 'use client';
 
-import { getCitiesByCountryOrRegion, getCollectionList, getGeoNodes, getRegionsByCountry } from '@/lib/api/admin/collectionapi';
+import { getCitiesByCountryOrRegion, getCollectionList, getRegionsByCountry } from '@/lib/api/admin/collectionapi';
 import { COLLECTION_STATUS_OPTIONS } from '@/lib/constants/ruleConfig';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export default function CollectionList() {
-    const [collections, setCollections] = useState([]);
+export default function CollectionList({ initialCollections, initialGeoNodes }) {
+    const [collections, setCollections] = useState(initialCollections);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const router = useRouter();
@@ -15,136 +15,82 @@ export default function CollectionList() {
 
     const [selectedGeoNode, setSelectedGeoNode] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
-    const [geoNodes, setGeoNodes] = useState([]);
+    const [geoNodes, setGeoNodes] = useState(initialGeoNodes);
     const [regions, setRegions] = useState([]);
     const [selectedRegion, setSelectedRegion] = useState('');
 
     useEffect(() => {
-        loadCollections();
-    }, [statusFilter, selectedGeoNode, selectedCity]);
+        const loadCollections = async () => {
+            try {
+                setLoading(true);
+                setError(null);
 
-    const loadCollections = async () => {
-        try {
-            setLoading(true);
-            setError(null);
+                const res = await getCollectionList({
+                    status: statusFilter,
+                    countryId: selectedGeoNode || null,
+                    regionId: selectedRegion || null,
+                    cityId: selectedCity || null
+                });
 
-            const res = await getCollectionList({
-                status: statusFilter,
-                countryId: selectedGeoNode,
-                regionId: selectedRegion,
-                cityId: selectedCity
-            });
-
-            setCollections(res?.data || []);
-        } catch (err) {
-            if (err.status === 404) {
-                setCollections([]);
-            } else {
+                setCollections(res?.data || []);
+            } catch {
                 setError('Something went wrong');
+            } finally {
+                setLoading(false);
             }
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
 
-    if (error) return <div className="text-danger text-center py-5">{error}</div>;
+        loadCollections();
+    }, [statusFilter, selectedGeoNode, selectedRegion, selectedCity]);
 
+    // Region load
     useEffect(() => {
-        if (selectedGeoNode) {
-            loadCities(selectedGeoNode, selectedRegion);
-        } else {
-            setCities([]);
-            setSelectedCity('');
-        }
-    }, [selectedGeoNode, selectedRegion]);
-
-    // const loadCities = async (countryId, regionId) => {
-    //     try {
-    //         const res = await getCitiesByCountryOrRegion({
-    //             countryId,
-    //             regionId
-    //         });
-
-    //         setCities(res?.data || []);
-    //         setSelectedCity('');
-    //     } catch (err) {
-    //         console.error('City load error', err);
-    //         setCities([]);
-    //     }
-    // };
-
-    const loadCities = async (countryId, regionId) => {
-        try {
-            const res = await getCitiesByCountryOrRegion({
-                countryId,
-                regionId
-            });
-
-            setCities(res?.data || []);
-        } catch (err) {
-            // If 404 → treat as empty list
-            if (err?.status === 404) {
-                setCities([]);
-            } else {
-                console.error('City load error', err);
-            }
-        } finally {
-            setSelectedCity('');
-        }
-    };
-
-    useEffect(() => {
-        loadGeoNodes();
-    }, []);
-
-    const loadGeoNodes = async () => {
-        try {
-            const res = await getGeoNodes();
-            console.log(res);
-            setGeoNodes(res?.data?.countries || []);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    useEffect(() => {
-        if (selectedGeoNode) {
-            loadRegions(selectedGeoNode);
-        } else {
+        if (!selectedGeoNode) {
             setRegions([]);
             setSelectedRegion('');
+            return;
         }
+
+        getRegionsByCountry(selectedGeoNode)
+            .then(res => setRegions(res?.data || []))
+            .catch(() => setRegions([]));
     }, [selectedGeoNode]);
 
-    const loadRegions = async (countryId) => {
-        try {
-            const res = await getRegionsByCountry(countryId);
-            setRegions(res?.data || []);
-        } catch (err) {
-            if (err?.status === 404) {
-                setRegions([]);
-            } else {
-                console.error('Region load error', err);
-            }
-        } finally {
-            setSelectedRegion('');
+    // City load
+    useEffect(() => {
+        if (!selectedGeoNode) {
+            setCities([]);
+            setSelectedCity('');
+            return;
         }
-    };
+
+        getCitiesByCountryOrRegion({
+            countryId: selectedGeoNode,
+            regionId: selectedRegion || null
+        })
+            .then(res => setCities(res?.data || []))
+            .catch(() => setCities([]));
+    }, [selectedGeoNode, selectedRegion]);
 
     return (
         <div className="card shadow-sm mb-5">
             <div className="card-header d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">Hotel Collections</h5>
-                <button className="theme-button-orange rounded-1 " onClick={() => router.push('/collections/create')}>
+                <button
+                    className="theme-button-orange rounded-1"
+                    onClick={() => router.push('/collections/create')}
+                >
                     Create New Collection
                 </button>
             </div>
 
             <div className="card-body">
                 <div className="row g-3 mb-3">
+
                     {/* Status */}
                     <div className="col-12 col-md-4 col-lg-3">
-                        <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                        <select className="form-select" value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}>
                             <option value="">All Status</option>
                             {COLLECTION_STATUS_OPTIONS.map((status) => (
                                 <option key={status.value} value={status.value}>
@@ -156,9 +102,10 @@ export default function CollectionList() {
 
                     {/* GeoNode */}
                     <div className="col-12 col-md-4 col-lg-3">
-                        <select className="form-select" value={selectedGeoNode} onChange={(e) => setSelectedGeoNode(e.target.value)}>
+                        <select className="form-select"
+                            value={selectedGeoNode}
+                            onChange={(e) => setSelectedGeoNode(e.target.value)}>
                             <option value="">Select GeoNode</option>
-
                             {geoNodes.map((node) => (
                                 <option key={node.countryID} value={node.countryID}>
                                     {node.name}
@@ -166,57 +113,45 @@ export default function CollectionList() {
                             ))}
                         </select>
                     </div>
+
+                    {/* Region */}
                     <div className="col-12 col-md-4 col-lg-3">
-                        <select
-                            className="form-select"
+                        <select className="form-select"
                             value={selectedRegion}
                             onChange={(e) => setSelectedRegion(e.target.value)}
-                            disabled={!selectedGeoNode}
-                        >
+                            disabled={!selectedGeoNode}>
                             <option value="">Select Region</option>
                             {regions.length === 0 && selectedGeoNode && (
-                                <option value="" disabled>
-                                    No regions found
-                                </option>
+                                <option disabled>No regions found</option>
                             )}
-
-                            {regions.map((region) => (
-                                <option key={region.regionID} value={region.regionID}>
-                                    {region.name}
+                            {regions.map((r) => (
+                                <option key={r.regionID} value={r.regionID}>
+                                    {r.name}
                                 </option>
                             ))}
-                            {/* {regions.map((region) => (
-                                <option key={region.regionID} value={region.regionID}>
-                                    {region.name}
-                                </option>
-                            ))} */}
                         </select>
                     </div>
 
                     {/* City */}
                     <div className="col-12 col-md-4 col-lg-3">
-                        <select
-                            className="form-select"
+                        <select className="form-select"
                             value={selectedCity}
                             onChange={(e) => setSelectedCity(e.target.value)}
-                            disabled={!selectedGeoNode}
-                        >
+                            disabled={!selectedGeoNode}>
                             <option value="">Select City</option>
-
                             {cities.length === 0 && selectedGeoNode && (
-                                <option value="" disabled>
-                                    No cities found
-                                </option>
+                                <option disabled>No cities found</option>
                             )}
-
-                            {cities.map((city) => (
-                                <option key={city.cityID} value={city.cityID}>
-                                    {city.name}
+                            {cities.map((c) => (
+                                <option key={c.cityID} value={c.cityID}>
+                                    {c.name}
                                 </option>
                             ))}
                         </select>
                     </div>
                 </div>
+
+                {/* TABLE (same UI as yours) */}
                 <table className="table table-bordered align-middle">
                     <thead className="table-light">
                         <tr>
@@ -236,16 +171,10 @@ export default function CollectionList() {
                                     Loading collections...
                                 </td>
                             </tr>
-                        ) : error ? (
-                            <tr>
-                                <td colSpan="6" className="text-danger text-center py-4">
-                                    {error}
-                                </td>
-                            </tr>
                         ) : collections.length === 0 ? (
                             <tr>
                                 <td colSpan="6" className="text-center py-4 text-muted">
-                                    {statusFilter ? `No ${statusFilter} collections found` : 'No collections found'}
+                                    No collections found
                                 </td>
                             </tr>
                         ) : (
@@ -257,7 +186,11 @@ export default function CollectionList() {
                                         <span className="badge bg-success">{item.status}</span>
                                     </td>
                                     <td>{item.hotelCount}</td>
-                                    <td>{item.publishDate ? new Date(item.publishDate).toLocaleDateString() : '-'}</td>
+                                    <td>
+                                        {item.publishDate
+                                            ? new Date(item.publishDate).toLocaleDateString()
+                                            : '-'}
+                                    </td>
                                     <td>
                                         <button className="btn btn-sm btn-outline-secondary me-2">Edit</button>
                                         <button className="btn btn-sm btn-outline-secondary me-2">Clone</button>
@@ -268,11 +201,6 @@ export default function CollectionList() {
                         )}
                     </tbody>
                 </table>
-
-                <div className="text-end">
-                    <button className="btn btn-outline-danger btn-sm me-2">Retire</button>
-                    <button className="btn btn-outline-dark btn-sm">Retire & Redirect</button>
-                </div>
             </div>
         </div>
     );
