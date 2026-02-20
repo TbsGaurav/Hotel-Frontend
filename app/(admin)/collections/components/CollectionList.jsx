@@ -30,7 +30,7 @@ export default function CollectionList() {
 
             const res = await getCollectionList({
                 status: statusFilter,
-                geoNodeId: selectedGeoNode,
+                countryId: selectedGeoNode,
                 regionId: selectedRegion,
                 cityId: selectedCity
             });

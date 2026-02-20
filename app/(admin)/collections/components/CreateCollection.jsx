@@ -28,6 +28,7 @@ export default function CreateCollection() {
     const [selectedExcludeHotel, setSelectedExcludeHotel] = useState(null);
     const pinnedRef = useRef(null);
     const excludeRef = useRef(null);
+    const [selectedPinnedHotel, setSelectedPinnedHotel] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
         slug: '',
@@ -116,7 +117,11 @@ export default function CreateCollection() {
         };
 
         await upsertCollection(payload);
-        router.push('/collections');
+
+        // if (res?.status === 'success' || res?.code === 200) {
+        //     await getCollectionList();
+        //     router.push('/collections');
+        // }
     };
 
     const moveHotel = (index, direction) => {
@@ -189,17 +194,17 @@ export default function CreateCollection() {
 
     useEffect(() => {
         const delay = setTimeout(() => {
-            if (hotelSearch.length >= 2) {
+            // PINNED
+            if (hotelSearch.length >= 2 && !pinnedHotels.some((h) => h.name === hotelSearch)) {
                 loadHotels(hotelSearch, 'pinned');
-                setShowPinnedDropdown(true);
             } else {
                 setPinnedOptions([]);
                 setShowPinnedDropdown(false);
             }
 
-            if (excludeSearch.length >= 2) {
+            // EXCLUDE
+            if (excludeSearch.length >= 2 && !selectedExcludeHotel) {
                 loadHotels(excludeSearch, 'exclude');
-                setShowExcludeDropdown(true);
             } else {
                 setExcludeOptions([]);
                 setShowExcludeDropdown(false);
@@ -207,42 +212,7 @@ export default function CreateCollection() {
         }, 400);
 
         return () => clearTimeout(delay);
-    }, [hotelSearch, excludeSearch, selectedCity]);
-
-    // const loadHotels = async (search, type) => {
-    //     try {
-    //         setLoadingHotels(true);
-
-    //         const payload = {
-    //             search
-    //         };
-
-    //         // Only add cityId if selected
-    //         if (selectedCity) {
-    //             payload.cityId = selectedCity;
-    //         }
-
-    //         const res = await getHotelsByCity(payload);
-    //         const results = res?.data?.slice(0, 50) || [];
-
-    //         if (type === 'pinned') {
-    //             setPinnedOptions(results || []);
-    //         } else {
-    //             setExcludeOptions(results || []);
-    //         }
-    //     } catch (err) {
-    //         console.error('Hotel load error', err);
-
-    //         if (type === 'pinned') {
-    //             setPinnedOptions([]);
-    //         } else {
-    //             setExcludeOptions([]);
-    //         }
-    //     } finally {
-    //         setLoadingHotels(false);
-    //     }
-    // };
-
+    }, [hotelSearch, excludeSearch, selectedCity, selectedExcludeHotel, pinnedHotels]);
     const loadHotels = async (search, type) => {
         try {
             setLoadingHotels(true);
@@ -259,7 +229,6 @@ export default function CreateCollection() {
             const res = await getHotelsByCity(payload);
 
             const results = res?.data?.slice(0, 50) || [];
-            console.log(results);
             if (type === 'pinned') {
                 setPinnedOptions(results);
                 setShowPinnedDropdown(true);
@@ -283,7 +252,7 @@ export default function CreateCollection() {
     };
     const addExcludedHotel = () => {
         if (!selectedExcludeHotel || !excludeReason.trim()) {
-            alert('Please select hotel and enter reason');
+            // alert('Please select hotel and enter reason');
             return;
         }
 
@@ -297,7 +266,7 @@ export default function CreateCollection() {
         setExcludedHotels((prev) => [
             ...prev,
             {
-                id: selectedExcludeHotel.id, // ✅ REAL HOTEL ID
+                id: selectedExcludeHotel.id,
                 name: selectedExcludeHotel.name,
                 reason: excludeReason
             }
@@ -307,14 +276,32 @@ export default function CreateCollection() {
         setExcludeSearch('');
         setExcludeReason('');
     };
-
     const addPinnedHotel = () => {
-        if (!hotelSearch) return;
+        if (!selectedPinnedHotel) {
+            return;
+        }
 
-        setPinnedHotels([...pinnedHotels, { id: Date.now(), name: hotelSearch }]);
+        const alreadyExists = pinnedHotels.some((h) => h.id === selectedPinnedHotel.id);
 
+        if (alreadyExists) {
+            alert('Hotel already pinned');
+            return;
+        }
+
+        setPinnedHotels((prev) => [
+            ...prev,
+            {
+                id: selectedPinnedHotel.id,
+                name: selectedPinnedHotel.name
+            }
+        ]);
+
+        setSelectedPinnedHotel(null);
         setHotelSearch('');
+        setPinnedOptions([]);
+        setShowPinnedDropdown(false);
     };
+
     return (
         <div className="card shadow-sm">
             <div className="card-header">
@@ -349,6 +336,7 @@ export default function CreateCollection() {
                                     value={formData.name}
                                     onChange={handleChange}
                                     placeholder="Collection Name"
+                                    required
                                 />
                             </div>
 
@@ -361,6 +349,7 @@ export default function CreateCollection() {
                                     value={formData.slug}
                                     onChange={handleChange}
                                     placeholder="Collection slug"
+                                    required
                                 />
                             </div>
 
@@ -517,7 +506,7 @@ export default function CreateCollection() {
                                         </div>
 
                                         {/* <div className="col-12 col-lg-2 "> */}
-                                        <div className="col-12 col-md-2">
+                                        <div className="col-12 col-md-2 d-grid">
                                             <button className="theme-button-orange rounded-1 w-100" onClick={addRule}>
                                                 + Add
                                             </button>
@@ -560,14 +549,15 @@ export default function CreateCollection() {
                                             className="form-control"
                                             placeholder="Search Hotel"
                                             value={excludeSearch}
-                                            onChange={(e) => setExcludeSearch(e.target.value)}
-                                        />
-                                        <input
-                                            type="text"
-                                            className="form-control mt-2"
-                                            placeholder="Reason for exclusion"
-                                            value={excludeReason}
-                                            onChange={(e) => setExcludeReason(e.target.value)}
+                                            onChange={(e) => {
+                                                setExcludeSearch(e.target.value);
+                                                setSelectedExcludeHotel(null);
+                                            }}
+                                            // onFocus={() => {
+                                            //     if (excludeSearch.length >= 2) {
+                                            //         setShowExcludeDropdown(true);
+                                            //     }
+                                            // }}
                                         />
 
                                         {/* {excludeOptions.length > 0 && ( */}
@@ -586,32 +576,6 @@ export default function CreateCollection() {
                                                             setExcludeSearch(hotel.name);
                                                             setShowExcludeDropdown(false);
                                                         }}
-                                                        // onClick={() => {
-                                                        //     if (!excludeReason.trim()) {
-                                                        //         alert('Please enter exclusion reason');
-                                                        //         return;
-                                                        //     }
-
-                                                        //     const alreadyExists = excludedHotels.some((h) => h.id === hotel.id);
-                                                        //     if (alreadyExists) {
-                                                        //         alert('Hotel already excluded');
-                                                        //         return;
-                                                        //     }
-
-                                                        //     setExcludedHotels((prev) => [
-                                                        //         ...prev,
-                                                        //         {
-                                                        //             id: hotel.id,
-                                                        //             name: hotel.name,
-                                                        //             reason: excludeReason
-                                                        //         }
-                                                        //     ]);
-
-                                                        //     setExcludeSearch('');
-                                                        //     setExcludeReason('');
-                                                        //     setExcludeOptions([]);
-                                                        //     setShowExcludeDropdown(false);
-                                                        // }}
                                                     >
                                                         {hotel.name}
                                                     </div>
@@ -619,8 +583,15 @@ export default function CreateCollection() {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="col-12 ">
-                                        <button className="theme-button-orange rounded-1" onClick={addExcludedHotel}>
+                                    <input
+                                        type="text"
+                                        className="form-control mt-2"
+                                        placeholder="Reason for exclusion"
+                                        value={excludeReason}
+                                        onChange={(e) => setExcludeReason(e.target.value)}
+                                    />
+                                    <div className="col-12 d-grid mt-2">
+                                        <button className="theme-button-orange rounded-1 w-100" onClick={addExcludedHotel}>
                                             Exclude
                                         </button>
                                     </div>
@@ -651,7 +622,7 @@ export default function CreateCollection() {
                             <div className="col-12 col-md-6 col-xl-3">
                                 <h6>Pinned Hotels</h6>
 
-                                <div className="border p-3 rounded-2">
+                                <div className="border p-3 rounded-2 ">
                                     <div className="position-relative w-100" ref={pinnedRef}>
                                         <input
                                             type="text"
@@ -659,6 +630,11 @@ export default function CreateCollection() {
                                             placeholder="Search Hotel"
                                             value={hotelSearch}
                                             onChange={(e) => setHotelSearch(e.target.value)}
+                                            // onFocus={() => {
+                                            //     if (hotelSearch.length >= 2) {
+                                            //         setShowPinnedDropdown(true);
+                                            //     }
+                                            // }}
                                         />
 
                                         {/* {pinnedOptions.length > 0 && ( */}
@@ -674,9 +650,8 @@ export default function CreateCollection() {
                                                         className="p-2 hover-bg cursor-pointer"
                                                         style={{ cursor: 'pointer' }}
                                                         onClick={() => {
-                                                            setPinnedHotels([...pinnedHotels, { id: hotel.id, name: hotel.name }]);
-                                                            setHotelSearch('');
-                                                            setPinnedOptions([]);
+                                                            setSelectedPinnedHotel(hotel);
+                                                            setHotelSearch(hotel.name);
                                                             setShowPinnedDropdown(false);
                                                         }}
                                                     >
@@ -718,8 +693,8 @@ export default function CreateCollection() {
                                         </div>
                                     ))}
 
-                                    <div className="d-flex mb-3">
-                                        <button className="theme-button-orange rounded-1" onClick={addPinnedHotel}>
+                                    <div className="d-grid mt-2 mb-3 ">
+                                        <button className="theme-button-orange rounded-1 w-100" onClick={addPinnedHotel}>
                                             Add
                                         </button>
                                     </div>
