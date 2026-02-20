@@ -1,5 +1,4 @@
-import CollectionList from './components/CollectionList';
-import RedirectManager from './components/RedirectManager';
+import CollectionList from "@/components/common/collections/CollectionList";
 
 export default function CollectionsPage() {
     return (

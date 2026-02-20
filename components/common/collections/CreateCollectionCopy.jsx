@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getCitiesByCountryOrRegion, getGeoNodes, getHotelsByCity, upsertCollection } from '@/lib/api/admin/collectionapi';
+import BasicsTab from './BasicsTab';
 import { RULE_FIELDS, RULE_OPERATORS, RULE_VALUE_OPTIONS } from '@/lib/constants/ruleConfig';
 
 export default function CreateCollection() {
@@ -28,6 +29,7 @@ export default function CreateCollection() {
     const [selectedExcludeHotel, setSelectedExcludeHotel] = useState(null);
     const pinnedRef = useRef(null);
     const excludeRef = useRef(null);
+
     const [selectedPinnedHotel, setSelectedPinnedHotel] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
@@ -55,6 +57,7 @@ export default function CreateCollection() {
             [name]: value
         });
     };
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (pinnedRef.current && !pinnedRef.current.contains(event.target)) {
@@ -325,7 +328,6 @@ export default function CreateCollection() {
 
                 {activeTab === 'Basics' && (
                     <>
-                        {/* ================= BASIC SECTION ================= */}
                         <div className="row">
                             <div className="col-12 col-lg-6 mb-3">
                                 <label className="form-label">Collection Name</label>
@@ -353,7 +355,6 @@ export default function CreateCollection() {
                                 />
                             </div>
 
-                            {/* GeoNode */}
                             <div className="col-12 col-lg-6 mb-3">
                                 <label className="form-label">GeoNode</label>
                                 <select className="form-select" name="geoNodeId" value={formData.geoNodeId} onChange={handleChange}>
@@ -366,7 +367,6 @@ export default function CreateCollection() {
                                 </select>
                             </div>
 
-                            {/* City */}
                             <div className="col-12 col-lg-6 mb-3">
                                 <label className="form-label">City</label>
                                 <select
@@ -436,19 +436,14 @@ export default function CreateCollection() {
 
                         <hr />
 
-                        {/* ================= MODE & RULES ================= */}
-
                         <div className="row g-3">
-                            {/* <div className="col-md-6"> */}
                             <div className="col-12 col-xl-6">
                                 <h6>Mode</h6>
                                 <div className="form-control bg-light">Hybrid (Rules + Pinned)</div>
                                 <h6>Rules</h6>
 
                                 <div className="border p-3 rounded-2 mb-3">
-                                    {/* <div className="row g-2 mb-3 align-items-end"> */}
                                     <div className="row g-2">
-                                        {/* <div className="col-12 col-lg-4"> */}
                                         <div className="col-12 col-md-4">
                                             <select
                                                 className="form-select"
@@ -464,7 +459,6 @@ export default function CreateCollection() {
                                             </select>
                                         </div>
 
-                                        {/* <div className="col-12 col-lg-4"> */}
                                         <div className="col-12 col-md-3">
                                             <select
                                                 className="form-select"
@@ -479,7 +473,6 @@ export default function CreateCollection() {
                                             </select>
                                         </div>
 
-                                        {/* <div className="col-12 col-lg-4"> */}
                                         <div className="col-12 col-md-3">
                                             {RULE_VALUE_OPTIONS[ruleField] ? (
                                                 <select
@@ -505,7 +498,6 @@ export default function CreateCollection() {
                                             )}
                                         </div>
 
-                                        {/* <div className="col-12 col-lg-2 "> */}
                                         <div className="col-12 col-md-2 d-grid">
                                             <button className="theme-button-orange rounded-1 w-100" onClick={addRule}>
                                                 + Add
@@ -538,7 +530,6 @@ export default function CreateCollection() {
                                 </div>
                             </div>
 
-                            {/* <div className="col-12 col-lg-3"> */}
                             <div className="col-12 col-md-6 col-xl-3">
                                 <h6>Excluded Hotels</h6>
 
@@ -553,14 +544,8 @@ export default function CreateCollection() {
                                                 setExcludeSearch(e.target.value);
                                                 setSelectedExcludeHotel(null);
                                             }}
-                                            // onFocus={() => {
-                                            //     if (excludeSearch.length >= 2) {
-                                            //         setShowExcludeDropdown(true);
-                                            //     }
-                                            // }}
                                         />
 
-                                        {/* {excludeOptions.length > 0 && ( */}
                                         {showExcludeDropdown && excludeOptions.length > 0 && (
                                             <div
                                                 className="position-absolute bg-white border w-100 mt-1 rounded shadow-sm"
@@ -616,9 +601,6 @@ export default function CreateCollection() {
                                 </div>
                             </div>
 
-                            {/* ================= PINNED ================= */}
-
-                            {/* <div className="col-md-3"> */}
                             <div className="col-12 col-md-6 col-xl-3">
                                 <h6>Pinned Hotels</h6>
 
@@ -630,20 +612,13 @@ export default function CreateCollection() {
                                             placeholder="Search Hotel"
                                             value={hotelSearch}
                                             onChange={(e) => setHotelSearch(e.target.value)}
-                                            // onFocus={() => {
-                                            //     if (hotelSearch.length >= 2) {
-                                            //         setShowPinnedDropdown(true);
-                                            //     }
-                                            // }}
                                         />
 
-                                        {/* {pinnedOptions.length > 0 && ( */}
                                         {showPinnedDropdown && pinnedOptions.length > 0 && (
                                             <div
                                                 className="position-absolute bg-white border w-100 mt-1 rounded shadow-sm"
                                                 style={{ zIndex: 1000, maxHeight: '200px', overflowY: 'auto' }}
                                             >
-                                                {/* {hotelOptions.map((hotel) => ( */}
                                                 {pinnedOptions.map((hotel) => (
                                                     <div
                                                         key={hotel.id}
@@ -702,17 +677,10 @@ export default function CreateCollection() {
                             </div>
                         </div>
 
-                        {/* ================= ACTION BUTTONS ================= */}
-
                         <div className="d-flex justify-content-end gap-2">
                             <button className="btn btn-outline-secondary" onClick={() => router.back()} type="button">
                                 Cancel
                             </button>
-
-                            {/* <button className="btn btn-outline-dark" onClick={() => handleSubmit('Draft')} type="button">
-                                Save Draft
-                            </button> */}
-
                             <button className=" theme-button-orange rounded-1" onClick={() => handleSubmit('Published')} type="button">
                                 Publish
                             </button>
@@ -722,4 +690,16 @@ export default function CreateCollection() {
             </div>
         </div>
     );
+}
+
+{
+    /* <button className="btn btn-outline-dark" onClick={() => handleSubmit('Draft')} type="button">
+    Save Draft
+</button> */
+}
+
+{
+    /* <button className=" theme-button-orange rounded-1" onClick={() => handleSubmit('Published')} type="button">
+    Publish
+</button> */
 }
