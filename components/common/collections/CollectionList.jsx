@@ -31,8 +31,7 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
                     regionId: selectedRegion || null,
                     cityId: selectedCity || null
                 });
-
-                setCollections(res?.data || []);
+                 setCollections(res?.data || []);
             } catch {
                 setError('Something went wrong');
             } finally {
@@ -52,7 +51,7 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
         }
 
         getRegionsByCountry(selectedGeoNode)
-            .then(res => setRegions(res?.data || []))
+            .then((res) => setRegions(res?.data || []))
             .catch(() => setRegions([]));
     }, [selectedGeoNode]);
 
@@ -68,7 +67,7 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
             countryId: selectedGeoNode,
             regionId: selectedRegion || null
         })
-            .then(res => setCities(res?.data || []))
+            .then((res) => setCities(res?.data || []))
             .catch(() => setCities([]));
     }, [selectedGeoNode, selectedRegion]);
 
@@ -76,21 +75,16 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
         <div className="card shadow-sm mb-5">
             <div className="card-header d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">Hotel Collections</h5>
-                <button
-                    className="theme-button-orange rounded-1"
-                    onClick={() => router.push('/collections/create')}
-                >
+                <button className="theme-button-orange rounded-1" onClick={() => router.push('/collections/create')}>
                     Create New Collection
                 </button>
             </div>
 
             <div className="card-body">
                 <div className="row g-3 mb-3">
-
                     {/* Status */}
                     <div className="col-12 col-md-4 col-lg-3">
-                        <select className="form-select" value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}>
+                        <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                             <option value="">All Status</option>
                             {COLLECTION_STATUS_OPTIONS.map((status) => (
                                 <option key={status.value} value={status.value}>
@@ -102,9 +96,7 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
 
                     {/* GeoNode */}
                     <div className="col-12 col-md-4 col-lg-3">
-                        <select className="form-select"
-                            value={selectedGeoNode}
-                            onChange={(e) => setSelectedGeoNode(e.target.value)}>
+                        <select className="form-select" value={selectedGeoNode} onChange={(e) => setSelectedGeoNode(e.target.value)}>
                             <option value="">Select GeoNode</option>
                             {geoNodes.map((node) => (
                                 <option key={node.countryID} value={node.countryID}>
@@ -116,14 +108,14 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
 
                     {/* Region */}
                     <div className="col-12 col-md-4 col-lg-3">
-                        <select className="form-select"
+                        <select
+                            className="form-select"
                             value={selectedRegion}
                             onChange={(e) => setSelectedRegion(e.target.value)}
-                            disabled={!selectedGeoNode}>
+                            disabled={!selectedGeoNode}
+                        >
                             <option value="">Select Region</option>
-                            {regions.length === 0 && selectedGeoNode && (
-                                <option disabled>No regions found</option>
-                            )}
+                            {regions.length === 0 && selectedGeoNode && <option disabled>No regions found</option>}
                             {regions.map((r) => (
                                 <option key={r.regionID} value={r.regionID}>
                                     {r.name}
@@ -134,14 +126,14 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
 
                     {/* City */}
                     <div className="col-12 col-md-4 col-lg-3">
-                        <select className="form-select"
+                        <select
+                            className="form-select"
                             value={selectedCity}
                             onChange={(e) => setSelectedCity(e.target.value)}
-                            disabled={!selectedGeoNode}>
+                            disabled={!selectedGeoNode}
+                        >
                             <option value="">Select City</option>
-                            {cities.length === 0 && selectedGeoNode && (
-                                <option disabled>No cities found</option>
-                            )}
+                            {cities.length === 0 && selectedGeoNode && <option disabled>No cities found</option>}
                             {cities.map((c) => (
                                 <option key={c.cityID} value={c.cityID}>
                                     {c.name}
@@ -186,11 +178,7 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
                                         <span className="badge bg-success">{item.status}</span>
                                     </td>
                                     <td>{item.hotelCount}</td>
-                                    <td>
-                                        {item.publishDate
-                                            ? new Date(item.publishDate).toLocaleDateString()
-                                            : '-'}
-                                    </td>
+                                    <td>{item.publishDate ? new Date(item.publishDate).toLocaleDateString() : '-'}</td>
                                     <td>
                                         <button className="btn btn-sm btn-outline-secondary me-2">Edit</button>
                                         <button className="btn btn-sm btn-outline-secondary me-2">Clone</button>
