@@ -31,7 +31,7 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
                     regionId: selectedRegion || null,
                     cityId: selectedCity || null
                 });
-                 setCollections(res?.data || []);
+                setCollections(res?.data || []);
             } catch {
                 setError('Something went wrong');
             } finally {
@@ -98,11 +98,16 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
                     <div className="col-12 col-md-4 col-lg-3">
                         <select className="form-select" value={selectedGeoNode} onChange={(e) => setSelectedGeoNode(e.target.value)}>
                             <option value="">Select GeoNode</option>
-                            {geoNodes.map((node) => (
-                                <option key={node.countryID} value={node.countryID}>
+                            {geoNodes.map((node, index) => (
+                                <option key={`${node.countryID || index}`} value={node.countryID}>
                                     {node.name}
                                 </option>
                             ))}
+                            {/* {geoNodes.map((node) => (
+                                <option key={node.countryID} value={node.countryID}>
+                                    {node.name}
+                                </option>
+                            ))} */}
                         </select>
                     </div>
 
