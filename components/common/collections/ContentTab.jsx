@@ -58,7 +58,7 @@ export default function ContentTab({ collectionId, data, setData, onNext, onBack
         <>
             <div className="row">
                 <div className="col-md-6 mb-3">
-                    <label className="form-label">H1</label>
+                    <label className="form-label">Header</label>
                     <input
                         className="form-control"
                         // name="h1"

@@ -22,7 +22,7 @@ export function useAuthGuard(allowedRoles = []) {
             if (role === 'User') {
                 router.replace('/');
             } else {
-                router.replace('/collections');
+                router.replace('/dashboard');
             }
         }
     }, [router, allowedRoles]);
