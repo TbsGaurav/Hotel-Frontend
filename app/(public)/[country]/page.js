@@ -10,38 +10,72 @@ export default async function CountryPage({ params }) {
     const data = await getCountryByUrlName(country);
     const countryName = formatCountryName(country);
     const descriptionHtml = data.countryContent;
-
+    const ITEM_TYPE = {
+        City: 0,
+        Region: 1,
+        HotelBrand: 2,
+        HotelType: 3
+    };
     const regions = data.countryData
-        .filter((item) => item.type === 'Region')
+        .filter((item) => item.type === ITEM_TYPE.Region)
         .map((item) => ({
             label: item.itemName,
-            href: item.urlName ? `/${countryName.toLocaleLowerCase()}/${item.urlName}` : null
+            href: item.urlName ? `/${countryName.toLowerCase()}/${item.urlName}` : null
         }));
 
     const cities = data.countryData
-        .filter((item) => item.type === 'City')
+        .filter((item) => item.type === ITEM_TYPE.City)
         .map((item) => ({
             label: item.itemName,
             href: item.urlName ? `/${item.urlName}` : null
         }));
+
     const hotelBrands = data.hotelData
-        .filter((item) => item.type === 'HotelBrand')
+        .filter((item) => item.type === ITEM_TYPE.HotelBrand)
         .map((item) => ({
             label: item.itemName,
             count: item.hotelCount,
             href: item.urlName ? `/${countryName}/${item.urlName}` : null
         }));
+
     const hotelTypes = data?.hotelData
-        .filter((item) => item.type === 'HotelType')
+        ?.filter((item) => item.type === ITEM_TYPE.HotelType)
         .map((item) => ({
             label: item.itemName,
             count: item.hotelCount,
             href: item.urlName ? `/hoteltype/${item.urlName}` : null
         }));
+    // const regions = data.countryData
+    //     .filter((item) => item.type === 'Region')
+    //     .map((item) => ({
+    //         label: item.itemName,
+    //         href: item.urlName ? `/${countryName.toLocaleLowerCase()}/${item.urlName}` : null
+    //     }));
+
+    // const cities = data.countryData
+    //     .filter((item) => item.type === 'City')
+    //     .map((item) => ({
+    //         label: item.itemName,
+    //         href: item.urlName ? `/${item.urlName}` : null
+    //     }));
+    // const hotelBrands = data.hotelData
+    //     .filter((item) => item.type === 'HotelBrand')
+    //     .map((item) => ({
+    //         label: item.itemName,
+    //         count: item.hotelCount,
+    //         href: item.urlName ? `/${countryName}/${item.urlName}` : null
+    //     }));
+    // const hotelTypes = data?.hotelData
+    //     .filter((item) => item.type === 'HotelType')
+    //     .map((item) => ({
+    //         label: item.itemName,
+    //         count: item.hotelCount,
+    //         href: item.urlName ? `/hoteltype/${item.urlName}` : null
+    //     }));
     return (
         <>
             <CountryHeroSection />
-            <CountryIntro countryName={countryName} descriptionHtml={descriptionHtml} heroImage="/image/country.webp" /> 
+            <CountryIntro countryName={countryName} descriptionHtml={descriptionHtml} heroImage="/image/country.webp" />
             <section className="container py-4">
                 <CountryDropdownSection
                     regions={regions}
