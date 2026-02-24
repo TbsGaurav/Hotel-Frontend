@@ -115,7 +115,7 @@ export default function CreateCollection() {
     const loadCitiesBySearch = async (search) => {
         const payload = {
             search,
-            countryId: selectedGeoNode?.countryID
+            countryId: selectedGeoNode?.countryId
         };
 
         const res = await getCitiesByCountryOrRegion(payload);
@@ -333,8 +333,8 @@ export default function CreateCollection() {
             await Promise.all(
                 rules.map((rule) =>
                     saveRule({
-                        ruleID: 0,
-                        collectionID: collectionId,
+                        ruleId: 0,
+                        collectionId: collectionId,
                         field: rule.Field,
                         operator: rule.Operator,
                         value: rule.Value,
@@ -391,7 +391,7 @@ export default function CreateCollection() {
 
     const handleStatusUpdate = async (action) => {
         if (!collectionId) {
-            alert('Collection ID not found');
+            alert('Collection Id not found');
             return;
         }
 

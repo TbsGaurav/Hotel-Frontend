@@ -99,12 +99,12 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
                         <select className="form-select" value={selectedGeoNode} onChange={(e) => setSelectedGeoNode(e.target.value)}>
                             <option value="">Select GeoNode</option>
                             {geoNodes.map((node, index) => (
-                                <option key={`${node.countryID || index}`} value={node.countryID}>
+                                <option key={`${node.countryId || index}`} value={node.countryId}>
                                     {node.name}
                                 </option>
                             ))}
                             {/* {geoNodes.map((node) => (
-                                <option key={node.countryID} value={node.countryID}>
+                                <option key={node.countryId} value={node.countryId}>
                                     {node.name}
                                 </option>
                             ))} */}
@@ -122,7 +122,7 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
                             <option value="">Select Region</option>
                             {regions.length === 0 && selectedGeoNode && <option disabled>No regions found</option>}
                             {regions.map((r, index) => (
-                                <option key={`${r.regionID || index}`} value={r.regionID}>
+                                <option key={`${r.regionId || index}`} value={r.regionId}>
                                     {r.name}
                                 </option>
                             ))}
@@ -140,7 +140,7 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
                             <option value="">Select City</option>
                             {cities.length === 0 && selectedGeoNode && <option disabled>No cities found</option>}
                             {cities.map((c, index) => (
-                                <option key={`${c.cityID || index}`} value={c.cityID}>
+                                <option key={`${c.cityId || index}`} value={c.cityId}>
                                     {c.name}
                                 </option>
                             ))}
@@ -176,7 +176,7 @@ export default function CollectionList({ initialCollections, initialGeoNodes }) 
                             </tr>
                         ) : (
                             collections.map((item) => (
-                                <tr key={item.collectionID}>
+                                <tr key={item.collectionId}>
                                     <td>{item.name}</td>
                                     <td>{item.type}</td>
                                     <td>
