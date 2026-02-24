@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
         <html lang="en">
             <body>
                 {children}
-                <Script src="/bootstrap.bundle.min.js" strategy="afterInteractive" />
+                {/* <Script src="/bootstrap.bundle.min.js" strategy="afterInteractive" /> */}
             </body>
         </html>
     );
