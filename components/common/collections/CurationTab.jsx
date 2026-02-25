@@ -3,10 +3,8 @@
 import { useEffect, useRef } from 'react';
 
 export default function CurationTab({
-    formData,
     countries,
     setFormData,
-    geoNodes,
     cities,
     selectedCity,
     setSelectedCity,
@@ -22,9 +20,7 @@ export default function CurationTab({
     setExcludeReason,
     pinnedOptions,
     excludeOptions,
-    selectedPinnedHotel,
     setSelectedPinnedHotel,
-    selectedExcludeHotel,
     setSelectedExcludeHotel,
     addPinnedHotel,
     addExcludedHotel,
@@ -37,7 +33,6 @@ export default function CurationTab({
     setShowExcludeDropdown,
     geoSearch,
     setGeoSearch,
-    geoOptions,
     showGeoDropdown,
     setShowGeoDropdown,
     selectedGeoNode,
@@ -47,17 +42,11 @@ export default function CurationTab({
     showCityDropdown,
     setShowCityDropdown,
     setSelectedCityObj,
-    cityOptions,
     setCityOptions,
     loading,
     excludeError,
     setExcludeError
 }) {
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
     const pinnedRef = useRef(null);
     const excludeRef = useRef(null);
     useEffect(() => {
@@ -88,11 +77,11 @@ export default function CurationTab({
             {/* ================= LOCATION SECTION ================= */}
             <div className="row">
                 {/* COUNTRY */}
-                <div className="col-12 col-lg-4 mb-3 position-relative dropdown-wrapper">
+                <div className="col-12 col-lg-6 position-relative dropdown-wrapper">
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="Select Country"
+                        placeholder="Search By Country"
                         value={geoSearch}
                         onFocus={() => {
                             setShowGeoDropdown(true);
@@ -159,7 +148,7 @@ export default function CurationTab({
                 </div>
 
                 {/* CITY */}
-                <div className="col-12 col-lg-4 mb-3 position-relative dropdown-wrapper">
+                <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
                     <input
                         type="text"
                         className="form-control"
@@ -412,7 +401,6 @@ export default function CurationTab({
                     {loading ? (
                         <>
                             <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            {/* Loading... */}
                         </>
                     ) : (
                         'Next'

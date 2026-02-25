@@ -70,7 +70,6 @@ export default function CreateCollection() {
     const [showPinnedDropdown, setShowPinnedDropdown] = useState(false);
     const [showExcludeDropdown, setShowExcludeDropdown] = useState(false);
 
-    const [geoNodes, setGeoNodes] = useState([]);
     const [cities, setCities] = useState([]);
     const [selectedCity, setSelectedCity] = useState('');
 
@@ -203,27 +202,6 @@ export default function CreateCollection() {
     };
 
     // ---------------- EXCLUDE ----------------
-    // const addExcludedHotel = () => {
-    //     if (!selectedExcludeHotel || !excludeReason) return;
-
-    //     if (excludedHotels.some((h) => h.id === selectedExcludeHotel.id)) {
-    //         toast.error('Hotel already excluded');
-    //         return;
-    //     }
-
-    //     setExcludedHotels([
-    //         ...excludedHotels,
-    //         {
-    //             id: selectedExcludeHotel.id,
-    //             name: selectedExcludeHotel.name,
-    //             reason: excludeReason
-    //         }
-    //     ]);
-
-    //     setSelectedExcludeHotel(null);
-    //     setExcludeSearch('');
-    //     setExcludeReason('');
-    // };
 
     const addExcludedHotel = () => {
         if (!selectedExcludeHotel) {
@@ -349,42 +327,6 @@ export default function CreateCollection() {
             setLoading(false);
         }
     };
-
-    // const handleSaveRules = async () => {
-    //     if (!collectionId) {
-    //         alert('Please save Basics first');
-    //         return;
-    //     }
-
-    //     if (!rules.length) {
-    //         alert('Please add at least one rule');
-    //         return;
-    //     }
-    //     setLoading(true);
-
-    //     try {
-    //         await Promise.all(
-    //             rules.map((rule) =>
-    //                 saveRule({
-    //                     ruleId: 0,
-    //                     collectionId: collectionId,
-    //                     field: rule.Field,
-    //                     operator: rule.Operator,
-    //                     value: rule.Value,
-    //                     logicalGroup: 'AND'
-    //                 })
-    //             )
-    //         );
-
-    //         // alert('Rules saved successfully!');
-    //         goNext();
-    //     } catch (error) {
-    //         console.error('Save rules failed:', error);
-    //         alert('Failed to save rules');
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
 
     const handleSaveRules = async () => {
         if (!collectionId) {
@@ -609,7 +551,6 @@ export default function CreateCollection() {
                     <BasicsTab
                         formData={formData}
                         setFormData={setFormData}
-                        geoNodes={geoNodes}
                         cities={cities}
                         selectedCity={selectedCity}
                         setSelectedCity={setSelectedCity}
@@ -623,10 +564,8 @@ export default function CreateCollection() {
                 {activeTab === 'Content' && (
                     <ContentTab
                         data={contentData}
-                        setData={setContentData}
                         onBack={goBack}
                         onNext={handleSaveContent}
-                        collectionId={collectionId}
                         loading={loading}
                     />
                 )}
@@ -634,7 +573,7 @@ export default function CreateCollection() {
                 {activeTab === 'Rules' && (
                     <RulesTab
                         rules={rules}
-                        setRules={setRules}
+                        // setRules={setRules}
                         ruleField={ruleField}
                         setRuleField={setRuleField}
                         ruleOperator={ruleOperator}
@@ -653,7 +592,6 @@ export default function CreateCollection() {
 
                 {activeTab === 'Curation' && (
                     <CurationTab
-                        formData={formData}
                         setFormData={setFormData}
                         selectedCity={selectedCity}
                         setSelectedCity={setSelectedCity}
@@ -671,7 +609,6 @@ export default function CreateCollection() {
                         excludeOptions={excludeOptions}
                         selectedPinnedHotel={selectedPinnedHotel}
                         setSelectedPinnedHotel={setSelectedPinnedHotel}
-                        selectedExcludeHotel={selectedExcludeHotel}
                         setSelectedExcludeHotel={setSelectedExcludeHotel}
                         showPinnedDropdown={showPinnedDropdown}
                         setShowPinnedDropdown={setShowPinnedDropdown}

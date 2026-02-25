@@ -1,11 +1,10 @@
 'use client';
 
 import CKEditorField from '@/components/ui/CKEditorField';
-import { saveContent } from '@/lib/api/admin/collectionapi';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-export default function ContentTab({ collectionId, data, setData, onNext, onBack, loading }) {
+export default function ContentTab({  data, setData, onNext, onBack, loading }) {
     const [errors, setErrors] = useState({});
     const handleNextClick = () => {
         if (!validateForm()) return;
@@ -20,7 +19,6 @@ export default function ContentTab({ collectionId, data, setData, onNext, onBack
             [name]: value
         }));
 
-        // 🔥 Clear error for that field when user types
         if (value?.trim()) {
             setErrors((prev) => ({
                 ...prev,
@@ -293,7 +291,6 @@ export default function ContentTab({ collectionId, data, setData, onNext, onBack
                         {loading ? (
                             <>
                                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                {/* Loading... */}
                             </>
                         ) : (
                             'Next'

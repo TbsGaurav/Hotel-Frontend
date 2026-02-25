@@ -6,7 +6,6 @@ import toast from 'react-hot-toast';
 
 export default function RulesTab({
     rules,
-    setRules,
     ruleField,
     setRuleField,
     ruleOperator,
@@ -23,26 +22,6 @@ export default function RulesTab({
 }) {
     const [errors, setErrors] = useState({});
 
-    const handleAddRule = () => {
-        const newErrors = {};
-
-        if (!ruleField) {
-            newErrors.ruleField = 'Field is required';
-        }
-
-        if (!ruleValue?.trim()) {
-            newErrors.ruleValue = 'Value is required';
-        }
-
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            toast.error('Please complete rule fields');
-            return;
-        }
-
-        setErrors({});
-        addRule();
-    };
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
