@@ -20,16 +20,16 @@ export default function PreviewTab({ formData, rules, pinnedHotels, excludedHote
             <div className="border rounded p-3 mb-4">
                 <h6>Basic Information</h6>
                 <p>
-                    <strong>Name:</strong> {formData.name}
+                    <strong>Collection Name:</strong> {formData.name}
                 </p>
                 <p>
                     <strong>Slug:</strong> {formData.slug}
                 </p>
                 <p>
-                    <strong>GeoNode ID:</strong> {formData.geoNodeId}
+                    <strong>Country:</strong> {formData.geoNodeId}
                 </p>
                 <p>
-                    <strong>Mode:</strong> {formData.mode}
+                    <strong>Type:</strong> {formData.mode}
                 </p>
                 <p>
                     <strong>Status:</strong> {formData.status}
@@ -97,14 +97,7 @@ export default function PreviewTab({ formData, rules, pinnedHotels, excludedHote
                     Back
                 </button>
 
-                {/* <button type="button" className="theme-button-orange rounded-2" onClick={handlePublish} disabled={isSubmitting}>
-                    {isSubmitting ? 'Publishing...' : 'Publish'}
-                </button>
-                <button type="button" className="theme-button-orange rounded-2" onClick={handleDraft} disabled={isSubmitting}>
-                    {isSubmitting ? 'Drafting...' : 'Draft'}
-                </button> */}
-
-                <div className="d-flex gap-2">
+                {/* <div className="d-flex gap-2">
                     <button type="button" className="btn btn-outline-primary" onClick={() => handleAction('draft')} disabled={isSubmitting}>
                         {isSubmitting ? 'Processing...' : 'Save as Draft'}
                     </button>
@@ -116,6 +109,42 @@ export default function PreviewTab({ formData, rules, pinnedHotels, excludedHote
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? 'Processing...' : 'Publish'}
+                    </button>
+                </div> */}
+
+                <div className="d-flex gap-2">
+                    <button
+                        type="button"
+                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
+                        onClick={() => handleAction('draft')}
+                        disabled={isSubmitting}
+                        style={{ minWidth: '100px' }}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Saving...
+                            </>
+                        ) : (
+                            'Save as Draft'
+                        )}
+                    </button>
+
+                    <button
+                        type="button"
+                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
+                        onClick={() => handleAction('publish')}
+                        disabled={isSubmitting}
+                        style={{ minWidth: '100px' }}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Publishing...
+                            </>
+                        ) : (
+                            'Publish'
+                        )}
                     </button>
                 </div>
             </div>

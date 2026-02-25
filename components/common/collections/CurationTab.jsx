@@ -179,20 +179,7 @@ export default function CurationTab({
                             </div>
                         )}
                     </div>
-                    {/* <label className="form-label">City</label>
-                    <select
-                        className="form-select"
-                        value={selectedCity}
-                        onChange={(e) => setSelectedCity(e.target.value)}
-                        disabled={!formData.geoNodeId}
-                    >
-                        <option value="">Select City</option>
-                        {cities.map((city) => (
-                            <option key={city.cityID} value={city.cityID}>
-                                {city.name}
-                            </option>
-                        ))}
-                    </select> */}
+                  
                 </div>
             </div>
 
@@ -364,7 +351,7 @@ export default function CurationTab({
                     {loading ? (
                         <>
                             <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            Loading...
+                            {/* Loading... */}
                         </>
                     ) : (
                         'Next'

@@ -19,6 +19,7 @@ import ContentTab from './ContentTab';
 import RulesTab from './RulesTab';
 import CurationTab from './CurationTab';
 import PreviewTab from './PreviewTab';
+import toast from 'react-hot-toast';
 
 export default function CreateCollection() {
     const router = useRouter();
@@ -253,7 +254,22 @@ export default function CreateCollection() {
     // ---------------- SAVE CONTENT ----------------
     const handleSaveContent = async () => {
         if (!collectionId) {
-            alert('Please save Basics first');
+            toast.error('Please save Basics first');
+            return;
+        }
+        const hasInvalidFaq = contentData.faqs?.some((faq) => !faq.question?.trim() || !faq.answer?.trim());
+
+        if (hasInvalidFaq) {
+            toast.error('Please complete all FAQs before saving.');
+            return;
+        }
+
+        const questions = contentData.faqs?.map((f) => f.question.trim().toLowerCase());
+
+        const hasDuplicate = new Set(questions).size !== questions.length;
+
+        if (hasDuplicate) {
+            toast.error('Duplicate FAQ questions are not allowed.');
             return;
         }
         setLoading(true);
@@ -272,11 +288,12 @@ export default function CreateCollection() {
         };
 
         try {
-            await saveContent(collectionId, payload);
+            const response = await saveContent(collectionId, payload);
+            toast.success(response?.message || 'Content saved successfully!');
             setActiveTab('Rules');
         } catch (error) {
             console.error('Save failed:', error);
-            alert('Failed to save content');
+            toast.error(error?.message || 'Failed to save content');
         } finally {
             setLoading(false);
         }
@@ -313,55 +330,92 @@ export default function CreateCollection() {
 
             if (newCollectionId) {
                 setCollectionId(newCollectionId);
-                // alert('Basics saved successfully!');
-                goNext(); // ✅ move to Content tab
+
+                toast.success(response?.message || 'Basics saved successfully!');
+                goNext();
             } else {
-                alert('Failed to get collectionId from response');
+                toast.error(response?.message || 'Failed to get collectionId from response');
             }
         } catch (error) {
             console.error('Save Basics failed:', error);
-            alert('Failed to save Basics');
+            toast.error(error?.message || 'Failed to save basics');
         } finally {
             setLoading(false);
         }
     };
 
+    // const handleSaveRules = async () => {
+    //     if (!collectionId) {
+    //         alert('Please save Basics first');
+    //         return;
+    //     }
+
+    //     if (!rules.length) {
+    //         alert('Please add at least one rule');
+    //         return;
+    //     }
+    //     setLoading(true);
+
+    //     try {
+    //         await Promise.all(
+    //             rules.map((rule) =>
+    //                 saveRule({
+    //                     ruleId: 0,
+    //                     collectionId: collectionId,
+    //                     field: rule.Field,
+    //                     operator: rule.Operator,
+    //                     value: rule.Value,
+    //                     logicalGroup: 'AND'
+    //                 })
+    //             )
+    //         );
+
+    //         // alert('Rules saved successfully!');
+    //         goNext();
+    //     } catch (error) {
+    //         console.error('Save rules failed:', error);
+    //         alert('Failed to save rules');
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const handleSaveRules = async () => {
         if (!collectionId) {
-            alert('Please save Basics first');
+            toast.error('Please save Basics first');
             return;
         }
 
         if (!rules.length) {
-            alert('Please add at least one rule');
+            toast.error('Please add at least one rule');
             return;
         }
-        setLoading(true);
 
         try {
-            await Promise.all(
-                rules.map((rule) =>
-                    saveRule({
-                        ruleId: 0,
-                        collectionId: collectionId,
-                        field: rule.Field,
-                        operator: rule.Operator,
-                        value: rule.Value,
-                        logicalGroup: 'AND'
-                    })
-                )
-            );
+            setLoading(true);
 
-            // alert('Rules saved successfully!');
+            const payload = {
+                collectionId,
+                rules: rules.map((rule) => ({
+                    ruleId: 0,
+                    field: rule.Field,
+                    operator: rule.Operator,
+                    value: rule.Value,
+                    logicalGroup: 'AND'
+                }))
+            };
+
+            const response = await saveRule(payload);
+
+            toast.success(response?.message || 'Rules saved successfully!');
+
             goNext();
         } catch (error) {
-            console.error('Save rules failed:', error);
-            alert('Failed to save rules');
+            toast.error(error?.message || 'Failed to save rules');
         } finally {
             setLoading(false);
         }
     };
-
     useEffect(() => {
         if (!selectedGeoNode) {
             setSelectedCity(null);
@@ -382,7 +436,6 @@ export default function CreateCollection() {
         try {
             const res = await getRulesByCollectionId(collectionId);
 
-            // adjust based on backend response
             const fetchedRules = res?.data || [];
 
             const formattedRules = fetchedRules.map((rule) => ({
@@ -405,15 +458,16 @@ export default function CreateCollection() {
 
     const handleStatusUpdate = async (action) => {
         if (!collectionId) {
-            alert('Collection Id not found');
+            toast.error('Collection ID not available');
             return;
         }
 
         try {
-            await updateCollectionStatus(collectionId, action);
+            const response = await updateCollectionStatus(collectionId, action);
 
-            alert(action === 'publish' ? 'Collection published successfully!' : 'Collection saved as draft!');
-
+            toast.success(
+                response?.message || (action === 'publish' ? 'Collection published successfully!' : 'Collection saved as draft!')
+            );
             setFormData((prev) => ({
                 ...prev,
                 status: action === 'publish' ? 'Published' : 'Draft'
@@ -422,30 +476,33 @@ export default function CreateCollection() {
             router.push('/collections');
         } catch (error) {
             console.error('Status update failed:', error);
-            alert('Failed to update status');
+            toast.error(error?.message || 'Failed to update status');
         }
     };
-
     const handleSaveCuration = async () => {
         if (!collectionId) {
-            alert('Please save Basics first');
+            toast.error('Please save Basics first');
+            return;
+        }
+
+        // ✅ If nothing added → just move next (no save, no toast)
+        if (pinnedHotels.length === 0 && excludedHotels.length === 0) {
+            goNext();
             return;
         }
 
         try {
             setLoading(true);
 
-            // ✅ Build pinned structure EXACTLY as backend expects
             const pinnedPayload = pinnedHotels.map((hotel, index) => ({
                 HotelID: hotel.id,
                 Position: index + 1,
-                PinType: 'FIXED' // default for manual pin
+                PinType: 'FIXED'
             }));
 
-            // ✅ Build exclude structure EXACTLY as backend expects
             const excludePayload = excludedHotels.map((hotel) => ({
                 HotelID: hotel.id,
-                ChainID: null, // as per backend contract
+                ChainID: null,
                 Reason: hotel.reason
             }));
 
@@ -455,16 +512,59 @@ export default function CreateCollection() {
                 excludeJson: JSON.stringify(excludePayload)
             };
 
-            await saveCuration(payload);
+            const response = await saveCuration(payload);
 
-            goNext(); // move to Preview
+            toast.success(response?.message || 'Curation saved successfully!');
+            goNext();
         } catch (error) {
             console.error('Curation save failed:', error);
-            alert('Failed to save curation');
+            toast.error(error?.message || 'Failed to save curation');
         } finally {
             setLoading(false);
         }
     };
+
+    // const handleSaveCuration = async () => {
+    //     if (!collectionId) {
+    //         toast.error('Please save Basics first');
+    //         return;
+    //     }
+
+    //     try {
+    //         setLoading(true);
+
+    //         // ✅ Build pinned structure EXACTLY as backend expects
+    //         const pinnedPayload = pinnedHotels.map((hotel, index) => ({
+    //             HotelID: hotel.id,
+    //             Position: index + 1,
+    //             PinType: 'FIXED' // default for manual pin
+    //         }));
+
+    //         // ✅ Build exclude structure EXACTLY as backend expects
+    //         const excludePayload = excludedHotels.map((hotel) => ({
+    //             HotelID: hotel.id,
+    //             ChainID: null, // as per backend contract
+    //             Reason: hotel.reason
+    //         }));
+
+    //         const payload = {
+    //             collectionId: collectionId,
+    //             pinnedJson: JSON.stringify(pinnedPayload),
+    //             excludeJson: JSON.stringify(excludePayload)
+    //         };
+
+    //         const response = await saveCuration(payload);
+
+    //         toast.success(response?.message || 'Curation saved successfully!');
+
+    //         goNext(); // move to Preview
+    //     } catch (error) {
+    //         console.error('Curation save failed:', error);
+    //         toast.error(error?.message || 'Failed to save curation');
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
     // ---------------- RENDER ----------------
     return (
         <div className="card shadow-sm">

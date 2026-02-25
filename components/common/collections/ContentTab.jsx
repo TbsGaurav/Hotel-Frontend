@@ -2,57 +2,82 @@
 
 import CKEditorField from '@/components/ui/CKEditorField';
 import { saveContent } from '@/lib/api/admin/collectionapi';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
-export default function ContentTab({ collectionId, data, setData, onNext, onBack  , loading}) {
+export default function ContentTab({ collectionId, data, setData, onNext, onBack, loading }) {
+    const [errors, setErrors] = useState({});
+    const handleNextClick = () => {
+        if (!validateForm()) return;
+        onNext();
+    };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
+
         setData((prev) => ({
             ...prev,
             [name]: value
         }));
+
+        // 🔥 Clear error for that field when user types
+        if (value?.trim()) {
+            setErrors((prev) => ({
+                ...prev,
+                [name]: null
+            }));
+        }
     };
+    const validateForm = () => {
+        const newErrors = {};
 
-    const handleSave = async () => {
-        if (!collectionId) {
-            alert('Please save Basic first.');
-            return;
-        }
-        // 1️⃣ Check incomplete FAQ
-        const hasInvalidFaq = data.faqs?.some((faq) => !faq.question?.trim() || !faq.answer?.trim());
-
-        if (hasInvalidFaq) {
-            alert('Please complete all FAQs before saving.');
-            return;
+        if (!data.header?.trim()) {
+            newErrors.header = 'H1 Title is required';
         }
 
-        // 2️⃣ Check duplicate questions
-        const questions = data.faqs.map((f) => f.question.trim().toLowerCase());
-
-        const hasDuplicate = new Set(questions).size !== questions.length;
-
-        if (hasDuplicate) {
-            alert('Duplicate FAQ questions are not allowed.');
-            return;
+        if (!data.metaTitle?.trim()) {
+            newErrors.metaTitle = 'Meta Title is required';
         }
-        const payload = {
-            header: data.header,
-            metaTitle: data.metaTitle,
-            metaDescription: data.metaDescription,
-            introShortCopy: data.introShortCopy,
-            introLongCopy: data.introLongCopy,
-            heroImageUrl: data.heroImageUrl,
-            badge: data.badge,
-            faQsJson: JSON.stringify(data.faqs || []),
-            userId: 1
-        };
 
-        try {
-            await saveContent(collectionId, payload);
-            // alert('Content saved successfully');
-        } catch (err) {
-            console.error(err);
-            alert('Error saving content');
+        if (!data.metaDescription?.trim()) {
+            newErrors.metaDescription = 'Meta Description is required';
         }
+
+        if (!data.introShortCopy?.trim()) {
+            newErrors.introShortCopy = 'Intro Short Copy is required';
+        }
+
+        if (!data.introLongCopy?.trim()) {
+            newErrors.introLongCopy = 'Intro Long Copy is required';
+        }
+
+        // 🔹 FAQ Validation
+        // if (data.faqs?.length) {
+        //     const hasInvalidFaq = data.faqs.some((faq) => !faq.question?.trim() || !faq.answer?.trim());
+
+        //     if (hasInvalidFaq) {
+        //         toast.error('Please complete all FAQs before saving.');
+        //         return false;
+        //     }
+
+        //     const questions = data.faqs.map((f) => f.question.trim().toLowerCase());
+
+        //     const hasDuplicate = new Set(questions).size !== questions.length;
+
+        //     if (hasDuplicate) {
+        //         toast.error('Duplicate FAQ questions are not allowed.');
+        //         return false;
+        //     }
+        // }
+
+        setErrors(newErrors);
+
+        if (Object.keys(newErrors).length > 0) {
+            toast.error('Please fill all required fields');
+            return false;
+        }
+
+        return true;
     };
 
     return (
@@ -61,49 +86,89 @@ export default function ContentTab({ collectionId, data, setData, onNext, onBack
                 <div className="col-md-6 mb-3">
                     <label className="form-label">H1 Title</label>
                     <input
-                        className="form-control"
-                        // name="h1"
-                        // value={data.h1}
+                        className={`form-control ${errors.header ? 'is-invalid' : ''}`}
                         value={data.header || ''}
                         name="header"
                         onChange={handleChange}
                     />
+                    {errors.header && <div className="invalid-feedback">{errors.header}</div>}
                 </div>
 
                 <div className="col-md-6 mb-3">
                     <label className="form-label">Meta Title</label>
-                    <input className="form-control" name="metaTitle" value={data.metaTitle} onChange={handleChange} />
+                    <input
+                        className={`form-control ${errors.metaTitle ? 'is-invalid' : ''}`}
+                        name="metaTitle"
+                        value={data.metaTitle}
+                        onChange={handleChange}
+                    />
+                    {errors.metaTitle && <div className="invalid-feedback">{errors.metaTitle}</div>}
                 </div>
 
                 <div className="col-md-12 mb-3">
                     <label className="form-label">Meta Description</label>
-                    <textarea className="form-control" name="metaDescription" value={data.metaDescription} onChange={handleChange} />
+                    <textarea
+                        className={`form-control ${errors.metaDescription ? 'is-invalid' : ''}`}
+                        name="metaDescription"
+                        value={data.metaDescription}
+                        onChange={handleChange}
+                    />
+                    {errors.metaDescription && <div className="invalid-feedback">{errors.metaDescription}</div>}
                 </div>
 
                 <div className="col-md-12 mb-3">
                     <label className="form-label">Intro Short Copy</label>
                     <CKEditorField
                         value={data.introShortCopy}
-                        onChange={(val) =>
+                        onChange={(val) => {
                             setData((prev) => ({
                                 ...prev,
                                 introShortCopy: val
-                            }))
-                        }
+                            }));
+
+                            if (val && val.replace(/<[^>]*>/g, '').trim()) {
+                                setErrors((prev) => ({
+                                    ...prev,
+                                    introShortCopy: null
+                                }));
+                            }
+                        }}
+                        // onChange={(val) =>
+                        //     setData((prev) => ({
+                        //         ...prev,
+                        //         introShortCopy: val
+                        //     }))
+                        // }
                     />
+                    {errors.introShortCopy && <div className="text-danger small mt-1">{errors.introShortCopy}</div>}
                 </div>
 
                 <div className="col-md-12 mb-3">
                     <label className="form-label">Intro Long Copy</label>
                     <CKEditorField
                         value={data.introLongCopy}
-                        onChange={(val) =>
+                        onChange={(val) => {
                             setData((prev) => ({
                                 ...prev,
                                 introLongCopy: val
-                            }))
-                        }
+                            }));
+
+                            if (val && val.replace(/<[^>]*>/g, '').trim()) {
+                                setErrors((prev) => ({
+                                    ...prev,
+                                    introLongCopy: null
+                                }));
+                            }
+                        }}
+
+                        // onChange={(val) =>
+                        //     setData((prev) => ({
+                        //         ...prev,
+                        //         introLongCopy: val
+                        //     }))
+                        // }
                     />
+                    {errors.introLongCopy && <div className="text-danger small mt-1">{errors.introLongCopy}</div>}
                 </div>
 
                 <div className="col-md-6 mb-3">
@@ -163,6 +228,12 @@ export default function ContentTab({ collectionId, data, setData, onNext, onBack
                     <button
                         type="button"
                         className="btn btn-sm btn-outline-primary"
+                        onChange={(e) => {
+                            const updatedFaqs = [...data.faqs];
+                            updatedFaqs[index].question = e.target.value;
+
+                            setData({ ...data, faqs: updatedFaqs });
+                        }}
                         onClick={() => {
                             const faqs = data.faqs || [];
 
@@ -179,7 +250,7 @@ export default function ContentTab({ collectionId, data, setData, onNext, onBack
 
                             // 1️⃣ Prevent empty
                             if (!lastFaq.question?.trim() || !lastFaq.answer?.trim()) {
-                                alert('Please fill Question and Answer before adding another FAQ.');
+                                toast.error('Please fill Question and Answer before adding another FAQ.');
                                 return;
                             }
 
@@ -189,7 +260,7 @@ export default function ContentTab({ collectionId, data, setData, onNext, onBack
                             const duplicate = faqs.slice(0, -1).some((f) => f.question?.trim().toLowerCase() === questionLower);
 
                             if (duplicate) {
-                                alert('Duplicate FAQ question is not allowed.');
+                                toast.error('Duplicate FAQ question is not allowed.');
                                 return;
                             }
 
@@ -213,7 +284,8 @@ export default function ContentTab({ collectionId, data, setData, onNext, onBack
                 <div>
                     <button
                         className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
-                        onClick={handleSave}
+                        onClick={handleNextClick}
+                        // onClick={onNext}
                         type="button"
                         disabled={loading}
                         style={{ minWidth: '100px' }}
@@ -221,7 +293,7 @@ export default function ContentTab({ collectionId, data, setData, onNext, onBack
                         {loading ? (
                             <>
                                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                Loading...
+                                {/* Loading... */}
                             </>
                         ) : (
                             'Next'

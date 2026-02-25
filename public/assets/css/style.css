@@ -1432,3 +1432,6 @@ a.text-sky-blue:hover {
 .nav-tabs .nav-link.active {
   color: #f0831e !important;
 }
+.ck.ck-powered-by {
+    display: none !important;
+}

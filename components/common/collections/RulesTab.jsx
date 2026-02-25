@@ -1,6 +1,8 @@
 'use client';
 
 import { RULE_FIELDS, RULE_OPERATORS, RULE_VALUE_OPTIONS } from '@/lib/constants/ruleConfig';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function RulesTab({
     rules,
@@ -19,6 +21,28 @@ export default function RulesTab({
     onBack,
     loading
 }) {
+    const [errors, setErrors] = useState({});
+
+    const handleAddRule = () => {
+        const newErrors = {};
+
+        if (!ruleField) {
+            newErrors.ruleField = 'Field is required';
+        }
+
+        if (!ruleValue?.trim()) {
+            newErrors.ruleValue = 'Value is required';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            toast.error('Please complete rule fields');
+            return;
+        }
+
+        setErrors({});
+        addRule();
+    };
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -26,7 +50,14 @@ export default function RulesTab({
             [name]: value
         }));
     };
+    const handleNextClick = () => {
+        if ((formData.mode === 'Rule' || formData.mode === 'Hybrid') && rules.length === 0) {
+            toast.error('Please add at least one rule');
+            return;
+        }
 
+        onNext();
+    };
     return (
         <>
             <div className="row">
@@ -63,7 +94,15 @@ export default function RulesTab({
                     <div className="row g-2">
                         {/* Field */}
                         <div className="col-12 col-md-4">
-                            <select className="form-select" value={ruleField} onChange={(e) => setRuleField(e.target.value)}>
+                            {/* <select className="form-select" value={ruleField} onChange={(e) => setRuleField(e.target.value)}> */}
+                            <select
+                                className={`form-select ${errors.ruleField ? 'is-invalid' : ''}`}
+                                value={ruleField}
+                                onChange={(e) => {
+                                    setRuleField(e.target.value);
+                                    setErrors((prev) => ({ ...prev, ruleField: null }));
+                                }}
+                            >
                                 <option value="">Select Field</option>
                                 {RULE_FIELDS.map((field) => (
                                     <option key={field.value} value={field.value}>
@@ -71,6 +110,7 @@ export default function RulesTab({
                                     </option>
                                 ))}
                             </select>
+                            {errors.ruleField && <div className="invalid-feedback">{errors.ruleField}</div>}
                         </div>
 
                         {/* Operator */}
@@ -87,7 +127,14 @@ export default function RulesTab({
                         {/* Value */}
                         <div className="col-12 col-md-3">
                             {RULE_VALUE_OPTIONS[ruleField] ? (
-                                <select className="form-select" value={ruleValue} onChange={(e) => setRuleValue(e.target.value)}>
+                                <select
+                                    className={`form-select ${errors.ruleValue ? 'is-invalid' : ''}`}
+                                    value={ruleValue}
+                                    onChange={(e) => {
+                                        setRuleValue(e.target.value);
+                                        setErrors((prev) => ({ ...prev, ruleValue: null }));
+                                    }}
+                                >
                                     <option value="">Select Value</option>
                                     {RULE_VALUE_OPTIONS[ruleField].map((val) => (
                                         <option key={val} value={val}>
@@ -98,10 +145,12 @@ export default function RulesTab({
                             ) : (
                                 <input
                                     type="text"
-                                    className="form-control"
-                                    placeholder="Enter value"
+                                    className={`form-control ${errors.ruleValue ? 'is-invalid' : ''}`}
                                     value={ruleValue}
-                                    onChange={(e) => setRuleValue(e.target.value)}
+                                    onChange={(e) => {
+                                        setRuleValue(e.target.value);
+                                        setErrors((prev) => ({ ...prev, ruleValue: null }));
+                                    }}
                                 />
                             )}
                         </div>
@@ -120,7 +169,13 @@ export default function RulesTab({
                             <h6>Added Rules</h6>
 
                             {rules.map((r, index) => (
-                                <div key={index} className="d-flex justify-content-between align-items-center border-bottom py-2">
+                                <div
+                                    key={index}
+                                    className={`d-flex justify-content-between align-items-center py-2 ${
+                                        rules.length > 1 && index !== rules.length - 1 ? 'border-bottom' : ''
+                                    }`}
+                                >
+                                    {/* <div key={index} className="d-flex justify-content-between align-items-center border-bottom py-2"> */}
                                     <div>
                                         {r.Field} {r.Operator} {r.Value}
                                     </div>
@@ -135,13 +190,6 @@ export default function RulesTab({
                 </div>
             )}
 
-            {/* ================= MODE INFO MESSAGE ================= */}
-            {/* {formData.mode === 'Curated' && (
-                <div className="alert alert-info">
-                    In Curated mode, rules are disabled. You can pin hotels manually in the Curation tab.
-                </div>
-            )} */}
-
             {/* ================= NAVIGATION ================= */}
             <div className="d-flex justify-content-between">
                 <button type="button" className="btn btn-outline-secondary" onClick={onBack}>
@@ -150,7 +198,7 @@ export default function RulesTab({
 
                 <button
                     className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
-                    onClick={onNext}
+                    onClick={handleNextClick}
                     type="button"
                     disabled={loading}
                     style={{ minWidth: '100px' }}
@@ -158,7 +206,7 @@ export default function RulesTab({
                     {loading ? (
                         <>
                             <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            Loading...
+                            {/* Loading... */}
                         </>
                     ) : (
                         'Next'

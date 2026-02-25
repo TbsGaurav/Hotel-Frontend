@@ -26,6 +26,7 @@ import '@/public/assets/css/style.css';
 import '@/public/assets/css/media.css';
 import Script from 'next/script';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({ children }) {
     return (
@@ -33,6 +34,15 @@ export default function RootLayout({ children }) {
             <body>
                 {children}
                 <Script src="/bootstrap.bundle.min.js" strategy="afterInteractive" />
+                <Toaster
+                    position="top-right"
+                    toastOptions={{
+                        duration: 3000,
+                        style: {
+                            fontSize: '14px'
+                        }
+                    }}
+                />
             </body>
         </html>
     );
