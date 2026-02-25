@@ -84,10 +84,7 @@ export default function CurationTab({
                         value={geoSearch}
                         onFocus={() => {
                             setShowGeoDropdown(true);
-                            if (selectedGeoNode) {
-                                setGeoSearch(selectedGeoNode.name);
-                            }
-                        }}
+                       }}
                         onChange={(e) => {
                             const value = e.target.value;
                             setGeoSearch(value);

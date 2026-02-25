@@ -143,24 +143,29 @@ export default function CreateCollection() {
     }, []);
 
     const loadHotels = async (search, type) => {
-        const payload = {
-            searchTerm: search || ''
-        };
+        const payload = { searchTerm: search || '' };
 
-        // ✅ Only send cityId if selected
-        if (selectedCity) {
-            payload.cityId = selectedCity;
-        }
+        if (selectedCity) payload.cityId = selectedCity;
+        if (selectedGeoNode?.countryId) payload.countryId = selectedGeoNode.countryId;
 
         const res = await getHotelsByCity(payload);
         const results = res?.data?.slice(0, 50) || [];
 
-        if (type === 'pinned') {
-            setPinnedOptions(results);
-        } else {
-            setExcludeOptions(results);
-        }
+        if (type === 'pinned') setPinnedOptions(results);
+        else setExcludeOptions(results);
     };
+
+    // ---------------- LOAD HOTELS ON CURATION TAB MOUNT ----------------
+    useEffect(() => {
+        if (activeTab !== 'Curation') return;
+
+        const fetchInitialHotels = async () => {
+            await loadHotels('', 'pinned');
+            await loadHotels('', 'exclude');
+        };
+
+        fetchInitialHotels();
+    }, [activeTab, selectedGeoNode]);
 
     // ---------------- RULE FUNCTIONS ----------------
 
@@ -366,19 +371,19 @@ export default function CreateCollection() {
     };
 
     useEffect(() => {
-        if (!selectedGeoNode) {
+        if (activeTab === 'Curation') {
+            setGeoSearch('');
+            setSelectedGeoNode(null);
             setSelectedCity(null);
             setSelectedCityObj(null);
             setCitySearch('');
             setCityOptions([]);
-            setShowCityDropdown(false);
-
             setPinnedOptions([]);
             setExcludeOptions([]);
             setHotelSearch('');
             setExcludeSearch('');
         }
-    }, [selectedGeoNode]);
+    }, [activeTab]);
 
     const handleRulesBack = async () => {
         if (!collectionId) {
