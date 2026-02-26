@@ -9,6 +9,11 @@ export default async function CountryPage({ params }) {
     const { country } = await params;
     const data = await getCountryByUrlName(country);
     const countryName = formatCountryName(country);
+
+    if (countryName.includes('.')) {
+        notFound();
+    }
+
     const descriptionHtml = data.countryContent;
     const ITEM_TYPE = {
         City: 0,
