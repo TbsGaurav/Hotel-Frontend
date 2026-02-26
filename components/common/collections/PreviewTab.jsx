@@ -3,14 +3,13 @@
 import { useState } from 'react';
 
 export default function PreviewTab({ formData, rules, pinnedHotels, excludedHotels, onBack, onSubmit }) {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const [submittingType, setSubmittingType] = useState(null);
     const handleAction = async (action) => {
         try {
-            setIsSubmitting(true);
+            setSubmittingType(action);
             await onSubmit(action);
         } finally {
-            setIsSubmitting(false);
+            setSubmittingType(null);
         }
     };
 
@@ -93,27 +92,28 @@ export default function PreviewTab({ formData, rules, pinnedHotels, excludedHote
 
             {/* ================= ACTION BUTTONS ================= */}
             <div className="d-flex justify-content-between">
-                <button type="button" className="btn btn-outline-secondary" onClick={onBack} disabled={isSubmitting}>
+                <button type="button" className="btn btn-outline-secondary" onClick={onBack} disabled={submittingType}>
                     Back
                 </button>
 
-                {/* <div className="d-flex gap-2">
-                    <button type="button" className="btn btn-outline-primary" onClick={() => handleAction('draft')} disabled={isSubmitting}>
-                        {isSubmitting ? 'Processing...' : 'Save as Draft'}
-                    </button>
-
-                    <button
-                        type="button"
-                        className="theme-button-orange rounded-2"
-                        onClick={() => handleAction('publish')}
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? 'Processing...' : 'Publish'}
-                    </button>
-                </div> */}
-
                 <div className="d-flex gap-2">
                     <button
+                        type="button"
+                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
+                        onClick={() => handleAction('draft')}
+                        disabled={submittingType !== null}
+                        style={{ minWidth: '100px' }}
+                    >
+                        {submittingType === 'draft' ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" />
+                                Saving...
+                            </>
+                        ) : (
+                            'Save as Draft'
+                        )}
+                    </button>
+                    {/* <button
                         type="button"
                         className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
                         onClick={() => handleAction('draft')}
@@ -128,18 +128,18 @@ export default function PreviewTab({ formData, rules, pinnedHotels, excludedHote
                         ) : (
                             'Save as Draft'
                         )}
-                    </button>
+                    </button> */}
 
                     <button
                         type="button"
                         className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
                         onClick={() => handleAction('publish')}
-                        disabled={isSubmitting}
-                        style={{ minWidth: '100px' }}
+                        disabled={submittingType !== null}
+                        style={{ minWidth: '120px' }}
                     >
-                        {isSubmitting ? (
+                        {submittingType === 'publish' ? (
                             <>
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" />
                                 Publishing...
                             </>
                         ) : (

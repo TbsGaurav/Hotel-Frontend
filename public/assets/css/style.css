@@ -1435,3 +1435,7 @@ a.text-sky-blue:hover {
 .ck.ck-powered-by {
     display: none !important;
 }
+
+nextjs-portal {
+  display: none !important;
+}
