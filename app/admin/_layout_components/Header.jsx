@@ -14,7 +14,7 @@ export default function AdminHeader() {
             }
             localStorage.removeItem('adminToken');
             localStorage.removeItem('adminRole');
-            router.push('/auth/login');
+            router.push('/admin/auth/login');
         } catch (error) {
             console.error('Logout error:', error);
         }
