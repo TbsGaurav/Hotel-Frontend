@@ -2,6 +2,7 @@
 
 import { getCitiesByCountryOrRegion, getCollectionList, getRegionsByCountry } from '@/lib/api/admin/collectionapi';
 import { COLLECTION_STATUS_OPTIONS } from '@/lib/constants/ruleConfig';
+import { ADMIN_ROUTES } from '@/lib/route';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -86,35 +87,23 @@ export default function CollectionList({ initialCollections, initialCountries })
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const filteredCountries = countries.filter((c) =>
-        c.name.toLowerCase().includes(countrySearch.toLowerCase())
-    );
+    const filteredCountries = countries.filter((c) => c.name.toLowerCase().includes(countrySearch.toLowerCase()));
 
-    const selectedCountryObj = countries.find(
-        c => c.countryId === selectedCountry
-    );
+    const selectedCountryObj = countries.find((c) => c.countryId === selectedCountry);
 
-    const filteredRegions = regions.filter((r) =>
-        r.name.toLowerCase().includes(regionSearch.toLowerCase())
-    );
+    const filteredRegions = regions.filter((r) => r.name.toLowerCase().includes(regionSearch.toLowerCase()));
 
-    const selectedRegionObj = regions.find(
-        r => r.regionId === selectedRegion
-    );
+    const selectedRegionObj = regions.find((r) => r.regionId === selectedRegion);
 
-    const filteredCities = cities.filter((ct) =>
-        ct.name.toLowerCase().includes(citySearch.toLowerCase())
-    );
+    const filteredCities = cities.filter((ct) => ct.name.toLowerCase().includes(citySearch.toLowerCase()));
 
-    const selectedCityObj = cities.find(
-        ct => ct.cityId === selectedCity
-    );
+    const selectedCityObj = cities.find((ct) => ct.cityId === selectedCity);
 
     return (
         <div className="card shadow-sm mb-5">
             <div className="card-header d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">Hotel Collections</h5>
-                <button className="theme-button-orange rounded-1" onClick={() => router.push('/admin/collections/create')}>
+                <button className="theme-button-orange rounded-1" onClick={() => router.push(ADMIN_ROUTES.createCollection)}>
                     Create New Collection
                 </button>
             </div>
@@ -319,12 +308,35 @@ export default function CollectionList({ initialCollections, initialCountries })
 
                     <tbody>
                         {loading ? (
-                            <tr>
-                                <td colSpan="6" className="text-center py-4">
-                                    Loading collections...
-                                </td>
-                            </tr>
-                        ) : collections.length === 0 ? (
+                            [...Array(5)].map((_, rowIndex) => (
+                                <tr key={rowIndex}>
+                                    <td>
+                                        <div className="skeleton-name"></div>
+                                    </td>
+                                    <td>
+                                        <div className="skeleton-small"></div>
+                                    </td>
+                                    <td>
+                                        <div className="skeleton-badge"></div>
+                                    </td>
+                                    <td>
+                                        <div className="skeleton-number"></div>
+                                    </td>
+                                    <td>
+                                        <div className="skeleton-small"></div>
+                                    </td>
+                                    <td>
+                                        <div className="skeleton-actions"></div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : // <tr>
+                        //     <td colSpan="6" className="text-center py-4">
+                        //         Loading collections...
+                        //     </td>
+                        // </tr>
+
+                        collections.length === 0 ? (
                             <tr>
                                 <td colSpan="6" className="text-center py-4 text-muted">
                                     No collections found
@@ -339,13 +351,14 @@ export default function CollectionList({ initialCollections, initialCountries })
                                         <span className="badge bg-success">{item.status}</span>
                                     </td>
                                     <td>{item.hotelCount}</td>
-                                    <td>{
-                                        item.publishDate
-                                            ? new Date(item.publishDate).toLocaleDateString('en-GB')
-                                            : '-'
-                                    }</td>
+                                    <td>{item.publishDate ? new Date(item.publishDate).toLocaleDateString('en-GB') : '-'}</td>
                                     <td>
-                                        <button className="btn btn-sm btn-outline-secondary me-2">Edit</button>
+                                        <button
+                                            className="btn btn-sm btn-outline-secondary me-2"
+                                            onClick={() => router.push(`${ADMIN_ROUTES.collections}/${item.collectionId}`)}
+                                        >
+                                            Edit
+                                        </button>
                                         <button className="btn btn-sm btn-outline-secondary me-2">Clone</button>
                                         <button className="btn btn-sm btn-outline-secondary">Preview</button>
                                     </td>

@@ -1,6 +1,7 @@
 'use client';
 
 import { adminlogoutApi } from '@/lib/api/admin/authapi';
+import { ADMIN_ROUTES } from '@/lib/route';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -14,7 +15,7 @@ export default function AdminHeader() {
             }
             localStorage.removeItem('adminToken');
             localStorage.removeItem('adminRole');
-            router.push('/admin/auth/login');
+            router.push(ADMIN_ROUTES.login);
         } catch (error) {
             console.error('Logout error:', error);
         }

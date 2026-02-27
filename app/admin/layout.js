@@ -4,18 +4,25 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminHeader from './_layout_components/Header';
 import AdminTopNav from './_layout_components/AdminTopNav';
+import { ADMIN_ROUTES } from '@/lib/route';
 
+// export const metadata = {
+//     robots: {
+//         index: false,
+//         follow: false
+//     }
+// };
 export default function AdminLayout({ children }) {
     const router = useRouter();
     const pathname = usePathname();
-    const hideHeader = pathname === '/admin/auth/login';
+    const hideHeader = pathname === ADMIN_ROUTES.login;
 
     useEffect(() => {
         const token = localStorage.getItem('adminToken');
         const role = localStorage.getItem('adminRole');
 
         if (!token) {
-            router.replace('/admin/auth/login');
+            router.replace(ADMIN_ROUTES.login);
             return;
         }
 

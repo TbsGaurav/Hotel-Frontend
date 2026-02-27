@@ -12,7 +12,8 @@ import {
     updateCollectionStatus,
     saveCuration,
     getContentByCollectionId,
-    getCurationByCollectionId
+    getCurationByCollectionId,
+    getCollectionById
 } from '@/lib/api/admin/collectionapi';
 
 import BasicsTab from './BasicsTab';
@@ -22,10 +23,11 @@ import CurationTab from './CurationTab';
 import PreviewTab from './PreviewTab';
 import toast from 'react-hot-toast';
 import { getCountriesApi } from '@/lib/api/public/countryapi';
+import { ADMIN_ROUTES } from '@/lib/route';
 
-export default function CreateCollection() {
+export default function CreateCollection({ collectionId: propCollectionId }) {
     const router = useRouter();
-
+    const [collectionId, setCollectionId] = useState(propCollectionId || null);
     const tabOrder = ['Basics', 'Content', 'Rules', 'Curation', 'Preview'];
     const [activeTab, setActiveTab] = useState('Basics');
     const [geoSearch, setGeoSearch] = useState('');
@@ -38,7 +40,7 @@ export default function CreateCollection() {
 
     const [selectedGeoNode, setSelectedGeoNode] = useState(null);
     const [selectedCityObj, setSelectedCityObj] = useState(null);
-    const [collectionId, setCollectionId] = useState(null);
+    // const [collectionId, setCollectionId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [countries, setCountries] = useState([]);
 
@@ -63,10 +65,8 @@ export default function CreateCollection() {
     const [excludeReason, setExcludeReason] = useState('');
     const [selectedPinnedHotel, setSelectedPinnedHotel] = useState(null);
     const [selectedExcludeHotel, setSelectedExcludeHotel] = useState(null);
-
     const [pinnedHotels, setPinnedHotels] = useState([]);
     const [excludedHotels, setExcludedHotels] = useState([]);
-
     const [pinnedOptions, setPinnedOptions] = useState([]);
     const [excludeOptions, setExcludeOptions] = useState([]);
     const [showPinnedDropdown, setShowPinnedDropdown] = useState(false);
@@ -78,7 +78,12 @@ export default function CreateCollection() {
     const [formData, setFormData] = useState({
         name: '',
         slug: '',
-        geoNodeId: '',
+        geoNodeId: null,
+        geoNodeType: null,
+        countryId: null,
+        regionId: null,
+        cityId: null,
+        districtId: null,
         status: 'Draft',
         expiryDate: '',
         mode: 'Hybrid',
@@ -88,6 +93,25 @@ export default function CreateCollection() {
         defaultSort: 'StarRating DESC',
         template: ''
     });
+
+    useEffect(() => {
+        if (propCollectionId) {
+            setCollectionId(propCollectionId);
+        }
+    }, [propCollectionId]);
+
+    useEffect(() => {
+        if (!propCollectionId) return;
+
+        const loadAll = async () => {
+            await fetchCollectionById();
+            await fetchContentByCollectionId();
+            await fetchRulesByCollectionId();
+            await fetchCurationByCollectionId();
+        };
+
+        loadAll();
+    }, []);
 
     // ---------------- TAB NAV ----------------
     const goNext = () => {
@@ -135,22 +159,17 @@ export default function CreateCollection() {
         loadCountries();
     }, []);
 
-    useEffect(() => {
-        const loadCountries = async () => {
-            const res = await getCountriesApi();
-            setCountries(res || []);
+    const loadHotels = async (search, type) => {
+        if (!formData.geoNodeId || !formData.geoNodeType) return;
+
+        const payload = {
+            geoNodeType: formData.geoNodeType,
+            geoNodeId: formData.geoNodeId,
+            searchTerm: search || ''
         };
 
-        loadCountries();
-    }, []);
-
-    const loadHotels = async (search, type) => {
-        const payload = { searchTerm: search || '' };
-
-        if (selectedCity) payload.cityId = selectedCity;
-        if (selectedGeoNode?.countryId) payload.countryId = selectedGeoNode.countryId;
-
         const res = await getHotelsByCity(payload);
+
         const results = res?.data?.slice(0, 50) || [];
 
         if (type === 'pinned') setPinnedOptions(results);
@@ -304,9 +323,9 @@ export default function CreateCollection() {
         };
 
         const payload = {
-            collectionId: null,
+            collectionId: collectionId ?? null,
             collectionJson: JSON.stringify(collectionObject),
-            changedBy: formData.changedBy,
+            changedBy: formData.changedBy
         };
 
         try {
@@ -400,7 +419,7 @@ export default function CreateCollection() {
                 status: action === 'publish' ? 'Published' : 'Draft'
             }));
 
-            router.push('/admin/collections');
+            router.push(ADMIN_ROUTES.collections);
         } catch (error) {
             console.error('Status update failed:', error);
             toast.error(error?.message || 'Failed to update status');
@@ -487,8 +506,22 @@ export default function CreateCollection() {
             setLoading(true);
 
             const res = await getContentByCollectionId(collectionId);
-
             const content = res?.data;
+            let parsedFaqs = [];
+
+            if (content?.faQsJson) {
+                try {
+                    const rawFaqs = JSON.parse(content.faQsJson);
+
+                    parsedFaqs = rawFaqs.map((f) => ({
+                        question: f.question || '',
+                        answer: f.answer || ''
+                    }));
+                } catch (err) {
+                    console.error('FAQ parse error:', err);
+                    parsedFaqs = [];
+                }
+            }
 
             setContentData({
                 header: content?.header || '',
@@ -498,7 +531,7 @@ export default function CreateCollection() {
                 introLongCopy: content?.introLongCopy || '',
                 heroImageUrl: content?.heroImageUrl || '',
                 badge: content?.badge || '',
-                faqs: content?.faqsJson ? JSON.parse(content.faqsJson) : []
+                faqs: parsedFaqs
             });
         } catch (error) {
             console.error('Failed to fetch content:', error);
@@ -526,6 +559,7 @@ export default function CreateCollection() {
             // ✅ Pinned Hotels
             const formattedPinned = (data?.pinnedHotels || []).map((hotel) => ({
                 id: hotel.hotelID,
+                name: hotel.hotelName,
                 position: hotel.position,
                 pinType: hotel.pinType
             }));
@@ -533,6 +567,7 @@ export default function CreateCollection() {
             // ✅ Excluded Hotels
             const formattedExcluded = (data?.excludedHotels || []).map((hotel) => ({
                 id: hotel.hotelID,
+                name: hotel.hotelName,
                 reason: hotel.reason
             }));
 
@@ -549,6 +584,46 @@ export default function CreateCollection() {
     const handlePreviewBack = async () => {
         await fetchCurationByCollectionId();
         setActiveTab('Curation');
+    };
+
+    const fetchCollectionById = async () => {
+        if (!collectionId) return;
+
+        try {
+            setLoading(true);
+
+            const res = await getCollectionById(collectionId);
+            const data = res?.data;
+
+            setFormData((prev) => ({
+                ...prev,
+                name: data?.name || '',
+                slug: data?.slug || '',
+                geoNodeId: data?.geoNodeId || '',
+                template: data?.template || '',
+                expiryDate: data?.expiryDate ? data.expiryDate.split('T')[0] : '',
+                maxHotels: data?.maxHotels || '',
+                status: data?.status ? data.status.charAt(0).toUpperCase() + data.status.slice(1) : 'Draft'
+            }));
+
+            if (data?.geoNodeId) {
+                setSelectedGeoNode({
+                    geoNodeId: data.geoNodeId,
+                    name: data.geoName
+                });
+            }
+
+            setGeoSearch(data.geoName);
+        } catch (error) {
+            console.error('Failed to fetch collection:', error);
+            toast.error('Failed to fetch collection');
+        } finally {
+            setLoading(false);
+        }
+    };
+    const handleBasicBack = async () => {
+        await fetchCollectionById();
+        setActiveTab('Basics');
     };
     // ---------------- RENDER ----------------
     return (
@@ -597,8 +672,7 @@ export default function CreateCollection() {
                     <ContentTab
                         data={contentData}
                         setData={setContentData}
-                        onBack={goBack}
-                        // onBack={handleBasicBack}
+                        onBack={handleBasicBack}
                         onNext={handleSaveContent}
                         loading={loading}
                     />

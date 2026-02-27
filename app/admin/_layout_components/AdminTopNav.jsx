@@ -1,5 +1,6 @@
 'use client';
 
+import { ADMIN_ROUTES } from '@/lib/route';
 import Link from 'next/link';
 
 export default function AdminTopNav() {
@@ -15,7 +16,7 @@ export default function AdminTopNav() {
                 <div className="collapse navbar-collapse" id="adminNavbar">
                     <ul className="navbar-nav w-100">
                         <li className="nav-item">
-                            <Link className="nav-link text-white px-4 py-3" href="/dashboard">
+                            <Link className="nav-link text-white px-4 py-3" href={ADMIN_ROUTES.dashboard}>
                                 Dashboard
                             </Link>
                         </li>
@@ -26,7 +27,7 @@ export default function AdminTopNav() {
                             </a>
                             <ul className="dropdown-menu">
                                 <li>
-                                    <Link className="dropdown-item" href="/admin/collections">
+                                    <Link className="dropdown-item" href={ADMIN_ROUTES.collections}>
                                         Collection
                                     </Link>
                                 </li>

@@ -1,3 +1,5 @@
+import { getCitiesByCountryOrRegion, getDistrictsByCity, getRegionsByCountry } from '@/lib/api/admin/collectionapi';
+import { ADMIN_ROUTES } from '@/lib/route';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -17,6 +19,17 @@ export default function BasicsTab({
 }) {
     const router = useRouter();
     const [errors, setErrors] = useState({});
+    const [regions, setRegions] = useState([]);
+    const [regionSearch, setRegionSearch] = useState('');
+    const [showRegionDropdown, setShowRegionDropdown] = useState(false);
+
+    const [cities, setCities] = useState([]);
+    const [citySearch, setCitySearch] = useState('');
+    const [showCityDropdown, setShowCityDropdown] = useState(false);
+
+    const [districts, setDistricts] = useState([]);
+    const [districtSearch, setDistrictSearch] = useState('');
+    const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
 
     const validateForm = () => {
         const newErrors = {};
@@ -48,14 +61,47 @@ export default function BasicsTab({
         const handleClickOutside = (e) => {
             if (!e.target.closest('.dropdown-wrapper')) {
                 setShowGeoDropdown(false);
+                setShowRegionDropdown(false);
+                setShowCityDropdown(false);
+                setShowDistrictDropdown(false);
             }
         };
 
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
     }, []);
+
+    useEffect(() => {
+        let finalId = null;
+        let finalType = null;
+
+        if (formData.districtId) {
+            finalId = formData.districtId;
+            finalType = 'District';
+        } else if (formData.cityId) {
+            finalId = formData.cityId;
+            finalType = 'City';
+        } else if (formData.regionId) {
+            finalId = formData.regionId;
+            finalType = 'Region';
+        } else if (formData.countryId) {
+            finalId = formData.countryId;
+            finalType = 'Country';
+        }
+
+        if (formData.geoNodeId !== finalId || formData.geoNodeType !== finalType) {
+            setFormData((prev) => ({
+                ...prev,
+                geoNodeId: finalId,
+                geoNodeType: finalType
+            }));
+        }
+    }, [formData.countryId, formData.regionId, formData.cityId, formData.districtId]);
     const handleCancel = () => {
-        router.push('/collections');
+        router.push(ADMIN_ROUTES.collections);
     };
 
     const generateSlug = (text) => {
@@ -79,7 +125,6 @@ export default function BasicsTab({
                 slug: generatedSlug
             }));
 
-            // 🔥 Clear both name & slug errors
             setErrors((prev) => ({
                 ...prev,
                 name: null,
@@ -91,7 +136,6 @@ export default function BasicsTab({
                 [name]: value
             }));
 
-            // 🔥 Clear only that field's error
             if (value?.trim()) {
                 setErrors((prev) => ({
                     ...prev,
@@ -108,7 +152,65 @@ export default function BasicsTab({
 
         onNext();
     };
+    useEffect(() => {
+        if (!formData.countryId) {
+            setRegions([]);
+            return;
+        }
 
+        const loadRegions = async () => {
+            try {
+                const res = await getRegionsByCountry(formData.countryId);
+                setRegions(res?.data || []);
+            } catch (err) {
+                console.error('Failed to load regions');
+                setRegions([]);
+            }
+        };
+
+        loadRegions();
+    }, [formData.countryId]);
+    useEffect(() => {
+        if (!formData.countryId && !formData.regionId) {
+            setCities([]);
+            return;
+        }
+
+        const loadCities = async () => {
+            try {
+                const res = await getCitiesByCountryOrRegion({
+                    countryId: formData.countryId,
+                    regionId: formData.regionId
+                });
+
+                setCities(res?.data || []);
+            } catch (err) {
+                console.error('Failed to load cities');
+                setCities([]);
+            }
+        };
+
+        loadCities();
+    }, [formData.regionId, formData.countryId]);
+
+    useEffect(() => {
+        if (!formData.cityId) {
+            setDistricts([]);
+            return;
+        }
+
+        const loadDistricts = async () => {
+            try {
+                const res = await getDistrictsByCity(formData.cityId);
+                setDistricts(res?.data || []);
+            } catch (err) {
+                console.error('Failed to load districts');
+                setDistricts([]);
+            }
+        };
+
+        loadDistricts();
+    }, [formData.cityId]);
     return (
         <>
             <div className="row">
@@ -159,14 +261,14 @@ export default function BasicsTab({
                             setGeoSearch(value);
                             setShowGeoDropdown(true);
 
-                            if (selectedGeoNode) {
-                                setSelectedGeoNode(null);
-
-                                setFormData((prev) => ({
-                                    ...prev,
-                                    geoNodeId: null
-                                }));
-                            }
+                            setFormData((prev) => ({
+                                ...prev,
+                                countryId: null,
+                                regionId: null,
+                                cityId: null,
+                                districtId: null,
+                                geoNodeId: null
+                            }));
                         }}
                     />
 
@@ -188,19 +290,209 @@ export default function BasicsTab({
                                             setSelectedGeoNode(node);
                                             setGeoSearch(node.name);
                                             setShowGeoDropdown(false);
+                                            setRegionSearch('');
+                                            setCitySearch('');
+                                            setDistrictSearch('');
 
                                             setFormData((prev) => ({
                                                 ...prev,
-                                                geoNodeId: node.countryId
+                                                countryId: node.countryId,
+                                                regionId: null,
+                                                cityId: null,
+                                                districtId: null
                                             }));
+                                        }}
+                                        // onClick={() => {
+                                        //     setSelectedGeoNode(node);
+                                        //     setGeoSearch(node.name);
+                                        //     setShowGeoDropdown(false);
 
-                                            setErrors((prev) => ({
+                                        //     setFormData((prev) => ({
+                                        //         ...prev,
+                                        //         geoNodeId: node.countryId
+                                        //     }));
+
+                                        //     setErrors((prev) => ({
+                                        //         ...prev,
+                                        //         geoNodeId: null
+                                        //     }));
+                                        // }}
+                                    >
+                                        {node.name}
+                                    </div>
+                                ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
+                    <label className="form-label">Region</label>
+
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search Region"
+                        value={regionSearch}
+                        disabled={!formData.countryId}
+                        onFocus={() => setShowRegionDropdown(true)}
+                        onChange={async (e) => {
+                            const value = e.target.value;
+                            setRegionSearch(value);
+                            setShowRegionDropdown(true);
+
+                            try {
+                                const res = await getRegionsByCountry(formData.countryId, value);
+                                setRegions(res?.data || []);
+                            } catch {
+                                setRegions([]);
+                            }
+                        }}
+                    />
+
+                    {showRegionDropdown && (
+                        <div
+                            className="border bg-white position-absolute w-100 mt-1"
+                            style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
+                        >
+                            {regions
+                                .filter((r) => r.name.toLowerCase().includes(regionSearch.toLowerCase()))
+                                .map((region) => (
+                                    <div
+                                        key={region.regionId}
+                                        className="p-2"
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => {
+                                            setRegionSearch(region.name);
+                                            setShowRegionDropdown(false);
+                                            setCitySearch('');
+                                            setDistrictSearch('');
+
+                                            setFormData((prev) => ({
                                                 ...prev,
-                                                geoNodeId: null
+                                                regionId: region.regionId,
+                                                cityId: null,
+                                                districtId: null
                                             }));
                                         }}
                                     >
-                                        {node.name}
+                                        {region.name}
+                                    </div>
+                                ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
+                    <label className="form-label">City</label>
+
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search City"
+                        value={citySearch}
+                        disabled={!formData.regionId}
+                        onFocus={() => setShowCityDropdown(true)}
+                        onChange={async (e) => {
+                            const value = e.target.value;
+                            setCitySearch(value);
+                            setShowCityDropdown(true);
+
+                            try {
+                                const res = await getCitiesByCountryOrRegion({
+                                    countryId: formData.countryId,
+                                    regionId: formData.regionId,
+                                    searchTerm: value
+                                });
+
+                                setCities(res?.data || []);
+                            } catch {
+                                setCities([]);
+                            }
+                        }}
+                    />
+
+                    {showCityDropdown && (
+                        <div
+                            className="border bg-white position-absolute w-100 mt-1"
+                            style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
+                        >
+                            {cities
+                                .filter((c) => c.name.toLowerCase().includes(citySearch.toLowerCase()))
+                                .map((city) => (
+                                    <div
+                                        key={city.cityId}
+                                        className="p-2"
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => {
+                                            setCitySearch(city.name);
+                                            setShowCityDropdown(false);
+                                            setDistrictSearch('');
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                cityId: city.cityId,
+                                                districtId: null
+                                            }));
+                                        }}
+                                    >
+                                        {city.name}
+                                    </div>
+                                ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
+                    <label className="form-label">District</label>
+
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search District"
+                        value={districtSearch}
+                        disabled={!formData.cityId}
+                        onFocus={() => setShowDistrictDropdown(true)}
+                        onChange={async (e) => {
+                            const value = e.target.value;
+                            setDistrictSearch(value);
+                            setShowDistrictDropdown(true);
+
+                            try {
+                                const res = await getDistrictsByCity(formData.cityId, value);
+                                setDistricts(res?.data || []);
+                            } catch (err) {
+                                setDistricts([]);
+                            }
+
+                            setFormData((prev) => ({
+                                ...prev,
+                                districtId: null
+                            }));
+                        }}
+                    />
+
+                    {showDistrictDropdown && (
+                        <div
+                            className="border bg-white position-absolute w-100 mt-1"
+                            style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
+                        >
+                            {districts
+                                .filter((d) => d.name.toLowerCase().includes(districtSearch.toLowerCase()))
+                                .map((district) => (
+                                    <div
+                                        key={district.districtId}
+                                        className="p-2"
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => {
+                                            setDistrictSearch(district.name);
+                                            setShowDistrictDropdown(false);
+
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                districtId: district.districtId
+                                            }));
+                                        }}
+                                    >
+                                        {district.name}
                                     </div>
                                 ))}
                         </div>

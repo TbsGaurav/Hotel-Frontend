@@ -4,7 +4,7 @@ import CKEditorField from '@/components/ui/CKEditorField';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-export default function ContentTab({  data, setData, onNext, onBack, loading }) {
+export default function ContentTab({ data, setData, onNext, onBack, loading }) {
     const [errors, setErrors] = useState({});
     const handleNextClick = () => {
         if (!validateForm()) return;
@@ -116,6 +116,25 @@ export default function ContentTab({  data, setData, onNext, onBack, loading }) 
 
                 <div className="col-md-12 mb-3">
                     <label className="form-label">Intro Short Copy</label>
+                    {/* <RichTextEditor
+                        value={data.introShortCopy}
+                        onChange={(val) => {
+                            setData((prev) => ({
+                                ...prev,
+                                introShortCopy: val
+                            }));
+
+                            // Remove HTML tags and validate plain text
+                            const plainText = val.replace(/<[^>]*>/g, '').trim();
+
+                            if (plainText) {
+                                setErrors((prev) => ({
+                                    ...prev,
+                                    introShortCopy: null
+                                }));
+                            }
+                        }}
+                    /> */}
                     <CKEditorField
                         value={data.introShortCopy}
                         onChange={(val) => {
@@ -131,12 +150,6 @@ export default function ContentTab({  data, setData, onNext, onBack, loading }) 
                                 }));
                             }
                         }}
-                        // onChange={(val) =>
-                        //     setData((prev) => ({
-                        //         ...prev,
-                        //         introShortCopy: val
-                        //     }))
-                        // }
                     />
                     {errors.introShortCopy && <div className="text-danger small mt-1">{errors.introShortCopy}</div>}
                 </div>
@@ -226,12 +239,12 @@ export default function ContentTab({  data, setData, onNext, onBack, loading }) 
                     <button
                         type="button"
                         className="btn btn-sm btn-outline-primary"
-                        onChange={(e) => {
-                            const updatedFaqs = [...data.faqs];
-                            updatedFaqs[index].question = e.target.value;
+                        // onChange={(e) => {
+                        //     const updatedFaqs = [...data.faqs];
+                        //     updatedFaqs[index].question = e.target.value;
 
-                            setData({ ...data, faqs: updatedFaqs });
-                        }}
+                        //     setData({ ...data, faqs: updatedFaqs });
+                        // }}
                         onClick={() => {
                             const faqs = data.faqs || [];
 

@@ -45,7 +45,7 @@ export default function CurationTab({
     setCityOptions,
     loading,
     excludeError,
-    setExcludeError,
+    setExcludeError
 }) {
     const pinnedRef = useRef(null);
     const excludeRef = useRef(null);
@@ -73,141 +73,7 @@ export default function CurationTab({
 
     return (
         <>
-            {/* ================= LOCATION SECTION ================= */}
-            <div className="row">
-                {/* COUNTRY */}
-                <div className="col-12 col-lg-6 position-relative dropdown-wrapper">
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search By Country"
-                        value={geoSearch}
-                        onFocus={() => {
-                            setShowGeoDropdown(true);
-                        }}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            setGeoSearch(value);
-                            setShowGeoDropdown(true);
-
-                            // Clear selection when user edits
-                            if (selectedGeoNode) {
-                                setSelectedGeoNode(null);
-                                setSelectedCity(null);
-                                setSelectedCityObj(null);
-                                setCitySearch('');
-                                setCityOptions([]);
-
-                                setFormData((prev) => ({
-                                    ...prev,
-                                    geoNodeId: null,
-                                    regionId: null,
-                                    cityId: null
-                                }));
-                            }
-                        }}
-                    />
-
-                    {showGeoDropdown && (
-                        <div
-                            className="border bg-white position-absolute w-100 mt-1"
-                            style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                        >
-                            {countries
-                                .filter((c) => c.name.toLowerCase().includes(geoSearch.toLowerCase()))
-                                .map((node) => (
-                                    <div
-                                        key={node.countryId}
-                                        className="p-2"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => {
-                                            setSelectedGeoNode(node);
-                                            setGeoSearch(node.name);
-                                            setShowGeoDropdown(false);
-
-                                            setSelectedCity(null);
-                                            setSelectedCityObj(null);
-                                            setCitySearch('');
-
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                geoNodeId: node.countryId,
-                                                cityId: null
-                                            }));
-                                        }}
-                                    >
-                                        {node.name}
-                                    </div>
-                                ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* CITY */}
-                <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Select City"
-                        value={citySearch}
-                        disabled={!selectedGeoNode}
-                        onFocus={() => {
-                            if (!selectedGeoNode) return;
-                            setShowCityDropdown(true);
-
-                            const selectedCityObj = cities?.find((ct) => ct.cityId === selectedCity);
-
-                            if (selectedCityObj) {
-                                setCitySearch(selectedCityObj.name);
-                            }
-                        }}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            setCitySearch(value);
-                            setShowCityDropdown(true);
-
-                            if (selectedCity) {
-                                setSelectedCity(null);
-                                setSelectedCityObj(null);
-
-                                setFormData((prev) => ({
-                                    ...prev,
-                                    cityId: null
-                                }));
-                            }
-                        }}
-                    />
-
-                    {showCityDropdown && selectedGeoNode && (
-                        <div
-                            className="border bg-white position-absolute w-100 mt-1"
-                            style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                        >
-                            {cities
-                                ?.filter((ct) => ct.name.toLowerCase().includes(citySearch.toLowerCase()))
-                                .map((city) => (
-                                    <div
-                                        key={city.cityId}
-                                        className="p-2"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => {
-                                            setSelectedCity(city.cityId);
-                                            setCitySearch(city.name);
-                                            setShowCityDropdown(false);
-
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                cityId: city.cityId
-                                            }));
-                                        }}
-                                    >
-                                        {city.name}
-                                    </div>
-                                ))}
-                        </div>
-                    )}
-                </div>
-            </div>
+            <div className="row"></div>
 
             {/* ================= PINNED HOTELS ================= */}
             {/* {(formData.mode === 'Curated' || formData.mode === 'Hybrid') && (

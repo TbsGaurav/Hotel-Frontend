@@ -5,12 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { adminLoginApi } from '@/lib/api/admin/authapi';
+import { ADMIN_ROUTES } from '@/lib/route';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const router = useRouter();
-
+    const [showPassword, setShowPassword] = useState(false);
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -25,9 +26,9 @@ export default function LoginPage() {
             if (roleName === 'User') {
                 router.replace('/');
             } else if (['Admin', 'Editor', 'Viewer'].includes(roleName)) {
-                router.replace('/admin/dashboard');
+                router.replace(ADMIN_ROUTES.dashboard);
             } else {
-                router.replace('/admin/auth/login');
+                router.replace(ADMIN_ROUTES.login);
             }
         } catch (error) {
             alert(error.message);
@@ -76,14 +77,30 @@ export default function LoginPage() {
                                 {/* Password */}
                                 <div className="mb-3">
                                     <label className="form-label small fw-semibold">Password</label>
-                                    <input
-                                        type="password"
-                                        className="form-control rounded-3"
-                                        placeholder="Enter password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                    />
+                                    <div className="position-relative">
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            className="form-control rounded-3 pe-5"
+                                            placeholder="Enter password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                        />
+
+                                        <span
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '12px',
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                cursor: 'pointer',
+                                                color: '#0f1011'
+                                            }}
+                                        >
+                                            {showPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 {/* Remember */}
