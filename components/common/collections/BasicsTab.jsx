@@ -102,6 +102,7 @@ export default function BasicsTab({
     }, [formData.countryId, formData.regionId, formData.cityId, formData.districtId]);
     const handleCancel = () => {
         router.push(ADMIN_ROUTES.collections);
+        console.log(ADMIN_ROUTES.collections);
     };
 
     const generateSlug = (text) => {
@@ -213,381 +214,405 @@ export default function BasicsTab({
     }, [formData.cityId]);
     return (
         <>
-            <div className="row">
-                {/* Collection Name */}
-                <div className="col-12 col-lg-6 mb-3">
-                    <label className="form-label">Collection Name </label>
-                    <input
-                        type="text"
-                        className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="Enter collection name"
-                    />
-                    {errors.name && <div className="invalid-feedback">{errors.name}</div>}
-                </div>
+            <form autoComplete="off">
+                <div className="row">
+                    {/* Collection Name */}
+                    <div className="col-12 col-lg-6 mb-3">
+                        <label className="form-label">Collection Name </label>
+                        <input
+                            type="text"
+                            className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            placeholder="Enter collection name"
+                            autoComplete="off"
+                        />
+                        {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+                    </div>
 
-                {/* Slug */}
-                <div className="col-12 col-lg-6 mb-3">
-                    <label className="form-label">Slug </label>
-                    <input
-                        type="text"
-                        className={`form-control ${errors.slug ? 'is-invalid' : ''}`}
-                        name="slug"
-                        value={formData.slug}
-                        onChange={handleChange}
-                        placeholder="collection-slug"
-                    />
-                    {errors.slug && <div className="invalid-feedback">{errors.slug}</div>}
-                </div>
+                    {/* Slug */}
+                    <div className="col-12 col-lg-6 mb-3">
+                        <label className="form-label">Slug </label>
+                        <input
+                            type="text"
+                            className={`form-control ${errors.slug ? 'is-invalid' : ''}`}
+                            name="slug"
+                            value={formData.slug}
+                            onChange={handleChange}
+                            placeholder="collection-slug"
+                            autoComplete="off"
+                        />
+                        {errors.slug && <div className="invalid-feedback">{errors.slug}</div>}
+                    </div>
 
-                <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
-                    <label className="form-label">Country</label>
+                    <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
+                        <label className="form-label">Country</label>
 
-                    <input
-                        type="text"
-                        className={`form-control ${errors.geoNodeId ? 'is-invalid' : ''}`}
-                        placeholder="Search By Country"
-                        value={geoSearch}
-                        onFocus={() => {
-                            setShowGeoDropdown(true);
-                            if (selectedGeoNode) {
-                                setGeoSearch(selectedGeoNode.name);
-                            }
-                        }}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            setGeoSearch(value);
-                            setShowGeoDropdown(true);
+                        <input
+                            type="text"
+                            className={`form-control ${errors.geoNodeId ? 'is-invalid' : ''}`}
+                            name="countrySearchField"
+                            placeholder="Search By Country"
+                            autoComplete="off"
+                            autoCorrect="off"
+                            spellCheck={false}
+                            inputMode="search"
+                            value={geoSearch}
+                            onFocus={() => {
+                                setShowGeoDropdown(true);
+                                if (selectedGeoNode) {
+                                    setGeoSearch(selectedGeoNode.name);
+                                }
+                            }}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setGeoSearch(value);
+                                setShowGeoDropdown(true);
 
-                            setFormData((prev) => ({
-                                ...prev,
-                                countryId: null,
-                                regionId: null,
-                                cityId: null,
-                                districtId: null,
-                                geoNodeId: null
-                            }));
-                        }}
-                    />
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    countryId: null,
+                                    regionId: null,
+                                    cityId: null,
+                                    districtId: null,
+                                    geoNodeId: null
+                                }));
+                            }}
+                        />
 
-                    {errors.geoNodeId && <div className="invalid-feedback d-block">{errors.geoNodeId}</div>}
+                        {errors.geoNodeId && <div className="invalid-feedback d-block">{errors.geoNodeId}</div>}
 
-                    {showGeoDropdown && (
-                        <div
-                            className="border bg-white position-absolute w-100 mt-1"
-                            style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
+                        {showGeoDropdown && (
+                            <div
+                                className="border bg-white position-absolute w-100 mt-1"
+                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
+                            >
+                                {countries
+                                    .filter((c) => c.name.toLowerCase().includes(geoSearch.toLowerCase()))
+                                    .map((node) => (
+                                        <div
+                                            key={node.countryId}
+                                            className="p-2"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => {
+                                                setSelectedGeoNode(node);
+                                                setGeoSearch(node.name);
+                                                setShowGeoDropdown(false);
+                                                setRegionSearch('');
+                                                setCitySearch('');
+                                                setDistrictSearch('');
+
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    countryId: node.countryId,
+                                                    regionId: null,
+                                                    cityId: null,
+                                                    districtId: null
+                                                }));
+                                            }}
+                                        >
+                                            {node.name}
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
+                        <label className="form-label">Region</label>
+
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search Region"
+                            autoComplete="off"
+                            autoCorrect="off"
+                            spellCheck={false}
+                            inputMode="search"
+                            name="regionSearchField"
+                            value={regionSearch}
+                            disabled={!formData.countryId}
+                            onFocus={() => setShowRegionDropdown(true)}
+                            onChange={async (e) => {
+                                const value = e.target.value;
+                                setRegionSearch(value);
+                                setShowRegionDropdown(true);
+
+                                try {
+                                    const res = await getRegionsByCountry(formData.countryId, value);
+                                    setRegions(res?.data || []);
+                                } catch {
+                                    setRegions([]);
+                                }
+                            }}
+                        />
+
+                        {showRegionDropdown && (
+                            <div
+                                className="border bg-white position-absolute w-100 mt-1"
+                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
+                            >
+                                {regions
+                                    .filter((r) => r.name.toLowerCase().includes(regionSearch.toLowerCase()))
+                                    .map((region) => (
+                                        <div
+                                            key={region.regionId}
+                                            className="p-2"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => {
+                                                setRegionSearch(region.name);
+                                                setShowRegionDropdown(false);
+                                                setCitySearch('');
+                                                setDistrictSearch('');
+
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    regionId: region.regionId,
+                                                    cityId: null,
+                                                    districtId: null
+                                                }));
+                                            }}
+                                        >
+                                            {region.name}
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
+                        <label className="form-label">City</label>
+
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search City"
+                            value={citySearch}
+                            autoComplete="off"
+                            autoCorrect="off"
+                            spellCheck={false}
+                            inputMode="search"
+                            name="citySearchField"
+                            disabled={!formData.regionId}
+                            onFocus={() => setShowCityDropdown(true)}
+                            onChange={async (e) => {
+                                const value = e.target.value;
+                                setCitySearch(value);
+                                setShowCityDropdown(true);
+
+                                try {
+                                    const res = await getCitiesByCountryOrRegion({
+                                        countryId: formData.countryId,
+                                        regionId: formData.regionId,
+                                        searchTerm: value
+                                    });
+
+                                    setCities(res?.data || []);
+                                } catch {
+                                    setCities([]);
+                                }
+                            }}
+                        />
+
+                        {showCityDropdown && (
+                            <div
+                                className="border bg-white position-absolute w-100 mt-1"
+                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
+                            >
+                                {cities
+                                    .filter((c) => c.name.toLowerCase().includes(citySearch.toLowerCase()))
+                                    .map((city) => (
+                                        <div
+                                            key={city.cityId}
+                                            className="p-2"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => {
+                                                setCitySearch(city.name);
+                                                setShowCityDropdown(false);
+                                                setDistrictSearch('');
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    cityId: city.cityId,
+                                                    districtId: null
+                                                }));
+                                            }}
+                                        >
+                                            {city.name}
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
+                        <label className="form-label">District</label>
+
+                        <input
+                            type="text"
+                            className="form-control"
+                            autoComplete="off"
+                            autoCorrect="off"
+                            spellCheck={false}
+                            inputMode="search"
+                            placeholder="Search District"
+                            name="districtSearchField"
+                            value={districtSearch}
+                            disabled={!formData.cityId}
+                            onFocus={() => setShowDistrictDropdown(true)}
+                            onChange={async (e) => {
+                                const value = e.target.value;
+                                setDistrictSearch(value);
+                                setShowDistrictDropdown(true);
+
+                                try {
+                                    const res = await getDistrictsByCity(formData.cityId, value);
+                                    setDistricts(res?.data || []);
+                                } catch (err) {
+                                    setDistricts([]);
+                                }
+
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    districtId: null
+                                }));
+                            }}
+                        />
+
+                        {showDistrictDropdown && (
+                            <div
+                                className="border bg-white position-absolute w-100 mt-1"
+                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
+                            >
+                                {districts
+                                    .filter((d) => d.name.toLowerCase().includes(districtSearch.toLowerCase()))
+                                    .map((district) => (
+                                        <div
+                                            key={district.districtId}
+                                            className="p-2"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => {
+                                                setDistrictSearch(district.name);
+                                                setShowDistrictDropdown(false);
+
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    districtId: district.districtId
+                                                }));
+                                            }}
+                                        >
+                                            {district.name}
+                                        </div>
+                                    ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Template */}
+                    <div className="col-12 col-lg-6 mb-3">
+                        <label className="form-label">Template</label>
+
+                        <select
+                            className={`form-select ${errors.template ? 'is-invalid' : ''}`}
+                            name="template"
+                            value={formData.template}
+                            onChange={handleChange}
+                            autoComplete="off"
                         >
-                            {countries
-                                .filter((c) => c.name.toLowerCase().includes(geoSearch.toLowerCase()))
-                                .map((node) => (
-                                    <div
-                                        key={node.countryId}
-                                        className="p-2"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => {
-                                            setSelectedGeoNode(node);
-                                            setGeoSearch(node.name);
-                                            setShowGeoDropdown(false);
-                                            setRegionSearch('');
-                                            setCitySearch('');
-                                            setDistrictSearch('');
+                            <option value="">Select Template</option>
+                            <option value="Family">Family</option>
+                            <option value="Luxury">Luxury</option>
+                            <option value="Business">Business</option>
+                            <option value="Budget">Budget</option>
+                        </select>
 
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                countryId: node.countryId,
-                                                regionId: null,
-                                                cityId: null,
-                                                districtId: null
-                                            }));
-                                        }}
-                                        // onClick={() => {
-                                        //     setSelectedGeoNode(node);
-                                        //     setGeoSearch(node.name);
-                                        //     setShowGeoDropdown(false);
+                        {errors.template && <div className="invalid-feedback d-block">{errors.template}</div>}
+                    </div>
 
-                                        //     setFormData((prev) => ({
-                                        //         ...prev,
-                                        //         geoNodeId: node.countryId
-                                        //     }));
+                    {/* Expiry Date */}
+                    <div className="col-12 col-lg-6 mb-3">
+                        <label className="form-label">Expiry Date</label>
+                        <input
+                            type="date"
+                            className="form-control"
+                            name="expiryDate"
+                            value={formData.expiryDate}
+                            onChange={handleChange}
+                            autoComplete="off"
+                        />
+                    </div>
 
-                                        //     setErrors((prev) => ({
-                                        //         ...prev,
-                                        //         geoNodeId: null
-                                        //     }));
-                                        // }}
-                                    >
-                                        {node.name}
-                                    </div>
-                                ))}
-                        </div>
-                    )}
-                </div>
+                    {/* Max Hotels */}
+                    <div className="col-12 col-lg-6 mb-3">
+                        <label className="form-label">Max Hotels</label>
+                        <input
+                            type="number"
+                            min="1"
+                            className={`form-control ${errors.maxHotels ? 'is-invalid' : ''}`}
+                            name="maxHotels"
+                            value={formData.maxHotels}
+                            onChange={handleChange}
+                            placeholder="Enter maximum number of hotels"
+                            autoComplete="off"
+                        />
+                        {errors.maxHotels && <div className="invalid-feedback">{errors.maxHotels}</div>}
+                    </div>
 
-                <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
-                    <label className="form-label">Region</label>
-
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search Region"
-                        value={regionSearch}
-                        disabled={!formData.countryId}
-                        onFocus={() => setShowRegionDropdown(true)}
-                        onChange={async (e) => {
-                            const value = e.target.value;
-                            setRegionSearch(value);
-                            setShowRegionDropdown(true);
-
-                            try {
-                                const res = await getRegionsByCountry(formData.countryId, value);
-                                setRegions(res?.data || []);
-                            } catch {
-                                setRegions([]);
-                            }
-                        }}
-                    />
-
-                    {showRegionDropdown && (
-                        <div
-                            className="border bg-white position-absolute w-100 mt-1"
-                            style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                        >
-                            {regions
-                                .filter((r) => r.name.toLowerCase().includes(regionSearch.toLowerCase()))
-                                .map((region) => (
-                                    <div
-                                        key={region.regionId}
-                                        className="p-2"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => {
-                                            setRegionSearch(region.name);
-                                            setShowRegionDropdown(false);
-                                            setCitySearch('');
-                                            setDistrictSearch('');
-
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                regionId: region.regionId,
-                                                cityId: null,
-                                                districtId: null
-                                            }));
-                                        }}
-                                    >
-                                        {region.name}
-                                    </div>
-                                ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
-                    <label className="form-label">City</label>
-
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search City"
-                        value={citySearch}
-                        disabled={!formData.regionId}
-                        onFocus={() => setShowCityDropdown(true)}
-                        onChange={async (e) => {
-                            const value = e.target.value;
-                            setCitySearch(value);
-                            setShowCityDropdown(true);
-
-                            try {
-                                const res = await getCitiesByCountryOrRegion({
-                                    countryId: formData.countryId,
-                                    regionId: formData.regionId,
-                                    searchTerm: value
-                                });
-
-                                setCities(res?.data || []);
-                            } catch {
-                                setCities([]);
-                            }
-                        }}
-                    />
-
-                    {showCityDropdown && (
-                        <div
-                            className="border bg-white position-absolute w-100 mt-1"
-                            style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                        >
-                            {cities
-                                .filter((c) => c.name.toLowerCase().includes(citySearch.toLowerCase()))
-                                .map((city) => (
-                                    <div
-                                        key={city.cityId}
-                                        className="p-2"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => {
-                                            setCitySearch(city.name);
-                                            setShowCityDropdown(false);
-                                            setDistrictSearch('');
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                cityId: city.cityId,
-                                                districtId: null
-                                            }));
-                                        }}
-                                    >
-                                        {city.name}
-                                    </div>
-                                ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
-                    <label className="form-label">District</label>
-
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search District"
-                        value={districtSearch}
-                        disabled={!formData.cityId}
-                        onFocus={() => setShowDistrictDropdown(true)}
-                        onChange={async (e) => {
-                            const value = e.target.value;
-                            setDistrictSearch(value);
-                            setShowDistrictDropdown(true);
-
-                            try {
-                                const res = await getDistrictsByCity(formData.cityId, value);
-                                setDistricts(res?.data || []);
-                            } catch (err) {
-                                setDistricts([]);
-                            }
-
-                            setFormData((prev) => ({
-                                ...prev,
-                                districtId: null
-                            }));
-                        }}
-                    />
-
-                    {showDistrictDropdown && (
-                        <div
-                            className="border bg-white position-absolute w-100 mt-1"
-                            style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                        >
-                            {districts
-                                .filter((d) => d.name.toLowerCase().includes(districtSearch.toLowerCase()))
-                                .map((district) => (
-                                    <div
-                                        key={district.districtId}
-                                        className="p-2"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => {
-                                            setDistrictSearch(district.name);
-                                            setShowDistrictDropdown(false);
-
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                districtId: district.districtId
-                                            }));
-                                        }}
-                                    >
-                                        {district.name}
-                                    </div>
-                                ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Template */}
-                <div className="col-12 col-lg-6 mb-3">
-                    <label className="form-label">Template</label>
-
-                    <select
-                        className={`form-select ${errors.template ? 'is-invalid' : ''}`}
-                        name="template"
-                        value={formData.template}
-                        onChange={handleChange}
-                    >
-                        <option value="">Select Template</option>
-                        <option value="Family">Family</option>
-                        <option value="Luxury">Luxury</option>
-                        <option value="Business">Business</option>
-                        <option value="Budget">Budget</option>
-                    </select>
-
-                    {errors.template && <div className="invalid-feedback d-block">{errors.template}</div>}
-                </div>
-
-                {/* Expiry Date */}
-                <div className="col-12 col-lg-6 mb-3">
-                    <label className="form-label">Expiry Date</label>
-                    <input type="date" className="form-control" name="expiryDate" value={formData.expiryDate} onChange={handleChange} />
-                </div>
-
-                {/* Max Hotels */}
-                <div className="col-12 col-lg-6 mb-3">
-                    <label className="form-label">Max Hotels</label>
-                    <input
-                        type="number"
-                        min="1"
-                        className={`form-control ${errors.maxHotels ? 'is-invalid' : ''}`}
-                        name="maxHotels"
-                        value={formData.maxHotels}
-                        onChange={handleChange}
-                        placeholder="Enter maximum number of hotels"
-                    />
-                    {errors.maxHotels && <div className="invalid-feedback">{errors.maxHotels}</div>}
-                </div>
-
-                {/* Status */}
-                <div className="col-12 col-lg-6 mb-3">
-                    <label className="form-label">Status</label>
-                    <div className="d-flex gap-3">
-                        <div>
-                            <input type="radio" name="status" value="Draft" checked={formData.status === 'Draft'} onChange={handleChange} />{' '}
-                            Draft
-                        </div>
-                        <div>
-                            <input
-                                type="radio"
-                                name="status"
-                                value="Published"
-                                checked={formData.status === 'Published'}
-                                onChange={handleChange}
-                            />{' '}
-                            Published
+                    {/* Status */}
+                    <div className="col-12 col-lg-6 mb-3">
+                        <label className="form-label">Status</label>
+                        <div className="d-flex gap-3">
+                            <div>
+                                <input
+                                    type="radio"
+                                    name="status"
+                                    value="Draft"
+                                    checked={formData.status === 'Draft'}
+                                    onChange={handleChange}
+                                />{' '}
+                                Draft
+                            </div>
+                            <div>
+                                <input
+                                    type="radio"
+                                    name="status"
+                                    value="Published"
+                                    checked={formData.status === 'Published'}
+                                    onChange={handleChange}
+                                />{' '}
+                                Published
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="d-flex justify-content-between">
-                <button className="btn btn-outline-secondary" onClick={handleCancel}>
-                    Cancel
-                </button>
+                <div className="d-flex justify-content-between">
+                    <button className="btn btn-outline-secondary" onClick={handleCancel}>
+                        Cancel
+                    </button>
 
-                <button
-                    className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
-                    // onClick={onNext}
-                    onClick={handleNextClick}
-                    type="button"
-                    disabled={loading}
-                    style={{ minWidth: '100px' }}
-                >
-                    {loading ? (
-                        <>
-                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            {/* Loading... */}
-                        </>
-                    ) : (
-                        'Next'
-                    )}
-                </button>
-                {/* <button className="theme-button-orange rounded-2" onClick={onNext} type="button">
+                    <button
+                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
+                        // onClick={onNext}
+                        onClick={handleNextClick}
+                        type="button"
+                        disabled={loading}
+                        style={{ minWidth: '100px' }}
+                    >
+                        {loading ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                {/* Loading... */}
+                            </>
+                        ) : (
+                            'Next'
+                        )}
+                    </button>
+                    {/* <button className="theme-button-orange rounded-2" onClick={onNext} type="button">
                     Next
                 </button> */}
-            </div>
+                </div>
+            </form>
         </>
     );
 }
