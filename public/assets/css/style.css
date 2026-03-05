@@ -84,6 +84,12 @@ a {
     background-color: #0077c0;
     color: #fff;
 }
+.theme-button-orange:disabled {
+    background-color: #f0831e !important;
+    color: #fff !important;
+    opacity: 1 !important;
+    cursor: not-allowed;
+}
 .theme-button-green {
     border-radius: 10px;
     background-color: #49ca3e;

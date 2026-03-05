@@ -10,10 +10,14 @@ import { ADMIN_ROUTES } from '@/lib/route';
 export default function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const router = useRouter();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         try {
             const response = await adminLoginApi(username, password);
@@ -32,6 +36,8 @@ export default function LoginPage() {
             }
         } catch (error) {
             alert(error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -118,8 +124,19 @@ export default function LoginPage() {
                                 </div>
 
                                 {/* Button */}
-                                <button type="submit" className="btn w-100 fw-semibold rounded-3 text-white theme-button-orange py-2">
-                                    Sign In
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="btn w-100 fw-semibold rounded-3 text-white theme-button-orange py-2 d-flex justify-content-center align-items-center"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            Signing In...
+                                        </>
+                                    ) : (
+                                        'Sign In'
+                                    )}
                                 </button>
                             </form>
                         </div>
