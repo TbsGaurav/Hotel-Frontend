@@ -429,7 +429,7 @@ export default function CollectionList({ initialCollections, initialCountries })
                                     </td>
                                     <td>{item.type}</td>
                                     <td>
-                                        <span className={`badge rounded-pill ${item.status === 'Publish' ? 'bg-success' : 'bg-secondary'}`}>
+                                        <span className={`badge rounded-pill ${item.status === 'Published' ? 'bg-success' : 'bg-secondary'}`}>
                                             {item.status}
                                         </span>{' '}
                                     </td>

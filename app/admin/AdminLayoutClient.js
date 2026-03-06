@@ -25,12 +25,22 @@ export default function AdminLayoutClient({ children }) {
             return;
         }
     }, [router]);
+    if (hideHeader) {
+        return <>{children}</>;
+    }
 
     return (
         <div className="min-vh-100 d-flex flex-column">
-            {!hideHeader && <AdminHeader />}
-            {!hideHeader && <AdminTopNav />}
-            <main className="flex-fill  bg-light">{children}</main>
+            <AdminHeader />
+            <AdminTopNav />
+            <main className="flex-fill p-4 bg-light">{children}</main>
         </div>
     );
+    // return (
+    //     <div className="min-vh-100 d-flex flex-column">
+    //         {!hideHeader && <AdminHeader />}
+    //         {!hideHeader && <AdminTopNav />}
+    //         <main className="flex-fill p-4 bg-light">{children}</main>
+    //     </div>
+    // );
 }
