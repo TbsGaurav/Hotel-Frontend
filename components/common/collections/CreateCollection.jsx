@@ -325,10 +325,26 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         }
 
         setLoading(true);
+        let geoNodeType = null;
+        let sourceId = null;
+
+        if (formData.districtId) {
+            geoNodeType = 'District';
+            sourceId = formData.districtId;
+        } else if (formData.cityId) {
+            geoNodeType = 'City';
+            sourceId = formData.cityId;
+        } else if (formData.regionId) {
+            geoNodeType = 'Region';
+            sourceId = formData.regionId;
+        } else if (formData.countryId) {
+            geoNodeType = 'Country';
+            sourceId = formData.countryId;
+        }
 
         const collectionObject = {
-            SourceId: formData.sourceId ? Number(formData.sourceId) : null,
-            GeoNodeType: formData.geoNodeType,
+            SourceId: sourceId,
+            GeoNodeType: geoNodeType,
             Name: formData.name,
             Slug: formData.slug,
             Type: formData.mode.toLowerCase(),
@@ -338,6 +354,18 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             MaxHotels: formData.maxHotels ? Number(formData.maxHotels) : null,
             DefaultSort: formData.defaultSort || 'StarRating DESC'
         };
+        // const collectionObject = {
+        //     SourceId: formData.sourceId ? Number(formData.sourceId) : null,
+        //     GeoNodeType: formData.geoNodeType,
+        //     Name: formData.name,
+        //     Slug: formData.slug,
+        //     Type: formData.mode.toLowerCase(),
+        //     Template: formData.template || null,
+        //     Status: formData.status,
+        //     ExpiryDate: formData.expiryDate || null,
+        //     MaxHotels: formData.maxHotels ? Number(formData.maxHotels) : null,
+        //     DefaultSort: formData.defaultSort || 'StarRating DESC'
+        // };
 
         const payload = {
             collectionId: collectionId ?? null,

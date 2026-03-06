@@ -30,10 +30,10 @@ export default function RulesTab({
         }));
     };
     const handleNextClick = () => {
-        if ((formData.mode === 'Rule' || formData.mode === 'Hybrid') && rules.length === 0) {
-            toast.error('Please add at least one rule');
-            return;
-        }
+        // if ((formData.mode === 'Rule' || formData.mode === 'Hybrid') && rules.length === 0) {
+        //     toast.error('Please add at least one rule');
+        //     return;
+        // }
 
         onNext();
     };

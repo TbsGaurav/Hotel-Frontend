@@ -117,7 +117,7 @@ export default function BasicsTab({
                 sourceId: finalId
             }));
         }
-    }, [formData.countryId, formData.regionId, formData.cityId, formData.districtId]);
+    }, [formData.countryId, formData.regionId, formData.cityId, formData.districtId, formData.geoNodeType]);
     const handleCancel = () => {
         router.push(ADMIN_ROUTES.collections);
     };
@@ -569,9 +569,7 @@ export default function BasicsTab({
                     {/* Status */}
                     <div className="col-12 col-lg-6 mb-3">
                         <label className="form-label">Status</label>
-                        <div className="form-control bg-light">
-                            {formData.status}
-                        </div>
+                        <div className="form-control bg-light">{formData.status}</div>
                     </div>
                 </div>
 
