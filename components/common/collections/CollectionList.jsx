@@ -193,14 +193,14 @@ export default function CollectionList({ initialCollections, initialCountries })
     return (
         <div className="card shadow-sm mb-5">
             <div className="card-header d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">Hotel Collections</h5>
+                <h5 className="mb-0  fw-semibold">Hotel Collections</h5>
                 <button className="theme-button-orange rounded-1" onClick={() => router.push(ADMIN_ROUTES.createCollection)}>
                     Create New Collection
                 </button>
             </div>
 
             <div className="card-body">
-                <div className="row g-3 mb-3">
+                <div className="row g-3 mb-4 p-3 bg-light rounded">
                     {/* Status */}
                     <div className="col-12 col-md-4 col-lg-3">
                         <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -212,7 +212,6 @@ export default function CollectionList({ initialCollections, initialCountries })
                             ))}
                         </select>
                     </div>
-
                     {/* Country */}
                     <div className="col-12 col-md-4 col-lg-3 position-relative dropdown-wrapper">
                         <input
@@ -223,7 +222,6 @@ export default function CollectionList({ initialCollections, initialCountries })
                             onFocus={() => {
                                 setShowCountryDropdown(true);
 
-                                // If user focuses after selection, allow editing
                                 if (selectedCountryObj) {
                                     setCountrySearch(selectedCountryObj.name);
                                 }
@@ -233,7 +231,6 @@ export default function CollectionList({ initialCollections, initialCountries })
                                 setCountrySearch(value);
                                 setShowCountryDropdown(true);
 
-                                // If user edits input → clear selected country
                                 if (selectedCountry) {
                                     setSelectedCountry('');
                                     setSelectedRegion('');
@@ -274,7 +271,6 @@ export default function CollectionList({ initialCollections, initialCountries })
                             </div>
                         )}
                     </div>
-
                     {/* Region */}
                     <div className="col-12 col-md-4 col-lg-3 position-relative dropdown-wrapper">
                         <input
@@ -329,7 +325,6 @@ export default function CollectionList({ initialCollections, initialCountries })
                             </div>
                         )}
                     </div>
-
                     {/* City */}
                     <div className="col-12 col-md-4 col-lg-3 position-relative dropdown-wrapper">
                         <input
@@ -385,8 +380,8 @@ export default function CollectionList({ initialCollections, initialCountries })
                 </div>
 
                 {/* TABLE (same UI as yours) */}
-                <table className="table table-bordered align-middle">
-                    <thead className="table-light">
+                <table className="table table-hover align-middle mb-0">
+                    <thead className="table-light text-secondary small text-uppercase">
                         <tr>
                             <th>Collection Name</th>
                             <th>Type</th>
@@ -396,7 +391,6 @@ export default function CollectionList({ initialCollections, initialCountries })
                             <th>URL</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         {loading ? (
                             [...Array(5)].map((_, rowIndex) => (
@@ -430,36 +424,47 @@ export default function CollectionList({ initialCollections, initialCountries })
                         ) : (
                             collections?.map((item) => (
                                 <tr key={item.collectionId}>
-                                    <td>{item.name}</td>
+                                    <td>
+                                        <span className="fw-semibold text-dark">{item.name}</span>
+                                    </td>
                                     <td>{item.type}</td>
                                     <td>
-                                        <span className="badge bg-success">{item.status}</span>
+                                        <span className={`badge rounded-pill ${item.status === 'Publish' ? 'bg-success' : 'bg-secondary'}`}>
+                                            {item.status}
+                                        </span>{' '}
                                     </td>
                                     <td>{item.hotelCount}</td>
                                     <td>{item.publishDate ? new Date(item.publishDate).toLocaleDateString('en-GB') : '-'}</td>
                                     <td>
-                                        <button
-                                            className="btn btn-sm btn-outline-secondary me-2"
-                                            onClick={() => router.push(`${ADMIN_ROUTES.collections}/${item.collectionId}`)}
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            className="btn btn-sm btn-outline-secondary me-2"
-                                            onClick={() => handleClone(item.collectionId)}
-                                        >
-                                            Clone
-                                        </button>
-                                        <button className="btn btn-sm btn-outline-secondary me-2">Preview</button>
-                                        <button
-                                            className="btn btn-sm btn-outline-secondary"
-                                            onClick={() => {
-                                                setCollectionToDelete(item.collectionId);
-                                                setShowDeleteModal(true);
-                                            }}
-                                        >
-                                            Delete
-                                        </button>
+                                        <div className="d-flex gap-2">
+                                            <button
+                                                className="btn btn-sm btn-outline-secondary me-2"
+                                                onClick={() => router.push(`${ADMIN_ROUTES.collections}/${item.collectionId}`)}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                className="btn btn-sm btn-outline-secondary me-2"
+                                                onClick={() => handleClone(item.collectionId)}
+                                            >
+                                                Clone
+                                            </button>
+                                            <button
+                                                className="btn btn-sm btn-outline-secondary me-2"
+                                                onClick={() => router.push(`${ADMIN_ROUTES.collections}/${item.collectionId}/preview`)}
+                                            >
+                                                Preview
+                                            </button>
+                                            <button
+                                                className="btn btn-sm btn-outline-secondary"
+                                                onClick={() => {
+                                                    setCollectionToDelete(item.collectionId);
+                                                    setShowDeleteModal(true);
+                                                }}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))

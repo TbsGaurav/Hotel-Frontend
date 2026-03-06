@@ -13,5 +13,6 @@ export default async function CollectionPage() {
         getCountriesApi()
     ]);
 
+
     return <CollectionList initialCollections={collectionsRes?.data || []} initialCountries={countries || []} />;
 }

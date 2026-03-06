@@ -731,7 +731,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
     // ---------------- RENDER ----------------
     return (
         <div className="card shadow-sm">
-            <ul className="nav nav-tabs mb-4">
+            <ul className="nav collection-tabs mb-4 gap-2">
                 {tabOrder.map((tab, index) => {
                     const currentIndex = tabOrder.indexOf(activeTab);
                     const isDisabled = index > currentIndex + 1;
@@ -740,7 +740,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                         <li className="nav-item" key={tab}>
                             <button
                                 type="button"
-                                className={`nav-link ${activeTab === tab ? 'active' : ''}`}
+                                className={`nav-link px-4 py-2 ${activeTab === tab ? 'active' : ''}`}
                                 disabled={isDisabled}
                                 onClick={() => setActiveTab(tab)}
                             >

@@ -6,13 +6,14 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { adminLoginApi } from '@/lib/api/admin/authapi';
 import { ADMIN_ROUTES } from '@/lib/route';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-
+    const [error, setError] = useState('');
     const router = useRouter();
 
     const handleSubmit = async (e) => {
@@ -21,6 +22,7 @@ export default function LoginPage() {
 
         try {
             const response = await adminLoginApi(username, password);
+            toast.success(response.message || 'Login successful');
             const token = response.token;
             const roleName = response.user.roleName;
 
@@ -35,7 +37,7 @@ export default function LoginPage() {
                 router.replace(ADMIN_ROUTES.login);
             }
         } catch (error) {
-            alert(error.message);
+            setError(error.message || 'Invalid username or password');
         } finally {
             setLoading(false);
         }
@@ -53,8 +55,7 @@ export default function LoginPage() {
                 <div className="row justify-content-center">
                     {/* Smaller width */}
                     <div className="col-11 col-sm-8 col-md-6 col-lg-4">
-                        {/* <div className="col-12 col-sm-10 col-md-8 col-lg-7 col-xl-6"> */}
-                        <div className="card shadow border-0 rounded-4 p-4">
+                        <div className="card shadow-lg border-0 rounded-4 p-4">
                             {/* Logo */}
                             <div className="text-center mb-3">
                                 <Image src="/image/logo.webp" alt="Logo" width={140} height={35} priority />
@@ -62,7 +63,7 @@ export default function LoginPage() {
 
                             {/* Heading */}
                             <div className="text-center mb-3">
-                                <h5 className="fw-semibold mb-1">Welcome Back</h5>
+                                <h4 className="fw-semibold mb-1">Welcome Back</h4>
                                 <p className="text-muted small mb-0">Sign in to your account</p>
                             </div>
 
@@ -75,7 +76,10 @@ export default function LoginPage() {
                                         className="form-control rounded-3"
                                         placeholder="Enter username"
                                         value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
+                                        onChange={(e) => {
+                                            setUsername(e.target.value);
+                                            setError('');
+                                        }}
                                         required
                                     />
                                 </div>
@@ -89,7 +93,10 @@ export default function LoginPage() {
                                             className="form-control rounded-3 pe-5"
                                             placeholder="Enter password"
                                             value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
+                                            onChange={(e) => {
+                                                setPassword(e.target.value);
+                                                setError('');
+                                            }}
                                             required
                                         />
 
@@ -107,6 +114,7 @@ export default function LoginPage() {
                                             {showPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
                                         </span>
                                     </div>
+                                    {error && <div className="text-danger small mt-1">{error}</div>}
                                 </div>
 
                                 {/* Remember */}

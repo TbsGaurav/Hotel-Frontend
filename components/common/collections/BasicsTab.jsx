@@ -66,9 +66,6 @@ export default function BasicsTab({
         if (!formData.maxHotels || formData.maxHotels < 1) {
             newErrors.maxHotels = 'Max Hotels must be at least 1';
         }
-        // if (!formData.geoNodeId) {
-        //     newErrors.geoNodeId = 'Country is required';
-        // }
 
         setErrors(newErrors);
 

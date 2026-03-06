@@ -1,6 +1,5 @@
 'use client';
 
-import CKEditorField from '@/components/ui/CKEditorField';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
