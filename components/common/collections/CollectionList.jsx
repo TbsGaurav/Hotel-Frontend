@@ -437,7 +437,7 @@ export default function CollectionList({ initialCollections, initialCountries })
                                         <span className="badge bg-success">{item.status}</span>
                                     </td>
                                     <td>{item.hotelCount}</td>
-                                    <td>{item.publishDate ? new Date(item.publishDate).toLocaleDateString('en-GB') : '-'}</td>
+                                    <td>{item.publishedDate ? new Date(item.publishedDate).toLocaleDateString('en-GB') : '-'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-outline-secondary me-2"
