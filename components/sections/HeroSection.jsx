@@ -288,7 +288,7 @@ export default function HeroSection() {
                 <div className="space-100px"></div>
 
                 <div className="text-center">
-                    <h1 className="hero-heading text-white">Find the best hotel deals</h1>
+                    <h1 className="hero-heading text-white">Find the best hotel test</h1>
                     <h4 className="small-heading-hero text-white">With Price Guardian a price robot on your side</h4>
                 </div>
                 <div className="space-100px"></div>
