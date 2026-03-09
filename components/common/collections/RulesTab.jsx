@@ -2,7 +2,6 @@
 
 import { RULE_FIELDS, RULE_OPERATORS, RULE_VALUE_OPTIONS } from '@/lib/constants/ruleConfig';
 import { useState } from 'react';
-import toast from 'react-hot-toast';
 
 export default function RulesTab({
     rules,

@@ -6,27 +6,28 @@ import { formatCountryName } from '@/lib/utils';
 import CountryHotelCarousel from '@/components/common/country/CountryHotelCarousel';
 import { notFound } from 'next/navigation';
 
-export default async function CountryPage({ params }) {
-    const { country } = await params;
+export default async function CountryDetails({ country }) {
     const data = await getCountryByUrlName(country);
     const countryName = formatCountryName(country);
 
-    if (countryName.includes('.')) {
-        notFound();
+    if (!data) {
+        return notFound();
     }
 
     const descriptionHtml = data.countryContent;
+
     const ITEM_TYPE = {
         City: 0,
         Region: 1,
         HotelBrand: 2,
         HotelType: 3
     };
+
     const regions = data.countryData
         .filter((item) => item.type === ITEM_TYPE.Region)
         .map((item) => ({
             label: item.itemName,
-            href: item.urlName ? `/${countryName.toLowerCase()}/${item.urlName}` : null
+            href: item.urlName ? `/${country}/${item.urlName}` : null
         }));
 
     const cities = data.countryData
@@ -41,7 +42,7 @@ export default async function CountryPage({ params }) {
         .map((item) => ({
             label: item.itemName,
             count: item.hotelCount,
-            href: item.urlName ? `/${countryName}/${item.urlName}` : null
+            href: item.urlName ? `/${country}/${item.urlName}` : null
         }));
 
     const hotelTypes = data?.hotelData
@@ -56,6 +57,7 @@ export default async function CountryPage({ params }) {
         <>
             <CountryHeroSection />
             <CountryIntro countryName={countryName} descriptionHtml={descriptionHtml} heroImage="/image/country.webp" />
+
             <section className="container py-4">
                 <CountryDropdownSection
                     regions={regions}
@@ -66,6 +68,7 @@ export default async function CountryPage({ params }) {
                     data={data}
                 />
             </section>
+
             <CountryHotelCarousel hotels={data.featuredHotels} />
         </>
     );
