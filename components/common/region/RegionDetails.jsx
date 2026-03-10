@@ -1,11 +1,13 @@
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import RegionFilterSidebar from './RegionFilterSidebar';
-import { getCountryByUrlName } from '@/lib/api/public/countryapi';
 import { formatCountryName } from '@/lib/utils';
 import Link from 'next/link';
+import Dropdown from '@/components/ui/Dropdown';
+import RegionCard from '@/components/ui/RegionCard';
 
 export default async function RegionDetails({ params }) {
     const resolvedParams = await params;
+
     const slug = resolvedParams?.slug || [];
     const countrySlug = slug[0];
     const regionSlug = slug[1];
@@ -17,36 +19,39 @@ export default async function RegionDetails({ params }) {
         <>
             <CountryHeroSection />
 
-            {/* BREADCRUMB */}
-            <div className="bg-light py-2">
+            <div className="py-2">
                 <div className="container">
-                    <nav aria-label="breadcrumb">
-                        <ol className="breadcrumb mb-0 small">
-                            <li className="breadcrumb-item">
-                                <Link href="/destinations">All Countries</Link>
-                            </li>
+                    <div className="d-flex align-items-center small">
+                        <Link href="/destinations" className="text-dark text-decoration-none">
+                            All Countries
+                        </Link>
 
-                            <li className="breadcrumb-item">
-                                <Link href={`/${countrySlug}`}>{countryName}</Link>
-                            </li>
+                        <span className="mx-2 text-muted">•</span>
 
-                            <li className="breadcrumb-item active">{regionName}</li>
-                        </ol>
-                    </nav>
+                        <Link href={`/${countrySlug}`} className="text-dark text-decoration-none">
+                            {countryName}
+                        </Link>
+
+                        <span className="mx-2 text-muted">•</span>
+
+                        <span className="text-primary">{regionName}</span>
+                    </div>
                 </div>
             </div>
 
-            {/* MAIN CONTENT */}
             <section className="container py-4">
                 <div className="row">
-                    {/* LEFT FILTER */}
+                    <Dropdown id="regions" parentId="countryAccordion" title="Cities" />
+                    <hr className="border-secondary opacity-10 my-5" />
+                    <div>
+                        <h2 className="text-center fw-bold mb-4">Featured Properties in {regionName}</h2>
+                    </div>
                     <div className="col-lg-3">
                         <RegionFilterSidebar />
                     </div>
-
-                    {/* RIGHT CONTENT */}
                     <div className="col-lg-9">
-                        <h4>Featured Properties in {regionName}</h4>
+                        <RegionCard />
+                        <RegionCard />
                     </div>
                 </div>
             </section>
