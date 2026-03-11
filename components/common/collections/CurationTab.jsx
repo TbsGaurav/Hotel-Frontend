@@ -1,272 +1,213 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function CurationTab({
-    countries,
-    setFormData,
-    cities,
-    selectedCity,
-    setSelectedCity,
+    hotelList,
     pinnedHotels,
     setPinnedHotels,
     excludedHotels,
     setExcludedHotels,
+    onNext,
+    loading,
     hotelSearch,
     setHotelSearch,
-    excludeSearch,
-    setExcludeSearch,
-    excludeReason,
-    setExcludeReason,
-    pinnedOptions,
-    excludeOptions,
-    setSelectedPinnedHotel,
-    setSelectedExcludeHotel,
-    addPinnedHotel,
-    addExcludedHotel,
-    moveHotel,
-    onNext,
     onBack,
-    showPinnedDropdown,
-    setShowPinnedDropdown,
-    showExcludeDropdown,
-    setShowExcludeDropdown,
-    geoSearch,
-    setGeoSearch,
-    showGeoDropdown,
-    setShowGeoDropdown,
-    selectedGeoNode,
-    setSelectedGeoNode,
-    citySearch,
-    setCitySearch,
-    showCityDropdown,
-    setShowCityDropdown,
-    setSelectedCityObj,
-    setCityOptions,
-    loading,
-    excludeError,
-    setExcludeError
+    maxHotels
 }) {
-    const pinnedRef = useRef(null);
-    const excludeRef = useRef(null);
+    const [reasonModal, setReasonModal] = useState(false);
+    const [selectedHotel, setSelectedHotel] = useState(null);
+    const [reason, setReason] = useState('');
+    const [selectedHotels, setSelectedHotels] = useState([]);
+    // ---------- SORT HOTELS (PINNED FIRST) ----------
+    const sortedHotels = [...pinnedHotels, ...hotelList.filter((hotel) => !pinnedHotels.some((p) => p.id === hotel.id))];
     useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (!e.target.closest('.dropdown-wrapper')) {
-                setShowGeoDropdown(false);
-                setShowCityDropdown(false);
+        if (!hotelList.length) return;
+
+        setSelectedHotels(hotelList.slice(0, maxHotels).map((h) => h.id));
+    }, [hotelList, maxHotels]);
+    // ---------- CHECKBOX ----------
+    // const handleCheckboxChange = (hotel, checked) => {
+    //     if (!checked) {
+    //         setSelectedHotel(hotel);
+    //         setReason('');
+    //         setReasonModal(true);
+    //         return;
+    //     }
+
+    //     // Re-include hotel
+    //     setExcludedHotels((prev) => prev.filter((h) => h.id !== hotel.id));
+    // };
+
+    const handleCheckboxChange = (hotelId, checked) => {
+        if (checked) {
+            if (selectedHotels.length >= maxHotels) return;
+
+            setSelectedHotels((prev) => [...prev, hotelId]);
+        } else {
+            setSelectedHotels((prev) => prev.filter((id) => id !== hotelId));
+        }
+    };
+    // ---------- EXCLUDE ----------
+    const confirmExclude = () => {
+        if (!reason.trim()) return;
+
+        setExcludedHotels((prev) => [
+            ...prev,
+            {
+                id: selectedHotel.id,
+                name: selectedHotel.name,
+                reason
+            }
+        ]);
+
+        // Remove from pinned if excluded
+        setPinnedHotels((prev) => prev.filter((h) => h.id !== selectedHotel.id));
+
+        setReasonModal(false);
+    };
+
+    // ---------- PIN ----------
+    const handlePin = (hotel) => {
+        setPinnedHotels((prev) => {
+            if (prev.some((h) => h.id === hotel.id)) return prev;
+
+            if (prev.length >= 8) {
+                toast.warning('You can pin only 8 hotels');
+                return prev;
             }
 
-            // Pinned
-            if (pinnedRef.current && !pinnedRef.current.contains(e.target)) {
-                setShowPinnedDropdown(false);
-            }
+            return [...prev, hotel];
+        });
+    };
 
-            // Exclude
-            if (excludeRef.current && !excludeRef.current.contains(e.target)) {
-                setShowExcludeDropdown(false);
-            }
-        };
+    // ---------- UNPIN ----------
+    const handleUnpin = (hotelId) => {
+        setPinnedHotels((prev) => prev.filter((h) => h.id !== hotelId));
+    };
 
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
-    }, []);
+    // ---------- MOVE PIN ----------
+    const movePin = (index, direction) => {
+        const updated = [...pinnedHotels];
+        const target = index + direction;
+
+        if (target < 0 || target >= updated.length) return;
+
+        [updated[index], updated[target]] = [updated[target], updated[index]];
+
+        setPinnedHotels(updated);
+    };
 
     return (
         <>
-            <div className="row"></div>
+            <h6>Hotel List</h6>
 
-            {/* ================= PINNED HOTELS ================= */}
-            {/* {(formData.mode === 'Curated' || formData.mode === 'Hybrid') && (
-            )} */}
-            <div className="row">
-                <div className="col-12 col-lg-6">
-                    <h6>Pinned Hotels</h6>
-
-                    <div className="position-relative" ref={pinnedRef}>
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search hotel"
-                            value={hotelSearch}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setShowPinnedDropdown(true);
-                                setShowExcludeDropdown(false);
-                            }}
-                            onChange={(e) => {
-                                setHotelSearch(e.target.value);
-                                setSelectedPinnedHotel(null);
-                                setShowPinnedDropdown(true);
-                            }}
-                        />
-
-                        {showPinnedDropdown && pinnedOptions.length > 0 && (
-                            <div
-                                className="position-absolute bg-white border w-100 mt-1 rounded shadow-sm"
-                                style={{ zIndex: 1000, maxHeight: '200px', overflowY: 'auto' }}
-                            >
-                                {pinnedOptions.map((hotel) => (
-                                    <div
-                                        key={hotel.id}
-                                        className="p-2"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedPinnedHotel(hotel);
-                                            setHotelSearch(hotel.name);
-                                            setShowPinnedDropdown(false);
-                                        }}
-                                    >
-                                        {hotel.name}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    <div className="mt-3">
-                        <button className="theme-button-orange rounded-2 mb-3" onClick={addPinnedHotel}>
-                            Add Pinned
-                        </button>
-                    </div>
-
-                    {pinnedHotels.map((hotel, index) => (
-                        <div
-                            key={hotel.id}
-                            className={`d-flex justify-content-between align-items-center py-2 ${
-                                index !== pinnedHotels.length - 1 ? 'border-bottom' : ''
-                            }`}
-                        >
-                            <div>
-                                {index + 1}. {hotel.name}
-                            </div>
-                            <div>
-                                <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => moveHotel(index, -1)}>
-                                    ↑
-                                </button>
-                                <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => moveHotel(index, 1)}>
-                                    ↓
-                                </button>
-                                <button
-                                    className="btn btn-sm btn-outline-danger"
-                                    onClick={() => setPinnedHotels(pinnedHotels.filter((_, i) => i !== index))}
-                                >
-                                    ❌
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* ================= EXCLUDED HOTELS ================= */}
-                <div className="col-12 col-lg-6">
-                    <h6>Excluded Hotels</h6>
-
-                    <div className="position-relative" ref={excludeRef}>
-                        <input
-                            type="text"
-                            className="form-control mb-2"
-                            placeholder="Search hotel"
-                            value={excludeSearch}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setShowExcludeDropdown(true);
-                                setShowPinnedDropdown(false);
-                            }}
-                            onChange={(e) => {
-                                setExcludeSearch(e.target.value);
-                                setSelectedExcludeHotel(null);
-                                setShowExcludeDropdown(true);
-                            }}
-                        />
-
-                        {showExcludeDropdown && excludeOptions.length > 0 && (
-                            <div
-                                className="position-absolute bg-white border w-100 mt-1 rounded shadow-sm"
-                                style={{ zIndex: 1000, maxHeight: '200px', overflowY: 'auto' }}
-                            >
-                                {excludeOptions.map((hotel) => (
-                                    <div
-                                        key={hotel.id}
-                                        className="p-2"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedExcludeHotel(hotel);
-                                            setExcludeSearch(hotel.name);
-                                            setShowExcludeDropdown(false);
-                                        }}
-                                    >
-                                        {hotel.name}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Reason Input */}
+            <div className="border rounded p-3" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <div className="mb-3">
                     <input
                         type="text"
-                        className={`form-control mb-1 ${excludeError ? 'is-invalid' : ''}`}
-                        placeholder="Reason for exclusion"
-                        value={excludeReason}
-                        onChange={(e) => {
-                            setExcludeReason(e.target.value);
-                            if (e.target.value.trim()) {
-                                setExcludeError('');
-                            }
-                        }}
+                        className="form-control"
+                        placeholder="Search hotel..."
+                        value={hotelSearch}
+                        onChange={(e) => setHotelSearch(e.target.value)}
                     />
-
-                    {excludeError && <div className="text-danger small mb-2">{excludeError}</div>}
-
-                    {/* Exclude Button */}
-                    <button type="button" className="theme-button-orange  rounded-2 mb-3" onClick={addExcludedHotel}>
-                        Exclude
-                    </button>
-
-                    {/* Excluded List */}
-                    {excludedHotels.map((hotel, index) => (
-                        // <div key={hotel.id} className="d-flex justify-content-between align-items-center border-bottom py-2">
-                        <div
-                            key={hotel.id}
-                            className={`d-flex justify-content-between align-items-center py-2 ${
-                                index !== excludedHotels.length - 1 ? 'border-bottom' : ''
-                            }`}
-                        >
-                            <div>
-                                {hotel.name} — {hotel.reason}
-                            </div>
-                            <button
-                                className="btn btn-sm btn-outline-danger"
-                                onClick={() => setExcludedHotels(excludedHotels.filter((_, i) => i !== index))}
-                            >
-                                ❌
-                            </button>
-                        </div>
-                    ))}
                 </div>
+                {sortedHotels.map((hotel) => {
+                    const isExcluded = excludedHotels.some((h) => h.id === hotel.id);
+
+                    const pinIndex = pinnedHotels.findIndex((h) => h.id === hotel.id);
+
+                    const isPinned = pinIndex !== -1;
+
+                    return (
+                        <div key={hotel.id} className="d-flex align-items-center border-bottom py-2">
+                            {/* Checkbox */}
+
+                            <input
+                                type="checkbox"
+                                className="form-check-input me-2"
+                                checked={selectedHotels.includes(hotel.id)}
+                                disabled={!selectedHotels.includes(hotel.id) && selectedHotels.length >= maxHotels}
+                                onChange={(e) => handleCheckboxChange(hotel.id, e.target.checked)}
+                            />
+                            {/* Hotel Name */}
+                            <span className="flex-grow-1">
+                                {isPinned && <span className="text-warning fw-bold me-2">⭐ </span>}
+
+                                {hotel.name}
+
+                                {isExcluded && <span className="text-danger ms-2">(Excluded)</span>}
+                            </span>
+
+                            {/* PIN CONTROLS */}
+                            {!isExcluded && (
+                                <div className="d-flex align-items-center gap-1">
+                                    {!isPinned ? (
+                                        <button className="btn btn-sm btn-outline-primary" onClick={() => handlePin(hotel)}>
+                                            Pin
+                                        </button>
+                                    ) : (
+                                        <>
+                                            <button className="btn btn-sm btn-outline-secondary" onClick={() => movePin(pinIndex, -1)}>
+                                                ↑
+                                            </button>
+
+                                            <button className="btn btn-sm btn-outline-secondary" onClick={() => movePin(pinIndex, 1)}>
+                                                ↓
+                                            </button>
+
+                                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleUnpin(hotel.id)}>
+                                                Unpin
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
-            {/* {formData.mode === 'Rule' && <div className="alert alert-info">Rule Based collections do not allow manual pinning.</div>} */}
+            {reasonModal && (
+                <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h6 className="modal-title">Reason for Exclusion</h6>
+                            </div>
 
-            {/* ================= NAVIGATION ================= */}
-            <div className="d-flex justify-content-between">
+                            <div className="modal-body">
+                                <input
+                                    className="form-control"
+                                    placeholder="Enter reason"
+                                    value={reason}
+                                    onChange={(e) => setReason(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={() => setReasonModal(false)}>
+                                    Cancel
+                                </button>
+
+                                <button className="btn btn-danger" onClick={confirmExclude}>
+                                    Exclude
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ---------- NAVIGATION ---------- */}
+            <div className="d-flex justify-content-between mt-3">
                 <button className="btn btn-outline-secondary" onClick={onBack}>
                     Back
                 </button>
-                <button
-                    className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
-                    onClick={onNext}
-                    disabled={loading}
-                    style={{ minWidth: '100px' }}
-                >
-                    {loading ? (
-                        <>
-                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        </>
-                    ) : (
-                        'Next'
-                    )}
+
+                <button className="theme-button-orange rounded-1" onClick={onNext} disabled={loading}>
+                    Next
                 </button>
             </div>
         </>

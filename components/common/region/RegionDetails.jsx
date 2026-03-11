@@ -4,6 +4,7 @@ import { formatCountryName } from '@/lib/utils';
 import Link from 'next/link';
 import Dropdown from '@/components/ui/Dropdown';
 import RegionCard from '@/components/ui/RegionCard';
+import { getCitiesByRegion } from '@/lib/api/public/countryapi';
 
 export default async function RegionDetails({ params }) {
     const resolvedParams = await params;
@@ -14,7 +15,13 @@ export default async function RegionDetails({ params }) {
 
     const countryName = formatCountryName(countrySlug);
     const regionName = formatCountryName(regionSlug);
-
+    const response = await getCitiesByRegion(countrySlug, regionSlug);
+    const cities = response?.data || [];
+    const cityItems = cities.map((city) => ({
+        label: city.cityName,
+        count: city.hotelCount,
+        href: `/${countrySlug}/${regionSlug}/${city.cityName.toLowerCase().replace(/\s+/g, '-')}`
+    }));
     return (
         <>
             <CountryHeroSection />
@@ -41,7 +48,7 @@ export default async function RegionDetails({ params }) {
 
             <section className="container py-4">
                 <div className="row">
-                    <Dropdown id="regions" parentId="countryAccordion" title="Cities" />
+                    <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />{' '}
                     <hr className="border-secondary opacity-10 my-5" />
                     <div>
                         <h2 className="text-center fw-bold mb-4">Featured Properties in {regionName}</h2>

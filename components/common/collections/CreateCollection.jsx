@@ -29,7 +29,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
     const [activeTab, setActiveTab] = useState('Basics');
     const [geoSearch, setGeoSearch] = useState('');
     const [citySearch, setCitySearch] = useState('');
-
+    const [hotelList, setHotelList] = useState([]);
     const [cityOptions, setCityOptions] = useState([]);
 
     const [showGeoDropdown, setShowGeoDropdown] = useState(false);
@@ -153,7 +153,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         loadCountries();
     }, []);
 
-    const loadHotels = async (search, type) => {
+    const loadHotels = async (search) => {
         if (!formData.sourceId || !formData.geoNodeType) return;
 
         const payload = {
@@ -163,11 +163,13 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         };
 
         const res = await getHotelsByCity(payload);
+        const results = res?.data || [];
 
-        const results = res?.data?.slice(0, 50) || [];
+        setHotelList(results);
+        // setPinnedHotels(results);
 
-        if (type === 'pinned') setPinnedOptions(results);
-        else setExcludeOptions(results);
+        // if (type === 'pinned') setPinnedOptions(results);
+        // else setExcludeOptions(results);
     };
 
     // ---------------- LOAD HOTELS ON CURATION TAB MOUNT ----------------
@@ -520,7 +522,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             };
 
             const response = await saveCuration(payload);
-
             toast.success(response?.message || 'Curation saved successfully!');
 
             setInitialCuration({
@@ -830,6 +831,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
 
                 {activeTab === 'Curation' && (
                     <CurationTab
+                        hotelList={hotelList}
                         setFormData={setFormData}
                         selectedCity={selectedCity}
                         setSelectedCity={setSelectedCity}
@@ -876,6 +878,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                         cities={cities}
                         excludeError={excludeError}
                         setExcludeError={setExcludeError}
+                        maxHotels={formData.maxHotels}
                     />
                 )}
 

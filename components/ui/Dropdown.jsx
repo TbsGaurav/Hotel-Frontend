@@ -52,8 +52,14 @@ export default function Dropdown({ id, title, items = [], parentId, defaultOpen 
                                     ) : (
                                         <span className="text-dark fw-semibold">• {item.label}</span>
                                     )}
-
                                     {item.count != null && (
+                                        <div className="text-secondary" style={{ fontSize: '13px', marginLeft: '14px', lineHeight: '1.2' }}>
+                                            <Link href="/" className="text-decoration-none text-secondary" prefetch={false}>
+                                                ({item.count} properties)
+                                            </Link>
+                                        </div>
+                                    )}
+                                    {/* {item.count != null && (
                                         <div
                                             className="text-secondary"
                                             style={{
@@ -64,7 +70,7 @@ export default function Dropdown({ id, title, items = [], parentId, defaultOpen 
                                         >
                                             ({item.count} properties)
                                         </div>
-                                    )}
+                                    )} */}
                                 </div>
                             ))}
                         </div>
