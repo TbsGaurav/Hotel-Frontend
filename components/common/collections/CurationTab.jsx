@@ -14,41 +14,45 @@ export default function CurationTab({
     hotelSearch,
     setHotelSearch,
     onBack,
-    maxHotels
+    maxHotels,
+    includedHotelIds, // New prop
+    selectedHotels,
+    setSelectedHotels
 }) {
     const [reasonModal, setReasonModal] = useState(false);
     const [selectedHotel, setSelectedHotel] = useState(null);
     const [reason, setReason] = useState('');
-    const [selectedHotels, setSelectedHotels] = useState([]);
+
     // ---------- SORT HOTELS (PINNED FIRST) ----------
     const sortedHotels = [...pinnedHotels, ...hotelList.filter((hotel) => !pinnedHotels.some((p) => p.id === hotel.id))];
+
+    // Initialize selected hotels based on includedHotelIds when editing, or top maxHotels when creating
     useEffect(() => {
         if (!hotelList.length) return;
 
-        setSelectedHotels(hotelList.slice(0, maxHotels).map((h) => h.id));
-    }, [hotelList, maxHotels]);
+        if (includedHotelIds && includedHotelIds.length > 0) {
+            // Editing mode: select hotels that are already included in the collection
+            setSelectedHotels(includedHotelIds);
+        } else {
+            // Creation mode: select top maxHotels
+            setSelectedHotels(hotelList.slice(0, maxHotels).map((h) => h.id));
+        }
+    }, [hotelList, maxHotels, includedHotelIds]);
+
     // ---------- CHECKBOX ----------
-    // const handleCheckboxChange = (hotel, checked) => {
-    //     if (!checked) {
-    //         setSelectedHotel(hotel);
-    //         setReason('');
-    //         setReasonModal(true);
-    //         return;
-    //     }
-
-    //     // Re-include hotel
-    //     setExcludedHotels((prev) => prev.filter((h) => h.id !== hotel.id));
-    // };
-
     const handleCheckboxChange = (hotelId, checked) => {
         if (checked) {
-            if (selectedHotels.length >= maxHotels) return;
-
+            // Check if we can add more hotels
+            if (selectedHotels.length >= maxHotels) {
+                toast.error(`You can only select up to ${maxHotels} hotels`);
+                return;
+            }
             setSelectedHotels((prev) => [...prev, hotelId]);
         } else {
             setSelectedHotels((prev) => prev.filter((id) => id !== hotelId));
         }
     };
+
     // ---------- EXCLUDE ----------
     const confirmExclude = () => {
         if (!reason.trim()) return;
@@ -62,10 +66,14 @@ export default function CurationTab({
             }
         ]);
 
+        // Remove from selected hotels if excluded
+        setSelectedHotels((prev) => prev.filter(id => id !== selectedHotel.id));
+
         // Remove from pinned if excluded
         setPinnedHotels((prev) => prev.filter((h) => h.id !== selectedHotel.id));
 
         setReasonModal(false);
+        setReason('');
     };
 
     // ---------- PIN ----------
@@ -103,7 +111,7 @@ export default function CurationTab({
         <>
             <h6>Hotel List</h6>
 
-            <div className="mb-3" style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'white', paddingBottom: '10px' }}>
+            <div className="mb-2" style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'white' }}>
                 <input
                     type="text"
                     className="form-control"
@@ -113,31 +121,32 @@ export default function CurationTab({
                 />
             </div>
 
-            <div className="border rounded p-3" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            <div className="mb-2 text-end">
+                Selected: {selectedHotels.length}/{maxHotels}
+            </div>
+
+            <div className="border rounded p-3" style={{ maxHeight: '550px', overflowY: 'auto' }}>
                 {sortedHotels.map((hotel) => {
                     const isExcluded = excludedHotels.some((h) => h.id === hotel.id);
-
                     const pinIndex = pinnedHotels.findIndex((h) => h.id === hotel.id);
-
                     const isPinned = pinIndex !== -1;
+                    const isSelected = selectedHotels.includes(hotel.id);
 
                     return (
                         <div key={hotel.id} className="d-flex align-items-center border-bottom py-2">
                             {/* Checkbox */}
-
                             <input
                                 type="checkbox"
                                 className="form-check-input me-2"
-                                checked={selectedHotels.includes(hotel.id)}
-                                disabled={!selectedHotels.includes(hotel.id) && selectedHotels.length >= maxHotels}
+                                checked={isSelected || isPinned}
+                                disabled={isExcluded || (!isSelected && selectedHotels.length >= maxHotels)}
                                 onChange={(e) => handleCheckboxChange(hotel.id, e.target.checked)}
                             />
+
                             {/* Hotel Name */}
                             <span className="flex-grow-1">
                                 {isPinned && <span className="text-warning fw-bold me-2">⭐ </span>}
-
                                 {hotel.name}
-
                                 {isExcluded && <span className="text-danger ms-2">(Excluded)</span>}
                             </span>
 
@@ -145,20 +154,37 @@ export default function CurationTab({
                             {!isExcluded && (
                                 <div className="d-flex align-items-center gap-1">
                                     {!isPinned ? (
-                                        <button className="btn btn-sm btn-outline-primary" onClick={() => handlePin(hotel)}>
+                                        <button
+                                            className="btn btn-sm btn-outline-primary"
+                                            onClick={() => handlePin(hotel)}
+                                            disabled={!isSelected} // Only allow pinning selected hotels
+                                        >
                                             Pin
                                         </button>
                                     ) : (
                                         <>
-                                            <button className="btn btn-sm btn-outline-secondary" onClick={() => movePin(pinIndex, -1)}>
-                                                ↑
-                                            </button>
+                                            {pinIndex > 0 && (
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary"
+                                                    onClick={() => movePin(pinIndex, -1)}
+                                                >
+                                                    ↑
+                                                </button>
+                                            )}
 
-                                            <button className="btn btn-sm btn-outline-secondary" onClick={() => movePin(pinIndex, 1)}>
-                                                ↓
-                                            </button>
+                                            {pinIndex < pinnedHotels.length - 1 && (
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary"
+                                                    onClick={() => movePin(pinIndex, 1)}
+                                                >
+                                                    ↓
+                                                </button>
+                                            )}
 
-                                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleUnpin(hotel.id)}>
+                                            <button
+                                                className="btn btn-sm btn-outline-danger"
+                                                onClick={() => handleUnpin(hotel.id)}
+                                            >
                                                 Unpin
                                             </button>
                                         </>

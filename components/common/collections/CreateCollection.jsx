@@ -71,6 +71,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
     const [excludeReason, setExcludeReason] = useState('');
     const [selectedPinnedHotel, setSelectedPinnedHotel] = useState(null);
     const [selectedExcludeHotel, setSelectedExcludeHotel] = useState(null);
+    const [includedHotelIds, setIncludedHotelIds] = useState([]);
     const [pinnedHotels, setPinnedHotels] = useState([]);
     const [excludedHotels, setExcludedHotels] = useState([]);
     const [pinnedOptions, setPinnedOptions] = useState([]);
@@ -80,6 +81,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
 
     const [cities, setCities] = useState([]);
     const [selectedCity, setSelectedCity] = useState('');
+    const [selectedHotels, setSelectedHotels] = useState([]);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -107,16 +109,41 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         }
     }, [propCollectionId]);
 
+    // Update selected hotels when hotel list loads and we have included IDs
+    useEffect(() => {
+        if (hotelList.length > 0 && includedHotelIds.length > 0) {
+            // Filter included IDs to only those that exist in the current hotel list
+            const validIncludedIds = includedHotelIds.filter(id =>
+                hotelList.some(hotel => hotel.id === id)
+            );
+            setSelectedHotels(validIncludedIds);
+        }
+    }, [hotelList, includedHotelIds]);
+
     // ---------------- TAB NAV ----------------
     const goNext = () => {
         const i = tabOrder.indexOf(activeTab);
         if (i < tabOrder.length - 1) setActiveTab(tabOrder[i + 1]);
     };
 
-    const goBack = () => {
-        const i = tabOrder.indexOf(activeTab);
-        if (i > 0) setActiveTab(tabOrder[i - 1]);
-    };
+   const goBack = async () => {
+    const i = tabOrder.indexOf(activeTab);
+    if (i > 0) {
+        const prevTab = tabOrder[i - 1];
+        
+        // Fetch data when going back to certain tabs
+        if (prevTab === 'Basics' || prevTab === 'Content' || prevTab === 'Rules' || prevTab === 'Curation') {
+            setLoading(true);
+            try {
+                await fetchCollectionById();
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        setActiveTab(prevTab);
+    }
+};
 
     useEffect(() => {
         if (!selectedGeoNode?.countryId) {
@@ -501,6 +528,11 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         try {
             setLoading(true);
 
+            // Include only checked hotels
+            const includePayload = selectedHotels.map((hotelId) => ({
+                HotelID: hotelId
+            }));
+
             const pinnedPayload = pinnedHotels.map((hotel, index) => ({
                 HotelID: hotel.id,
                 Position: index + 1,
@@ -515,6 +547,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
 
             const payload = {
                 collectionId,
+                includeJson: JSON.stringify(includePayload),
                 pinnedJson: JSON.stringify(pinnedPayload),
                 excludeJson: JSON.stringify(excludePayload)
             };
@@ -523,6 +556,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             toast.success(response?.message || 'Curation saved successfully!');
 
             setInitialCuration({
+                selectedHotels: [...selectedHotels],
                 pinned: [...pinnedHotels],
                 excluded: [...excludedHotels]
             });
@@ -537,14 +571,32 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
     };
 
     const handleRulesBack = async () => {
+        setLoading(true);
+        try {
+            await fetchCollectionById();
+        } finally {
+            setLoading(false);
+        }
         setActiveTab('Rules');
     };
 
     const handleContentBack = async () => {
+        setLoading(true);
+        try {
+            await fetchCollectionById();
+        } finally {
+            setLoading(false);
+        }
         setActiveTab('Content');
     };
 
     const handlePreviewBack = async () => {
+        setLoading(true);
+        try {
+            await fetchCollectionById();
+        } finally {
+            setLoading(false);
+        }
         setActiveTab('Curation');
     };
 
@@ -649,6 +701,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             // ---------------- CURATION ----------------
             const pinned = collectionCuration?.[0]?.pinnedHotels || [];
             const excluded = collectionCuration?.[0]?.excludedHotels || [];
+            const included = collectionCuration?.[0]?.includedHotels || []; // Get included hotels
 
             const formattedPinned = pinned.map((hotel) => ({
                 id: hotel.hotelID,
@@ -663,10 +716,23 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                 reason: hotel.reason
             }));
 
+            const includedIds = included.map((hotel) => hotel.hotelID);
+
             setPinnedHotels(formattedPinned);
             setExcludedHotels(formattedExcluded);
+            setIncludedHotelIds(includedIds);
+
+            // Important: Set selectedHotels after hotelList is loaded
+            // We'll need to wait for hotelList to be populated
+            if (hotelList.length > 0) {
+                setSelectedHotels(includedIds.filter(id => hotelList.some(hotel => hotel.id === id)));
+            } else {
+                // If hotelList isn't loaded yet, just store the IDs and they'll be applied when hotelList loads
+                setSelectedHotels(includedIds);
+            }
 
             setInitialCuration({
+                selectedHotels: [...includedIds],
                 pinned: formattedPinned,
                 excluded: formattedExcluded
             });
@@ -679,7 +745,12 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
     };
 
     const handleBasicBack = async () => {
-        await fetchCollectionById();
+        setLoading(true);
+        try {
+            await fetchCollectionById();
+        } finally {
+            setLoading(false);
+        }
         setActiveTab('Basics');
     };
 
@@ -751,8 +822,12 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         const currentExcluded = JSON.stringify(normalizeExcluded(excludedHotels));
         const initialExcluded = JSON.stringify(normalizeExcluded(initialCuration.excluded));
 
-        return currentPinned !== initialPinned || currentExcluded !== initialExcluded;
+        const currentSelected = JSON.stringify(selectedHotels);
+        const initialSelected = JSON.stringify(initialCuration.selectedHotels || []);
+
+        return currentPinned !== initialPinned || currentExcluded !== initialExcluded || currentSelected !== initialSelected;
     };
+
 
     // ---------------- RENDER ----------------
     return (
@@ -873,6 +948,9 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                         excludeError={excludeError}
                         setExcludeError={setExcludeError}
                         maxHotels={formData.maxHotels}
+                        selectedHotels={selectedHotels}
+                        setSelectedHotels={setSelectedHotels}
+                        includedHotelIds={includedHotelIds}
                     />
                 )}
 
