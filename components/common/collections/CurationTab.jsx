@@ -103,16 +103,17 @@ export default function CurationTab({
         <>
             <h6>Hotel List</h6>
 
+            <div className="mb-3" style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'white', paddingBottom: '10px' }}>
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search hotel..."
+                    value={hotelSearch}
+                    onChange={(e) => setHotelSearch(e.target.value)}
+                />
+            </div>
+
             <div className="border rounded p-3" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                <div className="mb-3">
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search hotel..."
-                        value={hotelSearch}
-                        onChange={(e) => setHotelSearch(e.target.value)}
-                    />
-                </div>
                 {sortedHotels.map((hotel) => {
                     const isExcluded = excludedHotels.some((h) => h.id === hotel.id);
 
