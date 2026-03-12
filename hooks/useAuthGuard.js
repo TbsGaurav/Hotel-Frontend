@@ -2,28 +2,30 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ADMIN_ROUTES } from '@/lib/route';
 
 export function useAuthGuard(allowedRoles = []) {
     const router = useRouter();
+    const allowedRolesKey = allowedRoles.join('|');
 
     useEffect(() => {
         const token = localStorage.getItem('adminToken');
         const role = localStorage.getItem('adminRole');
+        const normalizedAllowedRoles = allowedRolesKey ? allowedRolesKey.split('|') : [];
 
         // Not logged in
         if (!token) {
-            router.replace('/auth/login');
+            router.replace(ADMIN_ROUTES.login);
             return;
         }
 
         // If roles are provided, check role access
-        if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
-            // If user is normal user → go home
+        if (normalizedAllowedRoles.length > 0 && !normalizedAllowedRoles.includes(role)) {
             if (role === 'User') {
                 router.replace('/');
             } else {
-                router.replace('/dashboard');
+                router.replace(ADMIN_ROUTES.dashboard);
             }
         }
-    }, [router, allowedRoles]);
+    }, [router, allowedRolesKey]);
 }
