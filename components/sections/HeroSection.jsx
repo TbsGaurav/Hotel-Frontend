@@ -97,11 +97,6 @@ export default function HeroSection() {
         setTempCheckInDate(start);
         setTempCheckOutDate(end);
 
-        if (start && end) {
-            setCheckInDate(start);
-            setCheckOutDate(end);
-            setShowDatePicker(false);
-        }
     };
 
     const formatDate = (date) => {
@@ -405,7 +400,7 @@ export default function HeroSection() {
                                                                         type="button"
                                                                         onClick={decreaseMonth}
                                                                         disabled={prevMonthButtonDisabled}
-                                                                        className="nav-button"
+                                                                        className="nav-button prev-month"
                                                                     >
                                                                         ‹
                                                                     </button>
@@ -418,7 +413,7 @@ export default function HeroSection() {
                                                                         type="button"
                                                                         onClick={increaseMonth}
                                                                         disabled={nextMonthButtonDisabled}
-                                                                        className="nav-button"
+                                                                        className="nav-button next-month"
                                                                     >
                                                                         ›
                                                                     </button>

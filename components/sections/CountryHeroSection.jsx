@@ -85,11 +85,11 @@ function CountryHeroSection({}) {
         setTempCheckInDate(start);
         setTempCheckOutDate(end);
 
-        if (start && end) {
-            setCheckInDate(start);
-            setCheckOutDate(end);
-            setShowDatePicker(false);
-        }
+        // if (start && end) {
+        //     setCheckInDate(start);
+        //     setCheckOutDate(end);
+        //     setShowDatePicker(false);
+        // }
     };
 
     const formatDate = (date) => {
@@ -136,7 +136,8 @@ function CountryHeroSection({}) {
                 datePickerRef.current &&
                 !datePickerRef.current.contains(event.target) &&
                 !event.target.closest('.react-datepicker') &&
-                !event.target.closest('.country-date-range-picker-popup ')
+                !event.target.closest('.date-range-picker-popup ')
+                // !event.target.closest('.country-date-range-picker-popup ')
             ) {
                 setShowDatePicker(false);
             }
@@ -279,7 +280,7 @@ function CountryHeroSection({}) {
 
                                     {/* Date Range Picker Popup */}
                                     {showDatePicker && (
-                                        <div className="country-date-range-picker-popup">
+                                        <div className="date-range-picker-popup">
                                             <div className="calendar-container">
                                                 <DatePicker
                                                     selected={tempCheckInDate}
@@ -301,68 +302,154 @@ function CountryHeroSection({}) {
                                                         nextMonthButtonDisabled,
                                                         customHeaderCount
                                                     }) => {
-                                                        let displayDate = date;
-                                                        if (customHeaderCount === 1) {
-                                                            displayDate = addMonths(date, 1);
-                                                        }
+                                                        const isFirstMonth = customHeaderCount === 0;
+                                                        const isSecondMonth = customHeaderCount === 1;
+
+                                                        const displayDate = isSecondMonth ? addMonths(date, 1) : date;
 
                                                         return (
                                                             <div className="custom-header-wrapper">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={decreaseMonth}
-                                                                    disabled={prevMonthButtonDisabled}
-                                                                    className="nav-button prev-month"
-                                                                >
-                                                                    ‹
-                                                                </button>
+                                                                {isFirstMonth && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={decreaseMonth}
+                                                                        disabled={prevMonthButtonDisabled}
+                                                                        className="nav-button prev-month"
+                                                                    >
+                                                                        ‹
+                                                                    </button>
+                                                                )}
+
                                                                 <div className="month-year-display">{format(displayDate, 'MMM yyyy')}</div>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={increaseMonth}
-                                                                    disabled={nextMonthButtonDisabled}
-                                                                    className="nav-button next-month"
-                                                                >
-                                                                    ›
-                                                                </button>
+
+                                                                {isSecondMonth && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={increaseMonth}
+                                                                        disabled={nextMonthButtonDisabled}
+                                                                        className="nav-button next-month"
+                                                                    >
+                                                                        ›
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         );
                                                     }}
                                                 />
-                                            </div>
+                                                <div className="selected-range-footer">
+                                                    <span>
+                                                        {formatDate(tempCheckInDate)} - {formatDate(tempCheckOutDate)}
+                                                    </span>
 
-                                            {/* Footer with Cancel/Apply buttons */}
-                                            {/* <div className="date-picker-footer">
-                                                <div className="selected-range-footer"></div>
-                                                <div className="footer-buttons">
-                                                    {tempCheckInDate && tempCheckOutDate
-                                                        ? `${formatDate(tempCheckInDate)} - ${formatDate(tempCheckOutDate)}`
-                                                        : `${formatDate(new Date())} - ${formatDate(new Date())}`}
-                                                    <button
-                                                        type="button"
-                                                        className="cancel-button"
-                                                        onClick={() => {
-                                                            setTempCheckInDate(checkInDate);
-                                                            setTempCheckOutDate(checkOutDate);
-                                                            setShowDatePicker(false);
-                                                        }}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="apply-button"
-                                                        onClick={() => {
-                                                            setCheckInDate(tempCheckInDate);
-                                                            setCheckOutDate(tempCheckOutDate);
-                                                            setShowDatePicker(false);
-                                                        }}
-                                                    >
-                                                        Apply
-                                                    </button>
+                                                    <div className="footer-buttons">
+                                                        <button
+                                                            type="button"
+                                                            className="cancel-button"
+                                                            onClick={() => setShowDatePicker(false)}
+                                                        >
+                                                            Cancel
+                                                        </button>
+
+                                                        <button
+                                                            type="button"
+                                                            className="apply-button"
+                                                            onClick={() => {
+                                                                setCheckInDate(tempCheckInDate);
+                                                                setCheckOutDate(tempCheckOutDate);
+                                                                setShowDatePicker(false);
+                                                            }}
+                                                        >
+                                                            Apply
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div> */}
+                                            </div>
                                         </div>
+                                        // <div className="country-date-range-picker-popup">
+                                        // <div className="date-range-picker-popup">
+                                        //     <div className="calendar-container">
+                                        //         <DatePicker
+                                        //             selected={tempCheckInDate}
+                                        //             onChange={handleDateChange}
+                                        //             startDate={tempCheckInDate}
+                                        //             endDate={tempCheckOutDate}
+                                        //             selectsRange
+                                        //             inline
+                                        //             monthsShown={2}
+                                        //             minDate={new Date()}
+                                        //             dateFormat="MM/dd/yyyy"
+                                        //             showPopperArrow={false}
+                                        //             calendarClassName="custom-date-range-calendar"
+                                        //             renderCustomHeader={({
+                                        //                 date,
+                                        //                 decreaseMonth,
+                                        //                 increaseMonth,
+                                        //                 prevMonthButtonDisabled,
+                                        //                 nextMonthButtonDisabled,
+                                        //                 customHeaderCount
+                                        //             }) => {
+                                        //                 let displayDate = date;
+                                        //                 if (customHeaderCount === 1) {
+                                        //                     displayDate = addMonths(date, 1);
+                                        //                 }
+
+                                        //                 return (
+                                        //                     <div className="custom-header-wrapper">
+                                        //                         <button
+                                        //                             type="button"
+                                        //                             onClick={decreaseMonth}
+                                        //                             disabled={prevMonthButtonDisabled}
+                                        //                             className="nav-button prev-month"
+                                        //                         >
+                                        //                             ‹
+                                        //                         </button>
+                                        //                         <div className="month-year-display">{format(displayDate, 'MMM yyyy')}</div>
+                                        //                         <button
+                                        //                             type="button"
+                                        //                             onClick={increaseMonth}
+                                        //                             disabled={nextMonthButtonDisabled}
+                                        //                             className="nav-button next-month"
+                                        //                         >
+                                        //                             ›
+                                        //                         </button>
+                                        //                     </div>
+                                        //                 );
+                                        //             }}
+                                        //         />
+                                        //     </div>
+
+                                        //     {/* Footer with Cancel/Apply buttons */}
+                                        //     <div className="date-picker-footer">
+                                        //         <div className="selected-range-footer"></div>
+                                        //         <div className="footer-buttons">
+                                        //             {tempCheckInDate && tempCheckOutDate
+                                        //                 ? `${formatDate(tempCheckInDate)} - ${formatDate(tempCheckOutDate)}`
+                                        //                 : `${formatDate(new Date())} - ${formatDate(new Date())}`}
+                                        //             <button
+                                        //                 type="button"
+                                        //                 className="cancel-button"
+                                        //                 onClick={() => {
+                                        //                     setTempCheckInDate(checkInDate);
+                                        //                     setTempCheckOutDate(checkOutDate);
+                                        //                     setShowDatePicker(false);
+                                        //                 }}
+                                        //             >
+                                        //                 Cancel
+                                        //             </button>
+                                        //             <button
+                                        //                 type="button"
+                                        //                 className="apply-button"
+                                        //                 onClick={() => {
+                                        //                     setCheckInDate(tempCheckInDate);
+                                        //                     setCheckOutDate(tempCheckOutDate);
+                                        //                     setShowDatePicker(false);
+                                        //                 }}
+                                        //             >
+                                        //                 Apply
+                                        //             </button>
+                                        //         </div>
+                                        //     </div>
+                                        // </div>
                                     )}
                                 </div>
                             </div>
