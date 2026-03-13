@@ -12,11 +12,11 @@ export default async function RegionDetails({ params }) {
     const slug = resolvedParams?.slug || [];
     const countrySlug = slug[0];
     const regionSlug = slug[1];
-
     const countryName = formatCountryName(countrySlug);
     const regionName = formatCountryName(regionSlug);
     const response = await getCitiesByRegion(countrySlug, regionSlug);
     const cities = response?.data || [];
+    const description = cities.regionContent;
     const cityItems = cities.map((city) => ({
         label: city.cityName,
         count: city.hotelCount,
@@ -47,6 +47,21 @@ export default async function RegionDetails({ params }) {
             </div>
 
             <section className="container py-4">
+                <section className="container py-5">
+                    <div className="row align-items-start">
+                        {/* LEFT CONTENT */}
+                        <div className="col-lg-6">
+                            <h3 className="fw-bold mb-4">{regionName}</h3>
+
+                            <div className="region-description" dangerouslySetInnerHTML={{ __html: description || '' }}></div>
+                        </div>
+
+                        {/* RIGHT IMAGE */}
+                        {/* <div className="col-lg-6 text-end">
+                            <img src="/image/Delight your senses.webp" alt={regionName} className="img-fluid rounded-4" />
+                        </div> */}
+                    </div>
+                </section>
                 <div className="row">
                     <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />{' '}
                     <hr className="border-secondary opacity-10 my-5" />
