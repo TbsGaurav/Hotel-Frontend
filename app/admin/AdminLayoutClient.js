@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminHeader from './_layout_components/Header';
 import AdminTopNav from './_layout_components/AdminTopNav';
@@ -10,8 +10,11 @@ export default function AdminLayoutClient({ children }) {
     const router = useRouter();
     const pathname = usePathname();
     const hideHeader = pathname === ADMIN_ROUTES.login;
+    const [authorizedPath, setAuthorizedPath] = useState(() => (hideHeader ? pathname : null));
 
     useEffect(() => {
+        if (hideHeader) return;
+
         const token = localStorage.getItem('adminToken');
         const role = localStorage.getItem('adminRole');
 
@@ -24,9 +27,24 @@ export default function AdminLayoutClient({ children }) {
             router.replace('/');
             return;
         }
-    }, [router]);
+
+        const frame = requestAnimationFrame(() => {
+            setAuthorizedPath(pathname);
+        });
+
+        return () => cancelAnimationFrame(frame);
+    }, [hideHeader, pathname, router]);
+
     if (hideHeader) {
         return <>{children}</>;
+    }
+
+    if (authorizedPath !== pathname) {
+        return (
+            <div className="min-vh-100 d-flex justify-content-center align-items-center bg-light">
+                <div className="spinner-border text-primary" role="status" aria-label="Checking authentication"></div>
+            </div>
+        );
     }
 
     return (
