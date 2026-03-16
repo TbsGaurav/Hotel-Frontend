@@ -46,7 +46,7 @@ export default async function BrandPage({ params }) {
             <div className="py-2">
                 <div className="container">
                     <div className="d-flex align-items-center small">
-                        <Link href="/destinations" className="text-dark text-decoration-none">
+                        <Link href="/" className="text-dark text-decoration-none">
                             All Brands
                         </Link>
 
