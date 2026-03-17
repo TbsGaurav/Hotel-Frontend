@@ -172,6 +172,11 @@ export default function Header() {
                                                         Blogs
                                                     </a>
                                                 </li>
+                                                <li>
+                                                    <a href="/brands" onClick={handleCloseOffcanvas}>
+                                                        All Brands
+                                                    </a>
+                                                </li>
                                             </ul>
 
                                             {/* <ul className="list-unstyled main-menu">

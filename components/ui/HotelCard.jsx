@@ -1,6 +1,6 @@
 import { useId } from 'react';
 
-export default function HotelCard({ hotel }) {
+export default function  HotelCard({ hotel }) {
     const carouselId = useId();
 
     return (

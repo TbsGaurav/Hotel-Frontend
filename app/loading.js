@@ -1,4 +1,5 @@
-export default function Loading() {
+
+export default function Loader() {
     return (
         <div
             style={{

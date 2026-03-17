@@ -5,9 +5,11 @@ import Link from 'next/link';
 
 export default async function BrandPage({ params }) {
     const { brand } = await params;
-    const brandData = await getBrandCountries(brand);
+    const decodedBrand = decodeURIComponent(brand);
 
-    const brandName = formatBrandName(brand);
+    const brandData = await getBrandCountries(decodedBrand);
+
+    const brandName = formatBrandName(decodedBrand);
 
     function formatBrandName(slug) {
         const smallWords = ['and', 'of', 'the', 'in', 'at', 'by', 'for'];
@@ -43,10 +45,10 @@ export default async function BrandPage({ params }) {
         <>
             <CountryHeroSection />
 
-            <div className="py-2">
+            <div className="breadcrumb-section">
                 <div className="container">
                     <div className="d-flex align-items-center small">
-                        <Link href="/" className="text-dark text-decoration-none">
+                        <Link href="/brands" className="text-dark text-decoration-none">
                             All Brands
                         </Link>
 
@@ -59,7 +61,6 @@ export default async function BrandPage({ params }) {
             <section className="container py-4">
                 <section className="container py-5">
                     <div className="row align-items-start">
-                        {/* LEFT CONTENT */}
                         <div className="col-lg-6">
                             <h3 className="fw-bold mb-4">{brandName}</h3>
                         </div>

@@ -54,11 +54,5 @@ export default function AdminLayoutClient({ children }) {
             <main className="flex-fill p-4 bg-light">{children}</main>
         </div>
     );
-    // return (
-    //     <div className="min-vh-100 d-flex flex-column">
-    //         {!hideHeader && <AdminHeader />}
-    //         {!hideHeader && <AdminTopNav />}
-    //         <main className="flex-fill p-4 bg-light">{children}</main>
-    //     </div>
-    // );
+   
 }

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -253,16 +253,51 @@ function WeekendGetawayHotelSection() {
                                         maxWidth: '420px',
                                         margin: '0 auto',
                                         overflow: 'hidden'
-                                        
                                     }}
                                 >
-                                    <div
+                                    <Swiper
+                                        modules={[Autoplay, Pagination]}
+                                        slidesPerView={1}
+                                        loop
+                                        autoplay={{
+                                            delay: 4000,
+                                            disableOnInteraction: false
+                                        }}
+                                        speed={800}
+                                        pagination={{
+                                            clickable: true
+                                        }}
+                                        className="image-swiper"
+                                        style={{ borderRadius: '14px', overflow: 'hidden' }}
+                                    >
+                                        <SwiperSlide>
+                                            <img
+                                                src="/image/property-img.webp"
+                                                style={{ height: '200px', width: '100%', objectFit: 'cover' }}
+                                            />
+                                        </SwiperSlide>
+
+                                        <SwiperSlide>
+                                            <img
+                                                src="/image/property-img.webp"
+                                                style={{ height: '200px', width: '100%', objectFit: 'cover' }}
+                                            />
+                                        </SwiperSlide>
+
+                                        <SwiperSlide>
+                                            <img
+                                                src="/image/property-img.webp"
+                                                style={{ height: '200px', width: '100%', objectFit: 'cover' }}
+                                            />
+                                        </SwiperSlide>
+                                    </Swiper>
+
+                                    {/* <div
                                         id={`hotelCarousel-${index}`}
                                         className="carousel slide position-relative mb-3"
                                         data-bs-ride="carousel"
                                         data-bs-interval="2500"
                                     >
-                                        {/* indicators inside image */}
                                         <div className="carousel-indicators">
                                             <button
                                                 type="button"
@@ -281,7 +316,6 @@ function WeekendGetawayHotelSection() {
                                                 <img
                                                     src="/image/property-img.webp"
                                                     className="d-block w-100"
-                                                    // style={{ height: '220px', objectFit: 'cover' }}
                                                     style={{
                                                         height: '200px',
                                                         objectFit: 'cover',
@@ -306,7 +340,7 @@ function WeekendGetawayHotelSection() {
                                                 />
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> */}
                                     <div className="card-content">
                                         <div className="d-flex mb-2">
                                             <h4 className="property-grid-title my-auto me-3">{hotel.name}</h4>
@@ -332,19 +366,6 @@ function WeekendGetawayHotelSection() {
                                             </div>
 
                                             <p className="small-para-14-px mb-0">1 night, 2 adults</p>
-                                            {/* <div className="col-12">
-                                            <p className="small-para-14-px text-decoration-line-through text-black mb-1">
-                                                {hotel.oldPrice}
-                                            </p>
-                                        </div>
-
-                                        <div className="col-6">
-                                            <p className="para text-theme-green">{hotel.price}</p>
-                                        </div>
-
-                                        <div className="col-6 text-end">
-                                            <p className="small-para-14-px">1 night, 2 adults</p>
-                                        </div> */}
                                         </div>
 
                                         <a href="#" className="theme-button-blue rounded w-100 text-center">
