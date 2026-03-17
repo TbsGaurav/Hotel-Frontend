@@ -88,6 +88,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         slug: '',
         sourceId: null,
         geoNodeType: null,
+        geoNodeName: null,
         countryId: null,
         regionId: null,
         cityId: null,

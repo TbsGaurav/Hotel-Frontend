@@ -1,7 +1,8 @@
 'use client';
 
-import { RULE_FIELDS, RULE_OPERATORS, RULE_VALUE_OPTIONS } from '@/lib/constants/ruleConfig';
-import { useState } from 'react';
+import { getCategoryList } from '@/lib/api/admin/collectionapi';
+import { RULE_FIELDS, RULE_VALUE_OPTIONS, getOperatorsForField } from '@/lib/constants/ruleConfig';
+import { useEffect, useState } from 'react';
 
 export default function RulesTab({
     rules,
@@ -20,6 +21,25 @@ export default function RulesTab({
     loading
 }) {
     const [errors, setErrors] = useState({});
+    const operators = ruleField ? getOperatorsForField(ruleField) : [];
+    const [amenities, setAmenities] = useState([]);
+    const [propertyTypes, setPropertyTypes] = useState([]);
+    const [brands, setBrands] = useState([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await getCategoryList();
+                setAmenities(res?.data.amenities || []);
+                setPropertyTypes(res?.data.propertyTypes || []);
+                setBrands(res?.data.brands || []);
+            } catch (err) {
+                console.error('Error fetching categories', err);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -28,14 +48,11 @@ export default function RulesTab({
             [name]: value
         }));
     };
-    const handleNextClick = () => {
-        // if ((formData.mode === 'Rule' || formData.mode === 'Hybrid') && rules.length === 0) {
-        //     toast.error('Please add at least one rule');
-        //     return;
-        // }
 
+    const handleNextClick = () => {
         onNext();
     };
+
     const handleAddRule = () => {
         const newErrors = {};
 
@@ -43,7 +60,7 @@ export default function RulesTab({
             newErrors.ruleField = 'Please select a field';
         }
 
-        if (!ruleValue || !ruleValue.toString().trim()) {
+        if (ruleField !== 'GeoContainment' && (!ruleValue || !ruleValue.toString().trim())) {
             newErrors.ruleValue = 'Please enter/select a value';
         }
 
@@ -53,6 +70,7 @@ export default function RulesTab({
 
         addRule(); // call parent function
     };
+
     return (
         <>
             <div className="row">
@@ -66,19 +84,6 @@ export default function RulesTab({
                     </select>
                 </div>
 
-                {/* ================= Max Hotels ================= */}
-                {/* <div className="col-12 col-lg-6 mb-3">
-                    <label className="form-label">Max Hotels</label>
-                    <input
-                        type="number"
-                        min="1"
-                        className="form-control"
-                        name="maxHotels"
-                        value={formData.maxHotels}
-                        onChange={handleChange}
-                        placeholder="Enter max number of hotels"
-                    />
-                </div> */}
             </div>
 
             {/* ================= RULE BUILDER ================= */}
@@ -95,7 +100,18 @@ export default function RulesTab({
                                 className={`form-select ${errors.ruleField ? 'is-invalid' : ''}`}
                                 value={ruleField}
                                 onChange={(e) => {
-                                    setRuleField(e.target.value);
+                                    const field = e.target.value;
+                                    setRuleField(field);
+
+                                    const ops = getOperatorsForField(field);
+                                    setRuleOperator(ops[0]?.value || '');
+
+                                    if (field === 'GeoContainment') {
+                                        setRuleValue(formData.geoNodeName || '');
+                                    } else {
+                                        setRuleValue('');
+                                    }
+
                                     setErrors((prev) => ({ ...prev, ruleField: null }));
                                 }}
                             >
@@ -112,7 +128,7 @@ export default function RulesTab({
                         {/* Operator */}
                         <div className="col-12 col-md-3">
                             <select className="form-select" value={ruleOperator} onChange={(e) => setRuleOperator(e.target.value)}>
-                                {RULE_OPERATORS.map((op) => (
+                                {operators.map((op) => (
                                     <option key={op.value} value={op.value}>
                                         {op.label}
                                     </option>
@@ -120,7 +136,74 @@ export default function RulesTab({
                             </select>
                         </div>
                         <div className="col-12 col-md-3">
-                            {RULE_VALUE_OPTIONS[ruleField] ? (
+                            {ruleField === 'GeoContainment' ? (
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={formData.geoNodeType ? `${formData.geoNodeName}` : 'Select GeoNode in Basics tab'}
+                                    disabled
+                                />
+                            ) : ruleField === 'Amenities' ? (
+                                <>
+                                    <select
+                                        className={`form-select ${errors.ruleValue ? 'is-invalid' : ''}`}
+                                        value={ruleValue}
+                                        onChange={(e) => {
+                                            setRuleValue(e.target.value);
+                                            setErrors((prev) => ({ ...prev, ruleValue: null }));
+                                        }}
+                                    >
+                                        <option value="">Select Value</option>
+                                        {amenities.map((amen) => (
+                                            <option key={amen.categoryId} value={amen.categoryName}>
+                                                {amen.categoryName}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    {errors.ruleValue && <div className="invalid-feedback">{errors.ruleValue}</div>}
+                                </>
+                            ) : ruleField === 'PropertyType' ? (
+                                <>
+                                    <select
+                                        className={`form-select ${errors.ruleValue ? 'is-invalid' : ''}`}
+                                        value={ruleValue}
+                                        onChange={(e) => {
+                                            setRuleValue(e.target.value);
+                                            setErrors((prev) => ({ ...prev, ruleValue: null }));
+                                        }}
+                                    >
+                                        <option value="">Select Value</option>
+                                        {propertyTypes.map((prop) => (
+                                            <option key={prop.propertyTypeId} value={prop.propertyTypeName}>
+                                                {prop.propertyTypeName}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    {errors.ruleValue && <div className="invalid-feedback">{errors.ruleValue}</div>}
+                                </>
+                            )   : ruleField === 'Brand' ? (
+                                <>
+                                    <select
+                                        className={`form-select ${errors.ruleValue ? 'is-invalid' : ''}`}
+                                        value={ruleValue}
+                                        onChange={(e) => {
+                                            setRuleValue(e.target.value);
+                                            setErrors((prev) => ({ ...prev, ruleValue: null }));
+                                        }}
+                                    >
+                                        <option value="">Select Value</option>
+                                        {brands.map((brand) => (
+                                            <option key={brand.brandId} value={brand.brandName}>
+                                                {brand.brandName}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    {errors.ruleValue && <div className="invalid-feedback">{errors.ruleValue}</div>}
+                                </>
+                            ): RULE_VALUE_OPTIONS[ruleField] ? (
                                 <>
                                     <select
                                         className={`form-select ${errors.ruleValue ? 'is-invalid' : ''}`}
@@ -173,11 +256,9 @@ export default function RulesTab({
                             {rules.map((r, index) => (
                                 <div
                                     key={index}
-                                    className={`d-flex justify-content-between align-items-center py-2 ${
-                                        rules.length > 1 && index !== rules.length - 1 ? 'border-bottom' : ''
-                                    }`}
+                                    className={`d-flex justify-content-between align-items-center py-2 ${rules.length > 1 && index !== rules.length - 1 ? 'border-bottom' : ''}`}
                                 >
-                                     <div>
+                                    <div>
                                         {r.Field} {r.Operator} {r.Value}
                                     </div>
 

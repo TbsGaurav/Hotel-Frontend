@@ -314,6 +314,7 @@ export default function BasicsTab({
                                                 setFormData((prev) => ({
                                                     ...prev,
                                                     countryId: node.countryId,
+                                                    geoNodeName: node.name,
                                                     regionId: null,
                                                     cityId: null,
                                                     districtId: null
@@ -377,6 +378,7 @@ export default function BasicsTab({
                                                 setFormData((prev) => ({
                                                     ...prev,
                                                     regionId: region.regionId,
+                                                    geoNodeName: region.name,
                                                     cityId: null,
                                                     districtId: null
                                                 }));
@@ -442,6 +444,7 @@ export default function BasicsTab({
                                                 setFormData((prev) => ({
                                                     ...prev,
                                                     cityId: city.cityId,
+                                                    geoNodeName: city.name,
                                                     districtId: null
                                                 }));
                                             }}
@@ -505,7 +508,8 @@ export default function BasicsTab({
 
                                                 setFormData((prev) => ({
                                                     ...prev,
-                                                    districtId: district.districtId
+                                                    districtId: district.districtId,
+                                                    geoNodeName: district.name
                                                 }));
                                             }}
                                         >
@@ -594,7 +598,7 @@ export default function BasicsTab({
                         )}
                     </button>
                 </div>
-            </form>
+            </form >
         </>
     );
 }

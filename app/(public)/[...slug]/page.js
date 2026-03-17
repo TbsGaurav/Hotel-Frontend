@@ -25,10 +25,5 @@ export default async function DynamicPage({ params }) {
         return <RegionDetails country={slugArray[0]} region={slugArray[1]} params={params} />;
     }
 
-    // COLLECTION PAGE
-    // if (slugArray.length === 1 && data.entityType === 'collection') {
-    //     return <CollectionDetails collection={slugArray[0]} params={params} />;
-    // }
-
     return notFound();
 }
