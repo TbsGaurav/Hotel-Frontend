@@ -1,30 +1,40 @@
 'use client';
-import { useState, useEffect } from 'react';
+
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
-import toast from 'react-hot-toast';
-import { getCollectionByUrl } from '@/lib/api/admin/collectionapi';
-import { getHotelsByCollection } from '@/lib/api/public/hotelapi';
-
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 
-export default function CollectionDetails({ slug }) {
-    const [collection, setCollection] = useState(null);
-    const [hotels, setHotels] = useState([]);
-    const [loading, setLoading] = useState(true);
+export default function CollectionDetails({ collection, hotels, slug }) {
+    const basic = collection?.basicCollection;
+    const content = collection?.collectionContent;
+    const loading = false;
+    const hotelsData = hotels || [];
 
     function decodeHtml(html) {
         if (!html) return '';
 
-        const textarea = document.createElement('textarea');
-        let decoded = html;
+        // Handle HTML entities without using document (SSR compatible)
+        const entities = {
+            '&amp;': '&',
+            '&lt;': '<',
+            '&gt;': '>',
+            '&quot;': '"',
+            '&#39;': "'",
+            '&apos;': "'",
+            '&nbsp;': ' ',
+            '&ndash;': '–',
+            '&mdash;': '—',
+            '&copy;': '©',
+            '&reg;': '®',
+            '&trade;': '™'
+        };
 
-        // Decode multiple times (handles double encoding)
-        for (let i = 0; i < 2; i++) {
-            textarea.innerHTML = decoded;
-            decoded = textarea.value;
-        }
+        let decoded = html;
+        Object.keys(entities).forEach(entity => {
+            decoded = decoded.replace(new RegExp(entity, 'g'), entities[entity]);
+        });
 
         return decoded;
     }
@@ -40,65 +50,13 @@ export default function CollectionDetails({ slug }) {
         return 'Review score needed';
     }
 
-    useEffect(() => {
-        const load = async () => {
-            try {
-                setLoading(true);
 
-                const res = await getCollectionByUrl(slug);
-                setCollection(res?.data || null);
-
-                // Fetch preview hotels using collection ID
-                if (res?.data?.basicCollection?.collectionId) {
-                    const hotelsRes = await getHotelsByCollection(res.data.basicCollection.collectionId);
-                    setHotels(hotelsRes?.data || []);
-                }
-
-            } catch (err) {
-                console.error(err);
-                toast.error('Failed to load collection');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (slug) load();
-    }, [slug]);
-
-    // Initialize carousels after hotels data loads
-    useEffect(() => {
-        if (hotels.length > 0 && typeof window !== 'undefined') {
-            // Wait for DOM update then initialize carousels
-            const timer = setTimeout(() => {
-                const carousels = document.querySelectorAll('[id^="hotelCarousel-"]');
-                carousels.forEach((carousel) => {
-                    if (window.bootstrap && window.bootstrap.Carousel) {
-                        // Check if already initialized
-                        const instance = window.bootstrap.Carousel.getInstance(carousel);
-                        if (!instance) {
-                            new window.bootstrap.Carousel(carousel, {
-                                interval: 2500,
-                                pause: false,
-                                wrap: true
-                            });
-                        }
-                    }
-                });
-            }, 100);
-            return () => clearTimeout(timer);
-        }
-    }, [hotels]);
-
-    const basic = collection?.basicCollection;
-    const content = collection?.collectionContent;
 
     return (
         <>
             <CountryHeroSection />
 
-            {loading ? (
-                <CollectionDetailsSkeleton />
-            ) : !collection ? (
+            {!collection ? (
                 <div className="container py-5 text-center">
                     <h3>Collection not found</h3>
                     <Link href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
@@ -115,12 +73,9 @@ export default function CollectionDetails({ slug }) {
                                     Home
                                 </Link>
                                 <span className="mx-2 text-muted">•</span>
-                                {/* <Link href="/collections" className="text-dark text-decoration-none">
-                                    Collections
-                                </Link>
-                                <span className="mx-2 text-muted">•</span> */}
                                 <span className="fw-semibold text-decoration-none text-primary">
-                                    {basic?.name}                        </span>
+                                    {basic?.name}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -153,7 +108,7 @@ export default function CollectionDetails({ slug }) {
 
                                     <div className="d-flex align-items-center">
                                         <FaHotel className="text-muted me-2" />
-                                        <span>{hotels.length} Hotels</span>
+                                        <span>{hotelsData.length} Hotels</span>
                                     </div>
                                 </div>
 
@@ -169,9 +124,9 @@ export default function CollectionDetails({ slug }) {
                                 <h4 className="heading mb-4">Hotels List</h4>
                             </div>
                         </div>
-                        {hotels.length > 0 ? (
+                        {hotelsData.length > 0 ? (
                             <div className="d-flex flex-column gap-4">
-                                {hotels.map((hotel) => (
+                                {hotelsData.map((hotel) => (
                                     <div
                                         key={hotel.hotelId}
                                         className="card border-0 rounded-4 mb-4 p-4"
@@ -180,7 +135,7 @@ export default function CollectionDetails({ slug }) {
                                         }}
                                     >
                                         <div className="row g-3">
-                                            {/* Image Carousel */}
+                                            {/* Image */}
                                             <div className="col-md-4">
                                                 <div className="position-relative">
                                                     {/* TAG */}
@@ -197,69 +152,24 @@ export default function CollectionDetails({ slug }) {
                                                     >
                                                         {hotel.hotelType || 'Apartment Hotel'}
                                                     </span>
-                                                    <div
-                                                        id={`hotelCarousel-${hotel.hotelId}`}
-                                                        className="carousel slide rounded-4 overflow-hidden"
-                                                        data-bs-ride="carousel"
-                                                        data-bs-interval="2500"
-                                                        data-bs-pause="false"
-                                                        data-bs-wrap="true"
-                                                    >
-                                                        {/* Indicators */}
-                                                        <div className="carousel-indicators">
-                                                            <button type="button" data-bs-target={`#hotelCarousel-${hotel.hotelId}`} data-bs-slide-to="0" className="active"></button>
-                                                            <button type="button" data-bs-target={`#hotelCarousel-${hotel.hotelId}`} data-bs-slide-to="1"></button>
-                                                            <button type="button" data-bs-target={`#hotelCarousel-${hotel.hotelId}`} data-bs-slide-to="2"></button>
-                                                        </div>
-
-                                                        {/* Images */}
-                                                        <div className="carousel-inner">
-                                                            <div className="carousel-item active">
-                                                                <img
-                                                                    src={hotel.photo || "/image/property-img.webp"}
-                                                                    className="d-block w-100"
-                                                                    style={{ height: '340px', objectFit: 'cover' }}
-                                                                    alt={hotel.hotelName}
-                                                                    onError={(e) => {
-                                                                        e.target.src = '/image/property-img.webp';
-                                                                    }}
-                                                                />
-                                                            </div>
-
-                                                            <div className="carousel-item">
-                                                                <img
-                                                                    src={hotel.photo || "/image/property-img.webp"}
-                                                                    className="d-block w-100"
-                                                                    style={{ height: '340px', objectFit: 'cover' }}
-                                                                    alt={hotel.hotelName}
-                                                                    onError={(e) => {
-                                                                        e.target.src = '/image/property-img.webp';
-                                                                    }}
-                                                                />
-                                                            </div>
-
-                                                            <div className="carousel-item">
-                                                                <img
-                                                                    src={hotel.standardPhoto || "/image/property-img.webp"}
-                                                                    className="d-block w-100"
-                                                                    style={{ height: '340px', objectFit: 'cover' }}
-                                                                    alt={hotel.hotelName}
-                                                                    onError={(e) => {
-                                                                        e.target.src = '/image/property-img.webp';
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                    <img
+                                                        src={hotel.photo || "/image/property-img.webp"}
+                                                        className="d-block w-100 rounded-4"
+                                                        style={{ height: '340px', objectFit: 'cover' }}
+                                                        alt={hotel.hotelName}
+                                                    />                                                </div>
                                             </div>
 
                                             {/* Hotel Info */}
                                             <div className="col-md-8">
                                                 {/* TITLE + STARS */}
                                                 <div className="d-flex align-items-center mb-2">
-                                                    <h4 className="property-grid-title font-size-18 my-auto me-3">{hotel.hotelName}</h4>
-
+                                                    <Link
+                                                        href={`/${hotel.urlName?.toLowerCase().replace(/\s+/g, '-')}`}
+                                                        className="property-grid-title font-size-18 my-auto me-3 text-decoration-none text-primary hotel-name-link"
+                                                    >
+                                                        {hotel.hotelName}
+                                                    </Link>
                                                     <div className="text-warning">
                                                         {[...Array(5)].map((_, i) => (
                                                             <MdOutlineStarPurple500
@@ -383,7 +293,6 @@ export default function CollectionDetails({ slug }) {
 function CollectionDetailsSkeleton() {
     return (
         <div className="container py-5">
-
             {/* Breadcrumb / Title Skeleton */}
             <div className="mb-4">
                 <div className="skeleton-text mb-2" style={{ width: '150px', height: '20px' }}></div>
@@ -397,7 +306,6 @@ function CollectionDetailsSkeleton() {
                     <div key={i} className="card border-0 rounded-4 mb-4 p-4" style={{ boxShadow: '0 4px 18px rgba(0,0,0,0.08)' }}>
 
                         <div className="row g-3">
-
                             {/* Left: Image Skeleton */}
                             <div className="col-md-4">
                                 <div className="skeleton-image rounded-4" style={{ height: '200px', width: '100%' }}></div>
