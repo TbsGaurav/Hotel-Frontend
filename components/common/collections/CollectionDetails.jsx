@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
 import toast from 'react-hot-toast';
-import { getCollectionByUrl, getPreviewHotels } from '@/lib/api/admin/collectionapi';
+import { getCollectionByUrl } from '@/lib/api/admin/collectionapi';
+import { getHotelsByCollection } from '@/lib/api/public/hotelapi';
+
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 
 export default function CollectionDetails({ slug }) {
@@ -48,7 +50,7 @@ export default function CollectionDetails({ slug }) {
 
                 // Fetch preview hotels using collection ID
                 if (res?.data?.basicCollection?.collectionId) {
-                    const hotelsRes = await getPreviewHotels(res.data.basicCollection.collectionId);
+                    const hotelsRes = await getHotelsByCollection(res.data.basicCollection.collectionId);
                     setHotels(hotelsRes?.data || []);
                 }
 
