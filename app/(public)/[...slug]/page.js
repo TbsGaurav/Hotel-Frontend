@@ -6,7 +6,6 @@ import CountryDetails from '@/components/common/country/CountryDetails';
 import RegionDetails from '@/components/common/region/RegionDetails';
 import CollectionDetails from '@/components/common/collections/CollectionDetails';
 import CountryBrandDetails from '@/components/common/country/CountryBrandDetails';
-import HotelDetails from '@/components/common/hotel/HotelDetails';
 
 export default async function DynamicPage({ params }) {
     const { slug } = await params;
@@ -40,19 +39,23 @@ export default async function DynamicPage({ params }) {
     if (slugArray.length === 1 && data.entityType === 'Collection') {
         // Fetch collection and hotels data on server for SSR/SEO
         const collectionRes = await getCollectionByUrl(slug);
+        const introShortCopy = collectionRes?.data?.collectionContent?.introShortCopy;
+    
         let hotels = [];
-        
+
         if (collectionRes?.data?.basicCollection?.collectionId) {
             const hotelsRes = await getHotelsByCollection(collectionRes.data.basicCollection.collectionId);
             hotels = hotelsRes?.data || [];
         }
-        
-        return <CollectionDetails collection={collectionRes?.data} hotels={hotels} slug={slug} />;
-    }
 
-    // HOTEL PAGE (CityHotel)
-    if (slugArray.length === 2 && data.entityType === 'Hotel') {
-        return <HotelDetails city={slugArray[0]} hotel={slugArray[1]} params={params} />;
+        return (
+            <CollectionDetails
+                collection={collectionRes?.data}
+                hotels={hotels}
+                slug={slug}
+                introShortCopy={introShortCopy} 
+            />
+        );
     }
 
     return notFound();
