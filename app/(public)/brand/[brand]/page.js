@@ -37,8 +37,8 @@ export default async function BrandPage({ params }) {
 
     const items = Object.entries(countryMap).map(([country, data]) => ({
         label: `${brandName} ${country}`,
-        count: data.count
-        // href: `/${brand}/${country.toLowerCase().replace(/\s+/g, '-')}`
+        count: data.count,
+        href: `/${country.toLowerCase().replace(/\s+/g, '-')}/${brand}`
     }));
 
     return (

@@ -442,10 +442,10 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             return;
         }
 
-        if (!rules.length) {
-            toast.error('Please add at least one rule');
-            return;
-        }
+        // if (!rules.length) {
+        //     toast.error('Please add at least one rule');
+        //     return;
+        // }
 
         try {
             setLoading(true);

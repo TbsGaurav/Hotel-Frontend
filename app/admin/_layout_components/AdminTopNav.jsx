@@ -20,20 +20,11 @@ export default function AdminTopNav() {
                                 Dashboard
                             </Link>
                         </li>
-
-                        <li className="nav-item dropdown">
-                            <a className="nav-link dropdown-toggle text-white px-4 py-3" href="#" role="button" data-bs-toggle="dropdown">
-                                Content
-                            </a>
-                            <ul className="dropdown-menu">
-                                <li>
-                                    <Link className="dropdown-item" href={ADMIN_ROUTES.collections}>
-                                        Collection
-                                    </Link>
-                                </li>
-                            </ul>
+                        <li className="nav-item">
+                            <Link className="nav-link text-white px-4 py-3" href={ADMIN_ROUTES.collections}>
+                                Collection
+                            </Link>
                         </li>
-
                         <li className="nav-item">
                             <Link className="nav-link text-white px-4 py-3" href="#">
                                 Hotel

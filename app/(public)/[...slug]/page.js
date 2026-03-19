@@ -3,6 +3,7 @@ import { resolveSlug } from '@/lib/api/public/countryapi';
 import CountryDetails from '@/components/common/country/CountryDetails';
 import RegionDetails from '@/components/common/region/RegionDetails';
 import CollectionDetails from '@/components/common/collections/CollectionDetails';
+import CountryBrandDetails from '@/components/common/country/CountryBrandDetails';
 
 export default async function DynamicPage({ params }) {
     const { slug } = await params;
@@ -25,6 +26,11 @@ export default async function DynamicPage({ params }) {
     // REGION PAGE
     if (slugArray.length === 2 && data.entityType === 'Region') {
         return <RegionDetails country={slugArray[0]} region={slugArray[1]} params={params} />;
+    }
+
+    //CountryBrand Page
+    if (slugArray.length === 2 && data.entityType === 'CountryBrand') {
+        return <CountryBrandDetails country={slugArray[0]} params={params} />;
     }
 
     // COLLECTION PAGE
