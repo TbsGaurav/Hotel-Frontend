@@ -924,7 +924,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         setNewlyAddedHotels((prev) => (prev.some((item) => item.id === normalizedHotel.id) ? prev : [...prev, normalizedHotel]));
     };
 
-
     // ---------------- RENDER ----------------
     return (
         <div className="card shadow-sm">
@@ -962,6 +961,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                         selectedGeoNode={selectedGeoNode}
                         setSelectedGeoNode={setSelectedGeoNode}
                         locationNames={locationNames}
+                        isEdit={!!collectionId}
                     />
                 )}
 

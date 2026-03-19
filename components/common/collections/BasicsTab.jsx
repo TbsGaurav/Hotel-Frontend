@@ -16,7 +16,8 @@ export default function BasicsTab({
     setShowGeoDropdown,
     selectedGeoNode,
     setSelectedGeoNode,
-    locationNames
+    locationNames,
+    isEdit
 }) {
     const router = useRouter();
     const [errors, setErrors] = useState({});
@@ -130,23 +131,30 @@ export default function BasicsTab({
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-');
     };
-
     const handleChange = (e) => {
         const { name, value } = e.target;
 
         if (name === 'name') {
-            const generatedSlug = generateSlug(value);
+            // ✅ ONLY generate slug in CREATE mode
+            if (!isEdit) {
+                const generatedSlug = generateSlug(value);
 
-            setFormData((prev) => ({
-                ...prev,
-                name: value,
-                slug: generatedSlug
-            }));
+                setFormData((prev) => ({
+                    ...prev,
+                    name: value,
+                    slug: generatedSlug
+                }));
+            } else {
+                // ✅ EDIT MODE → only update name
+                setFormData((prev) => ({
+                    ...prev,
+                    name: value
+                }));
+            }
 
             setErrors((prev) => ({
                 ...prev,
-                name: null,
-                slug: generatedSlug ? null : prev.slug
+                name: null
             }));
         } else {
             setFormData((prev) => ({
@@ -162,6 +170,38 @@ export default function BasicsTab({
             }
         }
     };
+
+    // const handleChange = (e) => {
+    //     const { name, value } = e.target;
+
+    //     if (name === 'name') {
+    //         const generatedSlug = generateSlug(value);
+
+    //         setFormData((prev) => ({
+    //             ...prev,
+    //             name: value,
+    //             slug: generatedSlug
+    //         }));
+
+    //         setErrors((prev) => ({
+    //             ...prev,
+    //             name: null,
+    //             slug: generatedSlug ? null : prev.slug
+    //         }));
+    //     } else {
+    //         setFormData((prev) => ({
+    //             ...prev,
+    //             [name]: value
+    //         }));
+
+    //         if (value?.trim()) {
+    //             setErrors((prev) => ({
+    //                 ...prev,
+    //                 [name]: null
+    //             }));
+    //         }
+    //     }
+    // };
     const handleNextClick = () => {
         if (!validateForm()) {
             toast.error('Please fill all required fields');
@@ -250,6 +290,7 @@ export default function BasicsTab({
                             onChange={handleChange}
                             placeholder="collection-slug"
                             autoComplete="off"
+                            readOnly={isEdit}
                         />
                         {errors.slug && <div className="invalid-feedback">{errors.slug}</div>}
                     </div>
@@ -598,7 +639,7 @@ export default function BasicsTab({
                         )}
                     </button>
                 </div>
-            </form >
+            </form>
         </>
     );
 }
