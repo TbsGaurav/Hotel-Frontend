@@ -1424,19 +1424,19 @@ a.text-sky-blue:hover {
 }
 
 .navbar-toggler {
-  border-color: rgba(255,255,255,0.5);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .navbar-toggler-icon {
-  filter: invert(1);
+    filter: invert(1);
 }
 
 .nav-tabs .nav-link {
-  color: #0d6efd !important;
+    color: #0d6efd !important;
 }
 
 .nav-tabs .nav-link.active {
-  color: #f0831e !important;
+    color: #f0831e !important;
 }
 .ck.ck-powered-by {
     display: none !important;
@@ -1447,47 +1447,45 @@ a.text-sky-blue:hover {
 } */
 
 .rich-editor {
-  background: #fff;
+    background: #fff;
 }
 
 .editor-toolbar {
-  background: #f8f9fa;
+    background: #f8f9fa;
 }
 
 .editor-btn {
-  border: 1px solid #ddd;
-  background: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
+    border: 1px solid #ddd;
+    background: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
 .editor-btn:hover {
-  background: #e9ecef;
+    background: #e9ecef;
 }
 
 .editor-btn.active {
-  background: #0d6efd;
-  color: white;
-  border-color: #0d6efd;
+    background: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
 }
 
 .editor-divider {
-  width: 1px;
-  height: 20px;
-  background: #ddd;
+    width: 1px;
+    height: 20px;
+    background: #ddd;
 }
 
 .editor-content {
-  min-height: 180px;
+    min-height: 180px;
 }
 
 .ProseMirror {
-  outline: none;
+    outline: none;
 }
-
-
 
 .skeleton-name,
 .skeleton-small,
@@ -1528,82 +1526,85 @@ a.text-sky-blue:hover {
 }
 
 @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
 }
 
-
 .hotel-card {
-  border-radius: 10px;
-  transition: all 0.2s ease;
+    border-radius: 10px;
+    transition: all 0.2s ease;
 }
 
 .hotel-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
 }
 
 .table-hover tbody tr:hover {
-  background-color: #fafafa;
-  transition: background 0.2s ease;
+    background-color: #fafafa;
+    transition: background 0.2s ease;
 }
 
 .table tbody tr:last-child td {
-  border-bottom: none;
+    border-bottom: none;
 }
 .collection-tabs {
-  border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
 }
 
 .collection-tabs .nav-link {
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: #6c757d;
-  font-weight: 500;
-  padding: 10px 18px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 10px 18px;
 }
 
 .collection-tabs .nav-link:hover {
-  color: #ff7a00;
+    color: #ff7a00;
 }
 
 .collection-tabs .nav-link.active {
-  color: #ff7a00;
-  border-bottom: 2px solid #ff7a00;
-  background: transparent;
+    color: #ff7a00;
+    border-bottom: 2px solid #ff7a00;
+    background: transparent;
 }
 .property-link {
-  color: #3181c7;   /* light blue */
-  transition: color 0.2s ease;
+    color: #3181c7; /* light blue */
+    transition: color 0.2s ease;
 }
 
 .property-link:hover {
-  color: #f0831e;   /* orange */
+    color: #f0831e; /* orange */
 }
 /* arrows */
 .custom-prev,
 .custom-next {
-position: absolute;
-top: 50%;
-transform: translateY(-50%);
-z-index: 10;
-width: 40px;
-height: 40px;
-background: #8e97a6;
-border-radius: 8px;
-display: flex;
-align-items: center;
-justify-content: center;
-cursor: pointer;
-color: white;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    background: #8e97a6;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
 }
 
 .custom-prev {
-left: -50px;
+    left: -50px;
 }
 
 .custom-next {
-right: -50px;
+    right: -50px;
 }
 
 /* move indicators inside image */
@@ -1616,7 +1617,7 @@ right: -50px;
     width: 30px;
     height: 3px;
     border-radius: 2px;
-    background-color: rgba(255,255,255,0.6);
+    background-color: rgba(255, 255, 255, 0.6);
     margin: 0 4px;
 }
 
@@ -1625,53 +1626,84 @@ right: -50px;
     background-color: #ffffff;
 }
 .swiper-slide {
-  background: transparent !important;
+    background: transparent !important;
 }
-.card-content{
-padding:20px 22px 22px 22px;
+.card-content {
+    padding: 20px 22px 22px 22px;
 }
 
 /* swiper indicator */
 .image-swiper {
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
 }
 
 .image-swiper img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
 }
 
 /* 🔥 CENTERED SINGLE LINE STYLE */
 .image-swiper .swiper-pagination {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: auto;
-  display: flex;
-  gap: 6px;
-  z-index: 10;
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    display: flex;
+    gap: 6px;
+    z-index: 10;
 }
 
 /* bullets = small lines */
 .image-swiper .swiper-pagination-bullet {
-  width: 18px;
-  height: 3px;
-  border-radius: 2px;
-  background: rgba(255,255,255,0.5);
-  opacity: 1;
-  transition: all 0.3s ease;
+    width: 18px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 1;
+    transition: all 0.3s ease;
 }
 
 /* active line (highlighted one) */
 .image-swiper .swiper-pagination-bullet-active {
-  background: #fff;
-  width: 22px;
+    background: #fff;
+    width: 22px;
 }
 
 .breadcrumb-section {
     margin-top: 18px;
+}
+
+.collection-hero-skeleton {
+    background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+}
+
+.skeleton-title,
+.skeleton-text,
+.skeleton-image,
+.skeleton-breadcrumb {
+    background: linear-gradient(90deg, #eee, #ddd, #eee);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+}
+
+.hotel-card {
+    transition: transform 0.2s;
+}
+.hotel-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
 }

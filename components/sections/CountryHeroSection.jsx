@@ -7,10 +7,9 @@ import { LuCalendarRange } from 'react-icons/lu';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../public/assets/css/DatePicker.css';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
-import { useRouter } from 'next/navigation';
 import { globalSearchapi } from '@/lib/api/public/globalsearchapi';
 
-function CountryHeroSection({}) {
+function CountryHeroSection({ }) {
     const [checkInDate, setCheckInDate] = useState(new Date());
     const [checkOutDate, setCheckOutDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -76,7 +75,6 @@ function CountryHeroSection({}) {
 
     const handleSelect = (item) => {
         isSelectingRef.current = true;
-        // setSelectedLocation(item);
         setQuery(item.displayText);
         setShow(false);
     };
@@ -84,12 +82,6 @@ function CountryHeroSection({}) {
         const [start, end] = dates;
         setTempCheckInDate(start);
         setTempCheckOutDate(end);
-
-        // if (start && end) {
-        //     setCheckInDate(start);
-        //     setCheckOutDate(end);
-        //     setShowDatePicker(false);
-        // }
     };
 
     const formatDate = (date) => {
@@ -137,7 +129,6 @@ function CountryHeroSection({}) {
                 !datePickerRef.current.contains(event.target) &&
                 !event.target.closest('.react-datepicker') &&
                 !event.target.closest('.date-range-picker-popup ')
-                // !event.target.closest('.country-date-range-picker-popup ')
             ) {
                 setShowDatePicker(false);
             }
@@ -188,13 +179,14 @@ function CountryHeroSection({}) {
     useEffect(() => {
         function handleSearchOutsideClick(event) {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
-                setShow(false); // close search dropdown
+                setShow(false);
             }
         }
 
         document.addEventListener('mousedown', handleSearchOutsideClick);
         return () => document.removeEventListener('mousedown', handleSearchOutsideClick);
     }, []);
+
     return (
         <section className="container-fluid p-0">
             <div
@@ -209,12 +201,10 @@ function CountryHeroSection({}) {
                         <div className="row align-items-end" style={{ gap: '11px 0' }}>
                             <div className="col-10 col-md-4 col-lg-2 mb-3 mb-lg-0 position-relative" ref={searchRef}>
                                 <label className="form-label custom-form-label text-white">Destination or Hotel Name</label>
-
                                 <div className="input-group custom-input-group-textbox">
                                     <span className="input-group-text bg-white">
                                         <i className="fa-solid fa-magnifying-glass"></i>
                                     </span>
-
                                     <input
                                         type="text"
                                         className="form-control"
@@ -226,7 +216,6 @@ function CountryHeroSection({}) {
                                         }}
                                     />
                                 </div>
-
                                 {show && (
                                     <div className="list-group position-absolute mt-1 w-100" style={{ zIndex: 1050 }}>
                                         {loading && (
@@ -234,7 +223,6 @@ function CountryHeroSection({}) {
                                                 <span className="spinner-border spinner-border-sm" />
                                             </div>
                                         )}
-
                                         {!loading &&
                                             results.map((item) => (
                                                 <button
@@ -277,8 +265,6 @@ function CountryHeroSection({}) {
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* Date Range Picker Popup */}
                                     {showDatePicker && (
                                         <div className="date-range-picker-popup">
                                             <div className="calendar-container">
@@ -304,9 +290,7 @@ function CountryHeroSection({}) {
                                                     }) => {
                                                         const isFirstMonth = customHeaderCount === 0;
                                                         const isSecondMonth = customHeaderCount === 1;
-
                                                         const displayDate = isSecondMonth ? addMonths(date, 1) : date;
-
                                                         return (
                                                             <div className="custom-header-wrapper">
                                                                 {isFirstMonth && (
@@ -319,9 +303,7 @@ function CountryHeroSection({}) {
                                                                         ‹
                                                                     </button>
                                                                 )}
-
                                                                 <div className="month-year-display">{format(displayDate, 'MMM yyyy')}</div>
-
                                                                 {isSecondMonth && (
                                                                     <button
                                                                         type="button"
@@ -340,7 +322,6 @@ function CountryHeroSection({}) {
                                                     <span>
                                                         {formatDate(tempCheckInDate)} - {formatDate(tempCheckOutDate)}
                                                     </span>
-
                                                     <div className="footer-buttons">
                                                         <button
                                                             type="button"
@@ -349,7 +330,6 @@ function CountryHeroSection({}) {
                                                         >
                                                             Cancel
                                                         </button>
-
                                                         <button
                                                             type="button"
                                                             className="apply-button"
@@ -365,91 +345,6 @@ function CountryHeroSection({}) {
                                                 </div>
                                             </div>
                                         </div>
-                                        // <div className="country-date-range-picker-popup">
-                                        // <div className="date-range-picker-popup">
-                                        //     <div className="calendar-container">
-                                        //         <DatePicker
-                                        //             selected={tempCheckInDate}
-                                        //             onChange={handleDateChange}
-                                        //             startDate={tempCheckInDate}
-                                        //             endDate={tempCheckOutDate}
-                                        //             selectsRange
-                                        //             inline
-                                        //             monthsShown={2}
-                                        //             minDate={new Date()}
-                                        //             dateFormat="MM/dd/yyyy"
-                                        //             showPopperArrow={false}
-                                        //             calendarClassName="custom-date-range-calendar"
-                                        //             renderCustomHeader={({
-                                        //                 date,
-                                        //                 decreaseMonth,
-                                        //                 increaseMonth,
-                                        //                 prevMonthButtonDisabled,
-                                        //                 nextMonthButtonDisabled,
-                                        //                 customHeaderCount
-                                        //             }) => {
-                                        //                 let displayDate = date;
-                                        //                 if (customHeaderCount === 1) {
-                                        //                     displayDate = addMonths(date, 1);
-                                        //                 }
-
-                                        //                 return (
-                                        //                     <div className="custom-header-wrapper">
-                                        //                         <button
-                                        //                             type="button"
-                                        //                             onClick={decreaseMonth}
-                                        //                             disabled={prevMonthButtonDisabled}
-                                        //                             className="nav-button prev-month"
-                                        //                         >
-                                        //                             ‹
-                                        //                         </button>
-                                        //                         <div className="month-year-display">{format(displayDate, 'MMM yyyy')}</div>
-                                        //                         <button
-                                        //                             type="button"
-                                        //                             onClick={increaseMonth}
-                                        //                             disabled={nextMonthButtonDisabled}
-                                        //                             className="nav-button next-month"
-                                        //                         >
-                                        //                             ›
-                                        //                         </button>
-                                        //                     </div>
-                                        //                 );
-                                        //             }}
-                                        //         />
-                                        //     </div>
-
-                                        //     {/* Footer with Cancel/Apply buttons */}
-                                        //     <div className="date-picker-footer">
-                                        //         <div className="selected-range-footer"></div>
-                                        //         <div className="footer-buttons">
-                                        //             {tempCheckInDate && tempCheckOutDate
-                                        //                 ? `${formatDate(tempCheckInDate)} - ${formatDate(tempCheckOutDate)}`
-                                        //                 : `${formatDate(new Date())} - ${formatDate(new Date())}`}
-                                        //             <button
-                                        //                 type="button"
-                                        //                 className="cancel-button"
-                                        //                 onClick={() => {
-                                        //                     setTempCheckInDate(checkInDate);
-                                        //                     setTempCheckOutDate(checkOutDate);
-                                        //                     setShowDatePicker(false);
-                                        //                 }}
-                                        //             >
-                                        //                 Cancel
-                                        //             </button>
-                                        //             <button
-                                        //                 type="button"
-                                        //                 className="apply-button"
-                                        //                 onClick={() => {
-                                        //                     setCheckInDate(tempCheckInDate);
-                                        //                     setCheckOutDate(tempCheckOutDate);
-                                        //                     setShowDatePicker(false);
-                                        //                 }}
-                                        //             >
-                                        //                 Apply
-                                        //             </button>
-                                        //         </div>
-                                        //     </div>
-                                        // </div>
                                     )}
                                 </div>
                             </div>
@@ -513,7 +408,6 @@ function CountryHeroSection({}) {
                                             Apply
                                         </button>
                                     </div>
-
                                     <div className="py-3 px-4 d-flex d-md-none flex-column ">
                                         <div className="number number-in-dec mx-auto mb-4">
                                             <p className="custom-form-label mb-2">Rooms</p>
@@ -577,7 +471,6 @@ function CountryHeroSection({}) {
                             {childrenCount > 0 && (
                                 <div className="col-12 mb-3 mb-lg-0">
                                     <label className="form-label custom-form-label text-white">Age</label>
-
                                     <div className="row g-2">
                                         {childrenAges.map((age, index) => (
                                             <div key={index} className="col-4 col-md-2 col-lg-1">
@@ -598,7 +491,6 @@ function CountryHeroSection({}) {
                                 </div>
                             )}
                         </div>
-
                         {showFilters && (
                             <div className="advaance-form-field-wrap mt-4 p-3 p-md-5" id="filterSection">
                                 <div className="row">
@@ -855,27 +747,6 @@ function CountryHeroSection({}) {
                     </form>
                 </div>
             </div>
-            {/* <div className="container">
-                <div className="row align-items-center">
-                    <div className="col-md-7">
-                        <p className="breadcrumb-text">
-                            All Countries · <strong>{countryName}</strong>
-                        </p>
-
-                        <h1 className="country-hero-title">Hotel Accommodation in {countryName}</h1>
-
-                        <p className="country-hero-subtitle">
-                            Hotel accommodation at over <strong>{destinationsCount}</strong> destinations across {countryName}.
-                        </p>
-
-                        <p className="country-hero-description">{description}</p>
-                    </div>
-
-                    <div className="col-md-5 text-center">
-                        <img src={heroImage} alt={countryName} className="country-hero-image" />
-                    </div>
-                </div>
-            </div> */}
         </section>
     );
 }
