@@ -216,7 +216,7 @@ export default function CollectionDetails({ slug }) {
                                                         <div className="carousel-inner">
                                                             <div className="carousel-item active">
                                                                 <img
-                                                                    src={hotel.standardPhoto || hotel.thumbnailPhoto || "/image/property-img.webp"}
+                                                                    src={hotel.photo || "/image/property-img.webp"}
                                                                     className="d-block w-100"
                                                                     style={{ height: '340px', objectFit: 'cover' }}
                                                                     alt={hotel.hotelName}
@@ -228,7 +228,7 @@ export default function CollectionDetails({ slug }) {
 
                                                             <div className="carousel-item">
                                                                 <img
-                                                                    src={hotel.thumbnailPhoto || hotel.standardPhoto || "/image/property-img.webp"}
+                                                                    src={hotel.photo || "/image/property-img.webp"}
                                                                     className="d-block w-100"
                                                                     style={{ height: '340px', objectFit: 'cover' }}
                                                                     alt={hotel.hotelName}
