@@ -50,6 +50,8 @@ export default function CollectionDetails({ collection, hotels, slug }) {
         return 'Review score needed';
     }
 
+
+
     return (
         <>
             <CountryHeroSection />
@@ -116,8 +118,6 @@ export default function CollectionDetails({ collection, hotels, slug }) {
 
                     {/* Main Content */}
                     <div className="container">
-                        {/* Hotels Grid - Similar to property listings */}
-
                         {hotelsData.length > 0 ? (
                             <div className="d-flex flex-column gap-4">
                                 {hotelsData.map((hotel) => (
@@ -132,6 +132,20 @@ export default function CollectionDetails({ collection, hotels, slug }) {
                                             {/* Image */}
                                             <div className="col-md-4">
                                                 <div className="position-relative">
+                                                    {/* TAG */}
+                                                    <span
+                                                        className="position-absolute text-white px-3 py-1"
+                                                        style={{
+                                                            top: '12px',
+                                                            right: '12px',
+                                                            background: '#ff7a00',
+                                                            borderRadius: '20px',
+                                                            fontSize: '12px',
+                                                            zIndex: 2
+                                                        }}
+                                                    >
+                                                        {hotel.hotelType || 'Apartment Hotel'}
+                                                    </span>
                                                     <img
                                                         src={hotel.photo || "/image/property-img.webp"}
                                                         className="d-block w-100 rounded-4"
@@ -142,14 +156,47 @@ export default function CollectionDetails({ collection, hotels, slug }) {
 
                                             {/* Hotel Info */}
                                             <div className="col-md-8">
-                                                {/* TITLE */}
+                                                {/* TITLE + STARS */}
                                                 <div className="d-flex align-items-center mb-2">
                                                     <Link
-                                                        href={`/${hotel.hotelId}`}
+                                                        href={`/${hotel.urlName?.toLowerCase().replace(/\s+/g, '-')}`}
                                                         className="property-grid-title font-size-18 my-auto me-3 text-decoration-none text-primary hotel-name-link"
                                                     >
                                                         {hotel.hotelName}
                                                     </Link>
+                                                    <div className="text-warning">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <MdOutlineStarPurple500
+                                                                key={i}
+                                                                size={18}
+                                                                color={i < hotel.stars ? "#f0831e" : "#ddd"}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* FACILITIES */}
+                                                <div className="d-flex align-items-center flex-wrap gap-1 mb-2">
+                                                    <p className="small-para-14-px font-weight-bold my-auto me-2">Facilities:</p>
+
+                                                    {hotel.hotelFacilities && (
+                                                        <>
+                                                            {hotel.hotelFacilities.split(',').slice(0, 5).map((facility, idx) => (
+                                                                <span
+                                                                    key={idx}
+                                                                    className="badge bg-light text-dark border me-1 mb-1"
+                                                                    style={{ fontSize: '11px' }}
+                                                                >
+                                                                    {facility.trim()}
+                                                                </span>
+                                                            ))}
+                                                            {hotel.hotelFacilities.split(',').length > 5 && (
+                                                                <span className="rating" style={{ fontSize: '11px' }}>
+                                                                    +{hotel.hotelFacilities.split(',').length - 5} more
+                                                                </span>
+                                                            )}
+                                                        </>
+                                                    )}
                                                 </div>
 
                                                 {/* ADDRESS */}
@@ -157,6 +204,14 @@ export default function CollectionDetails({ collection, hotels, slug }) {
                                                     <i className="fa-solid fa-map me-1"></i>
                                                     {hotel.hotelAddress || 'Address not available'}
                                                 </p>
+
+                                                {/* DISTANCE */}
+                                                {hotel.distanceFromAirport && (
+                                                    <p className="small-para-14-px text-black mb-3">
+                                                        <i className="fa-solid fa-plane-up me-1"></i>
+                                                        {hotel.distanceFromAirport}
+                                                    </p>
+                                                )}
 
                                                 {/* DESCRIPTION */}
                                                 {hotel.hotelDescription && (
@@ -204,17 +259,15 @@ export default function CollectionDetails({ collection, hotels, slug }) {
                                                         </div>
                                                     </div>
 
-                                                    <div className="col-12 col-md-6 d-flex">
-                                                        <Link
-                                                            href={`${hotel.url}`}
-                                                            className="theme-button-blue rounded w-100 d-block text-center text-decoration-none"
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                        >
-                                                            See Availability
-                                                            <i className="fa-solid fa-arrow-right ms-2"></i>
-                                                        </Link>
-                                                    </div>
+                                                    <Link
+                                                        href={`${hotel.url}`}
+                                                        className="theme-button-blue rounded w-100 d-block text-center text-decoration-none"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        See Availability
+                                                        <i className="fa-solid fa-arrow-right ms-2"></i>
+                                                    </Link>
                                                 </div>
                                             </div>
                                         </div>
