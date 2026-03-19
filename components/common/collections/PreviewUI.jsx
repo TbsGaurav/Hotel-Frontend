@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCollectionById } from '@/lib/api/admin/collectionapi';
+import { getCollectionById, getPreviewHotels } from '@/lib/api/admin/collectionapi';
 import { ADMIN_ROUTES } from '@/lib/route';
 
 export default function PreviewUI({ initialData, id }) {
@@ -10,23 +10,32 @@ export default function PreviewUI({ initialData, id }) {
     const router = useRouter();
 
     useEffect(() => {
-        if (!initialData) {
-            const load = async () => {
+        const load = async () => {
+            let data = initialData;
+
+            if (!data) {
                 const res = await getCollectionById(id);
-                setCollection(res?.data);
-            };
+                data = res?.data;
+                console.log(data);
+            }
 
-            load();
-        }
+            const previewRes = await getPreviewHotels(id);
+            const previewHotels = previewRes?.data || [];
+            console.log(previewRes);
+            setCollection({
+                ...(data || {}),
+                collectionPreviewHotels: previewHotels
+            });
+        };
+
+        load();
     }, [id, initialData]);
-
     if (!collection) return <p className="p-4">Loading preview...</p>;
 
     const basic = collection.basicCollection;
     const rules = collection.collectionRules?.[0]?.rules || [];
     const pinnedHotels = collection.collectionCuration?.[0]?.pinnedHotels || [];
     const excludedHotels = collection.collectionCuration?.[0]?.excludedHotels || [];
-    const previewHotels = collection.collectionPreviewHotels || [];
     if (!collection) return <p className="p-4">Loading preview...</p>;
     const renderStars = (rating) => {
         const stars = [];
@@ -36,7 +45,9 @@ export default function PreviewUI({ initialData, id }) {
         return stars;
     };
 
+    const previewHotels = collection.collectionPreviewHotels || [];
     const totalHotelsFound = previewHotels.length;
+
     const maxHotelsAllowed = basic?.maxHotels || 'Unlimited';
 
     return (
@@ -166,9 +177,8 @@ export default function PreviewUI({ initialData, id }) {
                                     <div className="card-body d-flex justify-content-between align-items-center">
                                         <div>
                                             <div className="fw-semibold text-dark">{hotel.hotelName}</div>
-
+                                            <div className="text-muted small">{hotel.hotelAddress}</div>
                                             <div className="text-warning small">{renderStars(hotel.stars)}</div>
-
                                             <div className="text-muted small">Review Score: {hotel.reviewScore}</div>
                                         </div>
 
@@ -185,51 +195,6 @@ export default function PreviewUI({ initialData, id }) {
                         ))}
                     </div>
                 </div>
-                {/* <div className="card-body p-0">
-                    <table className="table table-hover align-middle mb-0">
-                        <thead className="table-light">
-                            <tr>
-                                <th>Rank</th>
-                                <th>Hotel</th>
-                                <th>Star Rating</th>
-                                <th>Review Score</th>
-                                <th>Reason</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>
-                                    {' '}
-                                    <span className="text-dark">Afghan Arya Guest House</span>
-                                </td>
-                                <td>{renderStars(5)}</td>
-                                <td>8.2</td>
-                                <td>Pinned</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>
-                                    {' '}
-                                    <span className="text-dark">Hotel Kabul</span>
-                                </td>
-                                <td>{renderStars(5)}</td>
-                                <td>7.5</td>
-                                <td>ReviewScore ≥ 7</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>
-                                    {' '}
-                                    <span className="text-dark">Central Inn</span>
-                                </td>
-                                <td>{renderStars(5)}</td>
-                                <td>7.1</td>
-                                <td>ReviewScore ≥ 7</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div> */}
             </div>
         </div>
     );
