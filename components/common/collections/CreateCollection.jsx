@@ -114,9 +114,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
     useEffect(() => {
         if (hotelList.length > 0 && includedHotelIds.length > 0) {
             // Filter included IDs to only those that exist in the current hotel list
-            const validIncludedIds = includedHotelIds.filter(id =>
-                hotelList.some(hotel => hotel.id === id)
-            );
+            const validIncludedIds = includedHotelIds.filter((id) => hotelList.some((hotel) => hotel.id === id));
             setSelectedHotels(validIncludedIds);
         }
     }, [hotelList, includedHotelIds]);
@@ -127,24 +125,24 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         if (i < tabOrder.length - 1) setActiveTab(tabOrder[i + 1]);
     };
 
-   const goBack = async () => {
-    const i = tabOrder.indexOf(activeTab);
-    if (i > 0) {
-        const prevTab = tabOrder[i - 1];
-        
-        // Fetch data when going back to certain tabs
-        if (prevTab === 'Basics' || prevTab === 'Content' || prevTab === 'Rules' || prevTab === 'Curation') {
-            setLoading(true);
-            try {
-                await fetchCollectionById();
-            } finally {
-                setLoading(false);
+    const goBack = async () => {
+        const i = tabOrder.indexOf(activeTab);
+        if (i > 0) {
+            const prevTab = tabOrder[i - 1];
+
+            // Fetch data when going back to certain tabs
+            if (prevTab === 'Basics' || prevTab === 'Content' || prevTab === 'Rules' || prevTab === 'Curation') {
+                setLoading(true);
+                try {
+                    await fetchCollectionById();
+                } finally {
+                    setLoading(false);
+                }
             }
+
+            setActiveTab(prevTab);
         }
-        
-        setActiveTab(prevTab);
-    }
-};
+    };
 
     useEffect(() => {
         if (!selectedGeoNode?.countryId) {
@@ -292,12 +290,35 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             toast.error('Please save Basics first');
             return;
         }
-        const hasInvalidFaq = contentData.faqs?.some((faq) => !faq.question?.trim() || !faq.answer?.trim());
+        // ✅ CHECK IF CONTENT IS EMPTY
+        const isEmptyContent =
+            !contentData.header &&
+            !contentData.metaTitle &&
+            !contentData.metaDescription &&
+            !contentData.introShortCopy &&
+            !contentData.introLongCopy &&
+            !contentData.heroImageUrl &&
+            !contentData.badge &&
+            (!contentData.faqs || contentData.faqs.length === 0);
 
-        if (hasInvalidFaq) {
-            toast.error('Please complete all FAQs before saving.');
+        // ✅ IF EMPTY → SKIP API
+        if (isEmptyContent) {
+            goNext();
             return;
         }
+
+        // ✅ IF NO CHANGE → SKIP API
+        if (collectionId && !isContentChanged()) {
+            goNext();
+            return;
+        }
+
+        const hasInvalidFaq = contentData.faqs?.some((faq) => !faq.question?.trim() || !faq.answer?.trim());
+
+        // if (hasInvalidFaq) {
+        //     toast.error('Please complete all FAQs before saving.');
+        //     return;
+        // }
 
         const questions = contentData.faqs?.map((f) => f.question.trim().toLowerCase());
 
@@ -442,10 +463,15 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             return;
         }
 
-        // if (!rules.length) {
-        //     toast.error('Please add at least one rule');
-        //     return;
-        // }
+        if (!rules || rules.length === 0) {
+            goNext();
+            return;
+        }
+
+        if (collectionId && !isRulesChanged()) {
+            goNext();
+            return;
+        }
 
         try {
             setLoading(true);
@@ -726,7 +752,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             // Important: Set selectedHotels after hotelList is loaded
             // We'll need to wait for hotelList to be populated
             if (hotelList.length > 0) {
-                setSelectedHotels(includedIds.filter(id => hotelList.some(hotel => hotel.id === id)));
+                setSelectedHotels(includedIds.filter((id) => hotelList.some((hotel) => hotel.id === id)));
             } else {
                 // If hotelList isn't loaded yet, just store the IDs and they'll be applied when hotelList loads
                 setSelectedHotels(includedIds);
@@ -828,7 +854,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
 
         return currentPinned !== initialPinned || currentExcluded !== initialExcluded || currentSelected !== initialSelected;
     };
-
 
     // ---------------- RENDER ----------------
     return (

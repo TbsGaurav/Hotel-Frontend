@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 export default function ContentTab({ data, setData, onNext, onBack, loading }) {
     const [errors, setErrors] = useState({});
     const handleNextClick = () => {
-        if (!validateForm()) return;
+        // if (!validateForm()) return;
         onNext();
     };
 
