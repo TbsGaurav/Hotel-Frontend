@@ -5,7 +5,7 @@ import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaUser } from 'react-icons/fa';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 
-export default function HotelDetails({ city, hotel, params }) {
+export default function HotelDetails({ city, hotel }) {
     const [hotelData, setHotelData] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -68,8 +68,6 @@ export default function HotelDetails({ city, hotel, params }) {
                 <div className="container">
                     <div className="d-flex align-items-center small">
                         <Link href="/" className="text-dark text-decoration-none">Home</Link>
-                        <span className="mx-2 text-muted">•</span>
-                        <Link href={`/${city}`} className="text-dark text-decoration-none">{city}</Link>
                         <span className="mx-2 text-muted">•</span>
                         <span className="fw-semibold text-decoration-none text-primary">{hotelData?.hotelName}</span>
                     </div>

@@ -1000,6 +1000,11 @@ input[type='range']:active::-webkit-slider-thumb {
 .para a:hover {
     color: #f0831e;
 }
+
+/* Hotel name link hover */
+.hotel-name-link:hover h4 {
+    color: #ff7a00 !important;
+}
 .small-para-14-px .para-14-orange-link {
     color: #f0831e !important;
     transition: all 0.5s !important;

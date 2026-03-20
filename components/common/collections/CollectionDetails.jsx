@@ -176,7 +176,9 @@ export default function CollectionDetails({ collection, hotels }) {
                                             <div className="col-md-8">
                                                 {/* TITLE + STARS */}
                                                 <div className="d-flex align-items-center mb-2">
-                                                    <h4 className="property-grid-title font-size-18 my-auto me-3">{hotel.hotelName}</h4>
+                                                    <Link href={`/${hotel.urlName}`} className="text-decoration-none hotel-name-link">
+                                                        <h4 className="property-grid-title font-size-18 my-auto me-3 text-primary">{hotel.hotelName}</h4>
+                                                    </Link>
                                                     <div className="text-warning">
                                                         {[...Array(5)].map((_, i) => (
                                                             <MdOutlineStarPurple500
@@ -207,9 +209,9 @@ export default function CollectionDetails({ collection, hotels }) {
                                                                     </span>
                                                                 ))}
                                                             {hotel.hotelFacilities.split(',').length > 5 && (
-                                                                <span className="rating" style={{ fontSize: '11px' }}>
+                                                                <Link href={`/${hotel.urlName}`} className="rating" style={{ fontSize: '11px' }}>
                                                                     +{hotel.hotelFacilities.split(',').length - 5} more
-                                                                </span>
+                                                                </Link>
                                                             )}
                                                         </>
                                                     )}
@@ -235,7 +237,11 @@ export default function CollectionDetails({ collection, hotels }) {
                                                         {hotel.hotelDescription.length > 200
                                                             ? `${hotel.hotelDescription.slice(0, 200)}... `
                                                             : hotel.hotelDescription}
-                                                        {hotel.hotelDescription.length > 200 && <span className="rating">more</span>}
+                                                        {hotel.hotelDescription.length > 200 && (
+                                                            <Link href={`/${hotel.urlName}`} className="rating">
+                                                                more
+                                                            </Link>
+                                                        )}
                                                     </p>
                                                 )}
 
