@@ -187,7 +187,8 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         const payload = {
             geoNodeType: formData.geoNodeType,
             geoNodeId: formData.sourceId,
-            searchTerm: search || ''
+            searchTerm: search || '',
+            collectionId: collectionId || null
         };
 
         const res = await getHotelsByCity(payload);

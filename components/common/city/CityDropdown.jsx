@@ -96,7 +96,7 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                                     <div key={city.id} className="col-6 col-md-4 col-lg-3 mb-2">
                                         {city.urlName ? (
                                             <Link
-                                                href={`/city/${city.urlName}`}
+                                                href={`${city.urlName}`}
                                                 className="text-decoration-none text-dark fw-semibold"
                                                 prefetch={false}
                                             >
