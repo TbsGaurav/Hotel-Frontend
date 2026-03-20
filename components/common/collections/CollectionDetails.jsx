@@ -1,16 +1,40 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 
-export default function CollectionDetails({ collection, hotels, slug, introShortCopy }) {
+export default function CollectionDetails({ collection, hotels }) {
     const basic = collection?.basicCollection;
     const content = collection?.collectionContent;
-    const loading = false;
     const hotelsData = hotels || [];
+
+    // Default image path
+    const defaultImage = '/image/property-img.webp';
+    const [timestamp, setTimestamp] = useState('');
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setTimestamp(Date.now().toString());
+        }, 0);
+        return () => clearTimeout(timer);
+    }, []);
+
+    const handleImageError = (e) => {
+        // Only set default if not already showing default
+        if (!e.target.src.includes(defaultImage)) {
+            e.target.src = defaultImage;
+        }
+    };
+
+    // Generate cache-busted URL
+    const getImageUrl = (photo) => {
+        if (!photo) return defaultImage;
+        const sep = photo.includes('?') ? '&' : '?';
+        return timestamp ? `${photo}${sep}t=${timestamp}` : photo;
+    };
 
     function decodeHtml(html) {
         if (!html) return '';
@@ -80,7 +104,7 @@ export default function CollectionDetails({ collection, hotels, slug, introShort
                     <section className="container py-5">
                         <div className="row align-items-center">
                             <div className="col-lg-8">
-                                <h2 className="display-5 fw-bold mb-3">{basic?.name}</h2>
+                                <h2 className="display-5 fw-bold mb-3">{content?.header}</h2>
 
                                 {content?.introShortCopy && (
                                     <div
@@ -90,7 +114,6 @@ export default function CollectionDetails({ collection, hotels, slug, introShort
                                         }}
                                     />
                                 )}
-                                {console.log(introShortCopy)}
 
                                 <div className="d-flex flex-wrap gap-4 mt-3">
                                     <div className="d-flex align-items-center">
@@ -140,10 +163,11 @@ export default function CollectionDetails({ collection, hotels, slug, introShort
                                                         {hotel.hotelType || 'Apartment Hotel'}
                                                     </span>
                                                     <img
-                                                        src={hotel?.photo || '/public/image/property-img.webp'}
+                                                        src={getImageUrl(hotel?.photo)}
                                                         className="d-block w-100 rounded-4"
-                                                        style={{ height: '340px', objectFit: 'cover' }}
+                                                        style={{ height: '280px', objectFit: 'cover' }}
                                                         alt={hotel.hotelName}
+                                                        onError={handleImageError}
                                                     />{' '}
                                                 </div>
                                             </div>
