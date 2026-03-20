@@ -1746,3 +1746,38 @@ a.text-sky-blue:hover {
         background-position: 200% 0;
     }
 }
+
+.bars-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+}
+
+.bars-loader span {
+  width: 6px;
+  height: 20px;
+  background: #0d6efd; /* primary color */
+  border-radius: 4px;
+  animation: bars 1s infinite ease-in-out;
+}
+
+.bars-loader span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.bars-loader span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bars {
+  0%, 100% {
+    transform: scaleY(0.5);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleY(1.5);
+    opacity: 1;
+  }
+}

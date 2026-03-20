@@ -925,9 +925,25 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         setNewlyAddedHotels((prev) => (prev.some((item) => item.id === normalizedHotel.id) ? prev : [...prev, normalizedHotel]));
     };
 
+    // if (loading && collectionId) {
+    //     return (
+    //         <div className="d-flex justify-content-center align-items-center" style={{ height: '60vh' }}>
+    //             <div className="spinner-border text-primary" role="status" />
+    //         </div>
+    //     );
+    // }
+    function BarsLoader() {
+        return (
+            <div className="bars-loader">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        );
+    }
     // ---------------- RENDER ----------------
     return (
-        <div className="card shadow-sm">
+        <div className="card shadow-sm position-relative">
             <ul className="nav collection-tabs mb-4 gap-2">
                 {tabOrder.map((tab) => {
                     return (
@@ -946,6 +962,25 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             <div className="card-header">
                 <h5>Collections</h5>
             </div>
+
+            {loading && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        background: 'rgba(255,255,255,0.7)',
+                        zIndex: 999,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <BarsLoader />
+                </div>
+            )}
             <div className="card-body">
                 {activeTab === 'Basics' && (
                     <BasicsTab

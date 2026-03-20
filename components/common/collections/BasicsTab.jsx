@@ -290,7 +290,7 @@ export default function BasicsTab({
                             onChange={handleChange}
                             placeholder="collection-slug"
                             autoComplete="off"
-                            readOnly={isEdit}
+                            disabled={isEdit}
                         />
                         {errors.slug && <div className="invalid-feedback">{errors.slug}</div>}
                     </div>
