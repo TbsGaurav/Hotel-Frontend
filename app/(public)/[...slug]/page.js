@@ -39,7 +39,7 @@ export default async function DynamicPage({ params }) {
     if (slugArray.length === 1 && data.entityType === 'Collection') {
         // Fetch collection and hotels data on server for SSR/SEO
         const collectionRes = await getCollectionByUrl(slug);
-    
+
         let hotels = [];
 
         if (collectionRes?.data?.basicCollection?.collectionId) {
@@ -47,13 +47,7 @@ export default async function DynamicPage({ params }) {
             hotels = hotelsRes?.data || [];
         }
 
-        return (
-            <CollectionDetails
-                collection={collectionRes?.data}
-                hotels={hotels}
-                slug={slug}
-            />
-        );
+        return <CollectionDetails collection={collectionRes?.data} hotels={hotels} slug={slug} />;
     }
 
     return notFound();
