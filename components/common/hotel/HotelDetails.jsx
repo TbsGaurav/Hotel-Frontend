@@ -4,15 +4,32 @@ import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaCamera, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
-import { getHotelByUrl } from '@/lib/api/public/hotelapi';
 
-export default function HotelDetails({ city, hotel }) {
-    const [hotelData, setHotelData] = useState(null);
-    const [loading, setLoading] = useState(true);
+export default function HotelDetails({ initialData }) {
+    const [hotelData] = useState(initialData);
+    const loading = !initialData;
     const [error, setError] = useState(null);
     const [showPhotoModal, setShowPhotoModal] = useState(false);
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [activeTab, setActiveTab] = useState('overview');
+    const [timestamp, setTimestamp] = useState('');
+
+    // Default image path
+    const defaultImage = '/image/property-img.webp';
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setTimestamp(Date.now().toString());
+        }, 0);
+        return () => clearTimeout(timer);
+    }, []);
+
+    // Generate cache-busted URL
+    const getImageUrl = (photo) => {
+        if (!photo) return defaultImage;
+        const sep = photo.includes('?') ? '&' : '?';
+        return timestamp ? `${photo}${sep}t=${timestamp}` : photo;
+    };
 
     const openPhotoModal = (index = 0) => {
         setCurrentPhotoIndex(index);
@@ -31,65 +48,109 @@ export default function HotelDetails({ city, hotel }) {
         setCurrentPhotoIndex((prev) => (prev - 1 + allPhotos.length) % allPhotos.length);
     };
 
-    // Fetch hotel data from API
-    useEffect(() => {
-        const loadHotel = async () => {
-            try {
-                setLoading(true);
-                const urlName = `/${city}/${hotel}`;
-
-                const response = await getHotelByUrl(urlName);
-
-                if (response?.status === 'success' && response?.data?.hotel) {
-                    setHotelData(response.data);
-                } else {
-                    setError('Hotel not found');
-                }
-            } catch (err) {
-                console.error('Error loading hotel:', err);
-                setError('Failed to load hotel data');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (hotel) {
-            loadHotel();
+    // Handle image error - fallback to default image
+    const handleImageError = (e) => {
+        if (!e.target.src.includes(defaultImage)) {
+            e.target.src = defaultImage;
         }
-    }, [hotel]);
+    };
 
-    function getRatingText(score) {
-        if (score >= 9) return 'Exceptional';
-        if (score >= 8) return 'Excellent';
-        if (score >= 7) return 'Very good';
-        if (score >= 6) return 'Good';
-        return 'Pleasant';
-    }
-
-    // Get facility icon based on facility name
-    function getFacilityIcon(facilityName) {
-        const name = facilityName.toLowerCase();
-        if (name.includes('wifi') || name.includes('internet')) return 'fa-wifi';
-        if (name.includes('parking')) return 'fa-square-parking';
-        if (name.includes('restaurant') || name.includes('food') || name.includes('breakfast')) return 'fa-utensils';
-        if (name.includes('room service')) return 'fa-bell-concierge';
-        if (name.includes('front desk') || name.includes('24-hour')) return 'fa-headset';
-        if (name.includes('air conditioning') || name.includes('a/c')) return 'fa-snowflake';
-        if (name.includes('pool') || name.includes('swim')) return 'fa-person-swimming';
-        if (name.includes('fitness') || name.includes('gym')) return 'fa-dumbbell';
-        if (name.includes('spa')) return 'fa-spa';
-        if (name.includes('bar')) return 'fa-martini-glass';
-        if (name.includes('laundry')) return 'fa-soap';
-        if (name.includes('airport')) return 'fa-plane';
-        if (name.includes('elevator') || name.includes('lift')) return 'fa-elevator';
-        return 'fa-check';
+    if (error || !hotelData?.hotel) {
+        return (
+            <>
+                <CountryHeroSection />
+                <div className="container py-5 text-center">
+                    <h3>{error || 'Hotel not found'}</h3>
+                    <Link href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
+                        Back to Home
+                    </Link>
+                </div>
+            </>
+        );
     }
 
     if (loading) {
         return (
             <div className="container py-5">
-                <div className="skeleton-text mb-2" style={{ width: '150px', height: '20px' }}></div>
-                <div className="skeleton-title" style={{ width: '300px', height: '40px' }}></div>
+                {/* Breadcrumb Skeleton */}
+                <div className="d-flex align-items-center small mb-3">
+                    <div className="skeleton-text" style={{ width: '50px', height: '16px' }}></div>
+                    <span className="mx-2 text-muted">•</span>
+                    <div className="skeleton-text" style={{ width: '80px', height: '16px' }}></div>
+                    <span className="mx-2 text-muted">•</span>
+                    <div className="skeleton-text" style={{ width: '120px', height: '16px' }}></div>
+                </div>
+
+                {/* Hotel Header Skeleton */}
+                <div className="d-flex align-items-start flex-column flex-md-row mb-4">
+                    <div className="me-auto">
+                        <div className="d-flex align-items-center mb-2">
+                            <div className="skeleton-title me-3" style={{ width: '250px', height: '40px' }}></div>
+                            <div className="d-flex gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                    <div key={i} className="skeleton-star" style={{ width: '18px', height: '18px', borderRadius: '4px' }}></div>
+                                ))}
+                            </div>
+                        </div>
+                        {/* Hotel Type Tag */}
+                        <div className="skeleton-text mb-2" style={{ width: '100px', height: '24px', borderRadius: '20px' }}></div>
+                        {/* Address */}
+                        <div className="skeleton-text mb-1" style={{ width: '300px', height: '16px' }}></div>
+                        {/* View Map and Nearby Hotels */}
+                        <div className="d-flex gap-3 mb-2">
+                            <div className="skeleton-text" style={{ width: '70px', height: '14px' }}></div>
+                            <div className="skeleton-text" style={{ width: '90px', height: '14px' }}></div>
+                        </div>
+                    </div>
+                    {/* Button */}
+                    <div className="mt-3 mt-md-0">
+                        <div className="skeleton-button" style={{ width: '160px', height: '40px', borderRadius: '4px' }}></div>
+                    </div>
+                </div>
+
+                {/* Image Gallery Skeleton */}
+                <div className="row g-2 mb-3">
+                    <div className="col-md-8">
+                        <div className="skeleton-image rounded-4" style={{ height: '400px', width: '100%' }}></div>
+                    </div>
+                    <div className="col-md-4">
+                        <div className="row g-2 h-100">
+                            <div className="col-6">
+                                <div className="skeleton-image rounded-4" style={{ height: '190px', width: '100%' }}></div>
+                            </div>
+                            <div className="col-6">
+                                <div className="skeleton-image rounded-4" style={{ height: '190px', width: '100%' }}></div>
+                            </div>
+                            <div className="col-6">
+                                <div className="skeleton-image rounded-4" style={{ height: '190px', width: '100%' }}></div>
+                            </div>
+                            <div className="col-6">
+                                <div className="skeleton-image rounded-4" style={{ height: '190px', width: '100%' }}></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tabs Skeleton */}
+                <div className="border-bottom mb-4">
+                    <div className="d-flex gap-3">
+                        <div className="skeleton-text" style={{ width: '80px', height: '20px' }}></div>
+                        <div className="skeleton-text" style={{ width: '70px', height: '20px' }}></div>
+                        <div className="skeleton-text" style={{ width: '90px', height: '20px' }}></div>
+                        <div className="skeleton-text" style={{ width: '100px', height: '20px' }}></div>
+                    </div>
+                </div>
+
+                {/* Content Skeleton */}
+                <div className="row">
+                    <div className="col-lg-12">
+                        <div className="skeleton-text mb-2" style={{ width: '100%', height: '16px' }}></div>
+                        <div className="skeleton-text mb-2" style={{ width: '100%', height: '16px' }}></div>
+                        <div className="skeleton-text mb-2" style={{ width: '90%', height: '16px' }}></div>
+                        <div className="skeleton-text mb-2" style={{ width: '95%', height: '16px' }}></div>
+                        <div className="skeleton-text mb-4" style={{ width: '80%', height: '16px' }}></div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -114,10 +175,10 @@ export default function HotelDetails({ city, hotel }) {
     const hotelReviews = hotelData.hotelReviews || [];
 
     // Get main photo
-    const mainPhoto = hotelInfo.mainPhoto || '/image/property-img.webp';
+    const mainPhoto = hotelInfo.mainPhoto || defaultImage;
 
-    // All photos for modal
-    const allPhotos = [mainPhoto, ...hotelPhotos.map(p => p.photo)];
+    // All photos for modal (only include photos that are not null/undefined)
+    const allPhotos = [mainPhoto, ...hotelPhotos.map(p => p.photo)].filter(Boolean);
 
     return (
         <>
@@ -140,33 +201,71 @@ export default function HotelDetails({ city, hotel }) {
             <section className="container py-3">
                 <div className="d-flex align-items-start flex-column flex-md-row mb-3">
                     <div className="me-auto">
-                        <h1 className="fw-bold mb-2" style={{ fontSize: '28px' }}>{hotelInfo.hotelName}</h1>
-                        <div className="text-warning d-flex align-items-center mb-2">
-                            {[...Array(5)].map((_, i) => (
-                                <MdOutlineStarPurple500
-                                    key={i}
-                                    size={18}
-                                    color={i < hotelInfo.stars ? "#f0831e" : "#ddd"}
-                                />
-                            ))}
+                        <div className="d-flex align-items-center mb-2">
+                            <h1 className="fw-bold mb-0 me-3" style={{ fontSize: '28px' }}>{hotelInfo.hotelName}</h1>
+                            <div className="text-warning d-flex align-items-center me-3">
+                                {[...Array(5)].map((_, i) => (
+                                    <MdOutlineStarPurple500
+                                        key={i}
+                                        size={18}
+                                        color={i < hotelInfo.stars ? "#f0831e" : "#ddd"}
+                                    />
+                                ))}
+                            </div>
+                            {/* Hotel Type Tag */}
+                            <span
+                                className="text-white px-3 py-1 mb-2 d-inline-block"
+                                style={{
+                                    background: '#ff7a00',
+                                    borderRadius: '20px',
+                                    fontSize: '12px'
+                                }}
+                            >
+                                {hotelInfo.hotelType || 'Apartment Hotel'}
+                            </span>
                         </div>
-                        <p className="text-muted mb-0">
-                            <FaMapMarkerAlt className="text-primary me-2" />
-                            {hotelInfo.address}
-                        </p>
+
+
+
+                        <div className="d-flex align-items-center mb-2">
+                            {/* Address with Map Icon */}
+                            <p className="mb-1 me-3">
+                                {hotelInfo.address}
+                            </p>
+
+                            {/* View Map and Nearby Hotels */}
+                            <FaMapMarkerAlt className="mb-1 me-1" />
+                            <p className="mb-1 me-3">
+                                View on map and nearby hotels
+                            </p>
+                        </div>
                     </div>
 
                     {/* Review Score Box */}
-                    <div className="d-flex align-items-start mt-3 mt-md-0">
-                        <div
-                            className="d-flex flex-column align-items-center justify-content-center p-2"
-                            style={{ background: '#003580', borderRadius: '12px 12px 12px 0', minWidth: '70px' }}
-                        >
-                            <span className="text-white fw-bold fs-4">{hotelInfo.reviewScore}</span>
+                    <div className="d-flex align-items-center mb-2">
+                        <div className="d-flex align-items-start mt-3 mt-md-0 me-3">
+                            <div
+                                className="d-flex flex-column align-items-center justify-content-center p-2"
+                                style={{ background: '#003580', borderRadius: '12px 12px 12px 0', minWidth: '70px' }}
+                            >
+                                <span className="text-white fw-bold fs-4">{hotelInfo.reviewScore}</span>
+                            </div>
+                            <div className="ms-2 d-flex flex-column justify-content-center">
+                                <span className="fw-bold">{hotelInfo.reviewScore}</span>
+                                <span className="text-muted small">{hotelInfo.reviewCount} verified reviews</span>
+                            </div>
                         </div>
-                        <div className="ms-2 d-flex flex-column justify-content-center">
-                            <span className="fw-bold">{getRatingText(hotelInfo.reviewScore)}</span>
-                            <span className="text-muted small">{hotelInfo.reviewCount} reviews</span>
+
+                        {/* See Rooms & Prices Button */}
+                        <div className="mt-3 mt-md-0">
+                            <Link
+                                href={hotelInfo.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="theme-button-blue rounded d-block text-center py-2 px-4"
+                            >
+                                See Rooms & Prices
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -197,19 +296,21 @@ export default function HotelDetails({ city, hotel }) {
                             <div className="carousel-inner h-100">
                                 <div className="carousel-item active h-100">
                                     <img
-                                        src={mainPhoto}
+                                        src={getImageUrl(mainPhoto)}
                                         className="d-block w-100 h-100"
                                         style={{ objectFit: 'cover' }}
                                         alt={hotelInfo.hotelName}
+                                        onError={handleImageError}
                                     />
                                 </div>
                                 {hotelPhotos.slice(0, 4).map((photo, idx) => (
                                     <div key={idx} className="carousel-item h-100">
                                         <img
-                                            src={photo.photo}
+                                            src={getImageUrl(photo.photo)}
                                             className="d-block w-100 h-100"
                                             style={{ objectFit: 'cover' }}
                                             alt={`${hotelInfo.hotelName} photo ${idx + 1}`}
+                                            onError={handleImageError}
                                         />
                                     </div>
                                 ))}
@@ -237,10 +338,11 @@ export default function HotelDetails({ city, hotel }) {
                                         onClick={() => openPhotoModal(idx + 1)}
                                     >
                                         <img
-                                            src={photo.photo}
+                                            src={getImageUrl(photo.photo)}
                                             className="w-100 h-100"
                                             style={{ objectFit: 'cover' }}
                                             alt={`${hotelInfo.hotelName} photo ${idx + 1}`}
+                                            onError={handleImageError}
                                         />
                                         <div className="photo-hover-overlay d-flex align-items-center justify-content-center">
                                             <span className="btn btn-light border rounded-pill px-3 py-1">
@@ -261,7 +363,7 @@ export default function HotelDetails({ city, hotel }) {
                         onClick={() => openPhotoModal()}
                     >
                         <FaCamera className="me-2" />
-                        View all {hotelPhotos.length + 1} photos
+                        View all {allPhotos.length} photos
                     </button>
                 </div>
             </section>
@@ -270,53 +372,53 @@ export default function HotelDetails({ city, hotel }) {
             <section className="container py-4">
                 {/* Tab Navigation */}
                 <div className="border-bottom mb-4">
-                    <ul className="nav nav-tabs border-0" role="tablist">
+                    <ul className="nav nav-tabs custom-tabs border-bottom" role="tablist">
                         <li className="nav-item">
                             <button
-                                className={`nav-link ${activeTab === 'overview' ? 'active' : ''} border-0`}
+                                className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('overview')}
                             >
-                                <span className="fw-bold">Overview</span>
+                                Overview
                             </button>
                         </li>
                         <li className="nav-item">
                             <button
-                                className={`nav-link ${activeTab === 'reviews' ? 'active' : ''} border-0`}
+                                className={`nav-link ${activeTab === 'reviews' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('reviews')}
                             >
-                                <span className="fw-bold">Reviews</span>
+                                Traveller reviews
                             </button>
                         </li>
                         <li className="nav-item">
                             <button
-                                className={`nav-link ${activeTab === 'facilities' ? 'active' : ''} border-0`}
+                                className={`nav-link ${activeTab === 'facilities' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('facilities')}
                             >
-                                <span className="fw-bold">Facilities</span>
+                                Facilities
                             </button>
                         </li>
                         <li className="nav-item">
                             <button
-                                className={`nav-link ${activeTab === 'policies' ? 'active' : ''} border-0`}
+                                className={`nav-link ${activeTab === 'policies' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('policies')}
                             >
-                                <span className="fw-bold">Hotel Policy</span>
+                                Hotel Policies
                             </button>
                         </li>
                         <li className="nav-item">
                             <button
-                                className={`nav-link ${activeTab === 'askPrice' ? 'active' : ''} border-0`}
+                                className={`nav-link ${activeTab === 'askPrice' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('askPrice')}
                             >
-                                <span className="fw-bold">Ask for Prices</span>
+                                Ask For Prices
                             </button>
                         </li>
                         <li className="nav-item">
                             <button
-                                className={`nav-link ${activeTab === 'writeReview' ? 'active' : ''} border-0`}
+                                className={`nav-link ${activeTab === 'writeReview' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('writeReview')}
                             >
-                                <span className="fw-bold">Write a Review</span>
+                                Write Review
                             </button>
                         </li>
                     </ul>
@@ -328,9 +430,13 @@ export default function HotelDetails({ city, hotel }) {
                             <div className="tab-content">
                                 {/* Description */}
                                 <div className="mb-4">
-                                    <p className="text-muted" style={{ lineHeight: '1.8' }}>{hotelInfo.description}</p>
+                                    <p
+                                        className="text-muted"
+                                        style={{ lineHeight: '1.8', whiteSpace: 'pre-line' }}
+                                    >
+                                        {hotelInfo.description}
+                                    </p>
                                 </div>
-
                             </div>
                         )}
 
@@ -340,31 +446,64 @@ export default function HotelDetails({ city, hotel }) {
                                     {hotelReviews.length > 0 ? (
                                         <div className="row">
                                             {hotelReviews.map((review, idx) => (
-                                                <div key={idx} className="col-12 mb-3">
-                                                    <div className="border rounded p-3">
-                                                        <div className="d-flex align-items-center mb-2">
+                                                <div key={idx} className="col-12 mb-4">
+                                                    <div className="border rounded-4 p-4 bg-white">
+
+                                                        <div className="d-flex">
+
+                                                            {/* Avatar */}
                                                             <div
-                                                                className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3"
-                                                                style={{ width: '50px', height: '50px', fontSize: '20px' }}
+                                                                className="rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                                style={{
+                                                                    width: '50px',
+                                                                    height: '50px',
+                                                                    minWidth: '50px',
+                                                                    background: '#e6eef6',
+                                                                    color: '#5f7f9c',
+                                                                    fontWeight: '600',
+                                                                    fontSize: '18px',
+                                                                    lineHeight: '1',
+                                                                    flexShrink: 0
+                                                                }}
                                                             >
-                                                                {review.travellerName ? review.travellerName.charAt(0).toUpperCase() : 'G'}
+                                                                {review.travellerName
+                                                                    ? review.travellerName.charAt(0).toUpperCase()
+                                                                    : 'S'}
                                                             </div>
-                                                            <div>
-                                                                <p className="mb-0 fw-bold" style={{ fontSize: '16px' }}>{review.travellerName || 'Guest'}</p>
-                                                                <p className="mb-0 text-muted small">{review.reviewType || 'Solo traveler'}</p>
+
+                                                            {/* Reviewer Info */}
+                                                            <div style={{ minWidth: "180px" }}>
+                                                                <p className="mb-1 fw-bold">{review.travellerName || "Guest"}</p>
+                                                                <p className="mb-0 text-muted small">
+                                                                    {review?.reviewType}
+                                                                </p>
                                                             </div>
-                                                            <div className="ms-auto">
-                                                                <div className="d-flex align-items-center">
-                                                                    <MdOutlineStarPurple500 className="text-warning me-1" />
-                                                                    <span className="fw-bold">{review.reviewStar || hotelInfo.reviewScore || '0'}</span>
-                                                                </div>
+
+                                                            {/* Review Content */}
+                                                            <div className="flex-grow-1">
+
+                                                                {/* Stars */}
+                                                                {/* <div className="mb-1">
+                                                                    {[...Array(5)].map((_, i) => (
+                                                                        <MdOutlineStarPurple500
+                                                                            key={i}
+                                                                            size={18}
+                                                                            color="#f0831e"
+                                                                        />
+                                                                    ))}
+                                                                </div> */}
+
+                                                                {/* Review Title */}
+                                                                <h6 className="fw-bold mb-1">
+                                                                    {review?.reviewTitle}
+                                                                </h6>
+
+                                                                {/* Review Text */}
+                                                                <p className="text-muted mb-0">
+                                                                    {review.positive || review.negative}
+                                                                </p>
                                                             </div>
                                                         </div>
-                                                        {(review.positive || review.negative) && (
-                                                            <div>
-                                                                <p className="mb-0 text-muted">{review.positive || review.negative}</p>
-                                                            </div>
-                                                        )}
                                                     </div>
                                                 </div>
                                             ))}
@@ -381,25 +520,24 @@ export default function HotelDetails({ city, hotel }) {
                         {activeTab === 'facilities' && (
                             <div className="tab-content">
                                 <div className="mb-4">
-                                    <h5 className="fw-bold mb-3">All Facilities</h5>
-                                    <div className="row g-3">
-                                        {hotelFacilities.length > 0 ? (
-                                            hotelFacilities.map((facility, idx) => (
-                                                <div key={idx} className="col-6 col-md-4">
-                                                    <div className="d-flex align-items-center p-3 border rounded h-100">
-                                                        <i className={`fa-solid ${getFacilityIcon(facility.facilityName)} text-success me-3 fs-5`}></i>
-                                                        <span>{facility.facilityName}</span>
-                                                    </div>
+                                    {hotelFacilities.length > 0 ? (
+                                        <div className="row">
+                                            {hotelFacilities.map((facilityGroup, idx) => (
+                                                <div key={idx} className="col-12 mb-3">
+                                                    <h6 className="fw-bold mb-2">{facilityGroup.facilityType}</h6>
+                                                    <p className="text-muted mb-0">
+                                                        {facilityGroup.facilities.split('|').map((f, i) => f.trim()).join(', ')}
+                                                    </p>
                                                 </div>
-                                            ))
-                                        ) : (
-                                            <div className="col-12">
-                                                <div className="border rounded p-4 text-center">
-                                                    <p className="text-muted mb-0">No facilities information available.</p>
-                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="col-12">
+                                            <div className="border rounded p-4 text-center">
+                                                <p className="text-muted mb-0">No facilities information available.</p>
                                             </div>
-                                        )}
-                                    </div>
+                                        </div>
+                                    )}
                                 </div>
 
                             </div>
@@ -586,50 +724,50 @@ export default function HotelDetails({ city, hotel }) {
                                                         />
                                                     </div>
                                                     <div className="col-md-6">
-                                                    <select className="form-select" required>
-                                                        <option value="">Select Travel Type</option>
-                                                        <option value="solo">Solo traveler</option>
-                                                        <option value="couple">Couple</option>
-                                                        <option value="family">Family</option>
-                                                        <option value="business">Business</option>
-                                                        <option value="friends">Friends</option>
-                                                    </select>
-                                                </div>
-                                                <div className="col-12">
-                                                    <div className="mb-3">
-                                                        <label className="form-label fw-bold">Your Rating</label>
-                                                        <div className="d-flex align-items-center">
-                                                            {[1, 2, 3, 4, 5].map((star) => (
-                                                                <MdOutlineStarPurple500
-                                                                    key={star}
-                                                                    className="text-warning"
-                                                                    style={{ fontSize: '32px', cursor: 'pointer' }}
-                                                                />
-                                                            ))}
+                                                        <select className="form-select" required>
+                                                            <option value="">Select Travel Type</option>
+                                                            <option value="solo">Solo traveler</option>
+                                                            <option value="couple">Couple</option>
+                                                            <option value="family">Family</option>
+                                                            <option value="business">Business</option>
+                                                            <option value="friends">Friends</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <div className="mb-3">
+                                                            <label className="form-label fw-bold">Your Rating</label>
+                                                            <div className="d-flex align-items-center">
+                                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                                    <MdOutlineStarPurple500
+                                                                        key={star}
+                                                                        className="text-warning"
+                                                                        style={{ fontSize: '32px', cursor: 'pointer' }}
+                                                                    />
+                                                                ))}
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                    <div className="col-12">
+                                                        <textarea
+                                                            className="form-control"
+                                                            rows="3"
+                                                            placeholder="What did you like most?"
+                                                        ></textarea>
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <textarea
+                                                            className="form-control"
+                                                            rows="3"
+                                                            placeholder="What could be improved?"
+                                                        ></textarea>
+                                                    </div>
+                                                    <div className="col-12">
+                                                        <button type="submit" className="btn btn-primary px-5 py-2">
+                                                            Submit Review
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div className="col-12">
-                                                    <textarea
-                                                        className="form-control"
-                                                        rows="3"
-                                                        placeholder="What did you like most?"
-                                                    ></textarea>
-                                                </div>
-                                                <div className="col-12">
-                                                    <textarea
-                                                        className="form-control"
-                                                        rows="3"
-                                                        placeholder="What could be improved?"
-                                                    ></textarea>
-                                                </div>
-                                                <div className="col-12">
-                                                    <button type="submit" className="btn btn-primary px-5 py-2">
-                                                        Submit Review
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -658,6 +796,7 @@ export default function HotelDetails({ city, hotel }) {
                                 src={allPhotos[currentPhotoIndex]}
                                 alt={`Photo ${currentPhotoIndex + 1}`}
                                 className="photo-modal-image"
+                                onError={handleImageError}
                             />
                             <button className="photo-modal-nav photo-modal-next" onClick={nextPhoto}>
                                 <FaChevronRight />
@@ -671,155 +810,13 @@ export default function HotelDetails({ city, hotel }) {
                                     alt={`Thumbnail ${idx + 1}`}
                                     className={`photo-thumbnail ${currentPhotoIndex === idx ? 'active' : ''}`}
                                     onClick={() => setCurrentPhotoIndex(idx)}
+                                    onError={handleImageError}
                                 />
                             ))}
                         </div>
                     </div>
                 </div>
             )}
-
-            <style jsx>{`
-                .view-photos-btn:hover {
-                    background-color: #ff7a00 !important;
-                    border-color: #ff7a00 !important;
-                    color: white !important;
-                }
-                .photo-hover-container:hover .photo-hover-overlay {
-                    opacity: 1;
-                }
-                .photo-hover-overlay {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0,0,0,0.5);
-                    opacity: 0;
-                    transition: opacity 0.3s;
-                }
-                .photo-modal-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(28, 28, 28, 0.95);
-                    z-index: 9999;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .photo-modal-content {
-                    position: relative;
-                    width: 90%;
-                    max-width: 1000px;
-                    background: #1a1a1a;
-                    border-radius: 12px;
-                    overflow: hidden;
-                    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-                }
-                .photo-modal-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 16px 24px;
-                    background: #262626;
-                    border-bottom: 1px solid #404040;
-                }
-                .photo-modal-title {
-                    color: white;
-                    font-size: 18px;
-                    font-weight: 600;
-                    margin: 0;
-                }
-                .photo-modal-counter {
-                    color: #999;
-                    font-size: 14px;
-                }
-                .photo-modal-close {
-                    background: #404040;
-                    border: none;
-                    border-radius: 50%;
-                    width: 36px;
-                    height: 36px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    color: white;
-                    font-size: 18px;
-                    transition: background 0.2s;
-                }
-                .photo-modal-close:hover {
-                    background: #555;
-                }
-                .photo-modal-body {
-                    padding: 24px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-height: 500px;
-                }
-                .photo-modal-image {
-                    max-width: 100%;
-                    max-height: 70vh;
-                    object-fit: contain;
-                    border-radius: 8px;
-                }
-                .photo-modal-nav {
-                    position: absolute;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    background: white;
-                    border: none;
-                    border-radius: 50%;
-                    width: 48px;
-                    height: 48px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    font-size: 18px;
-                    color: #333;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                    transition: all 0.2s;
-                }
-                .photo-modal-nav:hover {
-                    background: #f5f5f5;
-                    transform: translateY(-50%) scale(1.1);
-                }
-                .photo-modal-prev {
-                    left: 20px;
-                }
-                .photo-modal-next {
-                    right: 20px;
-                }
-                .photo-modal-footer {
-                    padding: 16px 24px;
-                    background: #262626;
-                    border-top: 1px solid #404040;
-                    display: flex;
-                    justify-content: center;
-                    gap: 12px;
-                }
-                .photo-thumbnail {
-                    width: 60px;
-                    height: 45px;
-                    border-radius: 6px;
-                    object-fit: cover;
-                    cursor: pointer;
-                    opacity: 0.5;
-                    transition: opacity 0.2s, transform 0.2s;
-                    border: 2px solid transparent;
-                }
-                .photo-thumbnail:hover {
-                    opacity: 0.8;
-                }
-                .photo-thumbnail.active {
-                    opacity: 1;
-                    border-color: #ff7a00;
-                }
-            `}</style>
         </>
     );
 }
