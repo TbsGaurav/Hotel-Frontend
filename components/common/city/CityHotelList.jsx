@@ -6,6 +6,17 @@ import { MdOutlineStarPurple500 } from 'react-icons/md';
 
 export default function CityHotelList({ hotels = [], hotelRates = [] }) {
     const defaultImage = '/image/property-img.webp';
+    const maxVisibleFacilities = 3;
+    const maxFacilityChars = 60;
+    const facilityBadgeStyle = {
+        fontSize: '11px',
+        maxWidth: '160px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        display: 'inline-block',
+        flexShrink: 0
+    };
     const [timestamp, setTimestamp] = useState('');
 
     useEffect(() => {
@@ -37,6 +48,31 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
         return 'Pleasant';
     };
 
+    const getVisibleFacilities = (facilities) => {
+        const visible = [];
+        let usedChars = 0;
+
+        for (const facility of facilities) {
+            if (visible.length >= maxVisibleFacilities) {
+                break;
+            }
+
+            const nextChars = usedChars + facility.length;
+            if (visible.length > 0 && nextChars > maxFacilityChars) {
+                break;
+            }
+
+            visible.push(facility);
+            usedChars = nextChars;
+        }
+
+        if (!visible.length && facilities.length > 0) {
+            visible.push(facilities[0]);
+        }
+
+        return visible;
+    };
+
     if (!hotels.length) {
         return (
             <div className="text-center py-5">
@@ -53,6 +89,11 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
                     const badges = rate?.badges || [];
                     const breakfastBadge = badges.find((badge) => badge.toLowerCase().includes('breakfast'));
                     const otherBadges = badges.filter((badge) => !badge.toLowerCase().includes('breakfast'));
+                    const facilities = hotel.hotelFacilities
+                        ? hotel.hotelFacilities.split('|').map((facility) => facility.trim()).filter(Boolean)
+                        : [];
+                    const visibleFacilities = getVisibleFacilities(facilities);
+                    const hiddenFacilitiesCount = Math.max(facilities.length - visibleFacilities.length, 0);
 
                     return (
                         <div
@@ -132,24 +173,22 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
                                             </div>
                                         </div>
 
-                                        <div className="d-flex align-items-center flex-wrap gap-1 mb-2">
-                                            {hotel.hotelFacilities && (
+                                        <div className="d-flex align-items-center gap-1 mb-2 flex-nowrap" style={{ overflow: 'hidden' }}>
+                                            {facilities.length > 0 && (
                                                 <>
-                                                    {hotel.hotelFacilities
-                                                        .split('|')
-                                                        .slice(0, 5)
-                                                        .map((facility, idx) => (
+                                                    {visibleFacilities.map((facility, idx) => (
                                                             <span
                                                                 key={idx}
                                                                 className="badge bg-light text-dark border me-1 mb-1"
-                                                                style={{ fontSize: '11px' }}
+                                                                style={facilityBadgeStyle}
+                                                                title={facility}
                                                             >
-                                                                {facility.trim()}
+                                                                {facility}
                                                             </span>
-                                                        ))}
-                                                    {hotel.hotelFacilities.split('|').length > 5 && (
-                                                        <span className="rating" style={{ fontSize: '11px' }}>
-                                                            +{hotel.hotelFacilities.split('|').length - 5} more
+                                                    ))}
+                                                    {hiddenFacilitiesCount > 0 && (
+                                                        <span className="rating text-nowrap" style={{ fontSize: '11px', flexShrink: 0 }}>
+                                                            +{hiddenFacilitiesCount} more
                                                         </span>
                                                     )}
                                                 </>

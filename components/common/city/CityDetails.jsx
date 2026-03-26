@@ -2,6 +2,7 @@ import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import { getCityHotels } from '@/lib/api/public/cityapi';
 import Link from 'next/link';
 import CityHotelList from './CityHotelList';
+import { getHotelRates } from '@/lib/api/public/hotelapi';
 
 function toSlug(value = '') {
     if (!value) return '';
@@ -22,7 +23,24 @@ export default async function CityDetails({ params }) {
     // const countrySlug = toSlug(country);
     // const regionSlug = toSlug(region);
     const citySlugPath = toSlug(city);
+    let hotelRates = [];
 
+    const bookingIds = hotels?.map((hotel) => hotel.bookingID).filter(Boolean) || [];
+    // ✅ SAFE CHECK
+    if (bookingIds.length > 0) {
+        const ratesRes = await getHotelRates({
+            bookingIds,
+            currency: 'USD',
+            rooms: 1,
+            adults: 2,
+            childs: 0,
+            device: 'desktop',
+            checkIn: null,
+            checkOut: null
+        });
+
+        hotelRates = ratesRes?.data || [];
+    }
     return (
         <>
             <CountryHeroSection />
@@ -31,9 +49,9 @@ export default async function CityDetails({ params }) {
                 <div className="py-2">
                     <div className="container">
                         <div className="d-flex align-items-center small">
-                            <Link href="/destinations" className="text-dark text-decoration-none">
-                                All Countries
-                            </Link>
+                            {/* <Link href="/destinations" className="text-dark text-decoration-none">
+                                All COuntries
+                            </Link> */}
 
                             {/* <span className="mx-2 text-muted">•</span> */}
 
@@ -66,7 +84,7 @@ export default async function CityDetails({ params }) {
 
                         {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
 
-                        <CityHotelList hotels={hotels} />
+                        <CityHotelList hotels={hotels} hotelRates={hotelRates} />
                     </>
                 ) : (
                     <div className="text-center py-5">
