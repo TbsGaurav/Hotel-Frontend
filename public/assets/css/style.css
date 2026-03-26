@@ -1991,3 +1991,11 @@ a.text-sky-blue:hover {
     opacity: 1;
     border-color: #ff7a00;
 }
+.city-hover {
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.city-hover:hover {
+    color: #0077c0 !important; 
+}

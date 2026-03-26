@@ -16,12 +16,10 @@ export default function PreviewUI({ initialData, id }) {
             if (!data) {
                 const res = await getCollectionById(id);
                 data = res?.data;
-                console.log(data);
             }
 
             const previewRes = await getPreviewHotels(id);
             const previewHotels = previewRes?.data || [];
-            console.log(previewRes);
             setCollection({
                 ...(data || {}),
                 collectionPreviewHotels: previewHotels
