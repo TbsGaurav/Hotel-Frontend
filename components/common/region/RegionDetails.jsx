@@ -20,7 +20,7 @@ export default async function RegionDetails({ params }) {
     const cityItems = cities.map((city) => ({
         label: city.cityName,
         count: city.hotelCount,
-        href: `/${countrySlug}/${regionSlug}/${city.cityName.toLowerCase().replace(/\s+/g, '-')}`
+        href: `/${city.cityName.toLowerCase().replace(/\s+/g, '-')}`
     }));
     return (
         <>

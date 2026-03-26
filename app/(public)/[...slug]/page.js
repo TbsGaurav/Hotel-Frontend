@@ -3,8 +3,10 @@ import { resolveSlug } from '@/lib/api/public/countryapi';
 import CountryDetails from '@/components/common/country/CountryDetails';
 import RegionDetails from '@/components/common/region/RegionDetails';
 import CollectionDetailsWrapper from '@/components/common/collections/CollectionDetailsWrapper';
-import CountryBrandDetails from '@/components/common/country/CountryBrandDetails';
+import CountryBrandDetails from '@/components/common/brand/CountryBrandDetails';
+import CityDetails from '@/components/common/city/CityDetails';
 import HotelDetailsWrapper from '@/components/common/hotel/HotelDetailsWrapper';
+import CityBrandDetails from '@/components/common/brand/CityBrandDetails';
 
 export default async function DynamicPage({ params }) {
     const { slug } = await params;
@@ -42,6 +44,14 @@ export default async function DynamicPage({ params }) {
     // HOTEL PAGE (CityHotel)
     if (slugArray.length === 2 && data.entityType === 'Hotel') {
         return <HotelDetailsWrapper city={slugArray[0]} hotel={slugArray[1]} />;
+    }
+
+    if (slugArray.length === 1 && data.entityType === 'City') {
+        return <CityDetails city={slugArray[0]} params={params} />;
+    }
+
+    if (slugArray.length === 2 && data.entityType === 'CityBrand') {
+        return <CityBrandDetails city={slugArray[0]} params={params} />;
     }
 
     return notFound();

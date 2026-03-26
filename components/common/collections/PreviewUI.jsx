@@ -59,6 +59,7 @@ export default function PreviewUI({ initialData, id }) {
             const collectionCuration = Array.isArray(data?.collectionCuration) ? data.collectionCuration : [];
             const collectionContent = normalizeSingleItem(data?.collectionContent);
             const previewRes = await getHotelsByCollection(id);
+            console.log('Preview hotels response:', previewRes);
             const previewHotels = extractHotelArray(previewRes?.data);
             setCollection({
                 ...(data || {}),

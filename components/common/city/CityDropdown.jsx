@@ -24,11 +24,10 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
 
             const endpoint =
                 letter === 'Top Cities' ? `/countries/${countryName}` : `/countries/${countryName}?alphabet=${letter.toLowerCase()}`;
-
             const json = await fetchClient(endpoint);
 
             const cityData = json?.data?.countryData?.filter((item) => Number(item.type) === ITEM_TYPE.City) || [];
-
+            
             setCities(cityData);
         } catch (error) {
             console.error('Failed to fetch cities:', error);
