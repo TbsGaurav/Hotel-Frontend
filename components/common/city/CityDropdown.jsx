@@ -28,7 +28,6 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
 
             const cityData = json?.data?.countryData?.filter((item) => Number(item.type) === ITEM_TYPE.City) || [];
             
-            console.log(cityData);
             setCities(cityData);
         } catch (error) {
             console.error('Failed to fetch cities:', error);

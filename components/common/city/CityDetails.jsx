@@ -1,7 +1,7 @@
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import { getCityHotels } from '@/lib/api/public/cityapi';
 import Link from 'next/link';
-import CountryBrandHotelList from '../hotel/CountryBrandHotelList';
+import CityHotelList from './CityHotelList';
 
 function toSlug(value = '') {
     if (!value) return '';
@@ -35,7 +35,7 @@ export default async function CityDetails({ params }) {
                                 All Countries
                             </Link>
 
-                            <span className="mx-2 text-muted">•</span>
+                            {/* <span className="mx-2 text-muted">•</span> */}
 
                             {/* <span className="mx-2">&bull;</span> */}
 
@@ -66,7 +66,7 @@ export default async function CityDetails({ params }) {
 
                         {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
 
-                        <CountryBrandHotelList hotels={hotels} />
+                        <CityHotelList hotels={hotels} />
                     </>
                 ) : (
                     <div className="text-center py-5">
