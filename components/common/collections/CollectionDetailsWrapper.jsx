@@ -18,11 +18,11 @@ export default async function CollectionDetailsWrapper({ slug }) {
     let totalCount = 0;
     let currentPage = 1;
     let pageSize = 10;
-    
+
     if (collection?.basicCollection?.collectionId) {
         // Fetch first page of hotels
         const hotelsRes = await getHotelsByCollection(collection.basicCollection.collectionId, 1, 10);
-        
+
         // Handle new API response structure: data.hotelData and data.totalCount
         const hotelsData = hotelsRes?.data?.hotelData || hotelsRes?.data || [];
         hotels = hotelsData;
@@ -55,10 +55,10 @@ export default async function CollectionDetailsWrapper({ slug }) {
     }
 
     return (
-        <CollectionDetails 
-            collection={collection} 
-            hotels={hotels} 
-            hotelRates={hotelRates} 
+        <CollectionDetails
+            collection={collection}
+            hotels={hotels}
+            hotelRates={hotelRates}
             slug={slug}
             totalCount={totalCount}
             currentPage={currentPage}

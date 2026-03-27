@@ -18,7 +18,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const [allRates, setAllRates] = useState(hotelRates || []);
     const [page, setPage] = useState(currentPage || 1);
     const [hasMore, setHasMore] = useState((hotels?.length || 0) < (totalCount || 0));
-    
+
     // Helper function to get rate for a hotel by bookingId
     const getHotelRate = (bookingId) => {
         return allRates.find(rate => rate.id === bookingId);
@@ -217,8 +217,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             const rate = getHotelRate(hotel.bookingId);
                                                             const badges = rate?.badges || [];
                                                             // Image badge: show badges that are NOT free cancellation or pay at property
-                                                            const imageBadges = badges.filter(b => 
-                                                                !b.toLowerCase().includes('free cancellation') && 
+                                                            const imageBadges = badges.filter(b =>
+                                                                !b.toLowerCase().includes('free cancellation') &&
                                                                 !b.toLowerCase().includes('pay at')
                                                             );
                                                             if (imageBadges.length > 0) {
@@ -307,7 +307,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         <span
                                                                             key={idx}
                                                                             className="badge bg-light text-dark border me-1 mb-1"
-                                                                            style={{ 
+                                                                            style={{
                                                                                 fontSize: '11px',
                                                                                 whiteSpace: 'nowrap',
                                                                                 maxWidth: '150px',
@@ -366,8 +366,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                 const rate = getHotelRate(hotel.bookingId);
                                                                 const badges = rate?.badges || [];
 
-                                                                const infoBadges = badges.filter(b => 
-                                                                    b.toLowerCase().includes('free cancellation') || 
+                                                                const infoBadges = badges.filter(b =>
+                                                                    b.toLowerCase().includes('free cancellation') ||
                                                                     b.toLowerCase().includes('pay at')
                                                                 );
                                                                 if (infoBadges.length > 0) {
@@ -403,15 +403,15 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         <p className="para-12px text-muted mb-1 text-end">
                                                                             1 night, 2 adults
                                                                         </p>
-                                                                        {discountPercentage > 0 && (
+                                                                        {/* {discountPercentage > 0 && (
                                                                             <div className="text-end mb-1">
                                                                                 <span className="badge bg-danger" style={{ fontSize: '11px' }}>
                                                                                     {discountPercentage}% OFF
                                                                                 </span>
                                                                             </div>
-                                                                        )}
+                                                                        )} */}
                                                                         {formattedOriginal && originalPrice > rate.price.total && (
-                                                                            <p className="para-12px text-muted mb-0 text-end" style={{ textDecoration: 'line-through' }}>
+                                                                            <p className="para-12px text-muted mb-0 text-end" style={{ color: '#ee310f', textDecoration: 'line-through' }}>
                                                                                 {formattedOriginal}
                                                                             </p>
                                                                         )}

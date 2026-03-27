@@ -546,32 +546,24 @@ export default function HotelDetails({ initialData }) {
                         {activeTab === 'policies' && (
                             <div className="tab-content">
                                 <div className="mb-4">
-                                    <h5 className="fw-bold mb-3">Hotel Policies</h5>
-                                    <div className="border rounded p-4">
-                                        <p className="mb-0 text-muted" >
-                                            {hotelInfo.hotelPolicy || 'No special policies listed.'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="mb-4">
-                                    <h5 className="fw-bold mb-3">Check-in / Check-out</h5>
-                                    <div className="row g-3">
-                                        <div className="col-md-6">
-                                            <div className="border rounded p-4">
-                                                <p className="mb-2 fw-bold text-primary" style={{ fontSize: '18px' }}>Check-in</p>
-                                                <p className="mb-0 text-muted">
-                                                    From {hotelInfo.checkIn ? hotelInfo.checkIn.slice(0, 5) : '00:00'} to 23:59
-                                                </p>
-                                            </div>
+                                    <div className="row g-2">
+                                        <div className="row mb-4">
+                                            <span className="fw-bold" style={{ fontSize: '18px' }}>Check-in</span>
+                                            <span className="text-muted">
+                                                From {hotelInfo.checkIn ? hotelInfo.checkIn.slice(0, 5) : '00:00'} to 23:59
+                                            </span>
                                         </div>
-                                        <div className="col-md-6">
-                                            <div className="border rounded p-4">
-                                                <p className="mb-2 fw-bold text-primary" style={{ fontSize: '18px' }}>Check-out</p>
-                                                <p className="mb-0 text-muted">
-                                                    Until {hotelInfo.checkOut ? hotelInfo.checkOut.slice(0, 5) : '11:00'}
-                                                </p>
-                                            </div>
+                                        <div className="row mb-4">
+                                            <span className="fw-bold" style={{ fontSize: '18px' }}>Check-out</span>
+                                            <span className="text-muted">
+                                                Until {hotelInfo.checkOut ? hotelInfo.checkOut.slice(0, 5) : '11:00'}
+                                            </span>
+                                        </div>
+                                        <div className="row mb-4">
+                                            <span className="fw-bold" style={{ fontSize: '18px' }}>The fine print</span>
+                                            <span className="text-muted">
+                                                {hotelInfo.hotelPolicy || 'No special policies listed.'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -580,96 +572,44 @@ export default function HotelDetails({ initialData }) {
 
                         {activeTab === 'askPrice' && (
                             <div className="tab-content">
-                                <div className="row">
-                                    {/* Left Column - Hotel Info Card */}
-                                    <div className="col-lg-4 mb-4">
-                                        <div className="border rounded p-4">
-                                            <h5 className="fw-bold mb-3">{hotelInfo.hotelName}</h5>
-                                            <div className="text-warning d-flex align-items-center mb-2">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <MdOutlineStarPurple500
-                                                        key={i}
-                                                        size={16}
-                                                        color={i < hotelInfo.stars ? "#f0831e" : "#ddd"}
-                                                    />
-                                                ))}
-                                            </div>
-                                            <p className="text-muted small mb-2">
-                                                <FaMapMarkerAlt className="text-primary me-1" />
-                                                {hotelInfo.address}, {hotelInfo.city}
-                                            </p>
-                                            <hr />
-                                            <div className="d-flex align-items-center justify-content-between mb-2">
-                                                <span className="text-muted">Review Score</span>
-                                                <span className="fw-bold">{hotelInfo.reviewScore}/10</span>
-                                            </div>
-                                            <div className="d-flex align-items-center justify-content-between mb-2">
-                                                <span className="text-muted">Review Count</span>
-                                                <span className="fw-bold">{hotelInfo.reviewCount} reviews</span>
-                                            </div>
-                                            <hr />
-                                            <p className="text-muted small mb-0">
-                                                <i className="fa-solid fa-tag me-2"></i>
-                                                Best price guarantee
-                                            </p>
+                                <h5 className="fw-bold mb-3">Setup a Price watch for {hotelInfo.hotelName}</h5>
+                                <p className="text-muted mb-2">
+                                    Each day we&apos;ll check prices and send you an email for your selected dates at {hotelInfo.hotelName}.
+                                </p>
+                                <p className="text-muted mb-4">
+                                    If you don&apos;t have specific dates but would like to check prices for say next weekend or say next month we can check the price too.
+                                </p>
+                                <form onSubmit={(e) => { e.preventDefault(); alert('Price watch setup!'); }}>
+                                    <div className="row g-3 align-items-end">
+                                        <div className="col-md-4">
+                                            <span className="mb-2">Enter your name</span>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                style={{ backgroundColor: '#f3f4f7', borderRadius: '16px', border: 'none' }}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="col-md-4">
+                                            <span className="mb-2">Enter your email</span>
+                                            <input
+                                                type="email"
+                                                className="form-control"
+                                                style={{ backgroundColor: '#f3f4f7', borderRadius: '16px', border: 'none' }}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="col-md-4">
+                                            <button type="submit" className="theme-button-orange rounded px-5 py-2">
+                                                Send Me Details
+                                            </button>
                                         </div>
                                     </div>
-
-                                    {/* Right Column - Contact Form */}
-                                    <div className="col-lg-8">
-                                        <div className="border rounded p-4">
-                                            <h5 className="fw-bold mb-3">Ask for Prices</h5>
-                                            <p className="text-muted mb-4">
-                                                Looking for the best deal? Send us your requirements and we will get back to you with the best available prices.
-                                            </p>
-                                            <form onSubmit={(e) => { e.preventDefault(); alert('Price request sent!'); }}>
-                                                <div className="row g-3">
-                                                    <div className="col-md-6">
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            placeholder="Your Name"
-                                                            required
-                                                        />
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <input
-                                                            type="email"
-                                                            className="form-control"
-                                                            placeholder="Your Email"
-                                                            required
-                                                        />
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <input
-                                                            type="tel"
-                                                            className="form-control"
-                                                            placeholder="Phone Number"
-                                                        />
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <input
-                                                            type="date"
-                                                            className="form-control"
-                                                            required
-                                                        />
-                                                    </div>
-                                                    <div className="col-12">
-                                                        <textarea
-                                                            className="form-control"
-                                                            rows="4"
-                                                            placeholder="Your requirements (number of rooms, guests, special requests, etc.)"
-                                                        ></textarea>
-                                                    </div>
-                                                    <div className="col-12">
-                                                        <button type="submit" className="btn btn-primary px-5 py-2">
-                                                            Send Request
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
+                                </form>
+                                <div className="mt-4">
+                                    <a href="#" className="small me-2" style={{ color: '#f0831e' }} onMouseOver={(e) => e.target.style.color = '#0077c0'} onMouseOut={(e) => e.target.style.color = '#f0831e'}>Privacy</a>
+                                    <span className="text-muted small">/</span>
+                                    <a href="#" className="small ms-2" style={{ color: '#f0831e' }} onMouseOver={(e) => e.target.style.color = '#0077c0'} onMouseOut={(e) => e.target.style.color = '#f0831e'}>Terms</a>
                                 </div>
                             </div>
                         )}
@@ -691,25 +631,28 @@ export default function HotelDetails({ initialData }) {
                                                 ))}
                                             </div>
                                             <p className="text-muted small mb-2">
-                                                <FaMapMarkerAlt className="text-primary me-1" />
+                                                <FaMapMarkerAlt className="me-1" />
                                                 {hotelInfo.address}, {hotelInfo.city}
                                             </p>
                                             <hr />
-                                            <div className="d-flex align-items-center justify-content-between mb-2">
-                                                <span className="text-muted">Review Score</span>
-                                                <span className="fw-bold">{hotelInfo.reviewScore}/10</span>
+                                            <div className="mb-3">
+                                                <div className="d-flex align-items-center mb-1">
+                                                    <span className="fw-bold me-2" style={{ fontSize: '18px' }}>{hotelInfo.reviewScore}</span>
+                                                    <span className="fw-bold">Excellent</span>
+                                                </div>
+                                                <p className="text-muted small mb-0">{hotelInfo.reviewCount} reviews</p>
                                             </div>
-                                            <div className="d-flex align-items-center justify-content-between mb-2">
-                                                <span className="text-muted">Review Count</span>
-                                                <span className="fw-bold">{hotelInfo.reviewCount} reviews</span>
-                                            </div>
+                                            <hr />
+                                            <p className="text-muted small mb-0">
+                                                <i className="fa-solid fa-tag me-2"></i>
+                                                Best price guarantee
+                                            </p>
                                         </div>
                                     </div>
 
                                     {/* Right Column - Review Form */}
                                     <div className="col-lg-8">
-                                        <div className="border rounded p-4">
-                                            <h5 className="fw-bold mb-3">Write a Review</h5>
+                                        <h5 className="fw-bold mb-3">Write a Review</h5>
                                             <p className="text-muted mb-4">
                                                 Your review helps other travelers make informed decisions about their stay.
                                             </p>
@@ -719,12 +662,13 @@ export default function HotelDetails({ initialData }) {
                                                         <input
                                                             type="text"
                                                             className="form-control"
+                                                            style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
                                                             placeholder="Your Name"
                                                             required
                                                         />
                                                     </div>
                                                     <div className="col-md-6">
-                                                        <select className="form-select" required>
+                                                        <select className="form-select" style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }} required>
                                                             <option value="">Select Travel Type</option>
                                                             <option value="solo">Solo traveler</option>
                                                             <option value="couple">Couple</option>
@@ -750,6 +694,7 @@ export default function HotelDetails({ initialData }) {
                                                     <div className="col-12">
                                                         <textarea
                                                             className="form-control"
+                                                            style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
                                                             rows="3"
                                                             placeholder="What did you like most?"
                                                         ></textarea>
@@ -757,18 +702,18 @@ export default function HotelDetails({ initialData }) {
                                                     <div className="col-12">
                                                         <textarea
                                                             className="form-control"
+                                                            style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
                                                             rows="3"
                                                             placeholder="What could be improved?"
                                                         ></textarea>
                                                     </div>
                                                     <div className="col-12">
-                                                        <button type="submit" className="btn btn-primary px-5 py-2">
+                                                        <button type="submit" className="theme-button-blue px-5 py-2">
                                                             Submit Review
                                                         </button>
                                                     </div>
                                                 </div>
                                             </form>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
