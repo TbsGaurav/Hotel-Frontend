@@ -2,8 +2,44 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCollectionById, getPreviewHotels } from '@/lib/api/admin/collectionapi';
+import { getCollectionById, getcollectionHotelsByMultipleNodes } from '@/lib/api/admin/collectionapi';
 import { ADMIN_ROUTES } from '@/lib/route';
+
+const normalizeSingleItem = (value) => (Array.isArray(value) ? value[0] || {} : value || {});
+
+const decodeHtml = (html) => {
+    if (!html) return '';
+
+    const entities = {
+        '&amp;': '&',
+        '&lt;': '<',
+        '&gt;': '>',
+        '&quot;': '"',
+        '&#39;': "'",
+        '&apos;': "'",
+        '&nbsp;': ' ',
+        '&ndash;': '–',
+        '&mdash;': '—',
+        '&copy;': '©',
+        '&reg;': '®',
+        '&trade;': '™'
+    };
+
+    let decoded = html;
+    Object.keys(entities).forEach((entity) => {
+        decoded = decoded.replace(new RegExp(entity, 'g'), entities[entity]);
+    });
+
+    return decoded;
+};
+
+const extractHotelArray = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.data)) return payload.data;
+    if (Array.isArray(payload?.hotels)) return payload.hotels;
+    if (Array.isArray(payload?.collectionPreviewHotels)) return payload.collectionPreviewHotels;
+    return [];
+};
 
 export default function PreviewUI({ initialData, id }) {
     const [collection, setCollection] = useState(initialData);
@@ -18,10 +54,19 @@ export default function PreviewUI({ initialData, id }) {
                 data = res?.data;
             }
 
-            const previewRes = await getPreviewHotels(id);
-            const previewHotels = previewRes?.data || [];
+            const basicCollection = normalizeSingleItem(data?.basicCollection);
+            const collectionRules = Array.isArray(data?.collectionRules) ? data.collectionRules : [];
+            const collectionCuration = Array.isArray(data?.collectionCuration) ? data.collectionCuration : [];
+            const collectionContent = normalizeSingleItem(data?.collectionContent);
+            const previewRes = await getcollectionHotelsByMultipleNodes(id);
+            console.log('Preview hotels response:', previewRes);
+            const previewHotels = extractHotelArray(previewRes?.data);
             setCollection({
                 ...(data || {}),
+                basicCollection,
+                collectionRules,
+                collectionCuration,
+                collectionContent,
                 collectionPreviewHotels: previewHotels
             });
         };
@@ -30,11 +75,12 @@ export default function PreviewUI({ initialData, id }) {
     }, [id, initialData]);
     if (!collection) return <p className="p-4">Loading preview...</p>;
 
-    const basic = collection.basicCollection;
+    const basic = normalizeSingleItem(collection.basicCollection);
+    const content = normalizeSingleItem(collection.collectionContent);
     const rules = collection.collectionRules?.[0]?.rules || [];
     const pinnedHotels = collection.collectionCuration?.[0]?.pinnedHotels || [];
     const excludedHotels = collection.collectionCuration?.[0]?.excludedHotels || [];
-    if (!collection) return <p className="p-4">Loading preview...</p>;
+
     const renderStars = (rating) => {
         const stars = [];
         for (let i = 0; i < rating; i++) {
@@ -46,7 +92,7 @@ export default function PreviewUI({ initialData, id }) {
     const previewHotels = collection.collectionPreviewHotels || [];
     const totalHotelsFound = previewHotels.length;
 
-    const maxHotelsAllowed = basic?.maxHotels || 'Unlimited';
+    const maxHotelsAllowed = basic?.maxHotels ?? 'Unlimited';
 
     return (
         <div className="container py-4">
@@ -60,7 +106,7 @@ export default function PreviewUI({ initialData, id }) {
                     <h5 className="mb-0">Collection Preview</h5>
                 </div>
 
-                <span className="badge bg-success px-3 py-2">{basic?.status}</span>
+                <span className="badge bg-success px-3 py-2">{basic?.status || 'Unknown'}</span>
             </div>
 
             {/* BASIC INFO */}
@@ -80,7 +126,11 @@ export default function PreviewUI({ initialData, id }) {
 
                         <div className="col-md-6">
                             <small className="fw-semibold">GeoNode</small>
-                            <div className="text-muted">{basic?.countryName || basic?.cityName || basic?.regionName}</div>
+                            <div className="text-muted">
+                                {basic?.cities?.length
+                                    ? basic.cities.map((city) => city.cityName).join(', ')
+                                    : basic?.countryName || basic?.cityName || basic?.regionName}
+                            </div>
                         </div>
 
                         <div className="col-md-6">
@@ -90,7 +140,55 @@ export default function PreviewUI({ initialData, id }) {
 
                         <div className="col-md-6">
                             <small className="fw-semibold">Max Hotels</small>
-                            <div className="text-muted">{basic?.maxHotels}</div>
+                            <div className="text-muted">{maxHotelsAllowed}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* CONTENT */}
+            <div className="card mb-4 shadow-sm">
+                <div className="card-header fw-bold">Content</div>
+                <div className="card-body">
+                    <div className="row g-3">
+                        <div className="col-md-6">
+                            <small className="fw-semibold">Header</small>
+                            <div className="text-muted">{content?.header || 'No header set'}</div>
+                        </div>
+
+                        <div className="col-md-6">
+                            <small className="fw-semibold">Badge</small>
+                            <div className="text-muted">{content?.badge || 'No badge set'}</div>
+                        </div>
+
+                        <div className="col-12">
+                            <small className="fw-semibold">Meta Title</small>
+                            <div className="text-muted">{content?.metaTitle || 'No meta title set'}</div>
+                        </div>
+
+                        <div className="col-12">
+                            <small className="fw-semibold">Meta Description</small>
+                            <div className="text-muted">{content?.metaDescription || 'No meta description set'}</div>
+                        </div>
+
+                        <div className="col-12">
+                            <small className="fw-semibold">Intro Short Copy</small>
+                            <div
+                                className="text-muted"
+                                dangerouslySetInnerHTML={{
+                                    __html: decodeHtml(content?.introShortCopy) || 'No intro copy set'
+                                }}
+                            />
+                        </div>
+
+                        <div className="col-12">
+                            <small className="fw-semibold">Intro Long Copy</small>
+                            <div
+                                className="text-muted"
+                                dangerouslySetInnerHTML={{
+                                    __html: decodeHtml(content?.introLongCopy) || 'No long copy set'
+                                }}
+                            />
                         </div>
                     </div>
                 </div>

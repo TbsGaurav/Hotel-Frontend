@@ -91,7 +91,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         cityId: null,
         districtId: null,
         status: 'Draft',
-        expiryDate: '',
         mode: 'Hybrid',
         maxHotels: '',
         changedBy: 'Admin',
@@ -350,7 +349,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             Type: formData.mode.toLowerCase(),
             Template: formData.template || null,
             Status: formData.status,
-            ExpiryDate: formData.expiryDate || null,
             MaxHotels: formData.maxHotels ? Number(formData.maxHotels) : null,
             DefaultSort: formData.defaultSort || 'StarRating DESC'
         };
@@ -362,7 +360,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         //     Type: formData.mode.toLowerCase(),
         //     Template: formData.template || null,
         //     Status: formData.status,
-        //     ExpiryDate: formData.expiryDate || null,
         //     MaxHotels: formData.maxHotels ? Number(formData.maxHotels) : null,
         //     DefaultSort: formData.defaultSort || 'StarRating DESC'
         // };
@@ -389,7 +386,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                     slug: formData.slug,
                     geoNodeId: formData.sourceId,
                     template: formData.template,
-                    expiryDate: formData.expiryDate,
                     maxHotels: formData.maxHotels,
                     status: formData.status
                 });
@@ -580,7 +576,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                 districtId: districtId || null,
 
                 template: basicCollection?.template || '',
-                expiryDate: basicCollection?.expiryDate ? basicCollection.expiryDate.split('T')[0] : '',
                 maxHotels: basicCollection?.maxHotels ?? '',
                 status: basicCollection?.status?.toLowerCase() === 'published' ? 'Published' : 'Draft'
             }));
@@ -590,7 +585,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                 slug: basicCollection?.slug || '',
                 sourceId: sourceId || null,
                 template: basicCollection?.template || '',
-                expiryDate: basicCollection?.expiryDate ? basicCollection.expiryDate.split('T')[0] : '',
                 maxHotels: basicCollection?.maxHotels ?? '',
                 status: basicCollection?.status?.toLowerCase() === 'published' ? 'Published' : 'Draft'
             });
@@ -692,7 +686,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             initialBasicData.slug !== formData.slug ||
             initialBasicData.sourceId !== formData.sourceId ||
             initialBasicData.template !== formData.template ||
-            initialBasicData.expiryDate !== formData.expiryDate ||
             Number(initialBasicData.maxHotels) !== Number(formData.maxHotels)
         );
     };

@@ -14,6 +14,7 @@ export default function RulesTab({
     setRuleValue,
     formData,
     setFormData,
+    selectedCities = [],
     addRule,
     removeRule,
     onNext,
@@ -71,6 +72,11 @@ export default function RulesTab({
         addRule(); // call parent function
     };
 
+    const geoNodeLabel =
+        selectedCities?.length > 0
+            ? selectedCities.map((city) => city.name).join(', ')
+            : formData.geoNodeName || 'Select GeoNode in Basics tab';
+
     return (
         <>
             <div className="row">
@@ -106,8 +112,8 @@ export default function RulesTab({
                                     const ops = getOperatorsForField(field);
                                     setRuleOperator(ops[0]?.value || '');
 
-                                    if (field === 'GeoContainment') {
-                                        setRuleValue(formData.geoNodeName || '');
+                                if (field === 'GeoContainment') {
+                                        setRuleValue(geoNodeLabel || '');
                                     } else {
                                         setRuleValue('');
                                     }
@@ -140,7 +146,7 @@ export default function RulesTab({
                                 <input
                                     type="text"
                                     className="form-control"
-                                    value={formData.geoNodeType ? `${formData.geoNodeName}` : 'Select GeoNode in Basics tab'}
+                                    value={formData.geoNodeType ? geoNodeLabel : 'Select GeoNode in Basics tab'}
                                     disabled
                                 />
                             ) : ruleField === 'Amenities' ? (

@@ -13,6 +13,8 @@ export default function CurationTab({
     setExcludedHotels,
     onNext,
     loading,
+    hasMoreHotels = false,
+    loadingMoreHotels = false,
     hotelSearch,
     setHotelSearch,
     onBack,
@@ -20,15 +22,24 @@ export default function CurationTab({
     selectedHotels,
     setSelectedHotels,
     newlyAddedHotels = [],
-    onAddGlobalHotel
+    onAddGlobalHotel,
+    onLoadMoreHotels
 }) {
     const [reasonModal, setReasonModal] = useState(false);
     const [selectedHotel, setSelectedHotel] = useState(null);
     const [reason, setReason] = useState('');
 
     const effectiveMaxHotels = Number(maxHotels) || 20;
+    const normalizedSearch = hotelSearch.trim().toLowerCase();
 
     const sortedHotels = [...pinnedHotels, ...hotelList.filter((hotel) => !pinnedHotels.some((p) => p.id === hotel.id))];
+    const visibleHotels = normalizedSearch
+        ? sortedHotels.filter((hotel) => {
+              const name = String(hotel?.name || '').toLowerCase();
+              const address = String(hotel?.address || '').toLowerCase();
+              return name.includes(normalizedSearch) || address.includes(normalizedSearch);
+          })
+        : sortedHotels;
 
     const handleCheckboxChange = (hotelId, checked) => {
         if (checked) {
@@ -74,6 +85,17 @@ export default function CurationTab({
         });
     };
 
+    const handleScroll = (event) => {
+        if (!onLoadMoreHotels || loadingMoreHotels || !hasMoreHotels) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
+        const nearBottom = scrollHeight - scrollTop - clientHeight < 48;
+
+        if (nearBottom) {
+            onLoadMoreHotels();
+        }
+    };
+
     const handleUnpin = (hotelId) => {
         setPinnedHotels((prev) => prev.filter((h) => h.id !== hotelId));
     };
@@ -106,8 +128,8 @@ export default function CurationTab({
                 Selected: {selectedHotels.length}/{effectiveMaxHotels}
             </div>
 
-            <div className="border rounded p-3" style={{ maxHeight: '550px', overflowY: 'auto' }}>
-                {sortedHotels.map((hotel) => {
+            <div className="border rounded p-3" style={{ maxHeight: '550px', overflowY: 'auto' }} onScroll={handleScroll}>
+                {visibleHotels.map((hotel) => {
                     const isExcluded = excludedHotels.some((h) => h.id === hotel.id);
                     const pinIndex = pinnedHotels.findIndex((h) => h.id === hotel.id);
                     const isPinned = pinIndex !== -1;
@@ -175,6 +197,24 @@ export default function CurationTab({
                         </div>
                     );
                 })}
+
+                {loadingMoreHotels && (
+                    <div className="py-3 text-center text-muted">
+                        Loading more hotels...
+                    </div>
+                )}
+
+                {!loadingMoreHotels && !hasMoreHotels && visibleHotels.length > 0 && !normalizedSearch && (
+                    <div className="py-3 text-center text-muted">
+                        You have reached the end of the hotel list.
+                    </div>
+                )}
+
+                {normalizedSearch && visibleHotels.length === 0 && (
+                    <div className="py-3 text-center text-muted">
+                        No hotels match &quot;{hotelSearch}&quot;.
+                    </div>
+                )}
             </div>
 
             <GlobalHotelSearch

@@ -4,6 +4,13 @@ import CollectionDetails from './CollectionDetails';
 import { notFound } from 'next/navigation';
 import { countryToCurrency } from '@/lib/utils';
 
+const extractHotelArray = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.data)) return payload.data;
+    if (Array.isArray(payload?.hotels)) return payload.hotels;
+    return [];
+};
+
 export default async function CollectionDetailsWrapper({ slug }) {
     // Fetch collection and hotels data on server
     const collectionRes = await getCollectionByUrl(slug);
@@ -13,7 +20,17 @@ export default async function CollectionDetailsWrapper({ slug }) {
         return notFound();
     }
 
+    const basicCollection = Array.isArray(collection.basicCollection)
+        ? collection.basicCollection[0] || {}
+        : collection.basicCollection || {};
     let hotels = [];
+    const collectionId = basicCollection?.collectionId ?? collection?.basicCollection?.collectionId ?? null;
+
+    if (collectionId) {
+        const hotelsRes = await getHotelsByCollection(collectionId);
+        hotels = extractHotelArray(hotelsRes?.data);
+    }
+
     let hotelRates = [];
     let totalCount = 0;
     let currentPage = 1;
@@ -31,7 +48,7 @@ export default async function CollectionDetailsWrapper({ slug }) {
         pageSize = hotelsRes?.data?.pageSize || 10;
 
         // Get booking IDs from hotels array (each hotel has a bookingId property)
-        const bookingIds = hotels?.map(hotel => hotel.bookingId).filter(Boolean);
+        const bookingIds = hotels?.map((hotel) => hotel.bookingId).filter(Boolean);
 
         // Get country code from first hotel and convert to currency
         // Note: countryCode is lowercase "au" but we need uppercase for our map
@@ -53,7 +70,9 @@ export default async function CollectionDetailsWrapper({ slug }) {
             hotelRates = ratesRes?.data || [];
         }
     }
-
+    {
+        console.log(collection);
+    }
     return (
         <CollectionDetails
             collection={collection}

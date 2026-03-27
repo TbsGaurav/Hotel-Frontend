@@ -2,7 +2,25 @@
 
 import { useState } from 'react';
 
-export default function PreviewTab({ formData, rules, pinnedHotels, excludedHotels, onBack, onSubmit, locationNames }) {
+const slugifyText = (value = '') =>
+    String(value)
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+
+export default function PreviewTab({
+    formData,
+    rules,
+    pinnedHotels,
+    excludedHotels,
+    onBack,
+    onSubmit,
+    locationNames,
+    selectedCities,
+    slugCityId
+}) {
     const [submittingType, setSubmittingType] = useState(null);
     const handleAction = async (action) => {
         try {
@@ -14,6 +32,9 @@ export default function PreviewTab({ formData, rules, pinnedHotels, excludedHote
     };
     const geoName =
         locationNames.districtName || locationNames.cityName || locationNames.regionName || locationNames.countryName || formData.sourceId;
+    const slugBase = formData.slugBase || String(formData.slug || '').split('/').slice(1).join('/') || formData.slug;
+    const selectedSlugCity = selectedCities?.find((city) => city.cityId === slugCityId) || null;
+    const previewSlug = selectedSlugCity ? `${slugifyText(selectedSlugCity.name || '')}/${slugBase}` : slugBase;
 
     return (
         <>
@@ -27,6 +48,12 @@ export default function PreviewTab({ formData, rules, pinnedHotels, excludedHote
                     <strong>Slug:</strong> {formData.slug}
                 </p>
                 <p>
+                    <strong>Slug Namespace:</strong> {selectedSlugCity?.name || 'No city selected'}
+                </p>
+                <p>
+                    <strong>Preview URL:</strong> {previewSlug ? `${previewSlug}.htm` : 'No slug yet'}
+                </p>
+                <p>
                     <strong>GeoLocation:</strong> {geoName || ''}
                 </p>
                 <p>
@@ -34,9 +61,6 @@ export default function PreviewTab({ formData, rules, pinnedHotels, excludedHote
                 </p>
                 <p>
                     <strong>Status:</strong> {formData.status}
-                </p>
-                <p>
-                    <strong>Expiry Date:</strong> {formData.expiryDate || 'N/A'}
                 </p>
                 <p>
                     <strong>Max Hotels:</strong> {formData.maxHotels || 'Not Set'}

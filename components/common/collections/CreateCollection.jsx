@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
     getCitiesByCountryOrRegion,
     getHotelsByCity,
+    getcollectionHotelsByMultipleNodes,
     upsertCollection,
     saveContent,
     saveRule,
@@ -22,6 +23,63 @@ import toast from 'react-hot-toast';
 import { getCountriesApi } from '@/lib/api/public/countryapi';
 import { ADMIN_ROUTES } from '@/lib/route';
 
+const slugifyText = (value = '') =>
+    String(value)
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+
+const getSlugParts = (slug = '') => {
+    const normalized = String(slug || '').replace(/^\/+/, '');
+    const parts = normalized.split('/').filter(Boolean);
+
+    if (parts.length <= 1) {
+        return {
+            namespace: '',
+            base: normalized
+        };
+    }
+
+    return {
+        namespace: parts[0] || '',
+        base: parts.slice(1).join('/')
+    };
+};
+
+const extractHotelArray = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.data)) return payload.data;
+    if (Array.isArray(payload?.hotels)) return payload.hotels;
+    if (Array.isArray(payload?.collectionPreviewHotels)) return payload.collectionPreviewHotels;
+    return [];
+};
+
+const extractHotelPagination = (payload) => {
+    const source = payload?.data && typeof payload.data === 'object' ? payload.data : payload || {};
+
+    return {
+        pageNumber: source?.pageNumber ?? null,
+        pageSize: source?.pageSize ?? null,
+        totalCount: source?.totalCount ?? null,
+        totalPages: source?.totalPages ?? null,
+        hasNextPage: source?.hasNextPage ?? null
+    };
+};
+
+const mergeHotelsById = (existingHotels = [], nextHotels = []) => {
+    const hotelMap = new Map();
+
+    [...existingHotels, ...nextHotels].forEach((hotel) => {
+        if (hotel?.id && !hotelMap.has(hotel.id)) {
+            hotelMap.set(hotel.id, hotel);
+        }
+    });
+
+    return Array.from(hotelMap.values());
+};
+
 export default function CreateCollection({ collectionId: propCollectionId }) {
     const router = useRouter();
     const [collectionId, setCollectionId] = useState(propCollectionId || null);
@@ -37,6 +95,8 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
 
     const [selectedGeoNode, setSelectedGeoNode] = useState(null);
     const [selectedCityObj, setSelectedCityObj] = useState(null);
+    const [selectedCities, setSelectedCities] = useState([]);
+    const [slugCityId, setSlugCityId] = useState(null);
     const [loading, setLoading] = useState(false);
     const [countries, setCountries] = useState([]);
 
@@ -84,6 +144,15 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedHotels, setSelectedHotels] = useState([]);
     const hasInitializedCurationSelectionRef = useRef(false);
+    const [hotelPagination, setHotelPagination] = useState({
+        pageNumber: 1,
+        pageSize: 20,
+        totalCount: 0,
+        totalPages: 0,
+        hasNextPage: false
+    });
+    const [hotelLoadingMore, setHotelLoadingMore] = useState(false);
+    const hotelLoadMoreLockRef = useRef(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -94,9 +163,9 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         countryId: null,
         regionId: null,
         cityId: null,
+        slugBase: '',
         districtId: null,
         status: 'Draft',
-        expiryDate: '',
         mode: 'Hybrid',
         maxHotels: '',
         changedBy: 'Admin',
@@ -112,6 +181,48 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             fetchCollectionById(propCollectionId);
         }
     }, [propCollectionId]);
+
+    useEffect(() => {
+        if (!selectedCities.length) {
+            if (slugCityId !== null) {
+                setSlugCityId(null);
+            }
+            return;
+        }
+        if (slugCityId !== null && !selectedCities.some((city) => city.cityId === slugCityId)) {
+            setSlugCityId(null);
+        }
+    }, [selectedCities, slugCityId]);
+
+    useEffect(() => {
+        if (collectionId) return;
+
+        const baseSlug = formData.slugBase?.trim();
+        if (!baseSlug) return;
+
+        const namespaceCity = selectedCities.find((city) => city.cityId === slugCityId) || null;
+        const namespace = namespaceCity ? slugifyText(namespaceCity.name || '') : '';
+        const nextSlug = namespace ? `${namespace}/${baseSlug}` : baseSlug;
+
+        if (formData.slug !== nextSlug) {
+            setFormData((prev) => ({
+                ...prev,
+                slug: nextSlug
+            }));
+        }
+    }, [collectionId, formData.slugBase, formData.slug, selectedCities, slugCityId]);
+
+    useEffect(() => {
+        if (!selectedCities.length) return;
+
+        const cityLabel = selectedCities.map((city) => city.name).join(', ');
+        if (formData.geoNodeName !== cityLabel) {
+            setFormData((prev) => ({
+                ...prev,
+                geoNodeName: cityLabel
+            }));
+        }
+    }, [selectedCities, formData.geoNodeName]);
 
     // Update selected hotels when hotel list loads and we have included IDs
     useEffect(() => {
@@ -166,11 +277,18 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
 
     useEffect(() => {
         const delay = setTimeout(() => {
-            loadHotels(hotelSearch);
+            if (activeTab !== 'Curation') return;
+
+            setHotelPagination((prev) => ({
+                ...prev,
+                pageNumber: 1,
+                hasNextPage: false
+            }));
+            loadHotels({ search: hotelSearch, pageNumber: 1, append: false });
         }, 400);
 
         return () => clearTimeout(delay);
-    }, [hotelSearch, selectedCity]);
+    }, [hotelSearch, selectedCity, activeTab, collectionId, formData.sourceId, formData.geoNodeType]);
 
     useEffect(() => {
         const loadCountries = async () => {
@@ -181,28 +299,63 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         loadCountries();
     }, []);
 
-    const loadHotels = async (search) => {
-        if (!formData.sourceId || !formData.geoNodeType) return;
+    const loadHotels = async ({ search = '', pageNumber = 1, append = false } = {}) => {
+        let results = [];
+        let pagination = {};
 
-        const payload = {
-            geoNodeType: formData.geoNodeType,
-            geoNodeId: formData.sourceId,
-            searchTerm: search || '',
-            collectionId: collectionId || null
-        };
+        if (collectionId) {
+            try {
+                const previewRes = await getcollectionHotelsByMultipleNodes(collectionId, {
+                    pageNumber,
+                    pageSize: 20,
+                    searchTerm: search || ''
+                });
+                results = extractHotelArray(previewRes?.data);
+                pagination = extractHotelPagination(previewRes);
+            } catch (error) {
+                console.error('Failed to load preview hotels:', error);
+            }
+        } else if (formData.sourceId && formData.geoNodeType) {
+            try {
+                const res = await getHotelsByCity({
+                    geoNodeType: formData.geoNodeType,
+                    geoNodeId: formData.sourceId,
+                    searchTerm: search || '',
+                    pageNumber,
+                    pageSize: 20
+                });
 
-        const res = await getHotelsByCity(payload);
-        const results = res?.data || [];
+                results = extractHotelArray(res?.data);
+                pagination = extractHotelPagination(res);
+            } catch (error) {
+                console.error('Failed to load hotels by geo-node:', error);
+                toast.error('Unable to load hotels for the selected geo-node');
+            }
+        }
 
-        setHotelList(() => {
-            const newHotelsById = new Map();
-            [...newlyAddedHotels, ...results].forEach((hotel) => {
-                if (hotel?.id && !newHotelsById.has(hotel.id)) {
-                    newHotelsById.set(hotel.id, hotel);
-                }
-            });
+        const normalizedResults = results.map(normalizeGlobalHotel).filter((hotel) => hotel?.id);
 
-            return Array.from(newHotelsById.values());
+        setHotelList((prev) => {
+            const baseHotels = append ? prev : newlyAddedHotels;
+            return mergeHotelsById(baseHotels, normalizedResults);
+        });
+
+        const resolvedPageSize = pagination.pageSize ?? 20;
+        const resolvedPageNumber = pagination.pageNumber ?? pageNumber;
+        const resolvedTotalPages =
+            pagination.totalPages ??
+            (pagination.totalCount !== null && pagination.totalCount !== undefined
+                ? Math.ceil(Number(pagination.totalCount) / resolvedPageSize)
+                : null);
+
+        setHotelPagination({
+            pageNumber: resolvedPageNumber,
+            pageSize: resolvedPageSize,
+            totalCount: pagination.totalCount ?? 0,
+            totalPages: resolvedTotalPages ?? 0,
+            hasNextPage:
+                pagination.hasNextPage ??
+                (resolvedTotalPages ? resolvedPageNumber < resolvedTotalPages : normalizedResults.length === resolvedPageSize)
         });
         // setPinnedHotels(results);
 
@@ -215,11 +368,18 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         if (activeTab !== 'Curation') return;
 
         const fetchInitialHotels = async () => {
-            await loadHotels('');
+            setHotelPagination({
+                pageNumber: 1,
+                pageSize: 20,
+                totalCount: 0,
+                totalPages: 0,
+                hasNextPage: false
+            });
+            await loadHotels({ search: hotelSearch, pageNumber: 1, append: false });
         };
 
         fetchInitialHotels();
-    }, [activeTab, selectedGeoNode]);
+    }, [activeTab, selectedGeoNode, collectionId, formData.sourceId, formData.geoNodeType]);
 
     useEffect(() => {
         if (activeTab !== 'Curation') return;
@@ -228,14 +388,30 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
 
         const effectiveMaxHotels = Number(formData.maxHotels) || 20;
 
-        const initialSelection =
-            includedHotelIds.length > 0
-                ? includedHotelIds.filter((id) => hotelList.some((hotel) => hotel.id === id))
-                : hotelList.slice(0, effectiveMaxHotels).map((hotel) => hotel.id);
+        const initialSelection = includedHotelIds.length > 0 ? includedHotelIds : hotelList.slice(0, effectiveMaxHotels).map((hotel) => hotel.id);
 
         setSelectedHotels(initialSelection);
         hasInitializedCurationSelectionRef.current = true;
     }, [activeTab, hotelList, includedHotelIds, formData.maxHotels]);
+
+    const handleLoadMoreHotels = async () => {
+        if (hotelLoadMoreLockRef.current || hotelLoadingMore || !hotelPagination.hasNextPage) return;
+
+        const nextPage = (hotelPagination.pageNumber || 1) + 1;
+        hotelLoadMoreLockRef.current = true;
+        setHotelLoadingMore(true);
+
+        try {
+            await loadHotels({
+                search: hotelSearch,
+                pageNumber: nextPage,
+                append: true
+            });
+        } finally {
+            setHotelLoadingMore(false);
+            hotelLoadMoreLockRef.current = false;
+        }
+    };
 
     // ---------------- RULE FUNCTIONS ----------------
 
@@ -420,34 +596,27 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             sourceId = formData.countryId;
         }
 
+        const selectedCityIds = selectedCities.map((city) => city.cityId);
+        const sourceIds = selectedCityIds.length > 0 ? selectedCityIds : sourceId ? [sourceId] : [];
+        const selectedSlugCity = selectedCities.find((city) => city.cityId === slugCityId) || null;
+
         const collectionObject = {
-            SourceId: sourceId,
+            SourceId: sourceIds,
             GeoNodeType: geoNodeType,
             Name: formData.name,
             Slug: formData.slug,
             Type: formData.mode.toLowerCase(),
             Template: formData.template || null,
             Status: formData.status,
-            ExpiryDate: formData.expiryDate || null,
             MaxHotels: formData.maxHotels ? Number(formData.maxHotels) : null,
-            DefaultSort: formData.defaultSort || 'StarRating DESC'
+            DefaultSort: formData.defaultSort || 'StarRating DESC',
+            UrlCityId: selectedSlugCity?.cityId ?? null
         };
-        // const collectionObject = {
-        //     SourceId: formData.sourceId ? Number(formData.sourceId) : null,
-        //     GeoNodeType: formData.geoNodeType,
-        //     Name: formData.name,
-        //     Slug: formData.slug,
-        //     Type: formData.mode.toLowerCase(),
-        //     Template: formData.template || null,
-        //     Status: formData.status,
-        //     ExpiryDate: formData.expiryDate || null,
-        //     MaxHotels: formData.maxHotels ? Number(formData.maxHotels) : null,
-        //     DefaultSort: formData.defaultSort || 'StarRating DESC'
-        // };
+        const collectionJson = JSON.stringify(collectionObject);
 
         const payload = {
             collectionId: collectionId ?? null,
-            collectionJson: JSON.stringify(collectionObject),
+            collectionJson,
             changedBy: formData.changedBy
         };
 
@@ -467,9 +636,10 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                     slug: formData.slug,
                     geoNodeId: formData.sourceId,
                     template: formData.template,
-                    expiryDate: formData.expiryDate,
                     maxHotels: formData.maxHotels,
-                    status: formData.status
+                    status: formData.status,
+                    cityIds: selectedCityIds,
+                    urlCityId: selectedSlugCity?.cityId ?? null
                 });
             } else {
                 toast.error(response?.message || 'Failed to get collectionId from response');
@@ -672,41 +842,89 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             const { basicCollection, collectionContent, collectionRules, collectionCuration } = data;
 
             // ---------------- BASICS ----------------
-            const { countryId, regionId, cityId, districtId, countryName, regionName, cityName, districtName, geoNodeType, sourceId } =
-                basicCollection || {};
+            const basic = Array.isArray(basicCollection) ? basicCollection[0] || {} : basicCollection || {};
+            const {
+                countryId,
+                regionId,
+                cityId,
+                districtId,
+                countryName,
+                regionName,
+                cityName,
+                districtName,
+                geoNodeType,
+                sourceId,
+                cities
+            } = basic;
+
+            const parsedSourceIds = String(sourceId || '')
+                .split(',')
+                .map((id) => Number(String(id).trim()))
+                .filter(Boolean);
+
+            const parsedCityNames = String(cityName || '')
+                .split(',')
+                .map((name) => name.trim())
+                .filter(Boolean);
+
+            const mappedCities =
+                cities && cities.length > 0
+                    ? cities.map((city) => ({
+                          cityId: city.cityId,
+                          name: city.cityName
+                      }))
+                    : parsedSourceIds.length > 0
+                      ? parsedSourceIds.map((id, index) => ({
+                            cityId: id,
+                            name: parsedCityNames[index] || ''
+                        }))
+                      : cityId
+                        ? [
+                              {
+                                  cityId,
+                                  name: cityName || ''
+                              }
+                          ]
+                        : [];
+            const slugParts = getSlugParts(basicCollection?.slug || '');
+            const matchedSlugCity = mappedCities.find((city) => slugifyText(city.name) === slugParts.namespace);
 
             setFormData((prev) => ({
                 ...prev,
-                name: basicCollection?.name || '',
-                slug: basicCollection?.slug || '',
-                sourceId: sourceId || null,
+                name: basic.name || '',
+                slug: basic.slug || '',
+                slugBase: slugParts.base || basic.slug || '',
+                sourceId: parsedSourceIds[0] || sourceId || null,
                 geoNodeType: geoNodeType || null,
 
                 countryId: countryId || null,
                 regionId: regionId || null,
-                cityId: cityId || null,
+                cityId: mappedCities[0]?.cityId || cityId || null,
                 districtId: districtId || null,
 
-                template: basicCollection?.template || '',
-                expiryDate: basicCollection?.expiryDate ? basicCollection.expiryDate.split('T')[0] : '',
-                maxHotels: basicCollection?.maxHotels ?? '',
-                status: basicCollection?.status?.toLowerCase() === 'published' ? 'Published' : 'Draft'
+                template: basic.template || '',
+                maxHotels: basic.maxHotels ?? '',
+                status: basic.status?.toLowerCase() === 'published' ? 'Published' : 'Draft'
             }));
 
+            setSelectedCities(mappedCities);
+            setSlugCityId(matchedSlugCity?.cityId ?? mappedCities[0]?.cityId ?? null);
+
             setInitialBasicData({
-                name: basicCollection?.name || '',
-                slug: basicCollection?.slug || '',
-                sourceId: sourceId || null,
-                template: basicCollection?.template || '',
-                expiryDate: basicCollection?.expiryDate ? basicCollection.expiryDate.split('T')[0] : '',
-                maxHotels: basicCollection?.maxHotels ?? '',
-                status: basicCollection?.status?.toLowerCase() === 'published' ? 'Published' : 'Draft'
+                name: basic.name || '',
+                slug: basic.slug || '',
+                sourceId: parsedSourceIds[0] || sourceId || null,
+                template: basic.template || '',
+                maxHotels: basic.maxHotels ?? '',
+                status: basic.status?.toLowerCase() === 'published' ? 'Published' : 'Draft',
+                cityIds: mappedCities.map((city) => city.cityId),
+                urlCityId: matchedSlugCity?.cityId ?? null
             });
 
             setLocationNames({
                 countryName: countryName || '',
                 regionName: regionName || '',
-                cityName: cityName || '',
+                cityName: mappedCities.map((city) => city.name).join(', ') || cityName || '',
                 districtName: districtName || ''
             });
 
@@ -815,13 +1033,17 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
     const isBasicsChanged = () => {
         if (!initialBasicData) return true;
 
+        const currentCityIds = JSON.stringify((selectedCities || []).map((city) => city.cityId));
+        const initialCityIds = JSON.stringify(initialBasicData.cityIds || []);
+
         return (
             initialBasicData.name !== formData.name ||
             initialBasicData.slug !== formData.slug ||
             initialBasicData.sourceId !== formData.sourceId ||
             initialBasicData.template !== formData.template ||
-            initialBasicData.expiryDate !== formData.expiryDate ||
-            Number(initialBasicData.maxHotels) !== Number(formData.maxHotels)
+            Number(initialBasicData.maxHotels) !== Number(formData.maxHotels) ||
+            currentCityIds !== initialCityIds ||
+            (initialBasicData.urlCityId ?? null) !== (slugCityId ?? null)
         );
     };
 
@@ -986,6 +1208,10 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                     <BasicsTab
                         formData={formData}
                         setFormData={setFormData}
+                        selectedCities={selectedCities}
+                        setSelectedCities={setSelectedCities}
+                        slugCityId={slugCityId}
+                        setSlugCityId={setSlugCityId}
                         onNext={handleSaveBasics}
                         onBack={goBack}
                         loading={loading}
@@ -1022,6 +1248,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                         setRuleValue={setRuleValue}
                         formData={formData}
                         setFormData={setFormData}
+                        selectedCities={selectedCities}
                         addRule={addRule}
                         removeRule={removeRule}
                         onNext={handleSaveRules}
@@ -1086,6 +1313,9 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                         newlyAddedHotels={newlyAddedHotels}
                         setNewlyAddedHotels={setNewlyAddedHotels}
                         onAddGlobalHotel={handleAddGlobalHotel}
+                        onLoadMoreHotels={handleLoadMoreHotels}
+                        hasMoreHotels={hotelPagination.hasNextPage}
+                        loadingMoreHotels={hotelLoadingMore}
                     />
                 )}
 
@@ -1099,6 +1329,8 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                         onSubmit={handleStatusUpdate}
                         loading={loading}
                         locationNames={locationNames}
+                        selectedCities={selectedCities}
+                        slugCityId={slugCityId}
                     />
                 )}
             </div>

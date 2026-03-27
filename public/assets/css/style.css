@@ -90,6 +90,12 @@ a {
     opacity: 1 !important;
     cursor: not-allowed;
 }
+
+.city-chip-strip {
+    max-width: 100%;
+    scrollbar-width: thin;
+}
+
 .theme-button-warning-amber,
 .theme-button-warning-outline,
 .theme-button-warning-muted {

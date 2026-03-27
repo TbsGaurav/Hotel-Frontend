@@ -7,6 +7,10 @@ import toast from 'react-hot-toast';
 export default function BasicsTab({
     formData,
     setFormData,
+    selectedCities,
+    setSelectedCities,
+    slugCityId,
+    setSlugCityId,
     onNext,
     loading,
     countries,
@@ -32,25 +36,61 @@ export default function BasicsTab({
     const [districtSearch, setDistrictSearch] = useState('');
     const [showDistrictDropdown, setShowDistrictDropdown] = useState(false);
 
+    const slugifyText = (value = '') =>
+        String(value)
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+
     useEffect(() => {
         if (!locationNames) return;
 
-        if (locationNames.countryName) {
-            setGeoSearch(locationNames.countryName);
-        }
+        const timer = setTimeout(() => {
+            if (locationNames.countryName) {
+                setGeoSearch(locationNames.countryName);
+            }
 
-        if (locationNames.regionName) {
-            setRegionSearch(locationNames.regionName);
-        }
+            if (locationNames.regionName) {
+                setRegionSearch(locationNames.regionName);
+            }
 
-        if (locationNames.cityName) {
-            setCitySearch(locationNames.cityName);
-        }
+            if (locationNames.districtName) {
+                setDistrictSearch(locationNames.districtName);
+            }
+        }, 0);
 
-        if (locationNames.districtName) {
-            setDistrictSearch(locationNames.districtName);
-        }
+        return () => clearTimeout(timer);
     }, [locationNames]);
+
+    useEffect(() => {
+        if (!selectedCities?.length) {
+            if (slugCityId !== null) {
+                setSlugCityId(null);
+            }
+            return;
+        }
+        if (slugCityId !== null && !selectedCities.some((city) => city.cityId === slugCityId)) {
+            setSlugCityId(null);
+        }
+    }, [selectedCities, slugCityId, setSlugCityId]);
+
+    useEffect(() => {
+        if (isEdit) return;
+        if (!formData.slugBase?.trim()) return;
+
+        const namespaceCity = selectedCities?.find((city) => city.cityId === slugCityId) || null;
+        const namespace = namespaceCity ? slugifyText(namespaceCity.name || '') : '';
+        const nextSlug = namespace ? `${namespace}/${formData.slugBase}` : formData.slugBase;
+
+        if (formData.slug !== nextSlug) {
+            setFormData((prev) => ({
+                ...prev,
+                slug: nextSlug
+            }));
+        }
+    }, [formData.slugBase, formData.slug, selectedCities, slugCityId, isEdit, setFormData]);
 
     const validateForm = () => {
         const newErrors = {};
@@ -142,7 +182,7 @@ export default function BasicsTab({
                 setFormData((prev) => ({
                     ...prev,
                     name: value,
-                    slug: generatedSlug
+                    slugBase: generatedSlug
                 }));
             } else {
                 // ✅ EDIT MODE → only update name
@@ -169,6 +209,42 @@ export default function BasicsTab({
                 }));
             }
         }
+    };
+
+    const syncPrimaryCity = (nextCities) => {
+        const primaryCityId = nextCities?.[0]?.cityId ?? null;
+        const cityLabel = (nextCities || []).map((city) => city.name).join(', ') || null;
+
+        setFormData((prev) => ({
+            ...prev,
+            cityId: primaryCityId,
+            districtId: null,
+            geoNodeName: cityLabel
+        }));
+    };
+
+    const addCity = (city) => {
+        if (selectedCities?.some((item) => item.cityId === city.cityId)) {
+            setCitySearch('');
+            setShowCityDropdown(false);
+            return;
+        }
+
+        const next = [...(selectedCities || []), city];
+        setSelectedCities(next);
+        syncPrimaryCity(next);
+
+        setCitySearch('');
+        setDistrictSearch('');
+        setShowCityDropdown(false);
+        setShowDistrictDropdown(false);
+    };
+
+    const removeCity = (cityId) => {
+        const next = (selectedCities || []).filter((item) => item.cityId !== cityId);
+        setSelectedCities(next);
+        syncPrimaryCity(next);
+        setDistrictSearch('');
     };
 
     // const handleChange = (e) => {
@@ -281,7 +357,24 @@ export default function BasicsTab({
 
                     {/* Slug */}
                     <div className="col-12 col-lg-6 mb-3">
-                        <label className="form-label">Slug </label>
+                        <div className="d-flex justify-content-between align-items-center gap-2 mb-1">
+                            <label className="form-label mb-0">Slug</label>
+
+                            <select
+                                className="form-select form-select-sm"
+                                style={{ maxWidth: '180px' }}
+                                value={slugCityId || ''}
+                                onChange={(e) => setSlugCityId(e.target.value ? Number(e.target.value) : null)}
+                                disabled={!selectedCities?.length}
+                            >
+                                <option value="">No city prefix</option>
+                                {selectedCities.map((city) => (
+                                    <option key={city.cityId} value={city.cityId}>
+                                        {city.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <input
                             type="text"
                             className={`form-control ${errors.slug ? 'is-invalid' : ''}`}
@@ -291,8 +384,10 @@ export default function BasicsTab({
                             placeholder="collection-slug"
                             autoComplete="off"
                             disabled={isEdit}
+                            readOnly={!isEdit}
                         />
                         {errors.slug && <div className="invalid-feedback">{errors.slug}</div>}
+                        <small className="text-muted d-block mt-1">Choose a city only if you want it added before the slug.</small>
                     </div>
 
                     <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
@@ -327,6 +422,9 @@ export default function BasicsTab({
                                     districtId: null,
                                     geoNodeId: null
                                 }));
+                                setSelectedCities([]);
+                                setCitySearch('');
+                                setDistrictSearch('');
                             }}
                         />
 
@@ -360,6 +458,10 @@ export default function BasicsTab({
                                                     cityId: null,
                                                     districtId: null
                                                 }));
+                                                setSelectedCities([]);
+                                                setSlugCityId(null);
+                                                setCitySearch('');
+                                                setDistrictSearch('');
                                             }}
                                         >
                                             {node.name}
@@ -423,6 +525,10 @@ export default function BasicsTab({
                                                     cityId: null,
                                                     districtId: null
                                                 }));
+                                                setSelectedCities([]);
+                                                setSlugCityId(null);
+                                                setCitySearch('');
+                                                setDistrictSearch('');
                                             }}
                                         >
                                             {region.name}
@@ -433,11 +539,34 @@ export default function BasicsTab({
                     </div>
 
                     <div className="col-12 col-lg-6 mb-3 position-relative dropdown-wrapper">
-                        <label className="form-label">City</label>
+                        <div className="d-flex justify-content-between align-items-center gap-2 mb-1 flex-wrap">
+                            <label className="form-label mb-0">City</label>
+
+                            {selectedCities?.length > 0 && (
+                                <div className="d-flex flex-nowrap gap-2 justify-content-end overflow-auto city-chip-strip">
+                                    {selectedCities.map((city) => (
+                                        <span
+                                            key={city.cityId}
+                                            className="badge text-bg-light border d-inline-flex align-items-center gap-2 py-2 px-3 flex-shrink-0"
+                                        >
+                                            {city.name}
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm p-0 border-0 bg-transparent text-muted"
+                                                onClick={() => removeCity(city.cityId)}
+                                                aria-label={`Remove ${city.name}`}
+                                            >
+                                                &times;
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         <input
                             type="text"
-                            className="form-control"
+                            className="form-control mt-0"
                             placeholder="Search City"
                             value={citySearch}
                             autoComplete="off"
@@ -479,15 +608,7 @@ export default function BasicsTab({
                                             className="p-2"
                                             style={{ cursor: 'pointer' }}
                                             onClick={() => {
-                                                setCitySearch(city.name);
-                                                setShowCityDropdown(false);
-                                                setDistrictSearch('');
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    cityId: city.cityId,
-                                                    geoNodeName: city.name,
-                                                    districtId: null
-                                                }));
+                                                addCity(city);
                                             }}
                                         >
                                             {city.name}
@@ -580,19 +701,6 @@ export default function BasicsTab({
                         </select>
 
                         {errors.template && <div className="invalid-feedback d-block">{errors.template}</div>}
-                    </div>
-
-                    {/* Expiry Date */}
-                    <div className="col-12 col-lg-6 mb-3">
-                        <label className="form-label">Expiry Date</label>
-                        <input
-                            type="date"
-                            className="form-control"
-                            name="expiryDate"
-                            value={formData.expiryDate}
-                            onChange={handleChange}
-                            autoComplete="off"
-                        />
                     </div>
 
                     {/* Max Hotels */}
