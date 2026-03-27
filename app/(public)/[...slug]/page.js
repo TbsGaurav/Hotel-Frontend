@@ -35,10 +35,10 @@ export default async function DynamicPage({ params }) {
     if (slugArray.length === 2 && data.entityType === 'CountryBrand') {
         return <CountryBrandDetails country={slugArray[0]} params={params} />;
     }
-  
+
     // COLLECTION PAGE
     if ((slugArray.length === 1 || slugArray.length === 2) && data.entityType === 'Collection') {
-        return <CollectionDetailsWrapper slug={slugArray.join('/')} />;
+        return <CollectionDetailsWrapper slug={slugArray.join('/')} entityId={data.entityID} />;
     }
 
     // HOTEL PAGE (CityHotel)

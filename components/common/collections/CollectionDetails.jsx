@@ -169,10 +169,10 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                         </div>
                     </div>
 
-                    <section className="container py-5">
+                    <section className="container py-4 py-lg-5">
                         <div className="row align-items-center">
-                            <div className="col-lg-8">
-                                <h2 className="display-5 fw-bold mb-3">{content?.header}</h2>
+                            <div className="col-12 col-lg-8">
+                                <h2 className="fs-2 fs-lg-1 fw-bold mb-3">{content?.header}</h2>
 
                                 {content?.introShortCopy && (
                                     <div
@@ -183,7 +183,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                     />
                                 )}
 
-                                <div className="d-flex flex-wrap gap-4 mt-3">
+                                <div className="d-flex flex-wrap gap-3 gap-lg-4 mt-3">
                                     <div className="d-flex align-items-center">
                                         <FaMapMarkerAlt className="text-muted me-2" />
                                         <span>
@@ -208,13 +208,13 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                 {allHotels.map((hotel) => (
                                     <div
                                         key={hotel.hotelId}
-                                        className="card border-0 rounded-4 mb-4 p-4"
+                                        className="card border-0 rounded-4 mb-4 p-3 p-md-4"
                                         style={{
                                             boxShadow: '0 4px 18px rgba(0,0,0,0.08)'
                                         }}
                                     >
                                         <div className="row g-3">
-                                            <div className="col-md-4">
+                                            <div className="col-12 col-md-4">
                                                 <Link href={`${hotel.url}`} target="_blank" className="text-decoration-none">
                                                     <div className="position-relative">
                                                         {(() => {
@@ -252,7 +252,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         <img
                                                             src={getImageUrl(hotel?.photo)}
                                                             className="d-block w-100 rounded-4"
-                                                            style={{ height: '290px', objectFit: 'cover' }}
+                                                            style={{ height: '270px', objectFit: 'cover' }}
                                                             alt={hotel.hotelName}
                                                             onError={handleImageError}
                                                         />
@@ -260,20 +260,20 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                 </Link>
                                             </div>
 
-                                            <div className="col-md-8">
+                                            <div className="col-12 col-md-8">
                                                 <div
                                                     className="text-decoration-none"
                                                     onClick={() => window.location.href = hotel.urlName}
                                                     style={{ cursor: 'pointer' }}
                                                 >
-                                                    <div className="d-flex align-items-center justify-content-between mb-2">
-                                                        <div className="d-flex align-items-center">
-                                                            <h4 className="property-grid-title font-size-18 my-auto me-3">{hotel.hotelName}</h4>
+                                                    <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2">
+                                                        <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0">
+                                                            <h4 className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3">{hotel.hotelName}</h4>
                                                             <div className="text-warning">
                                                                 {[...Array(5)].map((_, i) => (
                                                                     <MdOutlineStarPurple500
                                                                         key={i}
-                                                                        size={18}
+                                                                        size={16}
                                                                         color={i < hotel.stars ? '#f0831e' : '#ddd'}
                                                                     />
                                                                 ))}
@@ -359,8 +359,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         </p>
                                                     )} */}
 
-                                                    <div className="d-flex align-items-center justify-content-between mb-2">
-                                                        <div>
+                                                    <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2">
+                                                        <div className="mb-2 mb-md-0">
                                                             <p className="para text-primary mb-0">
                                                                 <i className="fa-solid fa-circle-info me-2"></i>
                                                                 Book Now Pay Later!
@@ -415,12 +415,12 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                             </div>
                                                                         )} */}
                                                                         {formattedOriginal && originalPrice > rate.price.total && (
-                                                                            <p className="para-12px text-muted mb-0 text-end" style={{ color: '#ee310f', textDecoration: 'line-through' }}>
+                                                                            <p className="para-12px mb-0 text-end" style={{ color: 'red', textDecoration: 'line-through' }}>
                                                                                 {formattedOriginal}
                                                                             </p>
                                                                         )}
-                                                                        <div className="d-flex align-items-baseline text-end">
-                                                                            <span className="text-theme-orange fw-bold" style={{ fontSize: '28px' }}>
+                                                                        <div className="d-flex align-items-baseline justify-content-end">
+                                                                            <span className="text-theme-orange fw-bold" style={{ fontSize: '24px' }}>
                                                                                 {rate.price.book}
                                                                             </span>
                                                                         </div>
@@ -435,7 +435,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                     </div>
 
                                                     <div className="row">
-                                                        <div className="col-12 col-md-3 d-flex ms-auto">
+                                                        <div className="col-12 col-md-4 col-lg-3 ms-auto">
                                                             <Link
                                                                 className="theme-button-blue rounded-4 w-100 d-block text-center p-2"
                                                                 href={`${hotel.url}`}
