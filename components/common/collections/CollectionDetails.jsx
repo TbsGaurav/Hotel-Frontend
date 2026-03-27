@@ -260,12 +260,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                 </Link>
                                             </div>
 
-                                            <div className="col-12 col-md-8">
-                                                <div
-                                                    className="text-decoration-none"
-                                                    onClick={() => window.location.href = hotel.urlName}
-                                                    style={{ cursor: 'pointer' }}
-                                                >
+                                            <div className="col-12 col-md-8" onClick={() => window.location.href = hotel.urlName} style={{ cursor: 'pointer' }}>
+                                                <div className="text-decoration-none">
                                                     <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2">
                                                         <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0">
                                                             <h4 className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3">{hotel.hotelName}</h4>

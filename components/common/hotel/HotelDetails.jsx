@@ -617,15 +617,68 @@ export default function HotelDetails({ initialData }) {
                         {activeTab === 'writeReview' && (
                             <div className="tab-content">
                                 <div className="row">
-                                    {/* Left Column - Hotel Info Card */}
-                                    <div className="col-lg-4 mb-4">
+                                    {/* Left Column - Share Experience */}
+                                    <div className="col-lg-6 mb-4">
+                                        <h5 className="fw-bold mb-3">Share your experience with other travellers</h5>
+                                        <p className="text-muted mb-4">
+                                            Your review helps other travelers make informed decisions about their stay.
+                                        </p>
+                                        <form onSubmit={(e) => { e.preventDefault(); alert('Review submitted!'); }}>
+                                            <div className="row g-3">
+                                                <div className="col-12">
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
+                                                        placeholder="Your Name"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="col-12">
+                                                    <select className="form-select" style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }} required>
+                                                        <option value="">Select Travel Type</option>
+                                                        <option value="solo">Solo traveler</option>
+                                                        <option value="couple">Couple</option>
+                                                        <option value="family">Family</option>
+                                                        <option value="business">Business</option>
+                                                        <option value="friends">Friends</option>
+                                                    </select>
+                                                </div>
+                                                <div className="col-12">
+                                                    <textarea
+                                                        className="form-control"
+                                                        style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
+                                                        rows="4"
+                                                        placeholder="What did you like most?"
+                                                    ></textarea>
+                                                </div>
+                                                <div className="col-12">
+                                                    <textarea
+                                                        className="form-control"
+                                                        style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
+                                                        rows="4"
+                                                        placeholder="What could be improved?"
+                                                    ></textarea>
+                                                </div>
+                                                <div className="col-12">
+                                                    <button type="submit" className="theme-button-blue px-5 py-2">
+                                                        Submit Review
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    {/* Right Column - Hotel Ratings */}
+                                    <div className="col-lg-6 mb-4">
+                                        <h5 className="fw-bold mb-3">Hotel Ratings (Click to select a rating)</h5>
                                         <div className="border rounded p-4">
-                                            <h5 className="fw-bold mb-3">{hotelInfo.hotelName}</h5>
-                                            <div className="text-warning d-flex align-items-center mb-2">
+                                            <h6 className="fw-bold mb-3">{hotelInfo.hotelName}</h6>
+                                            <div className="text-warning d-flex align-items-center mb-3">
                                                 {[...Array(5)].map((_, i) => (
                                                     <MdOutlineStarPurple500
                                                         key={i}
-                                                        size={16}
+                                                        size={24}
                                                         color={i < hotelInfo.stars ? "#f0831e" : "#ddd"}
                                                     />
                                                 ))}
@@ -648,72 +701,6 @@ export default function HotelDetails({ initialData }) {
                                                 Best price guarantee
                                             </p>
                                         </div>
-                                    </div>
-
-                                    {/* Right Column - Review Form */}
-                                    <div className="col-lg-8">
-                                        <h5 className="fw-bold mb-3">Write a Review</h5>
-                                            <p className="text-muted mb-4">
-                                                Your review helps other travelers make informed decisions about their stay.
-                                            </p>
-                                            <form onSubmit={(e) => { e.preventDefault(); alert('Review submitted!'); }}>
-                                                <div className="row g-3">
-                                                    <div className="col-md-6">
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
-                                                            placeholder="Your Name"
-                                                            required
-                                                        />
-                                                    </div>
-                                                    <div className="col-md-6">
-                                                        <select className="form-select" style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }} required>
-                                                            <option value="">Select Travel Type</option>
-                                                            <option value="solo">Solo traveler</option>
-                                                            <option value="couple">Couple</option>
-                                                            <option value="family">Family</option>
-                                                            <option value="business">Business</option>
-                                                            <option value="friends">Friends</option>
-                                                        </select>
-                                                    </div>
-                                                    <div className="col-12">
-                                                        <div className="mb-3">
-                                                            <label className="form-label fw-bold">Your Rating</label>
-                                                            <div className="d-flex align-items-center">
-                                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                                    <MdOutlineStarPurple500
-                                                                        key={star}
-                                                                        className="text-warning"
-                                                                        style={{ fontSize: '32px', cursor: 'pointer' }}
-                                                                    />
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="col-12">
-                                                        <textarea
-                                                            className="form-control"
-                                                            style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
-                                                            rows="3"
-                                                            placeholder="What did you like most?"
-                                                        ></textarea>
-                                                    </div>
-                                                    <div className="col-12">
-                                                        <textarea
-                                                            className="form-control"
-                                                            style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
-                                                            rows="3"
-                                                            placeholder="What could be improved?"
-                                                        ></textarea>
-                                                    </div>
-                                                    <div className="col-12">
-                                                        <button type="submit" className="theme-button-blue px-5 py-2">
-                                                            Submit Review
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </form>
                                     </div>
                                 </div>
                             </div>
