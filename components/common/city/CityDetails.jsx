@@ -1,32 +1,50 @@
-import CountryHeroSection from '@/components/sections/CountryHeroSection';
-import { getCityHotels } from '@/lib/api/public/cityapi';
 import Link from 'next/link';
-import CityHotelList from './CityHotelList';
+import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import { getCityHotels, getCitySidebar } from '@/lib/api/public/cityapi';
 import { getHotelRates } from '@/lib/api/public/hotelapi';
+import CityHotelList from './CityHotelList';
+import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 
-function toSlug(value = '') {
-    if (!value) return '';
-
-    return value.toString().trim().toLowerCase().replace(/\s+/g, '-');
+function getFirstDefined(...values) {
+    for (const value of values) {
+        if (value !== undefined && value !== null && value !== '') return value;
+    }
+    return null;
 }
 
-export default async function CityDetails({ params }) {
-    const { slug } = await params;
-    const citySlug = slug?.[0] || '';
-    const hotels = citySlug ? await getCityHotels(citySlug) : [];
-    const hasData = hotels && hotels.length > 0;
-    const firstHotel = hasData ? hotels[0] : null;
-    // const country = firstHotel?.countryName;
-    // const region = firstHotel?.regionName;
-    const city = firstHotel?.cityName;
-    const content = firstHotel?.content;
-    // const countrySlug = toSlug(country);
-    // const regionSlug = toSlug(region);
-    const citySlugPath = toSlug(city);
-    let hotelRates = [];
+function normalizeCitySlug(value = '') {
+    return String(value || '').replace(/^\/+|\/+$/g, '').replace(/\.htm$/i, '');
+}
 
-    const bookingIds = hotels?.map((hotel) => hotel.bookingID).filter(Boolean) || [];
-    // ✅ SAFE CHECK
+function toTitleCase(value = '') {
+    return String(value || '')
+        .replace(/[-_]+/g, ' ')
+        .trim()
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function normalizeItems(items) {
+    return Array.isArray(items) ? items : [];
+}
+
+export default async function CityDetails({ params, cityId: resolvedCityId = null }) {
+    const { slug } = await params;
+    const rawCitySlug = slug?.[0] || '';
+    const citySlug = normalizeCitySlug(rawCitySlug);
+    const cityHotels = rawCitySlug ? await getCityHotels(rawCitySlug) : [];
+    const hasData = cityHotels && cityHotels.length > 0;
+    const firstHotel = hasData ? cityHotels[0] : null;
+
+    const cityName = getFirstDefined(firstHotel?.cityName, firstHotel?.CityName, citySlug);
+    const content = firstHotel?.content;
+
+    const cityId = resolvedCityId;
+    const regionId = getFirstDefined(firstHotel?.regionId, firstHotel?.regionID, firstHotel?.RegionID);
+    const sidebar = cityId ? await getCitySidebar(cityId, regionId) : {};
+
+    let hotelRates = [];
+    const bookingIds = cityHotels?.map((hotel) => hotel.bookingID).filter(Boolean) || [];
+
     if (bookingIds.length > 0) {
         const ratesRes = await getHotelRates({
             bookingIds,
@@ -41,6 +59,26 @@ export default async function CityDetails({ params }) {
 
         hotelRates = ratesRes?.data || [];
     }
+
+    const breadcrumbLabel = toTitleCase(cityName || citySlug || '');
+    const sidebarSections = [
+        {
+            title: 'Rating',
+            items: normalizeItems(sidebar?.rating || sidebar?.ratings || sidebar?.ratingItems),
+            maxVisible: 6
+        },
+        {
+            title: 'Property Type',
+            items: normalizeItems(sidebar?.propertyTypes || sidebar?.propertyType || sidebar?.propertyTypeItems),
+            maxVisible: 5
+        },
+        {
+            title: 'Facilities',
+            items: normalizeItems(sidebar?.hotelFacilities || sidebar?.facilities || sidebar?.facilityItems),
+            maxVisible: 5
+        }
+    ];
+
     return (
         <>
             <CountryHeroSection />
@@ -48,43 +86,56 @@ export default async function CityDetails({ params }) {
             {hasData && (
                 <div className="py-2">
                     <div className="container">
-                        <div className="d-flex align-items-center small">
+                        <div className="d-flex align-items-center small flex-wrap gap-1">
                             <Link href="/destinations" className="text-dark text-decoration-none">
                                 All Countries
                             </Link>
-
-                            <span className="mx-2 text-muted">•</span>
-
-                            {/* <span className="mx-2">&bull;</span> */}
-
-                            {/* <Link href={`/${countrySlug}`} className="text-dark text-decoration-none">
-                                {country}
-                            </Link> */}
-
-                            {/* <span className="mx-2">&bull;</span> */}
-
-                            {/* <Link href={`/${countrySlug}/${regionSlug}`} className="text-dark text-decoration-none">
-                                {region}
-                            </Link> */}
-
-                            {/* <span className="mx-2">&bull;</span> */}
-
-                            <Link className="text-primary" href={`/${citySlugPath}`}>
-                                {city}
-                            </Link>
+                            <span className="mx-1 text-muted">&rsaquo;</span>
+                            <span className="text-primary">{breadcrumbLabel}</span>
+                            
                         </div>
                     </div>
                 </div>
             )}
 
-            <section className="container py-5">
+            <section className="container py-4">
                 {hasData ? (
                     <>
-                        <h2 className="mb-3">Hotel Accommodation in {city}</h2>
+                        <div className="bg-white border rounded-1 p-4 mb-3">
+                            <h2 className="mb-0" style={{ fontWeight: 700 }}>
+                                Hotel {breadcrumbLabel}
+                            </h2>
+                        </div>
 
-                        {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
+                        {content && (
+                            <div
+                                className="bg-white border rounded-1 p-4 mb-4 text-muted"
+                                dangerouslySetInnerHTML={{ __html: content }}
+                            />
+                        )}
 
-                        <CityHotelList hotels={hotels} hotelRates={hotelRates} />
+                        <div className="bg-white border rounded-1 p-3 mb-4 d-flex flex-wrap gap-3">
+                            <button type="button" className="btn btn-link text-decoration-none fw-semibold text-dark px-0">
+                                Hotel List
+                            </button>
+                            <button type="button" className="btn btn-link text-decoration-none fw-semibold text-dark px-0">
+                                Hotel Map
+                            </button>
+                        </div>
+
+                        <div className="row g-4 align-items-start">
+                            <div className="col-lg-3">
+                                <div className="position-sticky" style={{ top: '16px' }}>
+                                    <ListingSidebar title="Filters" sections={sidebarSections} />
+                                </div>
+                            </div>
+
+                            <div className="col-lg-9">
+                                <div className="bg-white border rounded-1 p-4">
+                                    <CityHotelList hotels={cityHotels} hotelRates={hotelRates} />
+                                </div>
+                            </div>
+                        </div>
                     </>
                 ) : (
                     <div className="text-center py-5">
