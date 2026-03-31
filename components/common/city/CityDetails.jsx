@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import { getCityHotels, getCitySidebar } from '@/lib/api/public/cityapi';
@@ -5,6 +8,13 @@ import { getHotelRates } from '@/lib/api/public/hotelapi';
 import CityHotelList from './CityHotelList';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 
+const PAGE_SIZE = 10;
+
+function toSlug(value = '') {
+    if (!value) return '';
+ 
+    return value.toString().trim().toLowerCase().replace(/\s+/g, '-');
+}
 function getFirstDefined(...values) {
     for (const value of values) {
         if (value !== undefined && value !== null && value !== '') return value;
@@ -27,40 +37,175 @@ function normalizeItems(items) {
     return Array.isArray(items) ? items : [];
 }
 
-export default async function CityDetails({ params, cityId: resolvedCityId = null }) {
-    const { slug } = await params;
-    const rawCitySlug = slug?.[0] || '';
-    const citySlug = normalizeCitySlug(rawCitySlug);
-    const cityHotels = rawCitySlug ? await getCityHotels(rawCitySlug) : [];
-    const hasData = cityHotels && cityHotels.length > 0;
-    const firstHotel = hasData ? cityHotels[0] : null;
+function extractCityHotels(payload) {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.data)) return payload.data;
+    if (Array.isArray(payload?.hotels)) return payload.hotels;
+    if (Array.isArray(payload?.hotelData)) return payload.hotelData;
+    if (Array.isArray(payload?.items)) return payload.items;
+    return [];
+}
 
-    const cityName = getFirstDefined(firstHotel?.cityName, firstHotel?.CityName, citySlug);
-    const content = firstHotel?.content;
+export default function CityDetails({ params, city: cityProp = null, cityId: resolvedCityId = null }) {
+    const [citySlug, setCitySlug] = useState('');
+    const [hotels, setHotels] = useState([]);
+    const [hotelRates, setHotelRates] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
+    const [totalCount, setTotalCount] = useState(0);
+    const [city, setCity] = useState('');
+    const [content, setContent] = useState('');
+    const [sidebar, setSidebar] = useState({});
+    const [error, setError] = useState(null);
 
-    const cityId = resolvedCityId;
-    const regionId = getFirstDefined(firstHotel?.regionId, firstHotel?.regionID, firstHotel?.RegionID);
-    const sidebar = cityId ? await getCitySidebar(cityId, regionId) : {};
+    useEffect(() => {
+        let isActive = true;
 
-    let hotelRates = [];
-    const bookingIds = cityHotels?.map((hotel) => hotel.bookingID).filter(Boolean) || [];
+        const initializeCity = async () => {
+            try {
+                setLoading(true);
+                setError(null);
 
-    if (bookingIds.length > 0) {
-        const ratesRes = await getHotelRates({
-            bookingIds,
-            currency: 'USD',
-            rooms: 1,
-            adults: 2,
-            childs: 0,
-            device: 'desktop',
-            checkIn: null,
-            checkOut: null
-        });
+                const resolvedParams = await Promise.resolve(params || {});
+                const rawCitySlug = resolvedParams?.slug?.[0] || '';
+                const normalizedSlug = normalizeCitySlug(rawCitySlug);
+                setCitySlug(normalizedSlug);
 
-        hotelRates = ratesRes?.data || [];
-    }
+                if (!normalizedSlug) {
+                    if (isActive) {
+                        setHotels([]);
+                        setHotelRates([]);
+                        setPage(1);
+                        setHasMore(false);
+                        setTotalCount(0);
+                        setCity('');
+                        setContent('');
+                        setSidebar({});
+                    }
+                    return;
+                }
 
-    const breadcrumbLabel = toTitleCase(cityName || citySlug || '');
+                let hotelsData = [];
+                let hotelRatesData = [];
+                let cityValue = '';
+                let contentValue = '';
+
+                if (normalizedSlug) {
+                    const data = await getCityHotels(normalizedSlug, 1, PAGE_SIZE);
+                    hotelsData = extractCityHotels(data);
+
+                    if (hotelsData && hotelsData.length > 0) {
+                        const firstHotel = hotelsData[0];
+                        cityValue = firstHotel?.cityName || firstHotel?.CityName || normalizedSlug;
+                        contentValue = firstHotel?.content || '';
+
+                        const bookingIds = hotelsData.map((hotel) => hotel.bookingID).filter(Boolean) || [];
+                        if (bookingIds.length > 0) {
+                            const ratesRes = await getHotelRates({
+                                bookingIds,
+                                currency: 'USD',
+                                rooms: 1,
+                                adults: 2,
+                                childs: 0,
+                                device: 'desktop',
+                                checkIn: null,
+                                checkOut: null
+                            });
+                            hotelRatesData = ratesRes?.data || [];
+                        }
+                    }
+                }
+
+                if (!isActive) return;
+
+                setHotels(hotelsData);
+                setHotelRates(hotelRatesData);
+                setCity(cityValue);
+                setContent(contentValue);
+                setTotalCount(hotelsData[0]?.totalCount || hotelsData.length);
+                setHasMore(hotelsData.length < (hotelsData[0]?.totalCount || hotelsData.length));
+                setPage(1);
+
+                if (resolvedCityId && hotelsData.length > 0) {
+                    const firstHotel = hotelsData[0];
+                    const regionId = getFirstDefined(firstHotel?.regionId, firstHotel?.regionID, firstHotel?.RegionID);
+                    const sidebarData = await getCitySidebar(resolvedCityId, regionId);
+                    if (!isActive) return;
+                    setSidebar(sidebarData || {});
+                } else {
+                    setSidebar({});
+                }
+            } catch (err) {
+                console.error('Error initializing city details:', err);
+                if (isActive) {
+                    setError('Failed to load city details');
+                }
+            } finally {
+                if (isActive) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        initializeCity();
+
+        return () => {
+            isActive = false;
+        };
+    }, [params, cityProp, resolvedCityId]);
+
+    const loadMoreHotels = async () => {
+        if (loadingMore || !hasMore || !citySlug) return;
+
+        setLoadingMore(true);
+        const nextPage = page + 1;
+
+        try {
+            const response = await getCityHotels(citySlug, nextPage, PAGE_SIZE);
+            const newHotels = extractCityHotels(response);
+
+            if (newHotels && newHotels.length > 0) {
+                const bookingIds = newHotels.map((hotel) => hotel.bookingID).filter(Boolean);
+                let newRates = [];
+
+                if (bookingIds.length > 0) {
+                    const ratesRes = await getHotelRates({
+                        bookingIds,
+                        currency: 'USD',
+                        rooms: 1,
+                        adults: 2,
+                        childs: 0,
+                        device: 'desktop',
+                        checkIn: null,
+                        checkOut: null
+                    });
+                    newRates = ratesRes?.data || [];
+                }
+
+                setHotels((prev) => [...prev, ...newHotels]);
+                setHotelRates((prev) => [...prev, ...newRates]);
+                setPage(nextPage);
+
+                const responseTotal = Number(newHotels[0]?.totalCount || totalCount || 0);
+                const currentTotal = hotels.length + newHotels.length;
+                setHasMore(currentTotal < responseTotal);
+                setTotalCount(responseTotal || currentTotal);
+            } else {
+                setHasMore(false);
+            }
+        } catch (err) {
+            console.error('Error loading more hotels:', err);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
+    const hasData = hotels && hotels.length > 0;
+    const citySlugPath = normalizeCitySlug(city || citySlug);
+    const breadcrumbLabel = toTitleCase(city || citySlug || '');
+
     const sidebarSections = [
         {
             title: 'Rating',
@@ -79,6 +224,34 @@ export default async function CityDetails({ params, cityId: resolvedCityId = nul
         }
     ];
 
+    if (loading) {
+        return (
+            <>
+                <CountryHeroSection />
+                <section className="container py-5">
+                    <div className="text-center py-5">
+                        <div className="spinner-border" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </section>
+            </>
+        );
+    }
+
+    if (error) {
+        return (
+            <>
+                <CountryHeroSection />
+                <section className="container py-5">
+                    <div className="text-center py-5">
+                        <h4>{error}</h4>
+                    </div>
+                </section>
+            </>
+        );
+    }
+
     return (
         <>
             <CountryHeroSection />
@@ -91,8 +264,9 @@ export default async function CityDetails({ params, cityId: resolvedCityId = nul
                                 All Countries
                             </Link>
                             <span className="mx-1 text-muted">&rsaquo;</span>
-                            <span className="text-primary">{breadcrumbLabel}</span>
-                            
+                            <Link className="text-primary text-decoration-none" href={`/${citySlugPath}`}>
+                                {city}
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -132,7 +306,24 @@ export default async function CityDetails({ params, cityId: resolvedCityId = nul
 
                             <div className="col-lg-9">
                                 <div className="bg-white border rounded-1 p-4">
-                                    <CityHotelList hotels={cityHotels} hotelRates={hotelRates} />
+                                    <div className="text-muted small mb-3">
+                                        Showing {hotels.length} of {totalCount || hotels.length} hotels
+                                    </div>
+
+                                    <CityHotelList hotels={hotels} hotelRates={hotelRates} />
+
+                                    {hasMore && (
+                                        <div className="text-center mt-4">
+                                            <button
+                                                type="button"
+                                                onClick={loadMoreHotels}
+                                                disabled={loadingMore}
+                                                className="theme-button-orange rounded-1 px-5 py-2"
+                                            >
+                                                {loadingMore ? 'Loading...' : 'Load More'}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

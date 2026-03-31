@@ -69,6 +69,25 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
         return visible;
     };
 
+    const formatOriginalPrice = (currentPriceStr, originalPrice) => {
+        if (!currentPriceStr || !originalPrice) return null;
+
+        const originalValue = Number(originalPrice);
+        if (Number.isNaN(originalValue)) return null;
+
+        const match = currentPriceStr.match(/^([A-Z]+\$)/);
+        const formattedNum = originalValue.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        });
+
+        if (match) {
+            return `${match[1]}${formattedNum}`;
+        }
+
+        return `$${formattedNum}`;
+    };
+
     if (!hotels.length) {
         return (
             <div className="text-center py-5">
@@ -222,6 +241,24 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
                                         {rate?.price ? (
                                             <div className="price-block p-1 rounded mb-3">
                                                 <p className="para-12px text-muted mb-1 text-end">1 night, 2 adults</p>
+                                                {(() => {
+                                                    const dealInfo = rate?.deal_info || {};
+                                                    const originalPrice = dealInfo?.public_price;
+                                                    const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
+
+                                                    if (formattedOriginal && Number(originalPrice) > Number(rate.price.total)) {
+                                                        return (
+                                                            <p
+                                                                className="para-12px mb-0 text-end"
+                                                                style={{ color: 'red', textDecoration: 'line-through' }}
+                                                            >
+                                                                {formattedOriginal}
+                                                            </p>
+                                                        );
+                                                    }
+
+                                                    return null;
+                                                })()}
                                                 <div className="d-flex align-items-baseline text-end">
                                                     <span className="text-theme-orange fw-bold" style={{ fontSize: '28px' }}>
                                                         {rate.price.book}
