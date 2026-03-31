@@ -4,7 +4,17 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 
-export default function CityHotelList({ hotels = [], hotelRates = [] }) {
+export default function CityHotelList({ hotels, initialRates }) {
+    const allHotels = hotels || []; // All hotels loaded from server
+    const allRates = initialRates || [];
+    
+    const ITEMS_PER_PAGE = 10;
+    const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE);
+    const [loading, setLoading] = useState(false);
+    
+    // Calculate if there are more items to show
+    const hasMore = displayCount < allHotels.length;
+    
     const defaultImage = '/image/property-img.webp';
     const maxVisibleFacilities = 3;
     const maxFacilityChars = 60;
@@ -18,6 +28,18 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
         flexShrink: 0
     };
     const [timestamp, setTimestamp] = useState('');
+
+    // Show next batch of hotels that are already loaded
+    const loadMoreHotels = () => {
+        if (loading || !hasMore) return;
+        
+        setLoading(true);
+        // Simulate API delay for smooth UX
+        setTimeout(() => {
+            setDisplayCount((prev) => Math.min(prev + ITEMS_PER_PAGE, allHotels.length));
+            setLoading(false);
+        }, 300);
+    };
 
     useEffect(() => {
         setTimestamp(Date.now().toString());
@@ -35,8 +57,7 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
         return timestamp ? `${photo}${sep}t=${timestamp}` : photo;
     };
 
-    const getHotelRate = (bookingID) => hotelRates.find((rate) => rate.id === bookingID);
-
+    const getHotelRate = (bookingID) => (allRates || []).find((rate) => rate.id === bookingID);
     const getRatingText = (score) => {
         const value = Number(score);
 
@@ -73,7 +94,7 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
         return visible;
     };
 
-    if (!hotels.length) {
+    if (!allHotels.length) {
         return (
             <div className="text-center py-5">
                 <p className="text-muted">No hotels available.</p>
@@ -100,10 +121,13 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
         })}`;
     };
 
+    // Only display hotels up to displayCount (but all exist in DOM)
+    const visibleHotels = allHotels.slice(0, displayCount);
+
     return (
         <div className="container">
             <div className="d-flex flex-column gap-4">
-                {hotels.map((hotel) => {
+                {visibleHotels.map((hotel) => {
                     const rate = getHotelRate(hotel.bookingID);
                     const badges = rate?.badges || [];
                     const breakfastBadge = badges.find((badge) => badge.toLowerCase().includes('breakfast'));
@@ -310,6 +334,13 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
                     );
                 })}
             </div>
+            {hasMore && (
+                <div className="text-center mt-4">
+                    <button onClick={loadMoreHotels} disabled={loading} className="theme-button-orange rounded-1 px-5 py-2">
+                        {loading ? 'Loading...' : 'Load More'}
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
