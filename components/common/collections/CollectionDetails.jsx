@@ -343,7 +343,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         </div>
                                                     </div>
 
-                                                    <div className="d-flex align-items-center flex-wrap gap-1 mb-2" style={{ maxHeight: '60px', overflow: 'hidden' }}>
+                                                    <div className="d-flex align-items-center flex-nowrap mb-2" style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}>
                                                         {hotel.hotelFacilities && (
                                                             <>
                                                                 {hotel.hotelFacilities
@@ -355,11 +355,13 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                             className="badge bg-light text-dark border me-1 mb-1"
                                                                             style={{
                                                                                 fontSize: '11px',
+                                                                                lineHeight: '1.2',
                                                                                 whiteSpace: 'nowrap',
-                                                                                maxWidth: '150px',
+                                                                                maxWidth: '135px',
                                                                                 overflow: 'hidden',
                                                                                 textOverflow: 'ellipsis',
-                                                                                display: 'inline-block'
+                                                                                display: 'inline-block',
+                                                                                padding: '4px 8px'
                                                                             }}
                                                                             title={facility.trim()}
                                                                         >
@@ -367,7 +369,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         </span>
                                                                     ))}
                                                                 {hotel.hotelFacilities.split('|').length > 5 && (
-                                                                    <Link href={`${hotel.urlName}`} className="rating" style={{ fontSize: '11px' }}>
+                                                                    <Link href={`${hotel.urlName}`} className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
                                                                         +{hotel.hotelFacilities.split('|').length - 5} more
                                                                     </Link>
                                                                 )}

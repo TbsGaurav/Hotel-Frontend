@@ -1,10 +1,8 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import { getCountryBrandHotels } from '@/lib/api/public/brandapi';
 import CountryBrandHotelList from '../hotel/CountryBrandHotelList';
-import Link from 'next/link';
 
 function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -26,88 +24,62 @@ function resolveTotalCount(hotelsData = []) {
     return hotelsData.length;
 }
 
-export default function CountryBrandDetails({ params }) {
-    const [slug, setSlug] = useState(null);
-    const [hotels, setHotels] = useState([]);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(false);
-    const [totalCount, setTotalCount] = useState(0);
-    const [country, setCountry] = useState('');
-    const [brand, setBrand] = useState('');
+function toSlug(value = '') {
+    return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-');
+}
 
-    // Parse params and fetch initial data
-    useEffect(() => {
-        const initializeData = async () => {
-            try {
-                const { slug: slugData } = await params;
-                setSlug(slugData);
+function getCountryBrandPageCookieName(countrySlug = '', brandSlug = '') {
+    const combined = `${toSlug(countrySlug)}_${toSlug(brandSlug)}`;
+    return `country_brand_page_${combined.replace(/[^a-z0-9_-]/g, '_')}`;
+}
 
-                if (slugData && slugData.length >= 2) {
-                    const countryName = capitalize(slugData[0]);
-                    const brandName = decodeURIComponent(slugData[1]);
-                    const fullSlug = `/${countryName}/${brandName}`;
+function parsePageNumber(value) {
+    const page = Number(value);
+    return Number.isInteger(page) && page > 0 ? page : 1;
+}
 
-                    setCountry(countryName);
-                    setBrand(brandName);
+export default async function CountryBrandDetails({ params }) {
+    const { slug: slugData } = await params;
+    const slug = slugData || [];
 
-                    // Fetch initial hotels
-                    const hotelsData = await getCountryBrandHotels(fullSlug, 1, PAGE_SIZE);
+    if (!slug || slug.length < 2) {
+        return null;
+    }
 
-                    if (hotelsData && hotelsData.length > 0) {
-                        const total = resolveTotalCount(hotelsData);
-                        setHotels(hotelsData);
-                        setTotalCount(total);
-                        setHasMore(total > hotelsData.length || hotelsData.length === PAGE_SIZE);
-                    } else {
-                        setHotels([]);
-                        setTotalCount(0);
-                        setHasMore(false);
-                    }
-                    setPage(1);
-                }
-            } catch (err) {
-                console.error('Error initializing country brand details:', err);
+    const countrySlug = slug[0];
+    const brandSlug = decodeURIComponent(slug[1]);
+    const countryName = capitalize(countrySlug);
+    const brandName = brandSlug;
+    const formattedBrand = formatBrand(brandName);
+    const fullSlug = `/${countryName}/${brandName}`;
+
+    const cookieStore = await cookies();
+    const pageCookieName = getCountryBrandPageCookieName(countrySlug, brandName);
+    const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
+
+    let hotels = [];
+    let totalCount = 0;
+
+    try {
+        for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
+            const pageHotels = await getCountryBrandHotels(fullSlug, pageNumber, PAGE_SIZE);
+            const nextHotels = pageHotels || [];
+
+            if (!nextHotels.length) {
+                break;
             }
-        };
 
-        initializeData();
-    }, [params]);
-
-    const loadMoreHotels = async () => {
-        if (loadingMore || !hasMore || !slug || slug.length < 2) return;
-
-        setLoadingMore(true);
-        const nextPage = page + 1;
-
-        try {
-            const countryName = capitalize(slug[0]);
-            const brandName = decodeURIComponent(slug[1]);
-            const fullSlug = `/${countryName}/${brandName}`;
-
-            const newHotels = await getCountryBrandHotels(fullSlug, nextPage, PAGE_SIZE);
-
-            if (newHotels && newHotels.length > 0) {
-                const currentTotal = hotels.length + newHotels.length;
-                setHotels((prev) => [...prev, ...newHotels]);
-                setPage(nextPage);
-
-                const nextTotal = resolveTotalCount(newHotels);
-                const resolvedTotal = Math.max(totalCount, nextTotal);
-                setTotalCount(resolvedTotal);
-
-                setHasMore(currentTotal < resolvedTotal || newHotels.length === PAGE_SIZE);
-            } else {
-                setHasMore(false);
-            }
-        } catch (err) {
-            console.error('Error loading more hotels:', err);
-        } finally {
-            setLoadingMore(false);
+            hotels = hotels.concat(nextHotels);
+            totalCount = Math.max(totalCount, resolveTotalCount(nextHotels));
         }
-    };
+    } catch (err) {
+        console.error('Error initializing country brand details:', err);
+    }
 
-    const formattedBrand = formatBrand(brand);
+    const hasMore = hotels.length < totalCount || hotels.length !== 0 && hotels.length % PAGE_SIZE === 0;
 
     return (
         <>
@@ -119,16 +91,16 @@ export default function CountryBrandDetails({ params }) {
                             All Brands
                         </Link>
 
-                        <span className="mx-2 text-muted">•</span>
+                        <span className="mx-2 text-muted">â€¢</span>
 
-                        <Link href={`/brand/${brand}`} className="text-dark text-decoration-none text-capitalize">
+                        <Link href={`/brand/${brandName}`} className="text-dark text-decoration-none text-capitalize">
                             {formattedBrand}
                         </Link>
 
-                        <span className="mx-2 text-muted">•</span>
+                        <span className="mx-2 text-muted">â€¢</span>
 
-                        <Link href={`/${country}/${brand}`} className=" text-decoration-none text-primary text-capitalize">
-                            {country}
+                        <Link href={`/${countryName}/${brandName}`} className=" text-decoration-none text-primary text-capitalize">
+                            {countryName}
                         </Link>
                     </div>
                 </div>
@@ -136,22 +108,19 @@ export default function CountryBrandDetails({ params }) {
 
             <section className="container py-5">
                 <h3 className="mb-4 text-capitalize">
-                    {formattedBrand} {country}
+                    {formattedBrand} {countryName}
                 </h3>
                 {hotels.length > 0 ? (
-                    <>
-                        <CountryBrandHotelList hotels={hotels} brand={brand} />
-                        {hasMore && (
-                            <div className="text-center py-4">
-                                <button onClick={loadMoreHotels} disabled={loadingMore} className="theme-button-orange rounded-1 px-5 py-2">
-                                    {loadingMore ? 'Loading...' : 'Load More'}
-                                </button>
-                            </div>
-                        )}
-                    </>
+                    <CountryBrandHotelList
+                        hotels={hotels}
+                        brand={brandName}
+                        currentPage={currentPage}
+                        hasMore={hasMore}
+                        pageCookieName={pageCookieName}
+                    />
                 ) : (
                     <div className="text-center py-5">
-                        <p className="text-muted">No hotels available for this brand in {country}.</p>
+                        <p className="text-muted">No hotels available for this brand in {countryName}.</p>
                     </div>
                 )}
             </section>

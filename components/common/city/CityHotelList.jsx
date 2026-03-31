@@ -4,11 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
-import { getCityHotels } from '@/lib/api/public/cityapi';
 import { getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 
-export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1, pageSize = 10, citySlug, content }) {
+export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1, pageSize = 10, citySlugPath, pageCookieName, content }) {
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(hotels || []);
     const [allRates, setAllRates] = useState([]);
@@ -78,7 +77,7 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
         return () => {
             cancelled = true;
         };
-    }, [currency]);
+    }, [currency, allHotels]);
 
     const handleImageError = (e) => {
         if (!e.target.src.includes(defaultImage)) {
@@ -105,6 +104,13 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
         return 'Pleasant';
     };
 
+    const getHotelFacilitiesText = (hotel) =>
+        hotel?.hotelFacilities ??
+        hotel?.hotelFacility ??
+        hotel?.facilities ??
+        hotel?.facility ??
+        '';
+
     const formatOriginalPrice = (currentPriceStr, originalPrice) => {
         if (!currentPriceStr || !originalPrice) return null;
 
@@ -124,35 +130,12 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
         })}`;
     };
 
-    const loadMoreHotels = async () => {
-        if (loading || !hasMore) return;
+    const loadMoreHotels = () => {
+        if (!hasMore) return;
 
         setLoading(true);
-        const nextPage = page + 1;
-
-        try {
-            const newHotels = await getCityHotels(citySlug, nextPage, pageSize);
-
-            if (newHotels.length > 0) {
-                let newRates = [];
-                if (currency) {
-                    newRates = await fetchRatesForHotels(newHotels, currency);
-                }
-
-                setAllHotels((prev) => [...prev, ...newHotels]);
-                setAllRates((prev) => [...prev, ...newRates]);
-                setPage(nextPage);
-
-                const currentTotal = allHotels.length + newHotels.length;
-                setHasMore(currentTotal < totalCount || newHotels.length === pageSize);
-            } else {
-                setHasMore(false);
-            }
-        } catch (error) {
-            console.error('Error loading more hotels:', error);
-        } finally {
-            setLoading(false);
-        }
+        document.cookie = `${pageCookieName}=${page + 1}; path=/; SameSite=Lax`;
+        window.location.reload();
     };
 
     if (!allHotels.length) {
@@ -171,6 +154,7 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                 {allHotels.map((hotel) => {
                     const rate = getHotelRate(getBookingId(hotel));
                     const badges = rate?.badges || [];
+                    const hotelFacilitiesText = getHotelFacilitiesText(hotel);
                     const imageBadges = badges.filter(
                         (badge) =>
                             !badge.toLowerCase().includes('free cancellation') &&
@@ -181,13 +165,6 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                             badge.toLowerCase().includes('free cancellation') ||
                             badge.toLowerCase().includes('pay at')
                     );
-                    const facilities = hotel.hotelFacilities
-                        ? hotel.hotelFacilities
-                              .split('|')
-                              .map((facility) => facility.trim())
-                              .filter(Boolean)
-                        : [];
-
                     return (
                         <div
                             key={hotel.hotelId}
@@ -273,33 +250,45 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                                             </div>
                                         </div>
 
-                                        <div className="d-flex align-items-center flex-wrap gap-1 mb-2" style={{ maxHeight: '60px', overflow: 'hidden' }}>
-                                            {hotel.hotelFacilities && (
+                                        <div
+                                            className="d-flex align-items-center flex-nowrap mb-2"
+                                            style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}
+                                        >
+                                            {hotelFacilitiesText && (
                                                 <>
-                                                    {hotel.hotelFacilities
+                                                    {hotelFacilitiesText
                                                         .split('|')
+                                                        .map((facility) => facility.trim())
+                                                        .filter(Boolean)
                                                         .slice(0, 5)
                                                         .map((facility, idx) => (
-                                                        <span
-                                                            key={idx}
-                                                            className="badge bg-light text-dark border me-1 mb-1"
-                                                            style={{
-                                                                fontSize: '11px',
-                                                                whiteSpace: 'nowrap',
-                                                                maxWidth: '150px',
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                display: 'inline-block'
-                                                            }}
-                                                            title={facility.trim()}
-                                                        >
-                                                            {facility.trim()}
-                                                        </span>
-                                                    ))}
-
-                                                    {hotel.hotelFacilities.split('|').length > 5 && (
-                                                        <Link href={`${hotel.urlName}`} className="rating" style={{ fontSize: '11px' }}>
-                                                            +{hotel.hotelFacilities.split('|').length - 5} more
+                                                            <span
+                                                                key={idx}
+                                                                className="badge bg-light text-dark border me-1 mb-1"
+                                                                style={{
+                                                                    fontSize: '11px',
+                                                                    lineHeight: '1.2',
+                                                                    whiteSpace: 'nowrap',
+                                                                    maxWidth: '135px',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    display: 'inline-block',
+                                                                    padding: '4px 8px'
+                                                                }}
+                                                                title={facility}
+                                                            >
+                                                                {facility}
+                                                            </span>
+                                                        ))}
+                                                    {hotelFacilitiesText
+                                                        .split('|')
+                                                        .map((facility) => facility.trim())
+                                                        .filter(Boolean).length > 5 && (
+                                                        <Link href={`${hotel.urlName}`} className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
+                                                            +{hotelFacilitiesText
+                                                                .split('|')
+                                                                .map((facility) => facility.trim())
+                                                                .filter(Boolean).length - 5} more
                                                         </Link>
                                                     )}
                                                 </>
@@ -344,11 +333,19 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
 
                                                 const dealInfo = rate?.deal_info || {};
                                                 const originalPrice = dealInfo?.public_price;
+                                                const discountPercentage = dealInfo?.discount_percentage;
                                                 const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
 
                                                 return (
                                                     <div className="price-block p-1 rounded mb-3">
                                                         <p className="para-12px text-muted mb-1 text-end">1 night, 2 adults</p>
+                                                        {/* {discountPercentage > 0 && (
+                                                            <div className="text-end mb-1">
+                                                                <span className="badge bg-danger" style={{ fontSize: '11px' }}>
+                                                                    {discountPercentage}% OFF
+                                                                </span>
+                                                            </div>
+                                                        )} */}
 
                                                         {formattedOriginal && originalPrice > rate.price.total && (
                                                             <p
@@ -372,14 +369,14 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                                         <div className="row">
                                             <div className="col-12 col-md-4 col-lg-3 ms-auto">
                                                 <Link
-                                                    className="theme-button-blue rounded-4 w-100 d-inline-flex align-items-center justify-content-center gap-1 text-center text-nowrap p-2"
+                                                    className="theme-button-blue rounded-4 w-100 d-block text-center p-2"
                                                     href={`${hotel.url}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     See Availability
-                                                    <i className="fa-solid fa-arrow-right"></i>
+                                                    <i className="fa-solid fa-arrow-right ms-2"></i>
                                                 </Link>
                                             </div>
                                         </div>

@@ -44,25 +44,6 @@ export default async function CollectionDetailsWrapper({ slug, collectionData, e
 
     let hotelRates = [];
 
-    // if (hotels.length > 0) {
-
-    //     const bookingIds = hotels.map(h => h.bookingId).filter(Boolean);
-
-    //     const ratesPayload = {
-    //         bookingIds,
-    //         currency: "USD", // default
-    //         rooms: 1,
-    //         adults: 2,
-    //         childs: 0,
-    //         device: "desktop",
-    //         checkIn: null,
-    //         checkOut: null
-    //     };
-
-    //     const ratesRes = await getHotelRates(ratesPayload);
-    //     hotelRates = ratesRes?.data || [];
-    // }
-
     let totalCount = 0;
     let currentPage = 1;
     let pageSize = 10;

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import CityHotelList from './CityHotelList';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
@@ -66,12 +67,24 @@ function formatCityName(slug = '') {
 
 const PAGE_SIZE = 10;
 
+function getCityPageCookieName(citySlug = '') {
+    return `city_page_${toSlug(citySlug).replace(/[^a-z0-9_-]/g, '_')}`;
+}
+
+function parsePageNumber(value) {
+    const page = Number(value);
+    return Number.isInteger(page) && page > 0 ? page : 1;
+}
+
 export default async function CityDetails({ params }) {
     const { slug } = await params;
     const citySlug = slug?.[0] || '';
 
     const citySlugPath = toSlug(citySlug);
     const cityName = formatCityName(citySlug);
+    const cookieStore = await cookies();
+    const pageCookieName = getCityPageCookieName(citySlug);
+    const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
 
     let hotels = [];
     let totalCount = 0;
@@ -79,8 +92,17 @@ export default async function CityDetails({ params }) {
     let content = '';
     if (citySlug) {
         try {
-            const pageData = await getCityHotels(citySlug, 1, PAGE_SIZE);
-            hotels = pageData || [];
+            for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
+                const pageData = await getCityHotels(citySlug, pageNumber, PAGE_SIZE);
+                const nextHotels = pageData || [];
+
+                if (!nextHotels.length) {
+                    break;
+                }
+
+                hotels = hotels.concat(nextHotels);
+            }
+
             content = hotels[0]?.content || '';
             totalCount = hotels[0]?.totalCount || hotels.length;
 
@@ -174,9 +196,11 @@ export default async function CityDetails({ params }) {
                         <CityHotelList
                             hotels={hotels}
                             totalCount={totalCount}
-                            currentPage={1}
+                            currentPage={currentPage}
                             pageSize={PAGE_SIZE}
                             citySlug={citySlug}
+                            citySlugPath={citySlugPath}
+                            pageCookieName={pageCookieName}
                             content={content}
                         />
                     </div>
