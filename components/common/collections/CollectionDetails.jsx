@@ -210,7 +210,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                     Home
                                 </Link>
                                 <span className="mx-2 text-muted">•</span>
-                                <span className="fw-semibold text-decoration-none text-primary">{basic?.name}</span>
+                                <span className="fw-semibold text-decoration-none text-primary">{basic[0]?.name}</span>
                             </div>
                         </div>
                     </div>

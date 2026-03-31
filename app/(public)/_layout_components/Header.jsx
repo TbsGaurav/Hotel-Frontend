@@ -6,14 +6,16 @@ import React, { useRef, useState, useEffect } from 'react';
 import { currencies } from '@/lib/constants/currencies';
 
 export default function Header() {
-    const offcanvasRef = useRef(null);
     const currencyDropdownRef = useRef(null);
     const languageDropdownRef = useRef(null);
+    const [isMounted, setIsMounted] = useState(false);
     const [currency, setCurrency] = useState("AUD");
     const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
     const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
+        setIsMounted(true);
 
         // load bootstrap only on client
         import('bootstrap/dist/js/bootstrap.bundle.min.js');
@@ -22,6 +24,16 @@ export default function Header() {
         if (cur) setCurrency(cur);
 
     }, []);
+
+    useEffect(() => {
+        if (!isMounted) return;
+
+        document.body.classList.toggle('offcanvas-backdrop-active', isMenuOpen);
+
+        return () => {
+            document.body.classList.remove('offcanvas-backdrop-active');
+        };
+    }, [isMounted, isMenuOpen]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -42,13 +54,7 @@ export default function Header() {
     }, []);
 
     const handleCloseOffcanvas = () => {
-        if (offcanvasRef.current && window.bootstrap) {
-            const bsOffcanvas = window.bootstrap.Offcanvas.getInstance(offcanvasRef.current);
-
-            if (bsOffcanvas) {
-                bsOffcanvas.hide();
-            }
-        }
+        setIsMenuOpen(false);
     };
 
     const changeCurrency = (cur) => {
@@ -145,11 +151,92 @@ export default function Header() {
                                 <button
                                     className="theme-bordered-button rounded"
                                     type="button"
-                                    data-bs-toggle="offcanvas"
-                                    data-bs-target="#offcanvasExample"
+                                    aria-controls="offcanvasExample"
+                                    aria-expanded={isMenuOpen}
+                                    onClick={() => setIsMenuOpen(true)}
                                 >
                                     <i className="fa-light fa-bars me-2"></i> Menu
                                 </button>
+                                {isMounted && (
+                                    <>
+                                        <div
+                                            className={`offcanvas-backdrop fade ${isMenuOpen ? 'show' : ''}`}
+                                            onClick={handleCloseOffcanvas}
+                                            style={{ display: isMenuOpen ? 'block' : 'none' }}
+                                        />
+                                        <div
+                                            className={`offcanvas offcanvas-end ${isMenuOpen ? 'show' : ''}`}
+                                            tabIndex="-1"
+                                            id="offcanvasExample"
+                                            aria-labelledby="offcanvasExampleLabel"
+                                            aria-modal={isMenuOpen ? 'true' : undefined}
+                                            role={isMenuOpen ? 'dialog' : undefined}
+                                            style={{ visibility: isMenuOpen ? 'visible' : 'hidden' }}
+                                        >
+                                            <div className="offcanvas-header">
+                                                <h5 className="offcanvas-title" id="offcanvasExampleLabel">
+                                                    Menu
+                                                </h5>
+                                                <button
+                                                    type="button"
+                                                    className="btn-close text-reset"
+                                                    aria-label="Close"
+                                                    onClick={handleCloseOffcanvas}
+                                                ></button>
+                                            </div>
+                                            <div className="offcanvas-body d-flex justify-content-between flex-column">
+                                                <div>
+                                                    <ul className="list-unstyled main-menu">
+                                                        <li>
+                                                            <Link href="/hotel-list" onClick={handleCloseOffcanvas}>
+                                                                Find Hotel Deals
+                                                            </Link>
+                                                        </li>
+                                                        <li>
+                                                            <Link
+                                                                href="/destinations"
+                                                                className="d-flex align-items-center"
+                                                                onClick={handleCloseOffcanvas}
+                                                            >
+                                                                Destinations
+                                                            </Link>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#" onClick={handleCloseOffcanvas}>
+                                                                Help
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#" onClick={handleCloseOffcanvas}>
+                                                                My Hotel
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <Link href="/" onClick={handleCloseOffcanvas}>
+                                                                Home
+                                                            </Link>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#" onClick={handleCloseOffcanvas}>
+                                                                Popular Destinations
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="#" onClick={handleCloseOffcanvas}>
+                                                                Blogs
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <Link href="/brands" onClick={handleCloseOffcanvas}>
+                                                                All Brands
+                                                            </Link>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
