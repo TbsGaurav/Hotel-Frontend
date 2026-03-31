@@ -21,6 +21,43 @@ function normalizeItems(items) {
     return Array.isArray(items) ? items : [];
 }
 
+function getSidebarValue(sidebarData, key) {
+    if (!sidebarData || !key) return undefined;
+
+    if (Array.isArray(sidebarData[key])) return sidebarData[key];
+
+    const lowerKey = String(key).toLowerCase();
+    const matchedKey = Object.keys(sidebarData).find((existingKey) => existingKey.toLowerCase() === lowerKey);
+
+    return matchedKey ? sidebarData[matchedKey] : undefined;
+}
+
+function mergeUniqueItems(...groups) {
+    const seen = new Set();
+    const merged = [];
+
+    for (const group of groups) {
+        for (const item of normalizeItems(group)) {
+            const label = String(item?.categoryName ?? item?.name ?? item?.label ?? '').trim();
+            const key = label.toLowerCase();
+            if (!key || seen.has(key)) continue;
+            seen.add(key);
+            merged.push(item);
+        }
+    }
+
+    return merged;
+}
+
+function getSidebarItems(sidebarData, ...keys) {
+    for (const key of keys) {
+        const value = getSidebarValue(sidebarData, key);
+        if (Array.isArray(value)) return value;
+    }
+
+    return [];
+}
+
 function formatCityName(slug = '') {
     return slug
         .split('-')
@@ -96,7 +133,7 @@ export default async function CityDetails({ params }) {
                 const cityId = getFirstDefined(firstHotel?.cityId, firstHotel?.cityID, firstHotel?.CityID);
                 const regionId = getFirstDefined(firstHotel?.regionId, firstHotel?.regionID, firstHotel?.RegionID);
 
-                if (cityId && regionId) {
+                if (cityId) {
                     const sidebar = await getCitySidebar(cityId, regionId);
                     sidebarData = sidebar || {};
                 }
@@ -112,17 +149,35 @@ export default async function CityDetails({ params }) {
     const sidebarSections = [
         {
             title: 'Rating',
-            items: normalizeItems(sidebarData?.rating || sidebarData?.ratings || sidebarData?.ratingItems),
+            items: getSidebarItems(sidebarData, 'ratings', 'rating', 'ratingItems'),
             maxVisible: 6
         },
         {
             title: 'Property Type',
-            items: normalizeItems(sidebarData?.propertyTypes || sidebarData?.propertyType || sidebarData?.propertyTypeItems),
+            items: getSidebarItems(sidebarData, 'propertyTypes', 'propertyType', 'propertyTypeItems'),
             maxVisible: 5
         },
         {
             title: 'Facilities',
-            items: normalizeItems(sidebarData?.hotelFacilities || sidebarData?.facilities || sidebarData?.facilityItems),
+            items: mergeUniqueItems(
+                getSidebarItems(sidebarData, 'roomFacilities', 'roomFacility', 'roomFacilityItems'),
+                getSidebarItems(sidebarData, 'hotelFacilities', 'facilityItems', 'facilities')
+            ),
+            maxVisible: 5
+        },
+        {
+            title: 'City & CBD',
+            items: getSidebarItems(sidebarData, 'cityAndCbd', 'cityAndCBD', 'cityAndCbdItems'),
+            maxVisible: 5
+        },
+        {
+            title: 'Entertainment',
+            items: getSidebarItems(sidebarData, 'entertainment', 'entertainmentItems'),
+            maxVisible: 5
+        },
+        {
+            title: 'Relaxation & Exercise',
+            items: getSidebarItems(sidebarData, 'relaxationAndExercise', 'relaxation', 'relaxationItems'),
             maxVisible: 5
         }
     ];
@@ -153,7 +208,13 @@ export default async function CityDetails({ params }) {
                 <h2 className="mb-3">Hotel Accommodation in {cityName}</h2>
 
                 <div className="row g-4 align-items-start">
-                    <div className="col-lg-9">
+                    <div className="col-lg-3 order-2 order-lg-1">
+                        <div className="position-sticky" style={{ top: '16px' }}>
+                            <ListingSidebar title="Filters" sections={sidebarSections} />
+                        </div>
+                    </div>
+
+                    <div className="col-lg-9 order-1 order-lg-2">
                         <CityHotelList
                             hotels={hotels}
                             initialRates={hotelRates}
@@ -161,12 +222,6 @@ export default async function CityDetails({ params }) {
                             totalCount={totalCount}
                             content={content}
                         />
-                    </div>
-
-                    <div className="col-lg-3">
-                        <div className="position-sticky" style={{ top: '16px' }}>
-                            <ListingSidebar title="Filters" sections={sidebarSections} />
-                        </div>
                     </div>
                 </div>
             </section>

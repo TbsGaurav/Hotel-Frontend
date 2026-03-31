@@ -170,11 +170,11 @@ export default function ListingSidebar({
     title = 'Filters',
     topContent = <PriceRangeBlock />,
     sections = [],
-    chipLimit = 1,
+    chipLimit,
     initialSelectedValues = []
 }) {
     const [selectedValues, setSelectedValues] = useState(() => new Set(initialSelectedValues.map((value) => String(value).trim().toLowerCase()).filter(Boolean)));
-    const chips = Array.from(selectedValues).slice(0, chipLimit);
+    const chips = chipLimit ? Array.from(selectedValues).slice(0, chipLimit) : Array.from(selectedValues);
  
     const clearAll = () => setSelectedValues(new Set());
  
