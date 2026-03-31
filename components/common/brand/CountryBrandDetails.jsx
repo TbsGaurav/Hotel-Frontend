@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import { getCountryBrandHotels } from '@/lib/api/public/brandapi';
-import Link from 'next/link';
 import CountryBrandHotelList from '../hotel/CountryBrandHotelList';
 
 function capitalize(word) {
