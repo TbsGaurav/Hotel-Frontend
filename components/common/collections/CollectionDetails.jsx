@@ -6,7 +6,7 @@ import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import { getHotelsByCollection, getHotelRates } from '@/lib/api/public/hotelapi';
-import { countryToCurrency } from '@/lib/utils';
+import { getUserCurrency } from '@/lib/getUserCurrency';
 
 export default function CollectionDetails({ collection, hotels, hotelRates, totalCount, currentPage, pageSize, collectionId }) {
     const basic = collection?.basicCollection;
@@ -18,10 +18,72 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const [allRates, setAllRates] = useState(hotelRates || []);
     const [page, setPage] = useState(currentPage || 1);
     const [hasMore, setHasMore] = useState((hotels?.length || 0) < (totalCount || 0));
+    const [currency, setCurrency] = useState(null);
+
+    useEffect(() => {
+
+        async function initCurrency() {
+
+            const cur = await getUserCurrency();
+            setCurrency(cur);
+
+        }
+
+        initCurrency();
+
+    }, []);
+
+    const getBookingId = (hotel) => hotel?.bookingId ?? hotel?.bookingID ?? hotel?.BookingId ?? null;
+
+    const fetchRatesForHotels = async (hotelsToRate, selectedCurrency) => {
+        const bookingIds = hotelsToRate.map(getBookingId).filter(Boolean);
+
+        if (!bookingIds.length || !selectedCurrency) {
+            return [];
+        }
+
+        const ratesPayload = {
+            bookingIds,
+            currency: selectedCurrency,
+            rooms: 1,
+            adults: 2,
+            childs: 0,
+            device: 'desktop',
+            checkIn: null,
+            checkOut: null
+        };
+
+        const ratesRes = await getHotelRates(ratesPayload);
+        return ratesRes?.data || [];
+    };
+
+    useEffect(() => {
+        if (!currency || !allHotels.length) return;
+
+        let cancelled = false;
+
+        async function syncRates() {
+            try {
+                const refreshedRates = await fetchRatesForHotels(allHotels, currency);
+
+                if (!cancelled) {
+                    setAllRates(refreshedRates);
+                }
+            } catch (error) {
+                console.error('Error refreshing hotel rates:', error);
+            }
+        }
+
+        syncRates();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [currency]);
 
     // Helper function to get rate for a hotel by bookingId
     const getHotelRate = (bookingId) => {
-        return allRates.find(rate => rate.id === bookingId);
+        return allRates.find(rate => String(rate?.id) === String(bookingId));
     };
 
     // Helper to format original price with currency
@@ -107,25 +169,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
             const newHotels = hotelsRes?.data?.hotelData || hotelsRes?.data || [];
 
             if (newHotels.length > 0) {
-                const countryCode = newHotels[0]?.countryCode;
-                const currency = countryCode ? countryToCurrency(countryCode) : 'USD';
-
-                const bookingIds = newHotels.map(hotel => hotel.bookingId).filter(Boolean);
-
                 let newRates = [];
-                if (bookingIds.length > 0) {
-                    const ratesPayload = {
-                        bookingIds: bookingIds,
-                        currency: currency,
-                        rooms: 1,
-                        adults: 2,
-                        childs: 0,
-                        device: 'desktop',
-                        checkIn: null,
-                        checkOut: null
-                    };
-                    const ratesRes = await getHotelRates(ratesPayload);
-                    newRates = ratesRes?.data || [];
+                if (currency) {
+                    newRates = await fetchRatesForHotels(newHotels, currency);
                 }
 
                 setAllHotels(prev => [...prev, ...newHotels]);
@@ -187,9 +233,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                     <div className="d-flex align-items-center">
                                         <FaMapMarkerAlt className="text-muted me-2" />
                                         <span>
-                                            {basic?.cities?.length
-                                                ? basic.cities.map((city) => city.cityName).join(', ')
-                                                : basic?.districtName || basic?.cityName || basic?.regionName || basic?.countryName}
+                                            {Array.isArray(basic) && basic.length > 0
+                                                ? basic.map((item) => item.cityName || item.regionName || item.countryName).filter(Boolean).join(', ')
+                                                : basic?.cityName || basic?.districtName || basic?.regionName || basic?.countryName}
                                         </span>
                                     </div>
 
@@ -218,7 +264,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                 <Link href={`${hotel.url}`} target="_blank" className="text-decoration-none">
                                                     <div className="position-relative">
                                                         {(() => {
-                                                            const rate = getHotelRate(hotel.bookingId);
+                                                            const rate = getHotelRate(getBookingId(hotel));
                                                             const badges = rate?.badges || [];
                                                             // Image badge: show badges that are NOT free cancellation or pay at property
                                                             const imageBadges = badges.filter(b =>
@@ -363,7 +409,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             </p>
 
                                                             {(() => {
-                                                                const rate = getHotelRate(hotel.bookingId);
+                                                                const rate = getHotelRate(getBookingId(hotel));
                                                                 const badges = rate?.badges || [];
 
                                                                 const infoBadges = badges.filter(b =>
@@ -391,7 +437,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         </div>
 
                                                         {(() => {
-                                                            const rate = getHotelRate(hotel.bookingId);
+                                                            const rate = getHotelRate(getBookingId(hotel));
                                                             if (rate?.price) {
                                                                 const dealInfo = rate?.deal_info || {};
                                                                 const originalPrice = dealInfo?.public_price;

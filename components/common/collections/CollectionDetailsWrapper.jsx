@@ -1,8 +1,7 @@
 import { getCollectionById, getCollectionByUrl } from '@/lib/api/admin/collectionapi';
-import { getHotelsByCollection, getHotelRates } from '@/lib/api/public/hotelapi';
+import { getHotelsByCollection } from '@/lib/api/public/hotelapi';
 import CollectionDetails from './CollectionDetails';
 import { notFound } from 'next/navigation';
-import { countryToCurrency } from '@/lib/utils';
 
 const extractHotelArray = (payload) => {
     if (Array.isArray(payload)) return payload;
@@ -14,7 +13,7 @@ const extractHotelArray = (payload) => {
 export default async function CollectionDetailsWrapper({ slug, collectionData, entityId }) {
     // Use collection data from resolveSlug if available, otherwise fetch it
     let collection = collectionData;
-    
+
     if (!collection) {
         // Try to fetch by entity ID first if available (for multi-segment URLs)
         if (entityId) {
@@ -25,7 +24,7 @@ export default async function CollectionDetailsWrapper({ slug, collectionData, e
                 console.error('Error fetching collection by ID:', error);
             }
         }
-        
+
         // Fallback to fetching by URL
         if (!collection) {
             const collectionRes = await getCollectionByUrl(slug);
@@ -44,6 +43,26 @@ export default async function CollectionDetailsWrapper({ slug, collectionData, e
     const collectionId = basicCollection?.collectionId ?? collection?.basicCollection?.collectionId ?? null;
 
     let hotelRates = [];
+
+    // if (hotels.length > 0) {
+
+    //     const bookingIds = hotels.map(h => h.bookingId).filter(Boolean);
+
+    //     const ratesPayload = {
+    //         bookingIds,
+    //         currency: "USD", // default
+    //         rooms: 1,
+    //         adults: 2,
+    //         childs: 0,
+    //         device: "desktop",
+    //         checkIn: null,
+    //         checkOut: null
+    //     };
+
+    //     const ratesRes = await getHotelRates(ratesPayload);
+    //     hotelRates = ratesRes?.data || [];
+    // }
+
     let totalCount = 0;
     let currentPage = 1;
     let pageSize = 10;
@@ -58,29 +77,6 @@ export default async function CollectionDetailsWrapper({ slug, collectionData, e
         totalCount = hotelsRes?.data?.totalCount || hotelsRes?.totalCount || 0;
         currentPage = hotelsRes?.data?.currentPage || 1;
         pageSize = hotelsRes?.data?.pageSize || 10;
-
-        // Get booking IDs from hotels array (each hotel has a bookingId property)
-        const bookingIds = hotels?.map((hotel) => hotel.bookingId).filter(Boolean);
-
-        // Get country code from first hotel and convert to currency
-        // Note: countryCode is lowercase "au" but we need uppercase for our map
-        const countryCode = hotels?.[0]?.countryCode?.toUpperCase();
-        const currency = countryCode ? countryToCurrency(countryCode) : 'USD';
-
-        if (bookingIds.length > 0) {
-            const ratesPayload = {
-                bookingIds: bookingIds,
-                currency: currency,
-                rooms: 1,
-                adults: 2,
-                childs: 0,
-                device: 'desktop',
-                checkIn: null,
-                checkOut: null
-            };
-            const ratesRes = await getHotelRates(ratesPayload);
-            hotelRates = ratesRes?.data || [];
-        }
     }
 
     return (

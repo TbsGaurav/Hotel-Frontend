@@ -55,16 +55,20 @@ a {
     border-radius: 10px !important;
     border: none !important;
     padding: 0px !important;
-    overflow: hidden !important;
+    max-height: 280px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
 }
-.language-switcher-menu-item li a {
+.language-switcher-menu-item li a,
+.language-switcher-menu-item li button {
     padding: 10px 15px !important;
     font-size: 14px !important;
     line-height: 20px !important;
     font-weight: 400 !important;
     transition: all 0.5s !important;
 }
-.language-switcher-menu-item li a:hover {
+.language-switcher-menu-item li a:hover,
+.language-switcher-menu-item li button:hover {
     color: #fff !important;
     background: #0077c0 !important;
 }
@@ -1691,43 +1695,43 @@ a.text-sky-blue:hover {
 }
 
 .hotel-row-info {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  font-size: 14px;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 14px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .hotel-name {
-  font-weight: 600;
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    font-weight: 600;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .hotel-stars {
-  color: #f5a623;
-  flex: 0 0 auto;
+    color: #f5a623;
+    flex: 0 0 auto;
 }
 
 .hotel-address {
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .hotel-score {
-  font-weight: 500;
-  flex: 0 0 auto;
+    font-weight: 500;
+    flex: 0 0 auto;
 }
 
 .hotel-separator {
-  color: #adb5bd;
-  flex: 0 0 auto;
+    color: #adb5bd;
+    flex: 0 0 auto;
 }
 /* swiper indicator */
 .image-swiper {
@@ -1806,38 +1810,39 @@ a.text-sky-blue:hover {
 }
 
 .bars-loader {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 40px;
 }
 
 .bars-loader span {
-  width: 6px;
-  height: 20px;
-  background: #0d6efd; /* primary color */
-  border-radius: 4px;
-  animation: bars 1s infinite ease-in-out;
+    width: 6px;
+    height: 20px;
+    background: #0d6efd; /* primary color */
+    border-radius: 4px;
+    animation: bars 1s infinite ease-in-out;
 }
 
 .bars-loader span:nth-child(2) {
-  animation-delay: 0.2s;
+    animation-delay: 0.2s;
 }
 
 .bars-loader span:nth-child(3) {
-  animation-delay: 0.4s;
+    animation-delay: 0.4s;
 }
 
 @keyframes bars {
-  0%, 100% {
-    transform: scaleY(0.5);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scaleY(1.5);
-    opacity: 1;
-  }
+    0%,
+    100% {
+        transform: scaleY(0.5);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scaleY(1.5);
+        opacity: 1;
+    }
 }
 
 .custom-tabs .nav-link {
@@ -1857,11 +1862,141 @@ a.text-sky-blue:hover {
     background: transparent;
 }
 
+.write-review-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(250px, 0.9fr);
+    column-gap: 42px;
+    row-gap: 24px;
+    align-items: start;
+    justify-items: center;
+}
+
+.write-review-form-column,
+.write-review-ratings-column {
+    min-width: 0;
+}
+
+.write-review-field-row {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    align-items: center;
+    gap: 26px;
+    margin-bottom: 16px;
+}
+
+.write-review-field-input {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.write-review-field-row-textarea {
+    align-items: start;
+}
+
+.write-review-label,
+.write-review-rating-label {
+    color: #0d1b2a;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.write-review-input {
+    min-height: 46px;
+    background-color: #eef1f6 !important;
+    border: none !important;
+    border-radius: 999px !important;
+    box-shadow: none !important;
+    padding: 12px 20px !important;
+    color: #243245;
+}
+
+.write-review-textarea {
+    min-height: 122px;
+    border-radius: 22px !important;
+    resize: vertical;
+}
+
+.write-review-select {
+    padding-right: 44px !important;
+}
+
+.write-review-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: wrap;
+}
+
+.write-review-star-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    line-height: 1;
+}
+
+.write-review-star-button:hover,
+.write-review-star-button:focus-visible {
+    transform: translateY(-1px);
+    outline: none;
+}
+
+.write-review-rating-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-top: 4px;
+}
+
+.write-review-rating-item {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+    align-items: center;
+    gap: 18px;
+}
+
+.write-review-submit-wrap {
+    padding-left: 246px;
+    margin-top: 28px;
+}
+
+.write-review-submit {
+    border-radius: 4px;
+    min-width: 132px;
+    padding: 10px 22px;
+}
+
+@media (max-width: 991.98px) {
+    .write-review-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .write-review-ratings-column {
+        order: -1;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .write-review-field-row,
+    .write-review-rating-item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .write-review-submit-wrap {
+        padding-left: 0;
+    }
+}
+
 .view-photos-btn:hover {
-                    background-color: #ff7a00 !important;
-                    border-color: #ff7a00 !important;
-                    color: white !important;
-                }
+    background-color: #ff7a00 !important;
+    border-color: #ff7a00 !important;
+    color: white !important;
+}
 .photo-hover-container:hover .photo-hover-overlay {
     opacity: 1;
 }
@@ -1871,7 +2006,7 @@ a.text-sky-blue:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     opacity: 0;
     transition: opacity 0.3s;
 }
@@ -1894,7 +2029,7 @@ a.text-sky-blue:hover {
     background: #1a1a1a;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 .photo-modal-header {
     display: flex;
@@ -1959,7 +2094,7 @@ a.text-sky-blue:hover {
     cursor: pointer;
     font-size: 18px;
     color: #333;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: all 0.2s;
 }
 .photo-modal-nav:hover {
@@ -1987,7 +2122,9 @@ a.text-sky-blue:hover {
     object-fit: cover;
     cursor: pointer;
     opacity: 0.5;
-    transition: opacity 0.2s, transform 0.2s;
+    transition:
+        opacity 0.2s,
+        transform 0.2s;
     border: 2px solid transparent;
 }
 .photo-thumbnail:hover {
@@ -2003,5 +2140,5 @@ a.text-sky-blue:hover {
 }
 
 .city-hover:hover {
-    color: #0077c0 !important; 
+    color: #0077c0 !important;
 }

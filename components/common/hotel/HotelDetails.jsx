@@ -3,16 +3,196 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaCamera, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { SiAmericanexpress, SiVisa, SiMastercard, SiDinersclub, SiJcb, SiWesternunion } from 'react-icons/si';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import { saveCustomerReview } from '@/lib/api/public/hotelapi';
+import { toast } from 'react-hot-toast';
+import * as yup from 'yup';
 
 export default function HotelDetails({ initialData }) {
-    const [hotelData] = useState(initialData);
+    const hotelData = initialData;
     const loading = !initialData;
     const [error, setError] = useState(null);
     const [showPhotoModal, setShowPhotoModal] = useState(false);
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [activeTab, setActiveTab] = useState('overview');
     const [timestamp, setTimestamp] = useState('');
+    const [overallReviewRating, setOverallReviewRating] = useState(0);
+    const [categoryRatings, setCategoryRatings] = useState({
+        service: 0,
+        rooms: 0,
+        location: 0
+    });
+
+    // Review form state
+    const [reviewForm, setReviewForm] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        reviewTitle: '',
+        reviewText: '',
+        tripType: 'select'
+    });
+    const [reviewErrors, setReviewErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Yup validation schema for review form
+    const reviewSchema = yup.object().shape({
+        firstName: yup
+            .string()
+            .required('First name is required')
+            .test('min-length', 'First name must be at least 2 characters', function (value) {
+                if (!value) return true; // Let required handle empty case
+                return value.length >= 2;
+            })
+            .test('max-length', 'First name must not exceed 50 characters', function (value) {
+                if (!value) return true;
+                return value.length <= 50;
+            }),
+        lastName: yup
+            .string()
+            .required('Last name is required')
+            .test('min-length', 'Last name must be at least 2 characters', function (value) {
+                if (!value) return true;
+                return value.length >= 2;
+            })
+            .test('max-length', 'Last name must not exceed 50 characters', function (value) {
+                if (!value) return true;
+                return value.length <= 50;
+            }),
+        email: yup
+            .string()
+            .required('Email is required')
+            .test('valid-email', 'Please enter a valid email address', function (value) {
+                if (!value) return true;
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+            }),
+        reviewTitle: yup
+            .string()
+            .required('Review title is required')
+            .test('max-length', 'Review title must not exceed 100 characters', function (value) {
+                if (!value) return true;
+                return value.length <= 100;
+            }),
+        reviewText: yup
+            .string()
+            .required('Review text is required')
+            .test('max-length', 'Review must not exceed 1000 characters', function (value) {
+                if (!value) return true;
+                return value.length <= 1000;
+            }),
+        tripType: yup
+            .string()
+            .required('Please select a trip type')
+            .test('not-select', 'Please select a trip type', function (value) {
+                return value !== 'select';
+            })
+    });
+
+    const handleReviewFieldChange = async (field, value) => {
+        const nextForm = { ...reviewForm, [field]: value };
+        setReviewForm(nextForm);
+
+        if (!reviewErrors[field]) {
+            return;
+        }
+
+        try {
+            await reviewSchema.validateAt(field, nextForm);
+            setReviewErrors((prev) => {
+                const { [field]: removed, ...rest } = prev;
+                return rest;
+            });
+        } catch (validationError) {
+            setReviewErrors((prev) => ({
+                ...prev,
+                [field]: validationError.message
+            }));
+        }
+    };
+
+    const formatLastUpdated = (value) => {
+        if (!value) return 'Unknown';
+        const date = new Date(value);
+        return Number.isNaN(date.getTime())
+            ? 'Unknown'
+            : date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    };
+
+    const handlePolicyReload = () => {
+        if (typeof window !== 'undefined') {
+            window.location.href = window.location.href;
+        }
+    };
+
+    const createReviewPayload = () => {
+        const hotelId = hotelInfo?.hotelId ?? hotelInfo?.id ?? hotelInfo?.HotelID ?? hotelInfo?.hotelID ?? null;
+        const hotelAddress = hotelInfo?.address || hotelInfo?.hotelAddress || '';
+        const thumbUrl = hotelInfo?.mainPhoto || hotelInfo?.thumbnail || hotelInfo?.thumbUrl || defaultImage;
+        const hotelName = hotelInfo?.hotelName || hotelInfo?.name || '';
+        const city = hotelInfo?.city || '';
+        const country = hotelInfo?.country || '';
+
+        return {
+            hotelId,
+            email: reviewForm.email,
+            firstName: reviewForm.firstName,
+            lastName: reviewForm.lastName,
+            isActive: 1,
+            hotelAddress,
+            starRating: overallReviewRating ? overallReviewRating.toString() : '0',
+            thumbUrl,
+            hotelName,
+            city,
+            country
+        };
+    };
+
+    const handleSubmitReview = async (e) => {
+        e.preventDefault();
+
+        try {
+            await reviewSchema.validate(reviewForm, { abortEarly: false });
+
+            const payload = {
+                ...createReviewPayload(),
+                service: categoryRatings.service,
+                rooms: categoryRatings.rooms,
+                location: categoryRatings.location,
+                reviewTitle: reviewForm.reviewTitle,
+                reviewDescription: reviewForm.reviewText,
+                trip: reviewForm.tripType
+            };
+
+            setIsSubmitting(true);
+
+            const data = await saveCustomerReview(payload);
+            toast.success(data.message || 'Review submitted successfully');
+            setReviewErrors({});
+            setReviewForm({
+                firstName: '',
+                lastName: '',
+                email: '',
+                reviewTitle: '',
+                reviewText: '',
+                tripType: 'select'
+            });
+            setOverallReviewRating(0);
+            setCategoryRatings({ service: 0, rooms: 0, location: 0 });
+        } catch (err) {
+            if (err.inner) {
+                const errors = {};
+                err.inner.forEach((error) => {
+                    errors[error.path] = error.message;
+                });
+                setReviewErrors(errors);
+            } else {
+                toast.error(err.message || 'Unable to submit review');
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     // Default image path
     const defaultImage = '/image/property-img.webp';
@@ -54,6 +234,26 @@ export default function HotelDetails({ initialData }) {
             e.target.src = defaultImage;
         }
     };
+
+    const renderReviewStars = (rating, onRate, keyPrefix) => (
+        <div className="write-review-stars" role="radiogroup" aria-label={`${keyPrefix} rating`}>
+            {[1, 2, 3, 4, 5].map((value) => (
+                <button
+                    key={`${keyPrefix}-${value}`}
+                    type="button"
+                    className="write-review-star-button"
+                    onClick={() => onRate(value)}
+                    aria-label={`Rate ${value} star${value > 1 ? 's' : ''}`}
+                    aria-pressed={rating === value}
+                >
+                    <MdOutlineStarPurple500
+                        size={28}
+                        color={value <= rating ? '#f0831e' : '#d8dde7'}
+                    />
+                </button>
+            ))}
+        </div>
+    );
 
     if (error || !hotelData?.hotel) {
         return (
@@ -188,9 +388,17 @@ export default function HotelDetails({ initialData }) {
             <div className="py-2">
                 <div className="container">
                     <div className="d-flex align-items-center small">
-                        <Link href="/" className="text-dark text-decoration-none">Home</Link>
+                        <Link href="/destinations" className="text-dark text-decoration-none">All Countries</Link>
                         <span className="mx-2 text-muted">•</span>
-                        <Link href={`/${hotelInfo.city?.toLowerCase()}`} className="text-dark text-decoration-none">{hotelInfo.city}</Link>
+                        <Link href={`/${hotelInfo.countryUrl?.toLowerCase()}`} className="text-dark text-decoration-none">{hotelInfo.country}</Link>
+                        <span className="mx-2 text-muted">•</span>
+                        {hotelInfo.region && (
+                            <>
+                                <Link href={`${hotelInfo.regionUrl?.toLowerCase()}`} className="text-dark text-decoration-none">{hotelInfo.region}</Link>
+                                <span className="mx-2 text-muted">•</span>
+                            </>
+                        )}
+                        <Link href={`${hotelInfo.cityUrl?.toLowerCase()}`} className="text-dark text-decoration-none">{hotelInfo.city}</Link>
                         <span className="mx-2 text-muted">•</span>
                         <span className="fw-semibold text-decoration-none text-primary">{hotelInfo.hotelName}</span>
                     </div>
@@ -224,9 +432,6 @@ export default function HotelDetails({ initialData }) {
                                 {hotelInfo.hotelType || 'Apartment Hotel'}
                             </span>
                         </div>
-
-
-
                         <div className="d-flex align-items-center mb-2">
                             {/* Address with Map Icon */}
                             <p className="mb-1 me-3">
@@ -560,10 +765,43 @@ export default function HotelDetails({ initialData }) {
                                             </span>
                                         </div>
                                         <div className="row mb-4">
+                                            <span className="fw-bold" style={{ fontSize: '18px' }}>Cancellation & prepayment</span>
+                                            <span className="text-muted">
+                                                {hotelInfo.cancellationPolicy || 'Cancellation and prepayment policies vary by room type. Please check your booking details before finalizing.'}
+                                            </span>
+                                        </div>
+                                        <div className="row mb-4">
+                                            <span className="fw-bold" style={{ fontSize: '18px' }}>Accepted credit cards</span>
+                                            <span className="text-muted">
+                                                {hotelInfo.acceptedCreditCards || 'The hotel reserves the right to pre-authorise credit cards prior to arrival.'}
+                                            </span>
+                                            {/* <div className="d-flex align-items-center flex-wrap gap-3 mt-3">
+                                                <SiAmericanexpress size={36} color="#2e77bc" />
+                                                <SiVisa size={36} color="#142688" />
+                                                <SiMastercard size={36} color="#eb001b" />
+                                                <SiDinersclub size={36} color="#006ba6" />
+                                                <SiJcb size={36} color="#0058a3" />
+                                                <SiWesternunion size={36} color="#ffd300" />
+                                            </div> */}
+                                        </div>
+                                        <div className="row mb-4">
                                             <span className="fw-bold" style={{ fontSize: '18px' }}>The fine print</span>
                                             <span className="text-muted">
                                                 {hotelInfo.hotelPolicy || 'No special policies listed.'}
                                             </span>
+                                        </div>
+                                        <div className="d-flex justify-content-start align-items-center mb-2 gap-4">
+                                            <span className="text-muted small">Last updated: {formatLastUpdated(hotelInfo.lastUpdated)}</span>
+                                            <button
+                                                type="button"
+                                                className="btn btn-link p-0 text-decoration-none"
+                                                style={{ color: '#0077c0' }}
+                                                onMouseOver={(e) => e.currentTarget.style.color = '#d97706'}
+                                                onMouseOut={(e) => e.currentTarget.style.color = '#0077c0'}
+                                                onClick={handlePolicyReload}
+                                            >
+                                                Reload
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -616,90 +854,133 @@ export default function HotelDetails({ initialData }) {
 
                         {activeTab === 'writeReview' && (
                             <div className="tab-content">
-                                <div className="row">
-                                    {/* Left Column - Share Experience */}
-                                    <div className="col-lg-6 mb-4">
-                                        <h5 className="fw-bold mb-3">Share your experience with other travellers</h5>
-                                        <p className="text-muted mb-4">
-                                            Your review helps other travelers make informed decisions about their stay.
-                                        </p>
-                                        <form onSubmit={(e) => { e.preventDefault(); alert('Review submitted!'); }}>
-                                            <div className="row g-3">
-                                                <div className="col-12">
+                                <div className="write-review-layout">
+                                    <div className="write-review-form-column">
+                                        <h5 className="fw-bold mb-4">Share your experience with other travellers.</h5>
+                                        <form onSubmit={handleSubmitReview}>
+                                            <div className="write-review-field-row">
+                                                <label className="write-review-label">Select Rating</label>
+                                                {renderReviewStars(overallReviewRating, setOverallReviewRating, 'overall')}
+                                            </div>
+                                            <div className="write-review-field-row">
+                                                <label htmlFor="reviewFirstName" className="write-review-label">First Name</label>
+                                                <div className="write-review-field-input">
                                                     <input
+                                                        id="reviewFirstName"
                                                         type="text"
-                                                        className="form-control"
-                                                        style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
-                                                        placeholder="Your Name"
-                                                        required
+                                                        className={`form-control write-review-input ${reviewErrors.firstName ? 'is-invalid' : ''}`}
+                                                        value={reviewForm.firstName}
+                                                        onChange={(e) => handleReviewFieldChange('firstName', e.target.value)}
                                                     />
+                                                    {reviewErrors.firstName && <div className="invalid-feedback">{reviewErrors.firstName}</div>}
                                                 </div>
-                                                <div className="col-12">
-                                                    <select className="form-select" style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }} required>
-                                                        <option value="">Select Travel Type</option>
-                                                        <option value="solo">Solo traveler</option>
+                                            </div>
+                                            <div className="write-review-field-row">
+                                                <label htmlFor="reviewLastName" className="write-review-label">Last Name</label>
+                                                <div className="write-review-field-input">
+                                                    <input
+                                                        id="reviewLastName"
+                                                        type="text"
+                                                        className={`form-control write-review-input ${reviewErrors.lastName ? 'is-invalid' : ''}`}
+                                                        value={reviewForm.lastName}
+                                                        onChange={(e) => handleReviewFieldChange('lastName', e.target.value)}
+                                                    />
+                                                    {reviewErrors.lastName && <div className="invalid-feedback">{reviewErrors.lastName}</div>}
+                                                </div>
+                                            </div>
+                                            <div className="write-review-field-row">
+                                                <label htmlFor="reviewEmail" className="write-review-label">Email</label>
+                                                <div className="write-review-field-input">
+                                                    <input
+                                                        id="reviewEmail"
+                                                        type="email"
+                                                        className={`form-control write-review-input ${reviewErrors.email ? 'is-invalid' : ''}`}
+                                                        value={reviewForm.email}
+                                                        onChange={(e) => handleReviewFieldChange('email', e.target.value)}
+                                                    />
+                                                    {reviewErrors.email && <div className="invalid-feedback">{reviewErrors.email}</div>}
+                                                </div>
+                                            </div>
+                                            <div className="write-review-field-row">
+                                                <label htmlFor="reviewTitle" className="write-review-label">Title of your review</label>
+                                                <div className="write-review-field-input">
+                                                    <input
+                                                        id="reviewTitle"
+                                                        type="text"
+                                                        className={`form-control write-review-input ${reviewErrors.reviewTitle ? 'is-invalid' : ''}`}
+                                                        value={reviewForm.reviewTitle}
+                                                        onChange={(e) => handleReviewFieldChange('reviewTitle', e.target.value)}
+                                                    />
+                                                    {reviewErrors.reviewTitle && <div className="invalid-feedback">{reviewErrors.reviewTitle}</div>}
+                                                </div>
+                                            </div>
+                                            <div className="write-review-field-row write-review-field-row-textarea">
+                                                <label htmlFor="reviewText" className="write-review-label">Your review</label>
+                                                <div className="write-review-field-input">
+                                                    <textarea
+                                                        id="reviewText"
+                                                        className={`form-control write-review-input write-review-textarea ${reviewErrors.reviewText ? 'is-invalid' : ''}`}
+                                                        rows="5"
+                                                        value={reviewForm.reviewText}
+                                                        onChange={(e) => handleReviewFieldChange('reviewText', e.target.value)}
+                                                    ></textarea>
+                                                    {reviewErrors.reviewText && <div className="invalid-feedback">{reviewErrors.reviewText}</div>}
+                                                </div>
+                                            </div>
+                                            <div className="write-review-field-row">
+                                                <label htmlFor="reviewTripType" className="write-review-label">What sort of trip was this?</label>
+                                                <div className="write-review-field-input">
+                                                    <select
+                                                        id="reviewTripType"
+                                                        className={`form-select write-review-input write-review-select ${reviewErrors.tripType ? 'is-invalid' : ''}`}
+                                                        value={reviewForm.tripType}
+                                                        onChange={(e) => handleReviewFieldChange('tripType', e.target.value)}
+                                                    >
+                                                        <option value="select">Select</option>
+                                                        <option value="solo">Solo Traveller</option>
                                                         <option value="couple">Couple</option>
                                                         <option value="family">Family</option>
                                                         <option value="business">Business</option>
                                                         <option value="friends">Friends</option>
                                                     </select>
+                                                    {reviewErrors.tripType && <div className="invalid-feedback">{reviewErrors.tripType}</div>}
                                                 </div>
-                                                <div className="col-12">
-                                                    <textarea
-                                                        className="form-control"
-                                                        style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
-                                                        rows="4"
-                                                        placeholder="What did you like most?"
-                                                    ></textarea>
-                                                </div>
-                                                <div className="col-12">
-                                                    <textarea
-                                                        className="form-control"
-                                                        style={{ backgroundColor: '#f3f4f7', borderRadius: '10px', border: 'none' }}
-                                                        rows="4"
-                                                        placeholder="What could be improved?"
-                                                    ></textarea>
-                                                </div>
-                                                <div className="col-12">
-                                                    <button type="submit" className="theme-button-blue px-5 py-2">
-                                                        Submit Review
-                                                    </button>
-                                                </div>
+                                            </div>
+                                            <div className="write-review-submit-wrap">
+                                                <button type="submit" className="theme-button-orange write-review-submit" disabled={isSubmitting}>
+                                                    {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                                                </button>
                                             </div>
                                         </form>
                                     </div>
 
-                                    {/* Right Column - Hotel Ratings */}
-                                    <div className="col-lg-6 mb-4">
-                                        <h5 className="fw-bold mb-3">Hotel Ratings (Click to select a rating)</h5>
-                                        <div className="border rounded p-4">
-                                            <h6 className="fw-bold mb-3">{hotelInfo.hotelName}</h6>
-                                            <div className="text-warning d-flex align-items-center mb-3">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <MdOutlineStarPurple500
-                                                        key={i}
-                                                        size={24}
-                                                        color={i < hotelInfo.stars ? "#f0831e" : "#ddd"}
-                                                    />
-                                                ))}
+                                    <div className="write-review-ratings-column">
+                                        <h5 className="fw-bold mb-4">Hotel Ratings (Click to select a rating)</h5>
+                                        <div className="write-review-rating-list">
+                                            <div className="write-review-rating-item">
+                                                <span className="write-review-rating-label">Service</span>
+                                                {renderReviewStars(
+                                                    categoryRatings.service,
+                                                    (value) => setCategoryRatings((prev) => ({ ...prev, service: value })),
+                                                    'service'
+                                                )}
                                             </div>
-                                            <p className="text-muted small mb-2">
-                                                <FaMapMarkerAlt className="me-1" />
-                                                {hotelInfo.address}, {hotelInfo.city}
-                                            </p>
-                                            <hr />
-                                            <div className="mb-3">
-                                                <div className="d-flex align-items-center mb-1">
-                                                    <span className="fw-bold me-2" style={{ fontSize: '18px' }}>{hotelInfo.reviewScore}</span>
-                                                    <span className="fw-bold">Excellent</span>
-                                                </div>
-                                                <p className="text-muted small mb-0">{hotelInfo.reviewCount} reviews</p>
+                                            <div className="write-review-rating-item">
+                                                <span className="write-review-rating-label">Rooms</span>
+                                                {renderReviewStars(
+                                                    categoryRatings.rooms,
+                                                    (value) => setCategoryRatings((prev) => ({ ...prev, rooms: value })),
+                                                    'rooms'
+                                                )}
                                             </div>
-                                            <hr />
-                                            <p className="text-muted small mb-0">
-                                                <i className="fa-solid fa-tag me-2"></i>
-                                                Best price guarantee
-                                            </p>
+                                            <div className="write-review-rating-item">
+                                                <span className="write-review-rating-label">Location</span>
+                                                {renderReviewStars(
+                                                    categoryRatings.location,
+                                                    (value) => setCategoryRatings((prev) => ({ ...prev, location: value })),
+                                                    'location'
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
