@@ -1,10 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 
-export default function CityHotelList({ hotels = [], hotelRates = [] }) {
+export default function CityHotelList({ hotels, initialRates, content }) {
+    const allHotels = hotels || []; // All hotels loaded from server
+    const allRates = initialRates || [];
+
+    const ITEMS_PER_PAGE = 10;
+    const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE);
+    const [loading, setLoading] = useState(false);
+
+    // Calculate if there are more items to show
+    const hasMore = displayCount < allHotels.length;
+
     const defaultImage = '/image/property-img.webp';
     const maxVisibleFacilities = 3;
     const maxFacilityChars = 60;
@@ -17,7 +27,23 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
         display: 'inline-block',
         flexShrink: 0
     };
-    const [timestamp] = useState(() => Date.now().toString());
+    const [timestamp, setTimestamp] = useState('');
+
+    // Show next batch of hotels that are already loaded
+    const loadMoreHotels = () => {
+        if (loading || !hasMore) return;
+
+        setLoading(true);
+        // Simulate API delay for smooth UX
+        setTimeout(() => {
+            setDisplayCount((prev) => Math.min(prev + ITEMS_PER_PAGE, allHotels.length));
+            setLoading(false);
+        }, 300);
+    };
+
+    useEffect(() => {
+        setTimestamp(Date.now().toString());
+    }, []);
 
     const handleImageError = (e) => {
         if (!e.target.src.includes(defaultImage)) {
@@ -31,8 +57,7 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
         return timestamp ? `${photo}${sep}t=${timestamp}` : photo;
     };
 
-    const getHotelRate = (bookingID) => hotelRates.find((rate) => rate.id === bookingID);
-
+    const getHotelRate = (bookingID) => (allRates || []).find((rate) => rate.id === bookingID);
     const getRatingText = (score) => {
         const value = Number(score);
 
@@ -69,225 +94,254 @@ export default function CityHotelList({ hotels = [], hotelRates = [] }) {
         return visible;
     };
 
-    const formatOriginalPrice = (currentPriceStr, originalPrice) => {
-        if (!currentPriceStr || !originalPrice) return null;
-
-        const originalValue = Number(originalPrice);
-        if (Number.isNaN(originalValue)) return null;
-
-        const match = currentPriceStr.match(/^([A-Z]+\$)/);
-        const formattedNum = originalValue.toLocaleString('en-US', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2
-        });
-
-        if (match) {
-            return `${match[1]}${formattedNum}`;
-        }
-
-        return `$${formattedNum}`;
-    };
-
-    if (!hotels.length) {
+    if (!allHotels.length) {
         return (
             <div className="text-center py-5">
                 <p className="text-muted">No hotels available.</p>
             </div>
         );
     }
+    // Helper to format original price with currency
+    const formatOriginalPrice = (currentPriceStr, originalPrice) => {
+        if (!currentPriceStr || !originalPrice) return null;
+
+        // Extract currency prefix (e.g., "AUD$", "USD$")
+        const match = currentPriceStr.match(/^([A-Z]+\$)/);
+        if (match) {
+            const currency = match[1];
+            const formattedNum = originalPrice.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+            return `${currency}${formattedNum}`;
+        }
+        return `$${originalPrice.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        })}`;
+    };
+
+    // Only display hotels up to displayCount (but all exist in DOM)
+    const visibleHotels = allHotels.slice(0, displayCount);
 
     return (
-        <div className="d-flex flex-column gap-4 w-100">
-            {hotels.map((hotel) => {
-                const rate = getHotelRate(hotel.bookingID);
-                const badges = rate?.badges || [];
-                const breakfastBadge = badges.find((badge) => badge.toLowerCase().includes('breakfast'));
-                const otherBadges = badges.filter((badge) => !badge.toLowerCase().includes('breakfast'));
-                const facilities = hotel.hotelFacilities
-                    ? hotel.hotelFacilities.split('|').map((facility) => facility.trim()).filter(Boolean)
-                    : [];
-                const visibleFacilities = getVisibleFacilities(facilities);
-                const hiddenFacilitiesCount = Math.max(facilities.length - visibleFacilities.length, 0);
+        <div className="container">
+            {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
+            <div className="d-flex flex-column gap-4">
+                {visibleHotels.map((hotel) => {
+                    const rate = getHotelRate(hotel.bookingID);
+                    const badges = rate?.badges || [];
+                    const breakfastBadge = badges.find((badge) => badge.toLowerCase().includes('breakfast'));
+                    const otherBadges = badges.filter((badge) => !badge.toLowerCase().includes('breakfast'));
+                    const facilities = hotel.hotelFacilities
+                        ? hotel.hotelFacilities
+                              .split('|')
+                              .map((facility) => facility.trim())
+                              .filter(Boolean)
+                        : [];
+                    const visibleFacilities = getVisibleFacilities(facilities);
+                    const hiddenFacilitiesCount = Math.max(facilities.length - visibleFacilities.length, 0);
 
-                return (
-                    <div
-                        key={hotel.hotelId}
-                        className="card border-0 rounded-4 mb-4 p-4"
-                        style={{
-                            boxShadow: '0 4px 18px rgba(0,0,0,0.08)'
-                        }}
-                    >
-                        <div className="row g-3">
-                            <div className="col-md-4">
-                                <Link href={`${hotel.url}`} target="_blank" className="text-decoration-none">
-                                    <div className="position-relative">
-                                        {breakfastBadge ? (
-                                            <span
-                                                className="position-absolute text-white px-3 py-1"
-                                                style={{
-                                                    top: '12px',
-                                                    left: '12px',
-                                                    background: '#28a745',
-                                                    borderRadius: '20px',
-                                                    fontSize: '12px',
-                                                    zIndex: 2
-                                                }}
-                                            >
-                                                {breakfastBadge}
-                                            </span>
-                                        ) : null}
+                    return (
+                        <div
+                            key={hotel.hotelId}
+                            className="card border-0 rounded-4 mb-4 p-4"
+                            style={{
+                                boxShadow: '0 4px 18px rgba(0,0,0,0.08)'
+                            }}
+                        >
+                            <div className="row g-3">
+                                <div className="col-md-4">
+                                    <Link href={`${hotel.url}`} target="_blank" className="text-decoration-none">
+                                        <div className="position-relative">
+                                            {breakfastBadge ? (
+                                                <span
+                                                    className="position-absolute text-white px-3 py-1"
+                                                    style={{
+                                                        top: '12px',
+                                                        left: '12px',
+                                                        background: '#28a745',
+                                                        borderRadius: '20px',
+                                                        fontSize: '12px',
+                                                        zIndex: 2
+                                                    }}
+                                                >
+                                                    {breakfastBadge}
+                                                </span>
+                                            ) : null}
 
-                                        <img
-                                            src={getImageUrl(hotel?.photo)}
-                                            className="d-block w-100 rounded-4"
-                                            style={{ height: '240px', objectFit: 'cover' }}
-                                            alt={hotel.hotelName}
-                                            onError={handleImageError}
-                                        />
-                                    </div>
-                                </Link>
-                            </div>
-
-                            <div className="col-md-8">
-                                <div
-                                    className="text-decoration-none"
-                                    onClick={() => (window.location.href = hotel.urlName)}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <div className="d-flex align-items-center justify-content-between mb-2">
-                                        <div className="d-flex align-items-center">
-                                            <h4 className="property-grid-title font-size-18 my-auto me-3">{hotel.hotelName}</h4>
-                                            <div className="text-warning">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <MdOutlineStarPurple500 key={i} size={18} color={i < hotel.stars ? '#f0831e' : '#ddd'} />
-                                                ))}
-                                            </div>
+                                            <img
+                                                src={getImageUrl(hotel?.photo)}
+                                                className="d-block w-100 rounded-4"
+                                                style={{ height: '240px', objectFit: 'cover' }}
+                                                alt={hotel.hotelName}
+                                                onError={handleImageError}
+                                            />
                                         </div>
+                                    </Link>
+                                </div>
 
-                                        <div className="d-flex align-items-center">
-                                            <div className="rating-box d-flex me-2">
-                                                <span className="m-auto">{hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}</span>
-                                            </div>
-
-                                            <div className="my-auto">
-                                                <p className="small-para-14-px font-weight-bold mb-1">
-                                                    {hotel.ratingText || getRatingText(hotel.reviewScore)}
-                                                </p>
-
-                                                <p className="para-12px mb-0">
-                                                    {hotel.reviewCount
-                                                        ? `${hotel.reviewCount.toLocaleString()} verified reviews`
-                                                        : '0 verified reviews'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex align-items-center gap-1 mb-2 flex-nowrap" style={{ overflow: 'hidden' }}>
-                                        {facilities.length > 0 && (
-                                            <>
-                                                {visibleFacilities.map((facility, idx) => (
-                                                    <span
-                                                        key={idx}
-                                                        className="badge bg-light text-dark border me-1 mb-1"
-                                                        style={facilityBadgeStyle}
-                                                        title={facility}
-                                                    >
-                                                        {facility}
-                                                    </span>
-                                                ))}
-                                                {hiddenFacilitiesCount > 0 && (
-                                                    <span className="rating text-nowrap" style={{ fontSize: '11px', flexShrink: 0 }}>
-                                                        +{hiddenFacilitiesCount} more
-                                                    </span>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-
-                                    <p className="small-para-14-px text-black mb-2">
-                                        <i className="fa-solid fa-map me-1"></i>
-                                        {hotel.address || 'Address not available'}
-                                    </p>
-
-                                    {hotel.distanceFromAirport && (
-                                        <p className="small-para-14-px text-black mb-3">
-                                            <i className="fa-solid fa-plane-up me-1"></i>
-                                            {hotel.distanceFromAirport}
-                                        </p>
-                                    )}
-
-                                    <div className="d-flex align-items-center justify-content-between mb-2">
-                                        <div>
-                                            <p className="para text-primary mb-0">
-                                                <i className="fa-solid fa-circle-info me-2"></i>
-                                                Book Now Pay Later!
-                                            </p>
-
-                                            {otherBadges.length > 0 ? (
-                                                <div className="mb-2">
-                                                    {otherBadges.map((badge, idx) => (
-                                                        <p key={idx} className="para-12px mb-1 text-theme-green">
-                                                            <span className="me-2 text-theme-green" style={{ fontSize: '13px' }}>
-                                                                <i className="fa-solid fa-check me-1"></i>
-                                                                {badge}
-                                                            </span>
-                                                        </p>
+                                <div className="col-md-8">
+                                    <div
+                                        className="text-decoration-none"
+                                        onClick={() => (window.location.href = hotel.urlName)}
+                                        style={{ cursor: 'pointer' }}
+                                    >
+                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                            <div className="d-flex align-items-center">
+                                                <h4 className="property-grid-title font-size-18 my-auto me-3">{hotel.hotelName}</h4>
+                                                <div className="text-warning">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <MdOutlineStarPurple500
+                                                            key={i}
+                                                            size={18}
+                                                            color={i < hotel.stars ? '#f0831e' : '#ddd'}
+                                                        />
                                                     ))}
                                                 </div>
-                                            ) : null}
-                                        </div>
+                                            </div>
 
-                                        {rate?.price ? (
-                                            <div className="price-block p-1 rounded mb-3">
-                                                <p className="para-12px text-muted mb-1 text-end">1 night, 2 adults</p>
-                                                {(() => {
-                                                    const dealInfo = rate?.deal_info || {};
-                                                    const originalPrice = dealInfo?.public_price;
-                                                    const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
+                                            <div className="d-flex align-items-center">
+                                                <div className="rating-box d-flex me-2">
+                                                    <span className="m-auto">{hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}</span>
+                                                </div>
 
-                                                    if (formattedOriginal && Number(originalPrice) > Number(rate.price.total)) {
-                                                        return (
-                                                            <p
-                                                                className="para-12px mb-0 text-end"
-                                                                style={{ color: 'red', textDecoration: 'line-through' }}
-                                                            >
-                                                                {formattedOriginal}
-                                                            </p>
-                                                        );
-                                                    }
+                                                <div className="my-auto">
+                                                    <p className="small-para-14-px font-weight-bold mb-1">
+                                                        {hotel.ratingText || getRatingText(hotel.reviewScore)}
+                                                    </p>
 
-                                                    return null;
-                                                })()}
-                                                <div className="d-flex align-items-baseline text-end">
-                                                    <span className="text-theme-orange fw-bold" style={{ fontSize: '28px' }}>
-                                                        {rate.price.book}
-                                                    </span>
+                                                    <p className="para-12px mb-0">
+                                                        {hotel.reviewCount
+                                                            ? `${hotel.reviewCount.toLocaleString()} verified reviews`
+                                                            : '0 verified reviews'}
+                                                    </p>
                                                 </div>
                                             </div>
-                                        ) : null}
-                                    </div>
+                                        </div>
+                                        <div className="d-flex align-items-center gap-1 mb-2 flex-nowrap" style={{ overflow: 'hidden' }}>
+                                            {facilities.length > 0 && (
+                                                <>
+                                                    {visibleFacilities.map((facility, idx) => (
+                                                        <span
+                                                            key={idx}
+                                                            className="badge bg-light text-dark border me-1 mb-1"
+                                                            style={facilityBadgeStyle}
+                                                            title={facility}
+                                                        >
+                                                            {facility}
+                                                        </span>
+                                                    ))}
+                                                    {hiddenFacilitiesCount > 0 && (
+                                                        <span className="rating text-nowrap" style={{ fontSize: '11px', flexShrink: 0 }}>
+                                                            +{hiddenFacilitiesCount} more
+                                                        </span>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
 
-                                    <div className="row">
-                                        <div className="col-12 col-md-3 d-flex ms-auto">
-                                            <Link
-                                                className="theme-button-blue rounded-4 w-100 d-block text-center p-2"
-                                                href={`${hotel.url}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                See Availability
-                                                <i className="fa-solid fa-arrow-right ms-2"></i>
-                                            </Link>
+                                        <p className="small-para-14-px text-black mb-2">
+                                            <i className="fa-solid fa-map me-1"></i>
+                                            {hotel.address || 'Address not available'}
+                                        </p>
+
+                                        {hotel.distanceFromAirport && (
+                                            <p className="small-para-14-px text-black mb-3">
+                                                <i className="fa-solid fa-plane-up me-1"></i>
+                                                {hotel.distanceFromAirport}
+                                            </p>
+                                        )}
+
+                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                            <div>
+                                                <p className="para text-primary mb-0">
+                                                    <i className="fa-solid fa-circle-info me-2"></i>
+                                                    Book Now Pay Later!
+                                                </p>
+
+                                                {otherBadges.length > 0 ? (
+                                                    <div className="mb-2">
+                                                        {otherBadges.map((badge, idx) => (
+                                                            <p key={idx} className="para-12px mb-1 text-theme-green">
+                                                                <span className="me-2 text-theme-green" style={{ fontSize: '13px' }}>
+                                                                    <i className="fa-solid fa-check me-1"></i>
+                                                                    {badge}
+                                                                </span>
+                                                            </p>
+                                                        ))}
+                                                    </div>
+                                                ) : null}
+                                            </div>
+                                            {(() => {
+                                                const rate = getHotelRate(hotel.bookingID);
+                                                if (rate?.price) {
+                                                    const dealInfo = rate?.deal_info || {};
+                                                    const originalPrice = dealInfo?.public_price;
+                                                    const discountPercentage = dealInfo?.discount_percentage;
+                                                    const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
+                                                    return (
+                                                        <div className="price-block p-1 rounded mb-3">
+                                                            <p className="para-12px text-muted mb-1 text-end">1 night, 2 adults</p>
+                                                            {/* {discountPercentage > 0 && (
+                                                                            <div className="text-end mb-1">
+                                                                                <span className="badge bg-danger" style={{ fontSize: '11px' }}>
+                                                                                    {discountPercentage}% OFF
+                                                                                </span>
+                                                                            </div>
+                                                                        )} */}
+                                                            {formattedOriginal && originalPrice > rate.price.total && (
+                                                                <p
+                                                                    className="para-12px mb-0 text-end"
+                                                                    style={{ color: 'red', textDecoration: 'line-through' }}
+                                                                >
+                                                                    {formattedOriginal}
+                                                                </p>
+                                                            )}
+                                                            <div className="d-flex align-items-baseline justify-content-end">
+                                                                <span className="text-theme-orange fw-bold" style={{ fontSize: '24px' }}>
+                                                                    {rate.price.book}
+                                                                </span>
+                                                            </div>
+                                                            {/* <p className="para-12px text-muted mb-0">
+                                                                            + {rate.price.total} taxes and charges
+                                                                        </p> */}
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            })()}
+                                        </div>
+
+                                        <div className="row">
+                                            <div className="col-12 col-md-3 d-flex ms-auto">
+                                                <Link
+                                                    className="theme-button-blue rounded-4 w-100 d-block text-center p-2"
+                                                    href={`${hotel.url}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    See Availability
+                                                    <i className="fa-solid fa-arrow-right ms-2"></i>
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                );
-            })}
+                    );
+                })}
+            </div>
+
+            {hasMore && (
+                <div className="text-center mt-4">
+                    <button onClick={loadMoreHotels} disabled={loading} className="theme-button-orange rounded-1 px-5 py-2">
+                        {loading ? 'Loading...' : 'Load More'}
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

@@ -105,7 +105,24 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
     };
 
     const formattedBrand = brand.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+    const formatOriginalPrice = (currentPriceStr, originalPrice) => {
+        if (!currentPriceStr || !originalPrice) return null;
 
+        // Extract currency prefix (e.g., "AUD$", "USD$")
+        const match = currentPriceStr.match(/^([A-Z]+\$)/);
+        if (match) {
+            const currency = match[1];
+            const formattedNum = originalPrice.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+            return `${currency}${formattedNum}`;
+        }
+        return `$${originalPrice.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        })}`;
+    };
     return (
         <div className="container">
             <div className="d-flex flex-column gap-4">
@@ -123,7 +140,10 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                             const breakfastBadge = badges.find((badge) => badge.toLowerCase().includes('breakfast'));
                             const otherBadges = badges.filter((badge) => !badge.toLowerCase().includes('breakfast'));
                             const facilities = hotel.hotelFacilities
-                                ? hotel.hotelFacilities.split('|').map((facility) => facility.trim()).filter(Boolean)
+                                ? hotel.hotelFacilities
+                                      .split('|')
+                                      .map((facility) => facility.trim())
+                                      .filter(Boolean)
                                 : [];
                             const visibleFacilities = getVisibleFacilities(facilities);
                             const hiddenFacilitiesCount = Math.max(facilities.length - visibleFacilities.length, 0);
@@ -207,22 +227,28 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                     </div>
                                                 </div>
 
-                                                <div className="d-flex align-items-center gap-1 mb-2 flex-nowrap" style={{ overflow: 'hidden' }}>
+                                                <div
+                                                    className="d-flex align-items-center gap-1 mb-2 flex-nowrap"
+                                                    style={{ overflow: 'hidden' }}
+                                                >
                                                     {facilities.length > 0 && (
                                                         <>
                                                             {visibleFacilities.map((facility, idx) => (
-                                                                    <span
-                                                                        key={idx}
-                                                                        className="badge bg-light text-dark border me-1 mb-1"
-                                                                        style={facilityBadgeStyle}
-                                                                        title={facility}
-                                                                    >
-                                                                        {facility}
-                                                                    </span>
+                                                                <span
+                                                                    key={idx}
+                                                                    className="badge bg-light text-dark border me-1 mb-1"
+                                                                    style={facilityBadgeStyle}
+                                                                    title={facility}
+                                                                >
+                                                                    {facility}
+                                                                </span>
                                                             ))}
 
                                                             {hiddenFacilitiesCount > 0 && (
-                                                                <span className="rating text-nowrap" style={{ fontSize: '11px', flexShrink: 0 }}>
+                                                                <span
+                                                                    className="rating text-nowrap"
+                                                                    style={{ fontSize: '11px', flexShrink: 0 }}
+                                                                >
                                                                     +{hiddenFacilitiesCount} more
                                                                 </span>
                                                             )}
@@ -259,16 +285,47 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                         ) : null}
                                                     </div>
 
-                                                    {rate?.price ? (
-                                                        <div className="price-block p-1 rounded mb-3">
-                                                            <p className="para-12px text-muted mb-1 text-end">1 night, 2 adults</p>
-                                                            <div className="d-flex align-items-baseline text-end">
-                                                                <span className="text-theme-orange fw-bold" style={{ fontSize: '28px' }}>
-                                                                    {rate.price.book}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    ) : null}
+                                                    {(() => {
+                                                        const rate = getHotelRate(hotel.bookingID);
+                                                        if (rate?.price) {
+                                                            const dealInfo = rate?.deal_info || {};
+                                                            const originalPrice = dealInfo?.public_price;
+                                                            const discountPercentage = dealInfo?.discount_percentage;
+                                                            const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
+                                                            return (
+                                                                <div className="price-block p-1 rounded mb-3">
+                                                                    <p className="para-12px text-muted mb-1 text-end">1 night, 2 adults</p>
+                                                                    {/* {discountPercentage > 0 && (
+                                                                            <div className="text-end mb-1">
+                                                                                <span className="badge bg-danger" style={{ fontSize: '11px' }}>
+                                                                                    {discountPercentage}% OFF
+                                                                                </span>
+                                                                            </div>
+                                                                        )} */}
+                                                                    {formattedOriginal && originalPrice > rate.price.total && (
+                                                                        <p
+                                                                            className="para-12px mb-0 text-end"
+                                                                            style={{ color: 'red', textDecoration: 'line-through' }}
+                                                                        >
+                                                                            {formattedOriginal}
+                                                                        </p>
+                                                                    )}
+                                                                    <div className="d-flex align-items-baseline justify-content-end">
+                                                                        <span
+                                                                            className="text-theme-orange fw-bold"
+                                                                            style={{ fontSize: '24px' }}
+                                                                        >
+                                                                            {rate.price.book}
+                                                                        </span>
+                                                                    </div>
+                                                                    {/* <p className="para-12px text-muted mb-0">
+                                                                            + {rate.price.total} taxes and charges
+                                                                        </p> */}
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return null;
+                                                    })()}
                                                 </div>
 
                                                 <div className="row">

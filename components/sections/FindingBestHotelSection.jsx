@@ -1,5 +1,5 @@
 import React from 'react';
-// FindingBestHotelSection    
+
 function FindingBestHotelSection() {
     return (
         <section className="pt-5">

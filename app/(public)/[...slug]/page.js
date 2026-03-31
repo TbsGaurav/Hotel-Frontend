@@ -47,7 +47,7 @@ export default async function DynamicPage({ params }) {
     }
 
     if (slugArray.length === 1 && data.entityType === 'City') {
-        return <CityDetails city={slugArray[0]} cityId={data.entityID} params={params} />;
+        return <CityDetails city={slugArray[0]} params={params} />;
     }
 
     if (slugArray.length === 2 && data.entityType === 'CityBrand') {
