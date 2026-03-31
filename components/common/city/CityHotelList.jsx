@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 
-export default function CityHotelList({ hotels, initialRates }) {
+export default function CityHotelList({ hotels, initialRates, content }) {
     const allHotels = hotels || []; // All hotels loaded from server
     const allRates = initialRates || [];
 
@@ -126,6 +126,7 @@ export default function CityHotelList({ hotels, initialRates }) {
 
     return (
         <div className="container">
+            {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
             <div className="d-flex flex-column gap-4">
                 {visibleHotels.map((hotel) => {
                     const rate = getHotelRate(hotel.bookingID);

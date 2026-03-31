@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import CityHotelList from './CityHotelList';
@@ -6,10 +5,9 @@ import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { getCityHotels, getCitySidebar } from '@/lib/api/public/cityapi';
 import { getHotelRates } from '@/lib/api/public/hotelapi';
 
-
 function toSlug(value = '') {
     if (!value) return '';
- 
+
     return value.toString().trim().toLowerCase().replace(/\s+/g, '-');
 }
 function getFirstDefined(...values) {
@@ -43,7 +41,7 @@ export default async function CityDetails({ params }) {
     let hotelRates = [];
     let totalCount = 0;
     let sidebarData = {};
-
+    let content = '';
     if (citySlug) {
         try {
             let allHotels = [];
@@ -55,6 +53,7 @@ export default async function CityDetails({ params }) {
 
                 if (pageData?.length > 0) {
                     allHotels = allHotels.concat(pageData);
+                    content = allHotels[0]?.content || '';
 
                     // Get totalCount from first request
                     if (pageNumber === 1) {
@@ -93,9 +92,10 @@ export default async function CityDetails({ params }) {
             // Fetch sidebar data
             if (hotels.length > 0) {
                 const firstHotel = hotels[0];
+
                 const cityId = getFirstDefined(firstHotel?.cityId, firstHotel?.cityID, firstHotel?.CityID);
                 const regionId = getFirstDefined(firstHotel?.regionId, firstHotel?.regionID, firstHotel?.RegionID);
-                
+
                 if (cityId && regionId) {
                     const sidebar = await getCitySidebar(cityId, regionId);
                     sidebarData = sidebar || {};
@@ -159,6 +159,7 @@ export default async function CityDetails({ params }) {
                             initialRates={hotelRates}
                             hasMoreInitial={hasMoreInitial}
                             totalCount={totalCount}
+                            content={content}
                         />
                     </div>
 
