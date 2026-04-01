@@ -5,6 +5,7 @@ import CityHotelList from './CityHotelList';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { getCityHotels, getCitySidebar } from '@/lib/api/public/cityapi';
 
+// Utility functions
 function toSlug(value = '') {
     if (!value) return '';
 
