@@ -1,12 +1,13 @@
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
-import RegionFilterSidebar from './RegionFilterSidebar';
+import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { formatCountryName } from '@/lib/utils';
 import Link from 'next/link';
-import Dropdown from '@/components/ui/Dropdown';
 import RegionCard from '@/components/ui/RegionCard';
 import { getCitiesByRegion } from '@/lib/api/public/countryapi';
+import { getSidebarData } from '@/lib/api/sidebarapi';
+import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
 
-export default async function RegionDetails({ params }) {
+export default async function RegionDetails({ params, regionId: regionIdFromRoute }) {
     const resolvedParams = await params;
 
     const slug = resolvedParams?.slug || [];
@@ -16,12 +17,10 @@ export default async function RegionDetails({ params }) {
     const regionName = formatCountryName(regionSlug);
     const response = await getCitiesByRegion(countrySlug, regionSlug);
     const cities = response?.data || [];
+    const regionId = regionIdFromRoute || response?.entityID || response?.data?.entityID || cities?.regionId || cities?.regionID || cities?.RegionID || null;
     const description = cities.regionContent;
-    const cityItems = cities.map((city) => ({
-        label: city.cityName,
-        count: city.hotelCount,
-        href: `/${city.cityName.toLowerCase().replace(/\s+/g, '-')}`
-    }));
+    const sidebarData = regionId ? await getSidebarData({ cityId: 0, regionId }) : {};
+    const sidebarSections = buildSidebarSections(sidebarData, { contextName: regionName });
     return (
         <>
             <CountryHeroSection />
@@ -63,13 +62,14 @@ export default async function RegionDetails({ params }) {
                     </div>
                 </section>
                 <div className="row">
-                    <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />{' '}
                     <hr className="border-secondary opacity-10 my-5" />
                     <div>
                         <h2 className="text-center fw-bold mb-4">Featured Properties in {regionName}</h2>
                     </div>
                     <div className="col-lg-3">
-                        <RegionFilterSidebar />
+                        <div className="position-sticky" style={{ top: '16px' }}>
+                            <ListingSidebar title="Filters" sections={sidebarSections} />
+                        </div>
                     </div>
                     <div className="col-lg-9">
                         <RegionCard />
