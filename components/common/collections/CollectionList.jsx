@@ -197,8 +197,7 @@ export default function CollectionList({ initialCollections, initialCountries })
         }
     };
     const renderActionButtons = (item) => {
-        const isViewEnabled = item.status === 'Published' || (item.status === 'Draft' && item.hotelCount > 0);
-
+        const isViewEnabled = item.status === 'Published';
         return (
             <>
                 <button
@@ -222,7 +221,7 @@ export default function CollectionList({ initialCollections, initialCountries })
                 <button
                     className="btn btn-sm btn-outline-primary"
                     disabled={!isViewEnabled}
-                    title={!isViewEnabled ? 'No hotels available for this collection' : ''}
+                    title={!isViewEnabled ? 'Only published collections can be viewed' : ''}
                     onClick={() => {
                         if (!isViewEnabled) return;
 

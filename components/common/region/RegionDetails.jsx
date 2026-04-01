@@ -16,7 +16,8 @@ export default async function RegionDetails({ params }) {
     const regionName = formatCountryName(regionSlug);
     const response = await getCitiesByRegion(countrySlug, regionSlug);
     const cities = response?.data || [];
-    const description = cities.regionContent;
+    const description = cities?.regionContent;
+    // console.log('Cities in region:', cities);
     const cityItems = cities.map((city) => ({
         label: city.cityName,
         count: city.hotelCount,
