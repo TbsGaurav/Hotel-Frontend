@@ -104,12 +104,7 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
         return 'Pleasant';
     };
 
-    const getHotelFacilitiesText = (hotel) =>
-        hotel?.hotelFacilities ??
-        hotel?.hotelFacility ??
-        hotel?.facilities ??
-        hotel?.facility ??
-        '';
+    const getHotelFacilitiesText = (hotel) => hotel?.hotelFacilities ?? hotel?.hotelFacility ?? hotel?.facilities ?? hotel?.facility ?? '';
 
     const formatOriginalPrice = (currentPriceStr, originalPrice) => {
         if (!currentPriceStr || !originalPrice) return null;
@@ -156,14 +151,10 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                     const badges = rate?.badges || [];
                     const hotelFacilitiesText = getHotelFacilitiesText(hotel);
                     const imageBadges = badges.filter(
-                        (badge) =>
-                            !badge.toLowerCase().includes('free cancellation') &&
-                            !badge.toLowerCase().includes('pay at')
+                        (badge) => !badge.toLowerCase().includes('free cancellation') && !badge.toLowerCase().includes('pay at')
                     );
                     const infoBadges = badges.filter(
-                        (badge) =>
-                            badge.toLowerCase().includes('free cancellation') ||
-                            badge.toLowerCase().includes('pay at')
+                        (badge) => badge.toLowerCase().includes('free cancellation') || badge.toLowerCase().includes('pay at')
                     );
                     return (
                         <div
@@ -182,7 +173,7 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                                                             key={idx}
                                                             className="position-absolute text-white px-3 py-1"
                                                             style={{
-                                                                top: idx === 0 ? '12px' : `${12 + (idx * 30)}px`,
+                                                                top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
                                                                 left: '12px',
                                                                 background: '#28a745',
                                                                 borderRadius: '20px',
@@ -231,9 +222,7 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
 
                                             <div className="d-flex align-items-center">
                                                 <div className="rating-box d-flex me-2">
-                                                    <span className="m-auto">
-                                                        {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
-                                                    </span>
+                                                    <span className="m-auto">{hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}</span>
                                                 </div>
 
                                                 <div className="my-auto">
@@ -284,13 +273,19 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                                                         .split('|')
                                                         .map((facility) => facility.trim())
                                                         .filter(Boolean).length > 5 && (
-                                                            <Link href={`${hotel.urlName}`} className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
-                                                                +{hotelFacilitiesText
-                                                                    .split('|')
-                                                                    .map((facility) => facility.trim())
-                                                                    .filter(Boolean).length - 5} more
-                                                            </Link>
-                                                        )}
+                                                        <Link
+                                                            href={`${hotel.urlName}`}
+                                                            className="rating"
+                                                            style={{ fontSize: '11px', lineHeight: '1.2' }}
+                                                        >
+                                                            +
+                                                            {hotelFacilitiesText
+                                                                .split('|')
+                                                                .map((facility) => facility.trim())
+                                                                .filter(Boolean).length - 5}{' '}
+                                                            more
+                                                        </Link>
+                                                    )}
                                                 </>
                                             )}
                                         </div>
@@ -376,7 +371,10 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     See Availability
-                                                    <i className="fa-solid fa-arrow-right"></i>
+                                                    <i
+                                                        className="fa-solid fa-arrow-right ms-1"
+                                                        style={{ fontSize: '11px',transform: 'translateY(1px)' }}
+                                                    ></i>
                                                 </Link>
                                             </div>
                                         </div>
@@ -390,8 +388,8 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
 
             {hasMore && (
                 <div className="text-center py-4">
-                    <button onClick={loadMoreHotels} disabled={loading} className="theme-button-orange rounded-1 px-5 py-2">
-                        {loading ? 'Loading...' : 'Load More'}
+                    <button onClick={loadMoreHotels} disabled={loading} className="theme-button-blue rounded-1 px-5 py-2">
+                        {loading ? 'Loading...' : 'Click to Load More'}
                     </button>
                 </div>
             )}

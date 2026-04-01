@@ -42,7 +42,7 @@ export default async function CountryDetails({ country }) {
         .map((item) => ({
             label: item.itemName,
             count: item.hotelCount,
-            href: item.urlName
+            href: `/${country}${item.urlName}`
         }));
 
     const hotelTypes = data?.hotelData

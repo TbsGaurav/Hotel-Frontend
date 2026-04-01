@@ -27,7 +27,7 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
             const json = await fetchClient(endpoint);
 
             const cityData = json?.data?.countryData?.filter((item) => Number(item.type) === ITEM_TYPE.City) || [];
-            
+
             setCities(cityData);
         } catch (error) {
             console.error('Failed to fetch cities:', error);
@@ -94,15 +94,11 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                                 {cities.map((city) => (
                                     <div key={city.id} className="col-6 col-md-4 col-lg-3 mb-2">
                                         {city.urlName ? (
-                                            <Link
-                                                href={`${city.urlName}`}
-                                                className="text-decoration-none text-dark fw-semibold"
-                                                prefetch={false}
-                                            >
+                                            <Link href={`${city.urlName}`} className="text-decoration-none text-dark" prefetch={false}>
                                                 • {city.itemName}
                                             </Link>
                                         ) : (
-                                            <span className="text-dark fw-semibold">• {city.itemName}</span>
+                                            <span className="text-dark ">• {city.itemName}</span>
                                         )}
                                     </div>
                                 ))}

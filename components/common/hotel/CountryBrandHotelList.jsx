@@ -411,8 +411,8 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
             </div>
             {hasMore && (
                 <div className="text-center py-4">
-                    <button onClick={loadMoreHotels} disabled={loadingMore} className="theme-button-orange rounded-1 px-5 py-2">
-                        {loadingMore ? 'Loading...' : 'Load More'}
+                    <button onClick={loadMoreHotels} disabled={loadingMore} className="theme-button-blue rounded-1 px-5 py-2">
+                        {loadingMore ? 'Loading...' : 'Click to Load More'}
                     </button>
                 </div>
             )}
