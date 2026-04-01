@@ -79,7 +79,7 @@ export default async function CountryBrandDetails({ params }) {
         console.error('Error initializing country brand details:', err);
     }
 
-    const hasMore = hotels.length < totalCount || hotels.length !== 0 && hotels.length % PAGE_SIZE === 0;
+    const hasMore = hotels.length < totalCount || (hotels.length !== 0 && hotels.length % PAGE_SIZE === 0);
 
     return (
         <>
@@ -91,13 +91,13 @@ export default async function CountryBrandDetails({ params }) {
                             All Brands
                         </Link>
 
-                        <span className="mx-2 text-muted">â€¢</span>
+                        <span className="mx-2 text-muted">&bull;</span>
 
                         <Link href={`/brand/${brandName}`} className="text-dark text-decoration-none text-capitalize">
                             {formattedBrand}
                         </Link>
 
-                        <span className="mx-2 text-muted">â€¢</span>
+                        <span className="mx-2 text-muted">&bull;</span>
 
                         <Link href={`/${countryName}/${brandName}`} className=" text-decoration-none text-primary text-capitalize">
                             {countryName}

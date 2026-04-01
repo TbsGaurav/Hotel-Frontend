@@ -196,10 +196,65 @@ export default function CollectionList({ initialCollections, initialCountries })
             setDeleteLoading(false);
         }
     };
+    const renderActionButtons = (item) => {
+        const isViewEnabled = item.status === 'Published' || (item.status === 'Draft' && item.hotelCount > 0);
+
+        return (
+            <>
+                <button
+                    className="btn btn-sm btn-outline-primary"
+                    onClick={() => router.push(`${ADMIN_ROUTES.collections}/${item.collectionId}`)}
+                >
+                    Edit
+                </button>
+
+                <button className="btn btn-sm btn-outline-primary" onClick={() => handleClone(item.collectionId)}>
+                    Clone
+                </button>
+
+                <button
+                    className="btn btn-sm btn-outline-primary"
+                    onClick={() => router.push(`${ADMIN_ROUTES.collections}/${item.collectionId}/preview`)}
+                >
+                    Preview
+                </button>
+
+                <button
+                    className="btn btn-sm btn-outline-primary"
+                    disabled={!isViewEnabled}
+                    title={!isViewEnabled ? 'No hotels available for this collection' : ''}
+                    onClick={() => {
+                        if (!isViewEnabled) return;
+
+                        const publicPath = getPublicCollectionPath(item.slug);
+
+                        if (!publicPath) {
+                            toast.error('Collection slug not available');
+                            return;
+                        }
+
+                        router.push(publicPath);
+                    }}
+                >
+                    View Live
+                </button>
+
+                <button
+                    className="btn btn-sm btn-outline-primary"
+                    onClick={() => {
+                        setCollectionToDelete(item.collectionId);
+                        setShowDeleteModal(true);
+                    }}
+                >
+                    Delete
+                </button>
+            </>
+        );
+    };
 
     return (
         <div className="card shadow-sm mb-5">
-            <div className="card-header d-flex justify-content-between align-items-center">
+            <div className="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                 <h5 className="mb-0  fw-semibold">Hotel Collections</h5>
                 <button className="theme-button-orange rounded-1" onClick={() => router.push(ADMIN_ROUTES.createCollection)}>
                     Create New Collection
@@ -386,122 +441,125 @@ export default function CollectionList({ initialCollections, initialCountries })
                     </div>
                 </div>
 
-                {/* TABLE (same UI as yours) */}
-                <table className="table table-hover align-middle mb-0">
-                    <thead className="table-light text-secondary small text-uppercase">
-                        <tr>
-                            <th>Collection Name</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Hotels</th>
-                            <th>Publish Date</th>
-                            <th>URL</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            [...Array(5)].map((_, rowIndex) => (
-                                <tr key={rowIndex}>
-                                    <td>
-                                        <div className="skeleton-name"></div>
-                                    </td>
-                                    <td>
-                                        <div className="skeleton-small"></div>
-                                    </td>
-                                    <td>
-                                        <div className="skeleton-badge"></div>
-                                    </td>
-                                    <td>
-                                        <div className="skeleton-number"></div>
-                                    </td>
-                                    <td>
-                                        <div className="skeleton-small"></div>
-                                    </td>
-                                    <td>
-                                        <div className="skeleton-actions"></div>
+                <div className="d-none d-md-block">
+                    <table className="table table-hover align-middle mb-0">
+                        <thead className="table-light text-secondary small text-uppercase">
+                            <tr>
+                                <th>Collection Name</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Hotels</th>
+                                <th>Publish Date</th>
+                                <th>URL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {loading ? (
+                                [...Array(5)].map((_, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                        <td>
+                                            <div className="skeleton-name"></div>
+                                        </td>
+                                        <td>
+                                            <div className="skeleton-small"></div>
+                                        </td>
+                                        <td>
+                                            <div className="skeleton-badge"></div>
+                                        </td>
+                                        <td>
+                                            <div className="skeleton-number"></div>
+                                        </td>
+                                        <td>
+                                            <div className="skeleton-small"></div>
+                                        </td>
+                                        <td>
+                                            <div className="skeleton-actions"></div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : collections.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-4 text-muted">
+                                        No collections found
                                     </td>
                                 </tr>
-                            ))
-                        ) : collections.length === 0 ? (
-                            <tr>
-                                <td colSpan="6" className="text-center py-4 text-muted">
-                                    No collections found
-                                </td>
-                            </tr>
-                        ) : (
-                            collections?.map((item) => (
-                                <tr key={item.collectionId}>
-                                    <td>
-                                        <span className="fw-semibold text-dark">{item.name}</span>
-                                    </td>
-                                    <td>{item.type}</td>
-                                    <td>
+                            ) : (
+                                collections?.map((item) => (
+                                    <tr key={item.collectionId}>
+                                        <td>
+                                            <span className="fw-semibold text-dark">{item.name}</span>
+                                        </td>
+                                        <td>{item.type}</td>
+                                        <td>
+                                            <span
+                                                className={`badge rounded-pill ${item.status === 'Published' ? 'bg-success' : 'bg-secondary'}`}
+                                            >
+                                                {item.status}
+                                            </span>{' '}
+                                        </td>
+                                        <td>{item.hotelCount}</td>
+                                        <td>{item.publishedDate ? new Date(item.publishedDate).toLocaleDateString('en-GB') : '-'}</td>
+                                        <td>
+                                            <div className="d-flex flex-wrap gap-2">{renderActionButtons(item)}</div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="d-md-none">
+                    {loading ? (
+                        <div className="d-flex flex-column gap-3">
+                            {[...Array(5)].map((_, index) => (
+                                <div key={index} className="border rounded-3 p-3">
+                                    <div className="skeleton-name mb-3"></div>
+                                    <div className="skeleton-small mb-2"></div>
+                                    <div className="skeleton-badge mb-2"></div>
+                                    <div className="skeleton-number"></div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : collections.length === 0 ? (
+                        <div className="text-center py-4 text-muted border rounded-3">No collections found</div>
+                    ) : (
+                        <div className="d-flex flex-column gap-3">
+                            {collections.map((item) => (
+                                <div key={item.collectionId} className="border rounded-3 p-3 shadow-sm">
+                                    <div className="d-flex justify-content-between align-items-start gap-3 mb-2">
+                                        <h6 className="mb-0 fw-semibold">{item.name}</h6>
                                         <span
                                             className={`badge rounded-pill ${item.status === 'Published' ? 'bg-success' : 'bg-secondary'}`}
                                         >
                                             {item.status}
-                                        </span>{' '}
-                                    </td>
-                                    <td>{item.hotelCount}</td>
-                                    <td>{item.publishedDate ? new Date(item.publishedDate).toLocaleDateString('en-GB') : '-'}</td>
-                                    <td>
-                                        <div className="d-flex gap-2">
-                                            <button
-                                                className="btn btn-sm btn-outline-primary me-2"
-                                                onClick={() => router.push(`${ADMIN_ROUTES.collections}/${item.collectionId}`)}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                className="btn btn-sm btn-outline-primary me-2"
-                                                onClick={() => handleClone(item.collectionId)}
-                                            >
-                                                Clone
-                                            </button>
-                                            <button
-                                                className="btn btn-sm btn-outline-primary me-2"
-                                                onClick={() => router.push(`${ADMIN_ROUTES.collections}/${item.collectionId}/preview`)}
-                                            >
-                                                Preview
-                                            </button>
-                                            <button
-                                                className="btn btn-sm btn-outline-primary me-2"
-                                                onClick={() => {
-                                                    const publicPath = getPublicCollectionPath(item.slug);
+                                        </span>
+                                    </div>
 
-                                                    if (!publicPath) {
-                                                        toast.error('Collection slug not available');
-                                                        return;
-                                                    }
+                                    <div className="small text-muted mb-1">
+                                        <strong className="text-dark">Type:</strong> {item.type || '-'}
+                                    </div>
+                                    <div className="small text-muted mb-1">
+                                        <strong className="text-dark">Hotels:</strong> {item.hotelCount}
+                                    </div>
+                                    <div className="small text-muted mb-3">
+                                        <strong className="text-dark">Publish Date:</strong>{' '}
+                                        {item.publishedDate ? new Date(item.publishedDate).toLocaleDateString('en-GB') : '-'}
+                                    </div>
 
-                                                    router.push(publicPath);
-                                                }}
-                                            >
-                                                View Live
-                                            </button>
-                                            <button
-                                                className="btn btn-sm btn-outline-primary"
-                                                onClick={() => {
-                                                    setCollectionToDelete(item.collectionId);
-                                                    setShowDeleteModal(true);
-                                                }}
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                                    <div className="d-grid gap-2">{renderActionButtons(item)}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
-                <div className="d-flex justify-content-between align-items-center mt-3 ">
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mt-3">
                     <div>
                         Showing page {pageNumber} of {totalPages}
                     </div>
 
-                    <div className="d-flex gap-2 justify-content-end mt-3">
+                    <div className="d-flex gap-2 justify-content-end w-100 w-md-auto">
                         <button
                             className="theme-button-orange rounded-1"
                             disabled={pageNumber === 1}
