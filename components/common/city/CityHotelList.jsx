@@ -141,6 +141,11 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
         );
     }
 
+    const openMap = (lat, lng) => {
+        if (!lat || !lng) return;
+        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, "_blank");
+    };
+
     return (
         <div className="container">
             {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
@@ -290,8 +295,15 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                                             )}
                                         </div>
 
-                                        <p className="small-para-14-px text-black mb-2">
-                                            <FaMapMarkerAlt className="me-1 text-muted" />
+                                        <p
+                                            className="small-para-14-px mb-2 hotel-address-link"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openMap(hotel.latitude, hotel.longitude);
+                                            }}
+                                        >
+                                            <FaMapMarkerAlt className="me-1 hotel-address-icon" />
                                             {hotel.hotelAddress || hotel.address || 'Address not available'}
                                         </p>
 

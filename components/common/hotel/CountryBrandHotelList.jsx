@@ -159,6 +159,11 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
         window.location.reload();
     };
 
+    const openMap = (lat, lng) => {
+        if (!lat || !lng) return;
+        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, "_blank");
+    };
+
     return (
         <div className="container">
             <div className="d-flex flex-column gap-4">
@@ -185,9 +190,9 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                             );
                             const facilities = hotel.hotelFacilities
                                 ? hotel.hotelFacilities
-                                      .split('|')
-                                      .map((facility) => facility.trim())
-                                      .filter(Boolean)
+                                    .split('|')
+                                    .map((facility) => facility.trim())
+                                    .filter(Boolean)
                                 : [];
 
                             return (
@@ -283,24 +288,24 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                                 .split('|')
                                                                 .slice(0, 5)
                                                                 .map((facility, idx) => (
-                                                                <span
-                                                                    key={idx}
-                                                                    className="badge bg-light text-dark border me-1 mb-1"
-                                                                    style={{
-                                                                        fontSize: '11px',
-                                                                        lineHeight: '1.2',
-                                                                        whiteSpace: 'nowrap',
-                                                                        maxWidth: '135px',
-                                                                        overflow: 'hidden',
-                                                                        textOverflow: 'ellipsis',
-                                                                        display: 'inline-block',
-                                                                        padding: '4px 8px'
-                                                                    }}
-                                                                    title={facility.trim()}
-                                                                >
-                                                                    {facility.trim()}
-                                                                </span>
-                                                            ))}
+                                                                    <span
+                                                                        key={idx}
+                                                                        className="badge bg-light text-dark border me-1 mb-1"
+                                                                        style={{
+                                                                            fontSize: '11px',
+                                                                            lineHeight: '1.2',
+                                                                            whiteSpace: 'nowrap',
+                                                                            maxWidth: '135px',
+                                                                            overflow: 'hidden',
+                                                                            textOverflow: 'ellipsis',
+                                                                            display: 'inline-block',
+                                                                            padding: '4px 8px'
+                                                                        }}
+                                                                        title={facility.trim()}
+                                                                    >
+                                                                        {facility.trim()}
+                                                                    </span>
+                                                                ))}
                                                             {hotel.hotelFacilities.split('|').length > 5 && (
                                                                 <Link href={`${hotel.urlName}`} className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
                                                                     +{hotel.hotelFacilities.split('|').length - 5} more
@@ -310,10 +315,18 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                     )}
                                                 </div>
 
-                                                <p className="small-para-14-px text-black mb-2">
-                                                    <FaMapMarkerAlt className="me-1 text-muted" />
+                                                <p
+                                                    className="small-para-14-px mb-2 hotel-address-link"
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openMap(hotel.latitude, hotel.longitude);
+                                                    }}
+                                                >
+                                                    <FaMapMarkerAlt className="me-1 hotel-address-icon" />
                                                     {hotel.hotelAddress || hotel.address || 'Address not available'}
                                                 </p>
+
 
                                                 {hotel.distanceFromAirport && (
                                                     <p className="small-para-14-px text-black mb-3">

@@ -20,6 +20,11 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const [hasMore, setHasMore] = useState((hotels?.length || 0) < (totalCount || 0));
     const [currency, setCurrency] = useState(null);
 
+    const openMap = (lat, lng) => {
+        if (!lat || !lng) return;
+        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, "_blank");
+    };
+
     useEffect(() => {
 
         async function initCurrency() {
@@ -377,9 +382,16 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         )}
                                                     </div>
 
-                                                    <p className="small-para-14-px text-black mb-2">
-                                                        <FaMapMarkerAlt className="me-1 text-muted" />
-                                                        {hotel.hotelAddress || 'Address not available'}
+                                                    <p
+                                                        className="small-para-14-px mb-2 hotel-address-link"
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            openMap(hotel.latitude, hotel.longitude);
+                                                        }}
+                                                    >
+                                                        <FaMapMarkerAlt className="me-1 hotel-address-icon" />
+                                                        {hotel.hotelAddress || hotel.address || 'Address not available'}
                                                     </p>
 
                                                     {hotel.distanceFromAirport && (

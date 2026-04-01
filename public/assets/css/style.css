@@ -2162,3 +2162,18 @@ a.text-sky-blue:hover {
 .city-hover:hover {
     color: #0077c0 !important;
 }
+
+.hotel-address-link {
+    color: #000;
+    transition: color 0.2s ease;
+}
+.hotel-address-icon {
+    color: #6c757d;
+    transition: color 0.2s ease;
+}
+.hotel-address-link:hover {
+    color: #f0831e;
+}
+.hotel-address-link:hover .hotel-address-icon {
+    color: #f0831e;
+}
