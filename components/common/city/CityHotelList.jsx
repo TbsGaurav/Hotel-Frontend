@@ -109,9 +109,9 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
     const formatOriginalPrice = (currentPriceStr, originalPrice) => {
         if (!currentPriceStr || !originalPrice) return null;
 
-        const match = currentPriceStr.match(/^([A-Z]+\$)/);
+        const match = currentPriceStr.match(/^[^\d-]+/u);
         if (match) {
-            const detectedCurrency = match[1];
+            const detectedCurrency = match[0].trim();
             const formattedNum = originalPrice.toLocaleString('en-US', {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 2
