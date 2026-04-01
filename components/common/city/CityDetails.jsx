@@ -136,7 +136,6 @@ export default async function CityDetails({ params }) {
             for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
                 const pageData = await getCityHotels(citySlug, pageNumber, PAGE_SIZE);
                 const nextHotels = pageData || [];
-
                 if (!nextHotels.length) {
                     break;
                 }
@@ -163,6 +162,12 @@ export default async function CityDetails({ params }) {
             console.error('Error fetching hotels:', error);
         }
     }
+
+    const firstHotel = hotels[0] || {};
+    const countryName = getFirstDefined(firstHotel?.countryName, firstHotel?.CountryName);
+    const countryUrl = getFirstDefined(firstHotel?.countryUrl, firstHotel?.CountryUrl);
+    const regionName = getFirstDefined(firstHotel?.regionName, firstHotel?.RegionName);
+    const regionUrl = getFirstDefined(firstHotel?.regionUrl, firstHotel?.RegionUrl);
 
     // Build sidebar sections
     const sidebarSections = [
@@ -235,7 +240,22 @@ export default async function CityDetails({ params }) {
                         <Link href="/destinations" className="text-dark text-decoration-none">
                             All Countries
                         </Link>
-
+                        {countryName && countryUrl && (
+                            <>
+                                <span className="mx-2 text-muted">•</span>
+                                <Link className="text-primary" href={`/${toSlug(countryUrl)}`}>
+                                    {countryName}
+                                </Link>
+                            </>
+                        )}
+                        {regionName && regionUrl && (
+                            <>
+                                <span className="mx-2 text-muted">•</span>
+                                <Link className="text-primary" href={`${toSlug(regionUrl)}`}>
+                                    {regionName}
+                                </Link>
+                            </>
+                        )}
                         <span className="mx-2 text-muted">•</span>
 
                         <Link className="text-primary" href={`/${citySlugPath}`}>

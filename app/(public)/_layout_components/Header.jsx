@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useRef, useState, useEffect } from 'react';
 import { currencies } from '@/lib/constants/currencies';
+import { getUserCurrency } from '@/lib/getUserCurrency';
 
 export default function Header() {
     const currencyDropdownRef = useRef(null);
@@ -15,14 +16,26 @@ export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
-        setIsMounted(true);
+        let cancelled = false;
 
-        // load bootstrap only on client
-        import('bootstrap/dist/js/bootstrap.bundle.min.js');
+        async function initHeader() {
+            setIsMounted(true);
 
-        const cur = localStorage.getItem("currency");
-        if (cur) setCurrency(cur);
+            // load bootstrap only on client
+            import('bootstrap/dist/js/bootstrap.bundle.min.js');
 
+            const cur = await getUserCurrency();
+
+            if (!cancelled && cur) {
+                setCurrency(cur);
+            }
+        }
+
+        initHeader();
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     useEffect(() => {
