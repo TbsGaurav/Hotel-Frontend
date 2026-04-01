@@ -95,10 +95,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const formatOriginalPrice = (currentPriceStr, originalPrice) => {
         if (!currentPriceStr || !originalPrice) return null;
 
-        // Extract currency prefix (e.g., "AUD$", "USD$")
-        const match = currentPriceStr.match(/^([A-Z]+\$)/);
+        const match = currentPriceStr.match(/^[^\d-]+/u);
         if (match) {
-            const currency = match[1];
+            const currency = match[0].trim();
             const formattedNum = originalPrice.toLocaleString('en-US', {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 2
