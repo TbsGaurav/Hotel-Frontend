@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import { getCountryBrandHotels } from '@/lib/api/public/brandapi';
 import CountryBrandHotelList from '../hotel/CountryBrandHotelList';
@@ -31,18 +30,14 @@ function toSlug(value = '') {
         .replace(/\s+/g, '-');
 }
 
-function getCountryBrandPageCookieName(countrySlug = '', brandSlug = '') {
-    const combined = `${toSlug(countrySlug)}_${toSlug(brandSlug)}`;
-    return `country_brand_page_${combined.replace(/[^a-z0-9_-]/g, '_')}`;
-}
-
 function parsePageNumber(value) {
     const page = Number(value);
     return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
-export default async function CountryBrandDetails({ params }) {
+export default async function CountryBrandDetails({ params, searchParams }) {
     const { slug: slugData } = await params;
+    const resolvedSearchParams = await searchParams;
     const slug = slugData || [];
 
     if (!slug || slug.length < 2) {
@@ -55,10 +50,7 @@ export default async function CountryBrandDetails({ params }) {
     const brandName = brandSlug;
     const formattedBrand = formatBrand(brandName);
     const fullSlug = `/${countryName}/${brandName}`;
-
-    const cookieStore = await cookies();
-    const pageCookieName = getCountryBrandPageCookieName(countrySlug, brandName);
-    const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
+    const currentPage = parsePageNumber(resolvedSearchParams?.page);
 
     let hotels = [];
     let totalCount = 0;
@@ -116,7 +108,6 @@ export default async function CountryBrandDetails({ params }) {
                         brand={brandName}
                         currentPage={currentPage}
                         hasMore={hasMore}
-                        pageCookieName={pageCookieName}
                     />
                 ) : (
                     <div className="text-center py-5">

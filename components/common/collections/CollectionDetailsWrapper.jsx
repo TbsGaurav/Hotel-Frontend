@@ -3,13 +3,6 @@ import { getHotelsByCollection } from '@/lib/api/public/hotelapi';
 import CollectionDetails from './CollectionDetails';
 import { notFound } from 'next/navigation';
 
-const extractHotelArray = (payload) => {
-    if (Array.isArray(payload)) return payload;
-    if (Array.isArray(payload?.data)) return payload.data;
-    if (Array.isArray(payload?.hotels)) return payload.hotels;
-    return [];
-};
-
 export default async function CollectionDetailsWrapper({ slug, collectionData, entityId }) {
     // Use collection data from resolveSlug if available, otherwise fetch it
     let collection = collectionData;
