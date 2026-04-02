@@ -4,10 +4,20 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
+import { getCityHotels } from '@/lib/api/public/cityapi';
 import { getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 
-export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1, pageSize = 10, citySlugPath, pageCookieName, content }) {
+export default function CityHotelList({
+    hotels,
+    totalCount = 0,
+    currentPage = 1,
+    pageSize = 10,
+    citySlugPath,
+    content,
+    citySlug,
+    regionHotelsSource = [],
+}) {
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(hotels || []);
     const [allRates, setAllRates] = useState([]);
@@ -19,7 +29,11 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
     const defaultImage = '/image/property-img.webp';
 
     useEffect(() => {
-        setTimestamp(Date.now().toString());
+        const timer = window.setTimeout(() => {
+            setTimestamp(Date.now().toString());
+        }, 0);
+
+        return () => window.clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -129,8 +143,49 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
         if (!hasMore) return;
 
         setLoading(true);
-        document.cookie = `${pageCookieName}=${page + 1}; path=/; SameSite=Lax`;
-        window.location.reload();
+
+        if (Array.isArray(regionHotelsSource) && regionHotelsSource.length > 0) {
+            const currentCount = allHotels.length;
+            const nextHotels = regionHotelsSource.slice(currentCount, currentCount + pageSize);
+
+            if (!nextHotels.length) {
+                setHasMore(false);
+                setLoading(false);
+                return;
+            }
+
+            setAllHotels((prev) => [...prev, ...nextHotels]);
+            setPage((prev) => prev + 1);
+            setHasMore(currentCount + nextHotels.length < regionHotelsSource.length);
+            setLoading(false);
+            return;
+        }
+
+        if (!citySlug) {
+            setHasMore(false);
+            setLoading(false);
+            return;
+        }
+
+        const nextPage = page + 1;
+
+        getCityHotels(citySlug, nextPage, pageSize)
+            .then((nextHotels) => {
+                if (!nextHotels.length) {
+                    setHasMore(false);
+                    return;
+                }
+
+                setAllHotels((prev) => [...prev, ...nextHotels]);
+                setPage(nextPage);
+                setHasMore(nextHotels.length === pageSize);
+            })
+            .catch((error) => {
+                console.error('Error loading more hotels:', error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     };
 
     if (!allHotels.length) {
@@ -222,6 +277,7 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                                                             color={i < hotel.stars ? '#f0831e' : '#ddd'}
                                                         />
                                                     ))}
+                        
                                                 </div>
                                             </div>
 
@@ -237,7 +293,7 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
 
                                                     <p className="para-12px mb-0">
                                                         {hotel.reviewCount
-                                                            ? `${hotel.reviewCount.toLocaleString()} verified reviews`
+                                                            ? `${hotel.reviewCount.toLocaleString('en-US')} verified reviews`
                                                             : '0 verified reviews'}
                                                     </p>
                                                 </div>

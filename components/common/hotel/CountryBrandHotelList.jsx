@@ -20,7 +20,11 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
     const normalizedBrand = String(brand || '').replace(/^\/+|\/+$/g, '');
 
     useEffect(() => {
-        setTimestamp(Date.now().toString());
+        const timer = window.setTimeout(() => {
+            setTimestamp(Date.now().toString());
+        }, 0);
+
+        return () => window.clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -278,7 +282,7 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
 
                                                             <p className="para-12px mb-0">
                                                                 {hotel.reviewCount
-                                                                    ? `${hotel.reviewCount.toLocaleString()} verified reviews`
+                                                                    ? `${hotel.reviewCount.toLocaleString('en-US')} verified reviews`
                                                                     : '0 verified reviews'}
                                                             </p>
                                                         </div>

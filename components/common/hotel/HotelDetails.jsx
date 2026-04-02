@@ -116,7 +116,7 @@ export default function HotelDetails({ initialData }) {
         const date = new Date(value);
         return Number.isNaN(date.getTime())
             ? 'Unknown'
-            : date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+            : date.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
     };
 
     const handlePolicyReload = () => {

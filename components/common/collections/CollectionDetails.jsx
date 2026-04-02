@@ -338,11 +338,11 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                     {hotel.ratingText}
                                                                 </p>
 
-                                                                <p className="para-12px mb-0">
-                                                                    {hotel.reviewCount
-                                                                        ? `${hotel.reviewCount.toLocaleString()} verified reviews`
+                                                                    <p className="para-12px mb-0">
+                                                                        {hotel.reviewCount
+                                                                        ? `${hotel.reviewCount.toLocaleString('en-US')} verified reviews`
                                                                         : '0 verified reviews'}
-                                                                </p>
+                                                                    </p>
                                                             </div>
                                                         </div>
                                                     </div>

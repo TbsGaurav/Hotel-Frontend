@@ -1,44 +1,94 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
-import RegionFilterSidebar from './RegionFilterSidebar';
 import Dropdown from '@/components/ui/Dropdown';
 import { getCitiesByRegion } from '@/lib/api/public/countryapi';
+import { getCityHotels } from '@/lib/api/public/cityapi';
+import { getSidebarData } from '@/lib/api/sidebarapi';
 import { getRegionHotels } from '@/lib/api/public/regionapi';
 import CityHotelList from '../city/CityHotelList';
 import { formatCountryName } from '@/lib/utils';
-
+import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
+import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
+ 
 function toSlug(value = '') {
     return value.toLowerCase().replace(/\s+/g, '-');
 }
-
+ 
 function getRegionPageCookieName(countrySlug = '', regionSlug = '') {
     return `region_page_${toSlug(countrySlug)}_${toSlug(regionSlug)}`;
 }
-
+ 
 function parsePageNumber(value) {
     const page = Number(value);
     return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
+function getCitySlug(city = {}) {
+    return String(city.cityUrlName || city.urlName || city.slug || city.cityName || '')
+        .trim()
+        .replace(/^\/+/, '');
+}
+
+async function fetchAllHotelsFromCities(cities = [], hotelsPerPage = pageSize) {
+    const orderedCities = [...cities].sort((a, b) =>
+        String(a?.cityName || '').localeCompare(String(b?.cityName || ''), undefined, {
+            sensitivity: 'base'
+        })
+    );
+
+    const cityHotelBatches = await Promise.all(
+        orderedCities.map(async (city) => {
+            const citySlug = getCitySlug(city);
+
+            if (!citySlug) {
+                return [];
+            }
+
+            const cityHotels = [];
+            let cityPage = 1;
+
+            while (true) {
+                const hotelsForPage = await getCityHotels(citySlug, cityPage, hotelsPerPage);
+
+                if (!hotelsForPage.length) {
+                    break;
+                }
+
+                cityHotels.push(...hotelsForPage);
+
+                if (hotelsForPage.length < hotelsPerPage) {
+                    break;
+                }
+
+                cityPage += 1;
+            }
+
+            return cityHotels;
+        })
+    );
+
+    return cityHotelBatches.flat();
+}
+
 const pageSize = 10;
 
-export default async function RegionDetails({ params }) {
+export default async function RegionDetails({ params, regionId }) {
     const { slug } = await params;
-
+ 
     const countrySlug = slug?.[0] || '';
     const regionSlug = slug?.[1] || '';
     const countryName = formatCountryName(countrySlug);
     const regionName = formatCountryName(regionSlug);
-
+ 
     const urlName = `/${countrySlug}/${regionSlug}`;
-
+ 
     // Sidebar Cities
     const response = await getCitiesByRegion(countrySlug, regionSlug);
     const regionData = response?.data;
     const cities = Array.isArray(regionData) ? regionData : regionData?.cities || regionData?.regionData || [];
     const description = regionData?.regionContent || regionData?.content || cities?.[0]?.regionContent || '';
-
+ 
     const cityItems = cities.map((city) => ({
         label: city.cityName,
         count: city.hotelCount,
@@ -47,12 +97,29 @@ export default async function RegionDetails({ params }) {
             .replace(/\s+/g, '-')}`
     }));
 
+    let sidebarData = {};
+    if (regionId) {
+        try {
+            sidebarData = await getSidebarData({ regionId });
+        } catch (error) {
+            console.error('Error fetching region sidebar data:', error);
+        }
+    }
+
+    const sidebarSections = buildSidebarSections(sidebarData, {
+        contextName: regionName,
+        propertyTypeHeader: regionName ? `${regionName} Hotels` : 'Property Type'
+    });
+ 
     const cookieStore = await cookies();
     const pageCookieName = getRegionPageCookieName(countrySlug, regionSlug);
     const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
+    const requestedCount = currentPage * pageSize;
 
     let hotels = [];
-    let totalCount = 0;
+    let totalCount = cities.reduce((sum, city) => sum + Number(city?.hotelCount || 0), 0);
+    let fallbackRegionHotels = [];
+
     try {
         for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
             const res = await getRegionHotels(urlName, pageNumber, pageSize);
@@ -64,14 +131,20 @@ export default async function RegionDetails({ params }) {
             hotels = hotels.concat(nextHotels);
             totalCount = res?.totalCount || 0;
         }
+
+        if (!hotels.length && cities.length > 0) {
+            fallbackRegionHotels = await fetchAllHotelsFromCities(cities, pageSize);
+            totalCount = fallbackRegionHotels.length;
+            hotels = fallbackRegionHotels.slice(0, requestedCount);
+        }
     } catch (err) {
         console.error('Region hotels error:', err);
     }
-
+ 
     return (
         <>
             <CountryHeroSection />
-
+ 
             {/* Breadcrumb */}
             <div className="py-2">
                 <div className="container">
@@ -88,7 +161,7 @@ export default async function RegionDetails({ params }) {
                     </div>
                 </div>
             </div>
-
+ 
             <section className="container py-4">
                 <div className="row">
                     <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
@@ -96,9 +169,9 @@ export default async function RegionDetails({ params }) {
                     <hr className="my-5" />
 
                     <div className="col-lg-3">
-                        <RegionFilterSidebar />
+                        <ListingSidebar title="Filters" sections={sidebarSections} />
                     </div>
-
+ 
                     <div className="col-lg-9">
                         <h2 className="text-center fw-bold mb-4">Featured Properties in {regionName}</h2>
                         <CityHotelList
@@ -106,7 +179,7 @@ export default async function RegionDetails({ params }) {
                             totalCount={totalCount}
                             currentPage={currentPage}
                             pageSize={pageSize}
-                            pageCookieName={pageCookieName}
+                            regionHotelsSource={fallbackRegionHotels}
                             content={description}
                         />
                     </div>
@@ -115,3 +188,4 @@ export default async function RegionDetails({ params }) {
         </>
     );
 }
+ 

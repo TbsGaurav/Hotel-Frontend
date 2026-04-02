@@ -10,11 +10,11 @@ import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { globalSearchapi } from '@/lib/api/public/globalsearchapi';
 
 function CountryHeroSection({ }) {
-    const [checkInDate, setCheckInDate] = useState(new Date());
-    const [checkOutDate, setCheckOutDate] = useState(new Date());
+    const [checkInDate, setCheckInDate] = useState(null);
+    const [checkOutDate, setCheckOutDate] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [tempCheckInDate, setTempCheckInDate] = useState(new Date());
-    const [tempCheckOutDate, setTempCheckOutDate] = useState(new Date());
+    const [tempCheckInDate, setTempCheckInDate] = useState(null);
+    const [tempCheckOutDate, setTempCheckOutDate] = useState(null);
     const [guests, setGuests] = useState(2);
     const [rooms, setRooms] = useState(1);
     const [tempGuests, setTempGuests] = useState(2);
@@ -28,6 +28,14 @@ function CountryHeroSection({ }) {
     const [loading, setLoading] = useState(false);
     const debounceRef = useRef(null);
     const isSelectingRef = useRef(false);
+
+    useEffect(() => {
+        const now = new Date();
+        setCheckInDate(now);
+        setCheckOutDate(now);
+        setTempCheckInDate(now);
+        setTempCheckOutDate(now);
+    }, []);
 
     useEffect(() => {
         if (isSelectingRef.current) {
@@ -90,8 +98,9 @@ function CountryHeroSection({ }) {
     };
 
     const handleOpenDatePicker = () => {
-        setTempCheckInDate(checkInDate);
-        setTempCheckOutDate(checkOutDate);
+        const now = new Date();
+        setTempCheckInDate(checkInDate || now);
+        setTempCheckOutDate(checkOutDate || now);
         setShowDatePicker(true);
     };
 
