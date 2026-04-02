@@ -19,8 +19,8 @@ function normalizeHref(item, label) {
 function LinkRow({ label, href }) {
     return (
         <li className="sidebar-filter-item">
-            <a href={href} className="text-decoration-none sidebar-filter-link">
-                {label}
+            <a href={href} className="sidebar-filter-link d-flex align-items-start gap-2">
+                <span className="sidebar-filter-text">{label}</span>
             </a>
         </li>
     );
@@ -127,7 +127,7 @@ function SectionBlock({ title, items = [], maxVisible = 5, defaultOpen = true, e
 export default function ListingSidebar({
     title = 'Filters',
     topContent = null,
-    sections = [],
+    sections = []
 }) {
     return (
         <aside

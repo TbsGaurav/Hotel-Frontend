@@ -7,7 +7,7 @@ import { FaMapMarkerAlt } from 'react-icons/fa';
 import { getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 
-export default function CountryBrandHotelList({ hotels = [], brand, hotelRates = [], currentPage = 1, hasMore = false, pageCookieName = '' }) {
+export default function CountryBrandHotelList({ hotels = [], brand, hotelRates = [], currentPage = 1, hasMore = false, pageCookieName = '', pageIntentCookieName = '' }) {
     const defaultImage = '/image/property-img.webp';
     const [loadingMore, setLoadingMore] = useState(false);
     const [timestamp, setTimestamp] = useState('');
@@ -16,7 +16,11 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
     const normalizedBrand = String(brand || '').replace(/^\/+|\/+$/g, '');
 
     useEffect(() => {
-        setTimestamp(Date.now().toString());
+        const timer = window.setTimeout(() => {
+            setTimestamp(Date.now().toString());
+        }, 0);
+
+        return () => window.clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -151,10 +155,11 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
     };
 
     const loadMoreHotels = () => {
-        if (!hasMore || !pageCookieName) return;
+        if (!hasMore || !pageCookieName || !pageIntentCookieName) return;
 
         setLoadingMore(true);
         document.cookie = `${pageCookieName}=${currentPage + 1}; path=/; SameSite=Lax`;
+        document.cookie = `${pageIntentCookieName}=1; path=/; SameSite=Lax; Max-Age=20`;
         window.location.reload();
     };
 
@@ -273,7 +278,7 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
 
                                                             <p className="para-12px mb-0">
                                                                 {hotel.reviewCount
-                                                                    ? `${hotel.reviewCount.toLocaleString()} verified reviews`
+                                                                    ? `${hotel.reviewCount.toLocaleString('en-US')} verified reviews`
                                                                     : '0 verified reviews'}
                                                             </p>
                                                         </div>

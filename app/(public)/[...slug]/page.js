@@ -28,7 +28,7 @@ export default async function DynamicPage({ params }) {
 
     // REGION PAGE
     if (slugArray.length === 2 && data.entityType === 'Region') {
-        return <RegionDetails country={slugArray[0]} region={slugArray[1]} params={params} />;
+        return <RegionDetails country={slugArray[0]} region={slugArray[1]} regionId={data.entityID} params={params} />;
     }
 
     //COUNTRYBRAND Page

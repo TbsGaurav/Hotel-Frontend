@@ -10,11 +10,11 @@ import { useRouter } from 'next/navigation';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 
 export default function HeroSection() {
-    const [checkInDate, setCheckInDate] = useState(new Date());
-    const [checkOutDate, setCheckOutDate] = useState(new Date());
+    const [checkInDate, setCheckInDate] = useState(null);
+    const [checkOutDate, setCheckOutDate] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [tempCheckInDate, setTempCheckInDate] = useState(new Date());
-    const [tempCheckOutDate, setTempCheckOutDate] = useState(new Date());
+    const [tempCheckInDate, setTempCheckInDate] = useState(null);
+    const [tempCheckOutDate, setTempCheckOutDate] = useState(null);
     const [guests, setGuests] = useState(2);
     const [rooms, setRooms] = useState(1);
     const [tempGuests, setTempGuests] = useState(2);
@@ -28,6 +28,14 @@ export default function HeroSection() {
     const datePickerRef = useRef(null);
     const debounceRef = useRef(null);
     const router = useRouter();
+
+    useEffect(() => {
+        const now = new Date();
+        setCheckInDate(now);
+        setCheckOutDate(now);
+        setTempCheckInDate(now);
+        setTempCheckOutDate(now);
+    }, []);
 
     // Handle click outside to close
     useEffect(() => {
@@ -104,8 +112,9 @@ export default function HeroSection() {
     };
 
     const handleOpenDatePicker = () => {
-        setTempCheckInDate(checkInDate);
-        setTempCheckOutDate(checkOutDate);
+        const now = new Date();
+        setTempCheckInDate(checkInDate || now);
+        setTempCheckOutDate(checkOutDate || now);
         setShowDatePicker(true);
     };
 

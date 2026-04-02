@@ -4,10 +4,22 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
+import { getCityHotels } from '@/lib/api/public/cityapi';
 import { getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 
-export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1, pageSize = 10, citySlugPath, pageCookieName, content }) {
+export default function CityHotelList({
+    hotels,
+    totalCount = 0,
+    currentPage = 1,
+    pageSize = 10,
+    citySlugPath,
+    content,
+    citySlug,
+    regionHotelsSource = [],
+    pageIntentCookieName = '',
+    pageCookieName
+}) {
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(hotels || []);
     const [allRates, setAllRates] = useState([]);
@@ -19,7 +31,11 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
     const defaultImage = '/image/property-img.webp';
 
     useEffect(() => {
-        setTimestamp(Date.now().toString());
+        const timer = window.setTimeout(() => {
+            setTimestamp(Date.now().toString());
+        }, 0);
+
+        return () => window.clearTimeout(timer);
     }, []);
 
     useEffect(() => {
@@ -30,6 +46,12 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
 
         initCurrency();
     }, []);
+
+    useEffect(() => {
+        setAllHotels(hotels || []);
+        setPage(currentPage || 1);
+        setHasMore((hotels?.length || 0) < (totalCount || 0) || (hotels?.length || 0) === pageSize);
+    }, [hotels, totalCount, currentPage, pageSize]);
 
     const getBookingId = (hotel) => hotel?.bookingId ?? hotel?.bookingID ?? hotel?.BookingId ?? null;
 
@@ -129,8 +151,48 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
         if (!hasMore) return;
 
         setLoading(true);
-        document.cookie = `${pageCookieName}=${page + 1}; path=/; SameSite=Lax`;
-        window.location.reload();
+
+        const nextPage = page + 1;
+
+        if (pageIntentCookieName) {
+            if (!pageCookieName) {
+                setLoading(false);
+                return;
+            }
+
+            document.cookie = `${pageCookieName}=${nextPage}; path=/; SameSite=Lax`;
+            document.cookie = `${pageIntentCookieName}=1; path=/; SameSite=Lax; Max-Age=20`;
+            window.location.reload();
+            return;
+        }
+
+        if (!citySlug) {
+            setHasMore(false);
+            setLoading(false);
+            return;
+        }
+
+        getCityHotels(citySlug, nextPage, pageSize)
+            .then((nextHotels) => {
+                if (!nextHotels.length) {
+                    setHasMore(false);
+                    return;
+                }
+
+                setAllHotels((prev) => [...prev, ...nextHotels]);
+                setPage(nextPage);
+                setHasMore(nextHotels.length === pageSize);
+
+                if (pageCookieName) {
+                    document.cookie = `${pageCookieName}=${nextPage}; path=/; SameSite=Lax`;
+                }
+            })
+            .catch((error) => {
+                console.error('Error loading more hotels:', error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     };
 
     if (!allHotels.length) {
@@ -143,7 +205,7 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
 
     const openMap = (lat, lng) => {
         if (!lat || !lng) return;
-        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, "_blank");
+        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
     };
 
     return (
@@ -161,6 +223,7 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                     const infoBadges = badges.filter(
                         (badge) => badge.toLowerCase().includes('free cancellation') || badge.toLowerCase().includes('pay at')
                     );
+
                     return (
                         <div
                             key={hotel.hotelId}
@@ -237,7 +300,7 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
 
                                                     <p className="para-12px mb-0">
                                                         {hotel.reviewCount
-                                                            ? `${hotel.reviewCount.toLocaleString()} verified reviews`
+                                                            ? `${hotel.reviewCount.toLocaleString('en-US')} verified reviews`
                                                             : '0 verified reviews'}
                                                     </p>
                                                 </div>
@@ -340,19 +403,11 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
 
                                                 const dealInfo = rate?.deal_info || {};
                                                 const originalPrice = dealInfo?.public_price;
-                                                const discountPercentage = dealInfo?.discount_percentage;
                                                 const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
 
                                                 return (
                                                     <div className="price-block p-1 rounded mb-3">
                                                         <p className="para-12px text-muted mb-1 text-end">1 night, 2 adults</p>
-                                                        {/* {discountPercentage > 0 && (
-                                                            <div className="text-end mb-1">
-                                                                <span className="badge bg-danger" style={{ fontSize: '11px' }}>
-                                                                    {discountPercentage}% OFF
-                                                                </span>
-                                                            </div>
-                                                        )} */}
 
                                                         {formattedOriginal && originalPrice > rate.price.total && (
                                                             <p
@@ -376,17 +431,14 @@ export default function CityHotelList({ hotels, totalCount = 0, currentPage = 1,
                                         <div className="row">
                                             <div className="col-12 col-md-4 col-lg-3 ms-auto">
                                                 <Link
-                                                    className="theme-button-blue rounded-4 w-100 d-inline-flex align-items-center justify-content-center gap-1 text-center text-nowrap p-2"
+                                                    className="theme-button-blue rounded-4 w-100 d-block text-center p-2"
                                                     href={`${hotel.url}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     See Availability
-                                                    <i
-                                                        className="fa-solid fa-arrow-right ms-1"
-                                                        style={{ fontSize: '11px',transform: 'translateY(1px)' }}
-                                                    ></i>
+                                                    <i className="fa-solid fa-arrow-right ms-2"></i>
                                                 </Link>
                                             </div>
                                         </div>
