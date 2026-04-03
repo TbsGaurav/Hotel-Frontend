@@ -273,6 +273,246 @@ a {
     background-color: #0077c0;
     border-radius: 20px;
 }
+@media (max-width: 767.98px) {
+    .hero-search-row .submit-search-col {
+        display: flex;
+        justify-content: flex-start;
+        padding-left: 20px;
+    }
+    .hero-search-row .submit-search-col .font-weight-bold-submit-search {
+        width: 200px;
+        min-width: 200px;
+        min-height: 52px;
+        white-space: normal;
+        line-height: 1;
+        padding: 8px 20px;
+    }
+    .country-hero {
+        padding: 0 !important;
+    }
+    .country-hero .country-hero-search-shell {
+        padding: 0 !important;
+    }
+    .country-hero .country-hero-search-row {
+        row-gap: 13px !important;
+        margin: 0;
+    }
+    .country-hero .hero-search-shell.country-hero-search-shell {
+        padding: 12px 13px 14px !important;
+    }
+    .country-hero .country-hero-search-row .hero-search-col {
+        padding-left: 8px;
+        padding-right: 8px;
+        margin-bottom: 0 !important;
+    }
+    .country-hero .country-hero-search-row .hotel-search-col,
+    .country-hero .country-hero-search-row .date-search-col,
+    .country-hero .country-hero-search-row .rooms-search-col {
+        margin-bottom: 3px !important;
+    }
+    .country-hero .country-hero-search-row .country-children-search-col,
+    .country-hero .country-hero-search-row .country-filter-search-col {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+    .country-hero .country-hero-search-row .country-children-search-col {
+        align-items: flex-start;
+        margin-top: -3px;
+    }
+    .country-hero .country-hero-search-row .country-filter-search-col {
+        align-items: flex-start;
+        flex: 0 0 auto;
+        max-width: 86px;
+        padding-top: 2px;
+        margin-top: -4px;
+    }
+    .country-hero .country-hero-search-row .country-filter-search-col .custom-form-label {
+        display: block;
+        margin-bottom: 10px;
+        padding-top: 8px;
+    }
+    .country-hero .country-hero-search-row .country-filter-search-col .filter-button {
+        margin-top: 0;
+    }
+    .country-hero .country-hero-search-row .country-submit-search-col {
+        padding-left: 8px;
+        padding-right: 8px;
+        justify-content: flex-start;
+        align-items: flex-end;
+        flex: 1 1 auto;
+        margin-top: -14px;
+    }
+    .country-hero .country-hero-search-row .country-submit-search-button {
+        width: 100%;
+        min-width: 0;
+        min-height: 60px;
+        white-space: nowrap;
+    }
+    .country-hero .country-hero-search-row .country-filter-search-col,
+    .country-hero .country-hero-search-row .country-submit-search-col {
+        margin-top: -2px;
+    }
+}
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .country-hero {
+        padding: 20px 16px !important;
+    }
+    .hero-search-shell {
+        max-width: 860px;
+    }
+    .hero-search-row {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 16px 14px;
+        align-items: end;
+    }
+    .hero-search-row .hero-search-col {
+        width: 100%;
+        max-width: none;
+        margin-bottom: 0 !important;
+    }
+    .hero-search-row .hotel-search-col {
+        grid-column: span 6;
+    }
+    .hero-search-row .date-search-col {
+        grid-column: span 6;
+    }
+    .hero-search-row .rooms-search-col {
+        grid-column: span 6;
+    }
+    .hero-search-row .children-search-col {
+        grid-column: span 2;
+    }
+    .hero-search-row .filter-search-col {
+        grid-column: span 1;
+    }
+    .hero-search-row .submit-search-col {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-start;
+    }
+    .hero-search-row .submit-search-col .font-weight-bold-submit-search {
+        width: 220px;
+        min-height: 60px;
+        white-space: nowrap;
+    }
+    .country-hero .hero-search-row .country-submit-search-col {
+        justify-content: center;
+    }
+    .country-hero .hero-search-row .country-submit-search-button {
+        width: 240px;
+        max-width: 240px;
+    }
+    .country-hero .country-hero-search-shell {
+        padding: 10px 12px !important;
+    }
+    .main-hero-search-row {
+        column-gap: 10px;
+        row-gap: 10px;
+    }
+}
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .country-hero {
+        padding: 22px 18px !important;
+    }
+    .hero-search-shell {
+        max-width: 1120px;
+    }
+    .hero-search-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(0, 1.45fr) minmax(0, 1fr) minmax(64px, 0.55fr) minmax(56px, 0.45fr);
+        gap: 16px;
+        align-items: end;
+    }
+    .hero-search-row .hero-search-col {
+        width: 100%;
+        max-width: none;
+        margin-bottom: 0 !important;
+    }
+    .hero-search-row .submit-search-col {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-start;
+    }
+    .hero-search-row .submit-search-col .font-weight-bold-submit-search {
+        width: 220px;
+        min-height: 60px;
+        white-space: nowrap;
+    }
+    .main-hero-search-shell {
+        max-width: 1040px;
+    }
+    .main-hero-search-row {
+        column-gap: 8px;
+        row-gap: 0;
+        grid-template-columns: minmax(0, 1.55fr) minmax(0, 1.55fr) minmax(0, 1.05fr) minmax(58px, 0.5fr) minmax(52px, 0.4fr);
+    }
+    .main-hero-search-row .submit-search-col {
+        margin-top: -10px;
+    }
+    .main-hero-search-row .submit-search-col .font-weight-bold-submit-search {
+        width: 200px;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .country-hero .hero-search-row .country-submit-search-col {
+        justify-content: center;
+    }
+    .country-hero .hero-search-row .country-submit-search-button {
+        width: 240px;
+        max-width: 240px;
+    }
+    .country-hero .hero-search-row {
+        column-gap: 10px;
+        row-gap: 4px;
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(58px, 0.5fr) minmax(52px, 0.4fr);
+    }
+}
+@media (min-width: 1200px) {
+    .country-hero {
+        padding: 24px 22px !important;
+    }
+}
+@media (min-width: 1200px) {
+    .hero-search-shell {
+        max-width: 1480px;
+    }
+    .hero-search-row {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: flex-end;
+    }
+    .hero-search-row .hero-search-col {
+        margin-bottom: 0 !important;
+    }
+    .hero-search-row .hotel-search-col,
+    .hero-search-row .date-search-col,
+    .hero-search-row .submit-search-col {
+        flex: 1 1 0;
+        max-width: none;
+    }
+    .hero-search-row .rooms-search-col {
+        flex: 0 0 190px;
+        max-width: 190px;
+    }
+    .hero-search-row .children-search-col,
+    .hero-search-row .filter-search-col {
+        flex: 0 0 88px;
+        max-width: 88px;
+    }
+    .hero-search-row .submit-search-col {
+        min-width: 180px;
+    }
+    .hero-search-row .submit-search-col .font-weight-bold-submit-search {
+        width: 100%;
+        white-space: nowrap;
+    }
+}
 .space-100px {
     padding-top: 50px;
     padding-bottom: 50px;

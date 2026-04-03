@@ -26,6 +26,7 @@ function CountryHeroSection({ }) {
     const [results, setResults] = useState([]);
     const [show, setShow] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [showRoomsDropdown, setShowRoomsDropdown] = useState(false);
     const debounceRef = useRef(null);
     const isSelectingRef = useRef(false);
 
@@ -80,6 +81,7 @@ function CountryHeroSection({ }) {
 
     const datePickerRef = useRef(null);
     const searchRef = useRef(null);
+    const roomsDropdownRef = useRef(null);
 
     const handleSelect = (item) => {
         isSelectingRef.current = true;
@@ -196,6 +198,17 @@ function CountryHeroSection({ }) {
         return () => document.removeEventListener('mousedown', handleSearchOutsideClick);
     }, []);
 
+    useEffect(() => {
+        function handleRoomsDropdownOutsideClick(event) {
+            if (roomsDropdownRef.current && !roomsDropdownRef.current.contains(event.target)) {
+                setShowRoomsDropdown(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleRoomsDropdownOutsideClick);
+        return () => document.removeEventListener('mousedown', handleRoomsDropdownOutsideClick);
+    }, []);
+
     return (
         <section className="container-fluid p-0">
             <div
@@ -205,10 +218,10 @@ function CountryHeroSection({ }) {
                     padding: '20px 0'
                 }}
             >
-                <div className="container p-2">
+                <div className="container p-2 hero-search-shell country-hero-search-shell">
                     <form action="#">
-                        <div className="row align-items-end" style={{ gap: '11px 0' }}>
-                            <div className="col-10 col-md-4 col-lg-2 mb-3 mb-lg-0 position-relative" ref={searchRef}>
+                        <div className="row align-items-end hero-search-row country-hero-search-row" style={{ gap: '11px 0' }}>
+                            <div className="col-12 col-md-4 col-lg-3 mb-3 mb-lg-0 position-relative hero-search-col hotel-search-col" ref={searchRef}>
                                 <label className="form-label custom-form-label text-white">Destination or Hotel Name</label>
                                 <div className="input-group custom-input-group-textbox">
                                     <span className="input-group-text bg-white">
@@ -247,7 +260,7 @@ function CountryHeroSection({ }) {
                                     </div>
                                 )}
                             </div>
-                            <div className="col-12 col-md-6 col-lg-3 mb-3 mb-lg-0" ref={datePickerRef}>
+                            <div className="col-12 col-md-6 col-lg-3 mb-3 mb-lg-0 hero-search-col date-search-col" ref={datePickerRef}>
                                 <label htmlFor="daterange" className="form-label custom-form-label text-white">
                                     Check-In and Check-Out
                                 </label>
@@ -357,7 +370,10 @@ function CountryHeroSection({ }) {
                                     )}
                                 </div>
                             </div>
-                            <div className="col-12 col-md-6 col-lg-2 mb-3 mb-lg-0">
+                            <div
+                                className="col-12 col-md-6 col-lg-2 mb-3 mb-lg-0 hero-search-col rooms-search-col"
+                                ref={roomsDropdownRef}
+                            >
                                 <label htmlFor="daterange" className="form-label custom-form-label text-white">
                                     Rooms & Guests
                                 </label>
@@ -365,12 +381,16 @@ function CountryHeroSection({ }) {
                                     className="dropdown-toggle rooms-guest-dd"
                                     type="button"
                                     id="languageSwitcher"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
+                                    aria-expanded={showRoomsDropdown}
+                                    onClick={() => setShowRoomsDropdown((prev) => !prev)}
                                 >
                                     <span className="me-2">{getRoomsGuestsLabel()}</span>
                                 </button>
-                                <div className="dropdown-menu language-switcher-menu-item" aria-labelledby="dropdownMenuButton">
+                                <div
+                                    className={`dropdown-menu language-switcher-menu-item${showRoomsDropdown ? ' show' : ''}`}
+                                    aria-labelledby="dropdownMenuButton"
+                                    style={{ display: showRoomsDropdown ? 'block' : 'none' }}
+                                >
                                     <div className="py-3 px-4 d-none d-md-block">
                                         <div className="mb-3">
                                             <label htmlFor="guest" className="form-label custom-form-label">
@@ -412,6 +432,7 @@ function CountryHeroSection({ }) {
                                             onClick={() => {
                                                 setGuests(tempGuests);
                                                 setRooms(tempRooms);
+                                                setShowRoomsDropdown(false);
                                             }}
                                         >
                                             Apply
@@ -444,7 +465,7 @@ function CountryHeroSection({ }) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-4 col-md-2 col-lg-1 mb-3 mb-lg-0">
+                            <div className="col-4 col-md-2 col-lg-1 mb-3 mb-lg-0 hero-search-col children-search-col country-children-search-col">
                                 <label className="form-label custom-form-label text-white">Children</label>
                                 <select
                                     className="dropdown-toggle rooms-guest-dd form-select custom-input-select-children-dd"
@@ -458,7 +479,7 @@ function CountryHeroSection({ }) {
                                     ))}
                                 </select>
                             </div>
-                            <div className="col-3 col-md-1 col-lg-1 mb-0 mb-lg-0">
+                            <div className="col-3 col-md-1 col-lg-1 mb-0 mb-lg-0 hero-search-col filter-search-col country-filter-search-col">
                                 <label className="custom-form-label text-white form-label-maring-bottom">Filter</label>
                                 <div
                                     className="filter-button d-flex"
@@ -469,10 +490,10 @@ function CountryHeroSection({ }) {
                                     <img src="/image/filter.webp" className="m-auto" alt="" />
                                 </div>
                             </div>
-                            <div className="col-9 col-md-5 col-lg-3 mb-0 mb-lg-0">
+                            <div className="col-9 col-md-5 col-lg-3 mb-0 mb-lg-0 hero-search-col submit-search-col country-submit-search-col">
                                 <button
                                     type="submit"
-                                    className="theme-button-orange rounded rounded rounded rounded rounded w-100 font-weight-bold-submit-search"
+                                    className="theme-button-orange rounded rounded rounded rounded rounded w-100 font-weight-bold-submit-search country-submit-search-button"
                                 >
                                     See Deals Now
                                 </button>
