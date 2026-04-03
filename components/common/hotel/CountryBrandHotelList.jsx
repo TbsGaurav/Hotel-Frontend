@@ -438,13 +438,13 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                 <div className="row">
                                                     <div className="col-12 col-md-4 col-lg-3 ms-auto">
                                                         <Link
-                                                            className="theme-button-blue rounded-4 w-100 d-block text-center p-2"
+                                                            className="theme-button-blue rounded-4 w-100 d-inline-flex align-items-center justify-content-center gap-2 p-2 hotel-availability-button"
                                                             href={`${hotel.url}`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
-                                                            See Availability
+                                                            <span>See Availability</span>
                                                             <i className="fa-solid fa-arrow-right ms-2"></i>
                                                         </Link>
                                                     </div>

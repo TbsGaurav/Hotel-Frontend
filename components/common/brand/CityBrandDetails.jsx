@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import { getCityBrandHotels } from '@/lib/api/public/brandapi';
+import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
+import { getSidebarData } from '@/lib/api/sidebarapi';
+import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
 import CityHotelList from '../city/CityHotelList';
 
 function capitalize(word) {
@@ -59,6 +62,7 @@ export default async function CityBrandDetails({ params }) {
 
     let hotels = [];
     let totalCount = 0;
+    let sidebarData = {};
 
     try {
         for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
@@ -73,6 +77,11 @@ export default async function CityBrandDetails({ params }) {
         }
 
         totalCount = hotels[0]?.totalCount || hotels.length;
+
+        const cityId = hotels[0]?.cityId ?? hotels[0]?.cityID ?? hotels[0]?.CityID;
+        if (cityId) {
+            sidebarData = await getSidebarData({ cityId });
+        }
     } catch (err) {
         console.error('Error initializing city brand details:', err);
     }
@@ -80,6 +89,10 @@ export default async function CityBrandDetails({ params }) {
     const firstHotel = hotels?.[0] || {};
     const countryName = firstHotel.countryName || firstHotel.country || '';
     const countrySlug = firstHotel.countryUrlName || toSlug(countryName);
+    const sidebarSections = buildSidebarSections(sidebarData, {
+        contextName: cityName,
+        propertyTypeHeader: cityName ? `${cityName} Apartments, Suites and Family Hotels` : 'Property Type'
+    });
 
     return (
         <>
@@ -115,21 +128,31 @@ export default async function CityBrandDetails({ params }) {
                     {formattedBrand} {cityName}
                 </h3>
 
-                {hotels.length > 0 ? (
-                    <CityHotelList
-                        hotels={hotels}
-                        totalCount={totalCount}
-                        currentPage={currentPage}
-                        pageSize={PAGE_SIZE}
-                        citySlugPath={`${toSlug(cityName)}/${toSlug(brandName)}`}
-                        pageCookieName={pageCookieName}
-                        pageIntentCookieName={pageIntentCookieName}
-                    />
-                ) : (
-                    <div className="text-center py-5">
-                        <p className="text-muted">No hotels available for this brand in {cityName}.</p>
+                <div className="row g-4 align-items-start">
+                    <div className="col-lg-3 order-2 order-lg-1">
+                        <div className="position-sticky" style={{ top: '16px' }}>
+                            <ListingSidebar title="Filters" sections={sidebarSections} />
+                        </div>
                     </div>
-                )}
+
+                    <div className="col-lg-9 order-1 order-lg-2">
+                        {hotels.length > 0 ? (
+                            <CityHotelList
+                                hotels={hotels}
+                                totalCount={totalCount}
+                                currentPage={currentPage}
+                                pageSize={PAGE_SIZE}
+                                citySlugPath={`${toSlug(cityName)}/${toSlug(brandName)}`}
+                                pageCookieName={pageCookieName}
+                                pageIntentCookieName={pageIntentCookieName}
+                            />
+                        ) : (
+                            <div className="text-center py-5">
+                                <p className="text-muted">No hotels available for this brand in {cityName}.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </section>
         </>
     );

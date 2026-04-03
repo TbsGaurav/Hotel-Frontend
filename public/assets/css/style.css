@@ -2195,3 +2195,12 @@ a.text-sky-blue:hover {
 .hotel-name-link:hover {
     color: #0077c0 !important;
 }
+.hotel-availability-button {
+    min-height: 44px;
+    white-space: nowrap;
+    font-size: 13px;
+}
+.hotel-availability-button i {
+    margin-left: 0 !important;
+    flex: 0 0 auto;
+}
