@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
@@ -27,6 +27,7 @@ export default function CityHotelList({
     const [hasMore, setHasMore] = useState((hotels?.length || 0) < (totalCount || 0) || (hotels?.length || 0) === pageSize);
     const [currency, setCurrency] = useState(null);
     const [timestamp, setTimestamp] = useState('');
+    const loadMoreTriggerRef = useRef(null);
 
     const defaultImage = '/image/property-img.webp';
 
@@ -195,6 +196,23 @@ export default function CityHotelList({
             });
     };
 
+    useEffect(() => {
+        if (!hasMore || loading || !loadMoreTriggerRef.current) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    loadMoreHotels();
+                }
+            },
+            { rootMargin: '300px 0px' }
+        );
+
+        observer.observe(loadMoreTriggerRef.current);
+
+        return () => observer.disconnect();
+    }, [hasMore, loading, page, citySlug, pageSize, pageIntentCookieName, pageCookieName]);
+
     if (!allHotels.length) {
         return (
             <div className="text-center py-5">
@@ -208,11 +226,16 @@ export default function CityHotelList({
         window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
     };
 
+    const navigateToHotel = (url) => {
+        if (!url) return;
+        window.open(url, '_blank', 'noopener,noreferrer');
+    };
+
     return (
         <div className="container">
             {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
 
-            <div className="d-flex flex-column gap-4">
+            <div className="d-flex flex-column gap-3">
                 {allHotels.map((hotel) => {
                     const rate = getHotelRate(getBookingId(hotel));
                     const badges = rate?.badges || [];
@@ -227,56 +250,63 @@ export default function CityHotelList({
                     return (
                         <div
                             key={hotel.hotelId}
-                            className="card border-0 rounded-4 mb-4 p-3 p-md-4"
+                            className="card border-0 rounded-4 p-3 p-md-4 hotel-list-card"
                             style={{ boxShadow: '0 4px 18px rgba(0,0,0,0.08)' }}
+                            onClick={() => navigateToHotel(hotel.url)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    navigateToHotel(hotel.url);
+                                }
+                            }}
+                            role="link"
+                            tabIndex={0}
                         >
                             <div className="row g-3">
                                 <div className="col-12 col-md-4">
-                                    <Link href={`${hotel.url}`} target="_blank" className="text-decoration-none">
-                                        <div className="position-relative">
-                                            {imageBadges.length > 0 && (
-                                                <>
-                                                    {imageBadges.map((badge, idx) => (
-                                                        <span
-                                                            key={idx}
-                                                            className="position-absolute text-white px-3 py-1"
-                                                            style={{
-                                                                top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                left: '12px',
-                                                                background: '#28a745',
-                                                                borderRadius: '20px',
-                                                                fontSize: '12px',
-                                                                zIndex: 2
-                                                            }}
-                                                        >
-                                                            {badge}
-                                                        </span>
-                                                    ))}
-                                                </>
-                                            )}
+                                    <div className="position-relative">
+                                        {imageBadges.length > 0 && (
+                                            <>
+                                                {imageBadges.map((badge, idx) => (
+                                                    <span
+                                                        key={idx}
+                                                        className="position-absolute text-white px-3 py-1"
+                                                        style={{
+                                                            top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                            left: '12px',
+                                                            background: '#28a745',
+                                                            borderRadius: '20px',
+                                                            fontSize: '12px',
+                                                            zIndex: 2
+                                                        }}
+                                                    >
+                                                        {badge}
+                                                    </span>
+                                                ))}
+                                            </>
+                                        )}
 
-                                            <img
-                                                src={getImageUrl(hotel?.photo)}
-                                                className="d-block w-100 rounded-4"
-                                                style={{ height: '270px', objectFit: 'cover' }}
-                                                alt={hotel.hotelName}
-                                                onError={handleImageError}
-                                            />
-                                        </div>
-                                    </Link>
+                                        <img
+                                            src={getImageUrl(hotel?.photo)}
+                                            className="d-block w-100 rounded-4"
+                                            style={{ height: '270px', objectFit: 'cover' }}
+                                            alt={hotel.hotelName}
+                                            onError={handleImageError}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div
-                                    className="col-12 col-md-8"
-                                    onClick={() => (window.location.href = hotel.urlName)}
-                                    style={{ cursor: 'pointer' }}
-                                >
+                                <div className="col-12 col-md-8">
                                     <div className="text-decoration-none">
                                         <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2">
                                             <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0">
-                                                <h4 className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3">
+                                                <Link
+                                                    href={`${hotel.urlName}`}
+                                                    className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
                                                     {hotel.hotelName}
-                                                </h4>
+                                                </Link>
                                                 <div className="text-warning">
                                                     {[...Array(5)].map((_, i) => (
                                                         <MdOutlineStarPurple500
@@ -341,18 +371,14 @@ export default function CityHotelList({
                                                         .split('|')
                                                         .map((facility) => facility.trim())
                                                         .filter(Boolean).length > 5 && (
-                                                        <Link
-                                                            href={`${hotel.urlName}`}
-                                                            className="rating"
-                                                            style={{ fontSize: '11px', lineHeight: '1.2' }}
-                                                        >
+                                                        <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
                                                             +
                                                             {hotelFacilitiesText
                                                                 .split('|')
                                                                 .map((facility) => facility.trim())
                                                                 .filter(Boolean).length - 5}{' '}
                                                             more
-                                                        </Link>
+                                                        </span>
                                                     )}
                                                 </>
                                             )}
@@ -431,13 +457,13 @@ export default function CityHotelList({
                                         <div className="row">
                                             <div className="col-12 col-md-4 col-lg-3 ms-auto">
                                                 <Link
-                                                    className="theme-button-blue rounded-4 w-100 d-block text-center p-2"
+                                                    className="theme-button-blue rounded-4 w-100 d-inline-flex align-items-center justify-content-center gap-2 p-2 hotel-availability-button"
                                                     href={`${hotel.url}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
-                                                    See Availability
+                                                    <span>See Availability</span>
                                                     <i className="fa-solid fa-arrow-right ms-2"></i>
                                                 </Link>
                                             </div>
@@ -451,10 +477,8 @@ export default function CityHotelList({
             </div>
 
             {hasMore && (
-                <div className="text-center py-4">
-                    <button onClick={loadMoreHotels} disabled={loading} className="theme-button-blue rounded-1 px-5 py-2">
-                        {loading ? 'Loading...' : 'Click to Load More'}
-                    </button>
+                <div ref={loadMoreTriggerRef} className="text-center py-4">
+                    <p className="text-muted mb-0">{loading ? 'Loading more...' : 'Loading more...'}</p>
                 </div>
             )}
         </div>

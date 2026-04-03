@@ -2423,3 +2423,30 @@ a.text-sky-blue:hover {
 .hotel-address-link:hover .hotel-address-icon {
     color: #f0831e;
 }
+.hotel-list-card {
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.hotel-list-card:hover {
+    background-color: #f1f3f5;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.1) !important;
+}
+.hotel-list-card:focus-visible {
+    outline: 2px solid #0077c0;
+    outline-offset: 2px;
+}
+.hotel-name-link {
+    color: inherit !important;
+}
+.hotel-name-link:hover {
+    color: #0077c0 !important;
+}
+.hotel-availability-button {
+    min-height: 44px;
+    white-space: nowrap;
+    font-size: 13px;
+}
+.hotel-availability-button i {
+    margin-left: 0 !important;
+    flex: 0 0 auto;
+}
