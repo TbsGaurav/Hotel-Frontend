@@ -606,9 +606,15 @@ a:hover.custom-form-label {
 }
 .filter-button {
     background-color: #fff;
+    border: 3px solid transparent;
     border-radius: 100%;
     width: 60px;
     height: 60px;
+    transition: all 0.2s ease;
+}
+.filter-button.active {
+    border-color: #f0831e;
+    box-shadow: 0 0 0 2px rgba(240, 131, 30, 0.2);
 }
 .form-label-maring-bottom {
     margin-bottom: 0.5rem;

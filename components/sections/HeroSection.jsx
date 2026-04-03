@@ -588,7 +588,7 @@ export default function HeroSection() {
                             <div className="col-3 col-md-1 col-lg-1 mb-0 mb-lg-0 hero-search-col filter-search-col">
                                 <label className="custom-form-label text-white form-label-maring-bottom">Filter</label>
                                 <div
-                                    className="filter-button d-flex"
+                                    className={`filter-button d-flex${showFilters ? ' active' : ''}`}
                                     id="filterButton"
                                     onClick={() => setShowFilters((prev) => !prev)}
                                     style={{ cursor: 'pointer' }}
