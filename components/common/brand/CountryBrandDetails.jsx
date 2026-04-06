@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
-import { getCountryBrandHotels } from '@/lib/api/public/brandapi';
+import { getHotelList } from '@/lib/api/public/hotelapi';
 import { getCitySidebar } from '@/lib/api/public/cityapi';
 import { getCountryByUrlName, resolveSlug } from '@/lib/api/public/countryapi';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
@@ -67,14 +67,14 @@ export default async function CountryBrandDetails({ params }) {
 
     const countrySlug = slug[0];
     const brandSlug = decodeURIComponent(slug[1]);
-    const countryName = capitalize(countrySlug);
     const brandName = brandSlug;
-    const formattedBrand = formatBrand(brandName);
-    const fullSlug = `/${countrySlug}/${brandName}`;
+    const countryName = capitalize(countrySlug);
+    const formattedBrand = formatBrand(brandSlug);
+    const fullSlug = `${countrySlug}/${brandSlug}`;
 
     const cookieStore = await cookies();
-    const pageCookieName = getCountryBrandPageCookieName(countrySlug, brandName);
-    const pageIntentCookieName = getCountryBrandPageIntentCookieName(countrySlug, brandName);
+    const pageCookieName = getCountryBrandPageCookieName(countrySlug, brandSlug);
+    const pageIntentCookieName = getCountryBrandPageIntentCookieName(countrySlug, brandSlug);
     const hasPaginationIntent = Boolean(cookieStore.get(pageIntentCookieName)?.value);
     const currentPage = hasPaginationIntent ? parsePageNumber(cookieStore.get(pageCookieName)?.value) : 1;
 
@@ -94,21 +94,24 @@ export default async function CountryBrandDetails({ params }) {
         }
 
         for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
-            const pageHotels = await getCountryBrandHotels(fullSlug, pageNumber, PAGE_SIZE);
-            const nextHotels = pageHotels || [];
+            const pageResponse = await getHotelList(fullSlug, pageNumber, PAGE_SIZE);
+            const nextHotels = pageResponse?.hotels || [];
 
             if (!nextHotels.length) {
                 break;
             }
 
-            hotels = hotels.concat(nextHotels);
-            totalCount = Math.max(totalCount, resolveTotalCount(nextHotels));
-        }
+            if (pageNumber === 1) {
+                totalCount = pageResponse?.totalCount || 0;
+                
+                // Extract countryId from API response if not already resolved
+                if (!countryId) {
+                    countryId = pageResponse?.countryId;
+                }
+            }
 
-        const firstHotel = hotels[0];
-        countryId =
-            countryId ||
-            getFirstDefined(firstHotel?.countryId, firstHotel?.countryId, firstHotel?.CountryId);
+            hotels = hotels.concat(nextHotels);
+        }
 
         if (countryId) {
             const sidebar = await getCitySidebar({ countryId });

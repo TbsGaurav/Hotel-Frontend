@@ -2,10 +2,9 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import Dropdown from '@/components/ui/Dropdown';
-import { getCitiesByRegion } from '@/lib/api/public/countryapi';
-import { getCityHotels } from '@/lib/api/public/cityapi';
+import { getCitiesByRegion } from '@/lib/api/public/regionapi';
+import { getHotelList } from '@/lib/api/public/hotelapi';
 import { getSidebarData } from '@/lib/api/sidebarapi';
-import { getRegionHotels } from '@/lib/api/public/regionapi';
 import CityHotelList from '../city/CityHotelList';
 import { formatCountryName } from '@/lib/utils';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
@@ -54,7 +53,8 @@ async function fetchAllHotelsFromCities(cities = [], hotelsPerPage = REGION_PAGE
             let cityPage = 1;
 
             while (true) {
-                const hotelsForPage = await getCityHotels(citySlug, cityPage, hotelsPerPage);
+                const pageResponse = await getHotelList(citySlug, cityPage, hotelsPerPage);
+                const hotelsForPage = pageResponse?.hotels || [];
 
                 if (!hotelsForPage.length) {
                     break;
@@ -84,7 +84,7 @@ export default async function RegionDetails({ params, regionId }) {
     const countryName = formatCountryName(countrySlug);
     const regionName = formatCountryName(regionSlug);
 
-    const urlName = `/${countrySlug}/${regionSlug}`;
+    const urlName = `${countrySlug}/${regionSlug}`;
 
     const response = await getCitiesByRegion(countrySlug, regionSlug);
     const regionData = response?.data;
@@ -99,20 +99,6 @@ export default async function RegionDetails({ params, regionId }) {
             .replace(/\s+/g, '-')}`
     }));
 
-    let sidebarData = {};
-    if (regionId) {
-        try {
-            sidebarData = await getSidebarData({ regionId });
-        } catch (error) {
-            console.error('Error fetching region sidebar data:', error);
-        }
-    }
-
-    const sidebarSections = buildSidebarSections(sidebarData, {
-        contextName: regionName,
-        propertyTypeHeader: regionName ? `${regionName} Hotels` : 'Property Type'
-    });
-
     const cookieStore = await cookies();
     const regionPageCookieName = getRegionPageCookieName(countrySlug, regionSlug);
     const pageIntentCookieName = getRegionPageIntentCookieName(countrySlug, regionSlug);
@@ -124,17 +110,24 @@ export default async function RegionDetails({ params, regionId }) {
     let hotels = [];
     let totalCount = cities.reduce((sum, city) => sum + Number(city?.hotelCount || 0), 0);
     let fallbackRegionHotels = [];
+    let resolvedRegionId = regionId;
 
     try {
         for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
-            const res = await getRegionHotels(urlName, pageNumber, REGION_PAGE_SIZE);
-
-            const nextHotels = res?.hotelData || [];
+            const pageResponse = await getHotelList(urlName, pageNumber, REGION_PAGE_SIZE);
+            const nextHotels = pageResponse?.hotels || [];
 
             if (!nextHotels.length) break;
 
+            if (pageNumber === 1) {
+                // Extract regionId from API response
+                if (pageResponse?.regionId) {
+                    resolvedRegionId = pageResponse.regionId;
+                }
+                totalCount = pageResponse?.totalCount || 0;
+            }
+
             hotels = hotels.concat(nextHotels);
-            totalCount = res?.totalCount || 0;
         }
 
         if (!hotels.length && cities.length > 0) {
@@ -145,6 +138,21 @@ export default async function RegionDetails({ params, regionId }) {
     } catch (err) {
         console.error('Region hotels error:', err);
     }
+
+    // Fetch sidebar data using extracted regionId
+    let sidebarData = {};
+    if (resolvedRegionId) {
+        try {
+            sidebarData = await getSidebarData({ regionId: resolvedRegionId });
+        } catch (error) {
+            console.error('Error fetching region sidebar data:', error);
+        }
+    }
+
+    const sidebarSections = buildSidebarSections(sidebarData, {
+        contextName: regionName,
+        propertyTypeHeader: regionName ? `${regionName} Hotels` : 'Property Type'
+    });
 
     return (
         <>
