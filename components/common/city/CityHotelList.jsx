@@ -55,7 +55,7 @@ export default function CityHotelList({
         setHasMore((hotels?.length || 0) < (totalCount || 0) || (hotels?.length || 0) === pageSize);
     }, [hotels, totalCount, currentPage, pageSize]);
 
-    const getBookingId = (hotel) => hotel?.bookingId ?? hotel?.bookingID ?? hotel?.BookingId ?? null;
+    const getBookingId = (hotel) => hotel?.bookingId ?? null;
 
     const fetchRatesForHotels = async (hotelsToRate, selectedCurrency) => {
         const bookingIds = hotelsToRate.map(getBookingId).filter(Boolean);

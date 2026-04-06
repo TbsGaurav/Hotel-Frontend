@@ -86,11 +86,11 @@ export default async function CountryBrandDetails({ params }) {
         let countryId = null;
 
         const countryInfo = await getCountryByUrlName(countrySlug);
-        countryId = getFirstDefined(countryInfo?.countryId, countryInfo?.countryID, countryInfo?.CountryID);
+        countryId = getFirstDefined(countryInfo?.countryId, countryInfo?.countryId, countryInfo?.CountryId);
 
         if (!countryId) {
             const countrySlugInfo = await resolveSlug(`/${countrySlug}`);
-            countryId = getFirstDefined(countrySlugInfo?.data?.countryId, countrySlugInfo?.data?.countryID, countrySlugInfo?.data?.entityID);
+            countryId = getFirstDefined(countrySlugInfo?.data?.countryId, countrySlugInfo?.data?.countryId, countrySlugInfo?.data?.entityId);
         }
 
         for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
@@ -108,7 +108,7 @@ export default async function CountryBrandDetails({ params }) {
         const firstHotel = hotels[0];
         countryId =
             countryId ||
-            getFirstDefined(firstHotel?.countryId, firstHotel?.countryID, firstHotel?.CountryID);
+            getFirstDefined(firstHotel?.countryId, firstHotel?.countryId, firstHotel?.CountryId);
 
         if (countryId) {
             const sidebar = await getCitySidebar({ countryId });

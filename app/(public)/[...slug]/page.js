@@ -21,13 +21,13 @@ export default async function DynamicPage({ params }) {
         if (slugArray.length === 2) {
             const resolvedCategory = await resolveCategoryFromSlug(slugArray[1], slugArray[0]);
 
-            if (resolvedCategory?.categoryID) {
+            if (resolvedCategory?.categoryId) {
                 return (
                     <CityCategoryRouteApp
                         citySlug={slugArray[0]}
                         categorySlug={slugArray[1]}
-                        resolvedCategoryId={resolvedCategory.categoryID}
-                        resolvedCityId={resolvedCategory.cityID}
+                        resolvedCategoryId={resolvedCategory.categoryId}
+                        resolvedCityId={resolvedCategory.cityId}
                         resolvedCityName={resolvedCategory.cityName}
                     />
                 );
@@ -46,7 +46,7 @@ export default async function DynamicPage({ params }) {
 
     // REGION PAGE
     if (slugArray.length === 2 && data.entityType === 'Region') {
-        return <RegionDetails country={slugArray[0]} region={slugArray[1]} regionId={data.entityID} params={params} />;
+        return <RegionDetails country={slugArray[0]} region={slugArray[1]} regionId={data.entityId} params={params} />;
     }
 
     //COUNTRYBRAND Page
@@ -56,7 +56,7 @@ export default async function DynamicPage({ params }) {
 
     // COLLECTION PAGE
     if ((slugArray.length === 1 || slugArray.length === 2) && data.entityType === 'Collection') {
-        return <CollectionDetailsWrapper slug={slugArray.join('/')} entityId={data.entityID} />;
+        return <CollectionDetailsWrapper slug={slugArray.join('/')} entityId={data.entityId} />;
     }
 
     // HOTEL PAGE (CityHotel)

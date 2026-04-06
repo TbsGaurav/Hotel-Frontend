@@ -97,7 +97,7 @@ export default async function CityDetails({ params }) {
                     }
                 }
 
-                const cityId = getFirstDefined(firstHotel?.cityId, firstHotel?.cityID, firstHotel?.CityID);
+                const cityId = getFirstDefined(firstHotel?.cityId, firstHotel?.cityId, firstHotel?.CityId);
 
                 if (cityId) {
                     sidebarData = await getSidebarData({ cityId });

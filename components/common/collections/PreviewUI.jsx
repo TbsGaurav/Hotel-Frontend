@@ -220,7 +220,7 @@ export default function PreviewUI({ initialData, id }) {
                     ) : (
                         <ul className="list-unstyled mb-0">
                             {pinnedHotels.map((hotel, i) => (
-                                <li key={hotel.hotelID} className="mb-1">
+                                <li key={hotel.hotelId} className="mb-1">
                                     <div className="fw-semibold text-dark">
                                         {i + 1}. {hotel.hotelName}
                                     </div>
@@ -240,7 +240,7 @@ export default function PreviewUI({ initialData, id }) {
                     ) : (
                         <ul className="list-unstyled mb-0">
                             {excludedHotels.map((hotel, i) => (
-                                <li key={hotel.hotelID} className="mb-1">
+                                <li key={hotel.hotelId} className="mb-1">
                                     <div className="fw-semibold text-dark">
                                         {i + 1}. {hotel.hotelName}
                                         <span className="text-muted"> ({hotel.reason})</span>

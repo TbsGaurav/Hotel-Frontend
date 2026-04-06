@@ -78,7 +78,7 @@ export default async function CityBrandDetails({ params }) {
 
         totalCount = hotels[0]?.totalCount || hotels.length;
 
-        const cityId = hotels[0]?.cityId ?? hotels[0]?.cityID ?? hotels[0]?.CityID;
+        const cityId = hotels[0]?.cityId ?? hotels[0]?.cityId ?? hotels[0]?.CityId;
         if (cityId) {
             sidebarData = await getSidebarData({ cityId });
         }

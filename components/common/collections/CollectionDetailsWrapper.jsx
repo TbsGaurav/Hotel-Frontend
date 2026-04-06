@@ -8,13 +8,13 @@ export default async function CollectionDetailsWrapper({ slug, collectionData, e
     let collection = collectionData;
 
     if (!collection) {
-        // Try to fetch by entity ID first if available (for multi-segment URLs)
+        // Try to fetch by entity Id first if available (for multi-segment URLs)
         if (entityId) {
             try {
                 const collectionRes = await getCollectionById(entityId);
                 collection = collectionRes?.data;
             } catch (error) {
-                console.error('Error fetching collection by ID:', error);
+                console.error('Error fetching collection by Id:', error);
             }
         }
 

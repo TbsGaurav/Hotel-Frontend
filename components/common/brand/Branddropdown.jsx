@@ -77,7 +77,7 @@ export default function BrandDropdown({ parentId, initialBrands }) {
                         ) : (
                             <div className="row">
                                 {brands.map((brand) => (
-                                    <div key={brand.brandID} className="col-6 col-md-4 col-lg-3 mb-2">
+                                    <div key={brand.brandId} className="col-6 col-md-4 col-lg-3 mb-2">
                                         {brand.urlName ? (
                                             <Link href={`/brand/${brand.urlName}`} className="text-decoration-none text-dark fw-semibold">
                                                 • {brand.name}

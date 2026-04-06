@@ -66,22 +66,22 @@ export default function CityCategoryDetails({
 
                 if (Number(initialResolvedCityId) > 0) {
                     cityContext = {
-                        cityID: Number(initialResolvedCityId),
+                        cityId: Number(initialResolvedCityId),
                         cityName: String(initialResolvedCityName || formatCityName(citySlug)).trim()
                     };
                 } else {
                     cityContext = await resolveCityContextFromSlug(citySlug);
                 }
 
-                const cityID = cityContext?.cityID;
+                const cityId = cityContext?.cityId;
 
-                if (!cityID) {
+                if (!cityId) {
                     throw new Error('Unable to resolve the city for this listing.');
                 }
 
                 if (cancelled) return;
 
-                setResolvedCityId(cityID);
+                setResolvedCityId(cityId);
 
                 const initialCategoryId = Number(resolvedCategoryId);
                 const hasInitialCategoryId = Number.isInteger(initialCategoryId) && initialCategoryId > 0;
@@ -90,12 +90,12 @@ export default function CityCategoryDetails({
                 let effectiveCategoryId = hasInitialCategoryId ? initialCategoryId : 0;
 
                 if (!hasInitialCategoryId) {
-                    throw new Error('CategoryID is required.');
+                    throw new Error('CategoryId is required.');
                 }
 
                 if (!response || hasInitialCategoryId) {
                     response = await getCityCategoryHotels({
-                        cityID,
+                        cityId,
                         categoryId: effectiveCategoryId,
                         pageNo: 1,
                         pageSize: 10
@@ -107,7 +107,7 @@ export default function CityCategoryDetails({
                 const categories = normalizeCategoryItems(response.categories || []);
 
                 const selectedCategory =
-                    categories.find((item) => String(item?.categoryID) === String(effectiveCategoryId)) ||
+                    categories.find((item) => String(item?.categoryId) === String(effectiveCategoryId)) ||
                     null;
 
                 const selectedCategoryName = getCategoryDisplayName(selectedCategory) || '';
@@ -119,7 +119,7 @@ export default function CityCategoryDetails({
                     formatCityName(citySlug);
 
                 setHotelRows(Array.isArray(response.hotels) ? response.hotels : []);
-                setSidebarData(await getSidebarData({ cityId: cityID }));
+                setSidebarData(await getSidebarData({ cityId: cityId }));
                 setTotalCount(Number(response.totalCount || response.hotels?.length || 0));
                 setPageSize(Number(response.pageSize || 10));
                 setCurrentPage(Number(response.pageNo || 1));
@@ -168,7 +168,7 @@ export default function CityCategoryDetails({
         if (!resolvedCityId || !resolvedCategoryId) return [];
 
         const response = await getCityCategoryHotels({
-            cityID: resolvedCityId,
+            cityId: resolvedCityId,
             categoryId: resolvedCategoryId,
             pageNo: pageNumber,
             pageSize: nextPageSize

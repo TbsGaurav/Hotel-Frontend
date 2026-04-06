@@ -126,7 +126,7 @@ export default function HotelDetails({ initialData }) {
     };
 
     const createReviewPayload = () => {
-        const hotelId = hotelInfo?.hotelId ?? hotelInfo?.id ?? hotelInfo?.HotelID ?? hotelInfo?.hotelID ?? null;
+        const hotelId = hotelInfo?.hotelId ?? hotelInfo?.id ?? null;
         const hotelAddress = hotelInfo?.address || hotelInfo?.hotelAddress || '';
         const thumbUrl = hotelInfo?.mainPhoto || hotelInfo?.thumbnail || hotelInfo?.thumbUrl || defaultImage;
         const hotelName = hotelInfo?.hotelName || hotelInfo?.name || '';

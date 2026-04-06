@@ -8,7 +8,7 @@ function normalizeLabel(item) {
 }
  
 function normalizeKey(item, label) {
-    return String(item?.categoryID ?? item?.id ?? item?.value ?? label).trim();
+    return String(item?.categoryId ?? item?.id ?? item?.value ?? label).trim();
 }
 
 function normalizeHref(item, label) {
