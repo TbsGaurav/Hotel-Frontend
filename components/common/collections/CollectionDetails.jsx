@@ -47,7 +47,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
     const openMap = (lat, lng) => {
         if (!lat || !lng) return;
-        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, "_blank");
+        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
     };
 
     const navigateToHotel = (url) => {
@@ -56,16 +56,12 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     };
 
     useEffect(() => {
-
         async function initCurrency() {
-
             const cur = await getUserCurrency();
             setCurrency(cur);
-
         }
 
         initCurrency();
-
     }, []);
 
     const fetchRatesForHotels = async (hotelsToRate, selectedCurrency) => {
@@ -120,7 +116,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
     // Helper function to get rate for a hotel by bookingId
     const getHotelRate = (bookingId) => {
-        return allRates.find(rate => String(rate?.id) === String(bookingId));
+        return allRates.find((rate) => String(rate?.id) === String(bookingId));
     };
 
     // Helper to format original price with currency
@@ -213,7 +209,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                 }
 
                 setAllHotels((prev) => mergeUniqueHotels(prev, uniqueNewHotels));
-                setAllRates(prev => [...prev, ...newRates]);
+                setAllRates((prev) => [...prev, ...newRates]);
                 pageRef.current = nextPage;
                 setPage(nextPage);
                 setHasMore((prevHasMore) => {
@@ -293,7 +289,10 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                         <FaMapMarkerAlt className="text-muted me-2" />
                                         <span>
                                             {Array.isArray(basic) && basic.length > 0
-                                                ? basic.map((item) => item.cityName || item.regionName || item.countryName).filter(Boolean).join(', ')
+                                                ? basic
+                                                      .map((item) => item.cityName || item.regionName || item.countryName)
+                                                      .filter(Boolean)
+                                                      .join(', ')
                                                 : basic?.cityName || basic?.districtName || basic?.regionName || basic?.countryName}
                                         </span>
                                     </div>
@@ -313,7 +312,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                 {allHotels.map((hotel, index) => (
                                     <div
                                         key={`${getHotelIdentity(hotel)}-${index}`}
-                                        className="card border-0 rounded-4 p-3 p-md-4 hotel-list-card"
+                                        className="card border-0 rounded-4 p-3 p-md-4 hotel-list-card collection-hotel-card"
                                         style={{
                                             boxShadow: '0 4px 18px rgba(0,0,0,0.08)'
                                         }}
@@ -327,15 +326,16 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                         role="link"
                                         tabIndex={0}
                                     >
-                                        <div className="row g-3">
-                                            <div className="col-12 col-md-4">
-                                                <div className="position-relative">
+                                        <div className="row g-3 collection-hotel-card-row">
+                                            <div className="col-12 col-md-4 collection-hotel-image-col">
+                                                <div className="position-relative collection-hotel-image-wrap">
                                                     {(() => {
                                                         const rate = getHotelRate(getBookingId(hotel));
                                                         const badges = rate?.badges || [];
-                                                        const imageBadges = badges.filter(b =>
-                                                            !b.toLowerCase().includes('free cancellation') &&
-                                                            !b.toLowerCase().includes('pay at')
+                                                        const imageBadges = badges.filter(
+                                                            (b) =>
+                                                                !b.toLowerCase().includes('free cancellation') &&
+                                                                !b.toLowerCase().includes('pay at')
                                                         );
                                                         if (imageBadges.length > 0) {
                                                             return (
@@ -345,7 +345,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                             key={idx}
                                                                             className="position-absolute text-white px-3 py-1"
                                                                             style={{
-                                                                                top: idx === 0 ? '12px' : `${12 + (idx * 30)}px`,
+                                                                                top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
                                                                                 left: '12px',
                                                                                 background: '#28a745',
                                                                                 borderRadius: '20px',
@@ -363,26 +363,25 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                     })()}
                                                     <img
                                                         src={getImageUrl(hotel?.photo)}
-                                                        className="d-block w-100 rounded-4"
+                                                        className="d-block w-100 rounded-4 collection-hotel-image"
                                                         style={{ height: '270px', objectFit: 'cover' }}
                                                         alt={hotel.hotelName}
                                                         onError={handleImageError}
                                                     />
                                                 </div>
                                             </div>
-
-                                            <div className="col-12 col-md-8">
+                                            <div className="col-12 col-md-8 collection-hotel-content-col">
                                                 <div className="text-decoration-none">
-                                                    <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2">
-                                                        <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0">
+                                                    <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-header">
+                                                        <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row">
                                                             <Link
                                                                 href={`${hotel.urlName}`}
-                                                                className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
+                                                                className="font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title "
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 {hotel.hotelName}
                                                             </Link>
-                                                            <div className="text-warning">
+                                                            <div className="text-warning collection-hotel-stars">
                                                                 {[...Array(5)].map((_, i) => (
                                                                     <MdOutlineStarPurple500
                                                                         key={i}
@@ -393,19 +392,19 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             </div>
                                                         </div>
 
-                                                        <div className="d-flex align-items-center">
-                                                            <div className="rating-box d-flex me-2">
+                                                        <div className="d-flex align-items-center collection-hotel-review-row">
+                                                            <div className="rating-box d-flex me-2 collection-hotel-rating-box">
                                                                 <span className="m-auto">
                                                                     {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
                                                                 </span>
                                                             </div>
 
-                                                            <div className="my-auto">
-                                                                <p className="small-para-14-px font-weight-bold mb-1">
+                                                            <div className="my-auto collection-hotel-review-copy">
+                                                                <p className="small-para-14-px font-weight-bold mb-1 collection-hotel-rating-text">
                                                                     {hotel.ratingText}
                                                                 </p>
 
-                                                                <p className="para-12px mb-0">
+                                                                <p className="para-12px mb-0 collection-hotel-review-count">
                                                                     {hotel.reviewCount
                                                                         ? `${hotel.reviewCount.toLocaleString('en-US')} verified reviews`
                                                                         : '0 verified reviews'}
@@ -414,7 +413,10 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         </div>
                                                     </div>
 
-                                                    <div className="d-flex align-items-center flex-nowrap mb-2" style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}>
+                                                    <div
+                                                        className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities"
+                                                        style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}
+                                                    >
                                                         {hotel.hotelFacilities && (
                                                             <>
                                                                 {hotel.hotelFacilities
@@ -440,7 +442,10 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         </span>
                                                                     ))}
                                                                 {hotel.hotelFacilities.split('|').length > 5 && (
-                                                                    <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
+                                                                    <span
+                                                                        className="rating"
+                                                                        style={{ fontSize: '11px', lineHeight: '1.2' }}
+                                                                    >
                                                                         +{hotel.hotelFacilities.split('|').length - 5} more
                                                                     </span>
                                                                 )}
@@ -449,7 +454,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                     </div>
 
                                                     <p
-                                                        className="small-para-14-px mb-2 hotel-address-link"
+                                                        className="small-para-14-px mb-2 hotel-address-link collection-hotel-address"
                                                         style={{ cursor: 'pointer' }}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -481,9 +486,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         </p>
                                                     )} */}
 
-                                                    <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2">
-                                                        <div className="mb-2 mb-md-0">
-                                                            <p className="para text-primary mb-0">
+                                                    <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-meta-row">
+                                                        <div className="mb-2 mb-md-0 collection-hotel-meta-copy">
+                                                            <p className="para text-primary mb-0 collection-hotel-pay-later">
                                                                 <i className="fa-solid fa-circle-info me-2"></i>
                                                                 Book Now Pay Later!
                                                             </p>
@@ -492,13 +497,14 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                 const rate = getHotelRate(getBookingId(hotel));
                                                                 const badges = rate?.badges || [];
 
-                                                                const infoBadges = badges.filter(b =>
-                                                                    b.toLowerCase().includes('free cancellation') ||
-                                                                    b.toLowerCase().includes('pay at')
+                                                                const infoBadges = badges.filter(
+                                                                    (b) =>
+                                                                        b.toLowerCase().includes('free cancellation') ||
+                                                                        b.toLowerCase().includes('pay at')
                                                                 );
                                                                 if (infoBadges.length > 0) {
                                                                     return (
-                                                                        <div className="mb-2">
+                                                                        <div className="mb-2 collection-hotel-badges">
                                                                             {infoBadges.map((badge, idx) => (
                                                                                 <p key={idx} className="para-12px mb-1 text-theme-green">
                                                                                     <span
@@ -515,18 +521,20 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                 return null;
                                                             })()}
                                                         </div>
-
                                                         {(() => {
                                                             const rate = getHotelRate(getBookingId(hotel));
                                                             if (rate?.price) {
                                                                 const dealInfo = rate?.deal_info || {};
                                                                 const originalPrice = dealInfo?.public_price;
                                                                 const discountPercentage = dealInfo?.discount_percentage;
-                                                                const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
+                                                                const formattedOriginal = formatOriginalPrice(
+                                                                    rate.price.book,
+                                                                    originalPrice
+                                                                );
 
                                                                 return (
-                                                                    <div className="price-block p-1 rounded mb-3">
-                                                                        <p className="para-12px text-muted mb-1 text-end">
+                                                                    <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
+                                                                        <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                             1 night, 2 adults
                                                                         </p>
                                                                         {/* {discountPercentage > 0 && (
@@ -537,12 +545,18 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                             </div>
                                                                         )} */}
                                                                         {formattedOriginal && originalPrice > rate.price.total && (
-                                                                            <p className="para-12px mb-0 text-end" style={{ color: 'red', textDecoration: 'line-through' }}>
+                                                                            <p
+                                                                                className="para-12px mb-0 text-end collection-hotel-original-price"
+                                                                                style={{ color: 'red', textDecoration: 'line-through' }}
+                                                                            >
                                                                                 {formattedOriginal}
                                                                             </p>
                                                                         )}
-                                                                        <div className="d-flex align-items-baseline justify-content-end">
-                                                                            <span className="text-theme-orange fw-bold" style={{ fontSize: '24px' }}>
+                                                                        <div className="d-flex align-items-baseline justify-content-end collection-hotel-current-price-row">
+                                                                            <span
+                                                                                className="text-theme-orange fw-bold collection-hotel-current-price"
+                                                                                style={{ fontSize: '24px' }}
+                                                                            >
                                                                                 {rate.price.book}
                                                                             </span>
                                                                         </div>
@@ -556,8 +570,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         })()}
                                                     </div>
 
-                                                    <div className="row">
-                                                        <div className="col-12 col-md-4 col-lg-3 ms-auto">
+                                                    <div className="row collection-hotel-cta-row">
+                                                        <div className="col-12 col-md-4 col-lg-3 ms-auto collection-hotel-cta-col">
                                                             <Link
                                                                 className="theme-button-blue rounded-4 w-100 d-inline-flex align-items-center justify-content-center gap-2 p-2 hotel-availability-button"
                                                                 href={`${hotel.url}`}

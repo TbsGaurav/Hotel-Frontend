@@ -225,7 +225,7 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                             return (
                                 <div
                                     key={hotel.hotelId}
-                                    className="card border-0 rounded-4 p-3 p-md-4 hotel-list-card"
+                                    className="card border-0 rounded-4 p-3 p-md-4 hotel-list-card collection-hotel-card"
                                     style={{
                                         boxShadow: '0 4px 18px rgba(0,0,0,0.08)'
                                     }}
@@ -239,9 +239,9 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                     role="link"
                                     tabIndex={0}
                                 >
-                                    <div className="row g-3">
-                                        <div className="col-12 col-md-4">
-                                            <div className="position-relative">
+                                    <div className="row g-3 collection-hotel-card-row">
+                                        <div className="col-12 col-md-4 collection-hotel-image-col">
+                                            <div className="position-relative collection-hotel-image-wrap">
                                                 {imageBadges.length > 0 && (
                                                     <>
                                                         {imageBadges.map((badge, idx) => (
@@ -264,7 +264,7 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                 )}
                                                 <img
                                                     src={getImageUrl(hotel?.photo)}
-                                                    className="d-block w-100 rounded-4"
+                                                    className="d-block w-100 rounded-4 collection-hotel-image"
                                                     style={{ height: '270px', objectFit: 'cover' }}
                                                     alt={hotel.hotelName}
                                                     onError={handleImageError}
@@ -272,20 +272,20 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                             </div>
                                         </div>
 
-                                        <div className="col-12 col-md-8">
+                                        <div className="col-12 col-md-8 collection-hotel-content-col">
                                             <div
                                                 className="text-decoration-none"
                                             >
-                                                <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2">
-                                                    <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0">
+                                                <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-header">
+                                                    <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row">
                                                         <Link
                                                             href={`${hotel.urlName}`}
-                                                            className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
+                                                            className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title  "
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
                                                             {hotel.hotelName}
                                                         </Link>
-                                                        <div className="text-warning">
+                                                        <div className="text-warning collection-hotel-stars">
                                                             {[...Array(5)].map((_, i) => (
                                                                 <MdOutlineStarPurple500
                                                                     key={i}
@@ -296,19 +296,19 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                         </div>
                                                     </div>
 
-                                                    <div className="d-flex align-items-center">
-                                                        <div className="rating-box d-flex me-2">
+                                                    <div className="d-flex align-items-center collection-hotel-review-row">
+                                                        <div className="rating-box d-flex me-2 collection-hotel-rating-box">
                                                             <span className="m-auto">
                                                                 {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
                                                             </span>
                                                         </div>
 
-                                                        <div className="my-auto">
-                                                            <p className="small-para-14-px font-weight-bold mb-1">
+                                                        <div className="my-auto collection-hotel-review-copy">
+                                                            <p className="small-para-14-px font-weight-bold mb-1 collection-hotel-rating-text">
                                                                 {hotel.ratingText || getRatingText(hotel.reviewScore)}
                                                             </p>
 
-                                                            <p className="para-12px mb-0">
+                                                            <p className="para-12px mb-0 collection-hotel-review-count">
                                                                 {hotel.reviewCount
                                                                     ? `${hotel.reviewCount.toLocaleString('en-US')} verified reviews`
                                                                     : '0 verified reviews'}
@@ -317,7 +317,7 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                     </div>
                                                 </div>
 
-                                                <div className="d-flex align-items-center flex-nowrap mb-2" style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}>
+                                                <div className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities" style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}>
                                                     {hotel.hotelFacilities && (
                                                         <>
                                                             {hotel.hotelFacilities
@@ -352,7 +352,7 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                 </div>
 
                                                 <p
-                                                    className="small-para-14-px mb-2 hotel-address-link"
+                                                    className="small-para-14-px mb-2 hotel-address-link collection-hotel-address"
                                                     style={{ cursor: 'pointer' }}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -371,15 +371,15 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                     </p>
                                                 )}
 
-                                                <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2">
-                                                    <div className="mb-2 mb-md-0">
-                                                        <p className="para text-primary mb-0">
+                                                <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-meta-row">
+                                                    <div className="mb-2 mb-md-0 collection-hotel-meta-copy">
+                                                        <p className="para text-primary mb-0 collection-hotel-pay-later">
                                                             <i className="fa-solid fa-circle-info me-2"></i>
                                                             Book Now Pay Later!
                                                         </p>
 
                                                         {infoBadges.length > 0 ? (
-                                                            <div className="mb-2">
+                                                            <div className="mb-2 collection-hotel-badges">
                                                                 {infoBadges.map((badge, idx) => (
                                                                     <p key={idx} className="para-12px mb-1 text-theme-green">
                                                                         <span
@@ -403,8 +403,8 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                             const discountPercentage = dealInfo?.discount_percentage;
                                                             const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
                                                             return (
-                                                                <div className="price-block p-1 rounded mb-3">
-                                                                    <p className="para-12px text-muted mb-1 text-end">1 night, 2 adults</p>
+                                                                <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
+                                                                    <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">1 night, 2 adults</p>
                                                                     {/* {discountPercentage > 0 && (
                                                                         <div className="text-end mb-1">
                                                                             <span className="badge bg-danger" style={{ fontSize: '11px' }}>
@@ -414,15 +414,15 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                                     )} */}
                                                                     {formattedOriginal && originalPrice > rate.price.total && (
                                                                         <p
-                                                                            className="para-12px mb-0 text-end"
+                                                                            className="para-12px mb-0 text-end collection-hotel-original-price"
                                                                             style={{ color: 'red', textDecoration: 'line-through' }}
                                                                         >
                                                                             {formattedOriginal}
                                                                         </p>
                                                                     )}
-                                                                    <div className="d-flex align-items-baseline justify-content-end">
+                                                                    <div className="d-flex align-items-baseline justify-content-end collection-hotel-current-price-row">
                                                                         <span
-                                                                            className="text-theme-orange fw-bold"
+                                                                            className="text-theme-orange fw-bold collection-hotel-current-price"
                                                                             style={{ fontSize: '24px' }}
                                                                         >
                                                                             {rate.price.book}
@@ -435,8 +435,8 @@ export default function CountryBrandHotelList({ hotels = [], brand, hotelRates =
                                                     })()}
                                                 </div>
 
-                                                <div className="row">
-                                                    <div className="col-12 col-md-4 col-lg-3 ms-auto">
+                                                <div className="row collection-hotel-cta-row">
+                                                    <div className="col-12 col-md-4 col-lg-3 ms-auto collection-hotel-cta-col">
                                                         <Link
                                                             className="theme-button-blue rounded-4 w-100 d-inline-flex align-items-center justify-content-center gap-2 p-2 hotel-availability-button"
                                                             href={`${hotel.url}`}

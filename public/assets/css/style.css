@@ -681,18 +681,18 @@ a:hover.custom-form-label {
     box-shadow: 5px 5px 25px rgba(24, 39, 75, 0.12);
     border-radius: 15px;
 }
-.property-grid-title {
+/* .property-grid-title {
     font-size: 16px;
     font-weight: 600;
     color: #0c1927;
     line-height: 1.5em;
     white-space: nowrap;
     max-width: 25ch;
-    -webkit-line-clamp: 1; /* number of lines to show */
+    -webkit-line-clamp: 1; 
     line-clamp: 1;
     text-overflow: ellipsis;
     overflow: hidden;
-}
+} */
 .section-heading-small-16px {
     font-size: 16px;
     font-weight: 600;
@@ -2066,6 +2066,142 @@ a.text-sky-blue:hover {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
 }
 
+.collection-hotel-title{
+    font-weight: 600 !important;
+}
+@media (max-width: 767.98px) {
+    .collection-hotel-card {
+        border-radius: 0 !important;
+        padding: 12px !important;
+        box-shadow: none !important;
+        border-bottom: 1px solid #dbe4ee !important;
+    }
+    .collection-hotel-card-row {
+        --bs-gutter-x: 12px;
+        --bs-gutter-y: 8px;
+        flex-wrap: nowrap;
+        align-items: stretch;
+    }
+    .collection-hotel-image-col {
+        flex: 0 0 38%;
+        width: 38%;
+    }
+    .collection-hotel-content-col {
+        flex: 0 0 62%;
+        width: 62%;
+    }
+    .collection-hotel-image-wrap,
+    .collection-hotel-image {
+        height: 100% !important;
+        min-height: 180px;
+        border-radius: 8px !important;
+    }
+    .collection-hotel-header {
+        margin-bottom: 8px !important;
+    }
+    .collection-hotel-title-row {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 2px;
+        margin-bottom: 14px !important;
+    }
+    /* .collection-hotel-title {
+        margin-right: 0 !important;
+        margin-bottom: 2px !important;
+        font-size: 18px !important;
+        line-height: 1.25;
+        color: #0b1f3a !important;
+    } */
+    .collection-hotel-title {
+        display: block;
+        /* max-width: 200px;  */
+        max-width: 50vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #0b1f3a !important;
+        font-weight: 600 !important;
+    }
+    .collection-hotel-stars {
+        display: none;
+    }
+    .collection-hotel-review-row {
+        align-items: flex-start !important;
+        margin-bottom: 8px;
+    }
+    .collection-hotel-rating-box {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 10px;
+    }
+    .collection-hotel-rating-text {
+        font-size: 15px !important;
+        line-height: 1.1;
+    }
+    .collection-hotel-review-count {
+        font-size: 12px !important;
+        line-height: 1.2;
+    }
+    .collection-hotel-facilities {
+        display: none !important;
+    }
+    .collection-hotel-address {
+        margin-bottom: 8px !important;
+        color: #111 !important;
+        font-size: 12px !important;
+        line-height: 1.35;
+    }
+    .collection-hotel-meta-row {
+        align-items: flex-start !important;
+        margin-bottom: 8px !important;
+    }
+    .collection-hotel-pay-later {
+        display: none;
+    }
+    .collection-hotel-badges p {
+        font-size: 12px !important;
+        line-height: 1.2;
+        margin-bottom: 2px !important;
+    }
+    .collection-hotel-price-block {
+        padding: 0 !important;
+        margin-bottom: 10px !important;
+        width: 100%;
+    }
+    .collection-hotel-price-caption {
+        display: none;
+    }
+    .collection-hotel-original-price {
+        text-align: left !important;
+        font-size: 12px !important;
+    }
+    .collection-hotel-current-price-row {
+        justify-content: flex-start !important;
+    }
+    .collection-hotel-current-price {
+        font-size: 18px !important;
+        color: #111 !important;
+    }
+    .collection-hotel-cta-row {
+        margin-top: 4px;
+    }
+    .collection-hotel-cta-col {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0 !important;
+    }
+    .collection-hotel-cta-col .hotel-availability-button {
+        border-radius: 4px !important;
+        min-height: 46px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+    .collection-hotel-cta-col .hotel-availability-button i {
+        display: none;
+    }
+}
+
 @keyframes shimmer {
     0% {
         background-position: -200% 0;
@@ -2425,7 +2561,9 @@ a.text-sky-blue:hover {
 }
 .hotel-list-card {
     cursor: pointer;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 .hotel-list-card:hover {
     background-color: #f1f3f5;
