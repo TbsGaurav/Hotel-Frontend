@@ -18,8 +18,7 @@ export default function CityHotelList({
     citySlug,
     regionHotelsSource = [],
     pageIntentCookieName = '',
-    pageCookieName,
-    fetchMoreHotels = null
+    pageCookieName
 }) {
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(hotels || []);
@@ -31,6 +30,12 @@ export default function CityHotelList({
     const loadMoreTriggerRef = useRef(null);
 
     const defaultImage = '/image/property-img.webp';
+    const getFirstDefined = (...values) => {
+        for (const value of values) {
+            if (value !== undefined && value !== null && value !== '') return value;
+        }
+        return null;
+    };
 
     useEffect(() => {
         const timer = window.setTimeout(() => {
@@ -50,12 +55,16 @@ export default function CityHotelList({
     }, []);
 
     useEffect(() => {
-        setAllHotels(hotels || []);
+        setAllHotels(dedupeHotels(hotels || []));
         setPage(currentPage || 1);
         setHasMore((hotels?.length || 0) < (totalCount || 0) || (hotels?.length || 0) === pageSize);
     }, [hotels, totalCount, currentPage, pageSize]);
 
     const getBookingId = (hotel) => hotel?.bookingId ?? null;
+    const getReviewScore = (hotel) =>
+        hotel?.reviewScore ?? hotel?.ReviewScore ?? hotel?.review_score ?? hotel?.ratingScore ?? hotel?.rating ?? hotel?.score ?? null;
+    const getReviewCount = (hotel) =>
+        hotel?.reviewCount ?? hotel?.ReviewCount ?? hotel?.review_count ?? hotel?.reviews ?? hotel?.reviewTotal ?? hotel?.totalReviews ?? null;
 
     const fetchRatesForHotels = async (hotelsToRate, selectedCurrency) => {
         const bookingIds = hotelsToRate.map(getBookingId).filter(Boolean);
@@ -117,6 +126,33 @@ export default function CityHotelList({
 
     const getHotelRate = (bookingId) => allRates.find((rate) => String(rate?.id) === String(bookingId));
 
+    const getHotelKey = (hotel, index) => {
+        const bookingId = getBookingId(hotel);
+        const rawKey = getFirstDefined(
+            bookingId,
+            hotel?.hotelId,
+            hotel?.hotelID,
+            hotel?.id,
+            hotel?.urlName,
+            hotel?.url
+        );
+
+        return rawKey ? `${rawKey}-${index}` : `hotel-${index}`;
+    };
+
+    const dedupeHotels = (list) => {
+        const seen = new Set();
+        const result = [];
+        list.forEach((hotel) => {
+            const id = getBookingId(hotel) ?? hotel?.hotelId ?? hotel?.hotelID ?? hotel?.id;
+            const key = id !== undefined && id !== null && id !== '' ? String(id) : null;
+            if (key && seen.has(key)) return;
+            if (key) seen.add(key);
+            result.push(hotel);
+        });
+        return result;
+    };
+
     const getRatingText = (score) => {
         const value = Number(score);
 
@@ -168,30 +204,6 @@ export default function CityHotelList({
             return;
         }
 
-        if (typeof fetchMoreHotels === 'function') {
-            const nextPage = page + 1;
-
-            fetchMoreHotels({ pageNumber: nextPage, pageSize })
-                .then((nextHotels) => {
-                    if (!nextHotels.length) {
-                        setHasMore(false);
-                        return;
-                    }
-
-                    setAllHotels((prev) => [...prev, ...nextHotels]);
-                    setPage(nextPage);
-                    setHasMore(nextHotels.length === pageSize);
-                })
-                .catch((error) => {
-                    console.error('Error loading more hotels:', error);
-                })
-                .finally(() => {
-                    setLoading(false);
-                });
-
-            return;
-        }
-
         if (!citySlug) {
             setHasMore(false);
             setLoading(false);
@@ -205,7 +217,7 @@ export default function CityHotelList({
                     return;
                 }
 
-                setAllHotels((prev) => [...prev, ...nextHotels]);
+                setAllHotels((prev) => dedupeHotels([...prev, ...nextHotels]));
                 setPage(nextPage);
                 setHasMore(nextHotels.length === pageSize);
 
@@ -261,8 +273,18 @@ export default function CityHotelList({
             {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
 
             <div className="d-flex flex-column gap-3">
-                {allHotels.map((hotel) => {
+                {allHotels.map((hotel, index) => {
                     const rate = getHotelRate(getBookingId(hotel));
+                    const reviewScore = getReviewScore(hotel);
+                    const reviewScoreValue =
+                        reviewScore !== null && reviewScore !== undefined && reviewScore !== ''
+                            ? Number(reviewScore)
+                            : null;
+                    const reviewCount = getReviewCount(hotel);
+                    const reviewCountValue =
+                        reviewCount !== null && reviewCount !== undefined && reviewCount !== ''
+                            ? Number(reviewCount)
+                            : null;
                     const badges = rate?.badges || [];
                     const hotelFacilitiesText = getHotelFacilitiesText(hotel);
                     const imageBadges = badges.filter(

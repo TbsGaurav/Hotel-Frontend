@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import CityHotelList from './CityHotelList';
 import { getSidebarData } from '@/lib/api/sidebarapi';
@@ -182,11 +183,17 @@ export default function CityCategoryDetails({
     const breadcrumb = (
         <div className="container">
             <div className="d-flex align-items-center small flex-wrap">
-                <span className="text-dark text-decoration-none">All countries</span>
+                <Link href="/destinations" className="text-dark text-decoration-none">
+                    All countries
+                </Link>
                 <span className="mx-2 text-muted">&bull;</span>
-                <span className="text-dark text-decoration-none">India</span>
+                <Link href="/countries" className="text-dark text-decoration-none">
+                    India
+                </Link>
                 <span className="mx-2 text-muted">&bull;</span>
-                <span className="text-dark text-decoration-none">Hotel {cityName || formatCityName(citySlug)}</span>
+                <Link href={`/${toSlug(citySlug)}`} className="text-dark text-decoration-none">
+                    Hotel {cityName || formatCityName(citySlug)}
+                </Link>
                 <span className="mx-2 text-muted">&bull;</span>
                 <span className="text-primary">{categoryName || formatCityName(categorySlug)}</span>
             </div>
