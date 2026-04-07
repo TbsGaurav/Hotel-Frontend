@@ -228,7 +228,7 @@ function CountryHeroSection({}) {
                                 <label className="form-label custom-form-label text-white">Destination or Hotel Name</label>
                                 <div className="input-group custom-input-group-textbox">
                                     <span className="input-group-text bg-white">
-                                        <i className="fa-solid fa-magnifying-glass"></i>
+                                        {/* <i className="fa-solid fa-magnifying-glass"></i> */}
                                     </span>
                                     <input
                                         type="text"
@@ -285,7 +285,7 @@ function CountryHeroSection({}) {
                                                     }}
                                                     style={{ cursor: 'pointer' }}
                                                 >
-                                                    <LuCalendarRange />
+                                                    {/* <LuCalendarRange /> */}
                                                 </span>
                                             </div>
                                         </div>
