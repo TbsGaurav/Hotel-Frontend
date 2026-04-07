@@ -7,7 +7,9 @@ export default function CityCategoryRouteApp({
     categorySlug = '',
     resolvedCategoryId = null,
     resolvedCityId = null,
-    resolvedCityName = ''
+    resolvedCityName = '',
+    resolvedRegionId = null,
+    resolvedRegionName = ''
 }) {
     return (
         <CityCategoryDetails
@@ -16,6 +18,8 @@ export default function CityCategoryRouteApp({
             resolvedCategoryId={resolvedCategoryId}
             resolvedCityId={resolvedCityId}
             resolvedCityName={resolvedCityName}
+            resolvedRegionId={resolvedRegionId}
+            resolvedRegionName={resolvedRegionName}
         />
     );
 }

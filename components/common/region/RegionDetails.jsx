@@ -17,6 +17,16 @@ function toSlug(value = '') {
     return value.toLowerCase().replace(/\s+/g, '-');
 }
 
+function buildRegionCategorySlug(label = '', regionSlug = '', sectionId = '') {
+    const normalizedLabel = toSlug(label);
+    const normalizedRegion = toSlug(regionSlug);
+    if (!normalizedLabel) return '';
+    if (sectionId === 'property-type' && normalizedRegion) {
+        return `${normalizedRegion}-${normalizedLabel}`;
+    }
+    return normalizedLabel;
+}
+
 function getRegionPageCookieName(countrySlug = '', regionSlug = '') {
     return `region_page_${toSlug(countrySlug)}_${toSlug(regionSlug)}`;
 }
@@ -112,6 +122,33 @@ export default async function RegionDetails({ params, regionId }) {
         contextName: regionName,
         propertyTypeHeader: regionName ? `${regionName} Hotels` : 'Property Type'
     });
+    const normalizedRegionSlug = toSlug(regionSlug);
+    const sidebarSectionsWithLinks = sidebarSections.map((section) => ({
+        ...section,
+        items: (section.items || []).map((item) => {
+            const label = String(item?.categoryName ?? item?.name ?? item?.label ?? '').trim();
+            const categoryId = item?.categoryId ?? item?.CategoryId ?? item?.id ?? null;
+            const categorySlug = buildRegionCategorySlug(label, normalizedRegionSlug, section.sectionId);
+            if (!categorySlug) return item;
+            const query = new URLSearchParams();
+            if (categoryId !== null && categoryId !== undefined && categoryId !== '') {
+                query.set('categoryId', String(categoryId));
+            }
+            if (regionId !== null && regionId !== undefined && regionId !== '') {
+                query.set('regionId', String(regionId));
+            }
+
+            const baseHref = `/${encodeURIComponent(normalizedRegionSlug)}/${encodeURIComponent(categorySlug)}`;
+            const href = query.toString() ? `${baseHref}?${query.toString()}` : baseHref;
+
+            return {
+                ...item,
+                href,
+                categoryId,
+                regionId
+            };
+        })
+    }));
 
     const cookieStore = await cookies();
     const regionPageCookieName = getRegionPageCookieName(countrySlug, regionSlug);
@@ -173,7 +210,7 @@ export default async function RegionDetails({ params, regionId }) {
                     <hr className="my-5" />
 
                     <div className="col-lg-3">
-                        <ListingSidebar title="Filters" sections={sidebarSections} />
+                        <ListingSidebar title="Filters" sections={sidebarSectionsWithLinks} />
                     </div>
 
                     <div className="col-lg-9">

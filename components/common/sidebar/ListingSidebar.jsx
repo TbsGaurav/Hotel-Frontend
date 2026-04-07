@@ -39,7 +39,7 @@ function normalizeHref(item, label) {
     return `#${String(raw).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 }
 
-function LinkRow({ label, href, isActive = false, onClick = null }) {
+function LinkRow({ label, href, isActive = false, onClick = null, item = null }) {
     const className = [
         'sidebar-filter-link d-flex align-items-start gap-2 w-100 text-start',
         isActive ? 'active fw-semibold' : ''
@@ -47,15 +47,45 @@ function LinkRow({ label, href, isActive = false, onClick = null }) {
         .filter(Boolean)
         .join(' ');
 
+    const storeSelectionContext = () => {
+        if (typeof window === 'undefined') return;
+
+        try {
+            const categoryId = item?.categoryId ?? item?.CategoryId ?? item?.id ?? null;
+            const regionId = item?.regionId ?? item?.RegionId ?? null;
+
+            if (categoryId || regionId) {
+                const payload = JSON.stringify({
+                    categoryId,
+                    regionId,
+                    href
+                });
+                sessionStorage.setItem('listingCategoryContext', payload);
+                document.cookie = `listingCategoryContext=${encodeURIComponent(payload)}; path=/; max-age=120; SameSite=Lax`;
+            }
+        } catch (error) {
+            console.error('Unable to store listing context:', error);
+        }
+    };
+
     return (
         <li className="sidebar-filter-item">
             <Link
                 href={href}
                 className={className}
+                onMouseDown={storeSelectionContext}
                 onClick={(event) => {
                     if (typeof onClick === 'function') {
                         event.preventDefault();
+                        storeSelectionContext();
                         onClick(event);
+                        return;
+                    }
+                    storeSelectionContext();
+                }}
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        storeSelectionContext();
                     }
                 }}
                 style={
@@ -153,7 +183,16 @@ function SectionBlock({ title, items = [], maxVisible = 5, defaultOpen = true, e
                             const href = normalizeHref(item, label);
                             const isActive = Boolean(item?.isActive);
 
-                            return <LinkRow key={key || label} label={label} href={href} isActive={isActive} onClick={item?.onClick} />;
+                            return (
+                                <LinkRow
+                                    key={key || label}
+                                    label={label}
+                                    href={href}
+                                    isActive={isActive}
+                                    onClick={item?.onClick}
+                                    item={item}
+                                />
+                            );
                         })}
                     </ul>
                 ) : (
