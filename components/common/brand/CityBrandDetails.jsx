@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
-import { getCityBrandHotels } from '@/lib/api/public/brandapi';
+import { getHotelList } from '@/lib/api/public/hotelapi';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { getSidebarData } from '@/lib/api/sidebarapi';
 import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
@@ -49,14 +49,14 @@ export default async function CityBrandDetails({ params }) {
 
     const citySlug = slug[0];
     const brandSlug = decodeURIComponent(slug[1]);
-    const cityName = capitalize(citySlug);
     const brandName = brandSlug;
-    const formattedBrand = formatBrand(brandName);
-    const fullSlug = `/${cityName}/${brandName}`;
+    const cityName = capitalize(citySlug);
+    const formattedBrand = formatBrand(brandSlug);
+    const fullSlug = `${citySlug}/${brandSlug}`;
 
     const cookieStore = await cookies();
-    const pageCookieName = getCityBrandPageCookieName(citySlug, brandName);
-    const pageIntentCookieName = getCityBrandPageIntentCookieName(citySlug, brandName);
+    const pageCookieName = getCityBrandPageCookieName(citySlug, brandSlug);
+    const pageIntentCookieName = getCityBrandPageIntentCookieName(citySlug, brandSlug);
     const hasPaginationIntent = Boolean(cookieStore.get(pageIntentCookieName)?.value);
     const currentPage = hasPaginationIntent ? parsePageNumber(cookieStore.get(pageCookieName)?.value) : 1;
 
@@ -66,21 +66,24 @@ export default async function CityBrandDetails({ params }) {
 
     try {
         for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
-            const pageHotels = await getCityBrandHotels(fullSlug, pageNumber, PAGE_SIZE);
-            const nextHotels = pageHotels || [];
+            const pageResponse = await getHotelList(fullSlug, pageNumber, PAGE_SIZE);
+            const nextHotels = pageResponse?.hotels || [];
 
             if (!nextHotels.length) {
                 break;
             }
 
+            if (pageNumber === 1) {
+                totalCount = pageResponse?.totalCount || 0;
+                
+                // Extract cityId from API response
+                const apiCityId = pageResponse?.cityId;
+                if (apiCityId !== null && apiCityId !== undefined) {
+                    sidebarData = await getSidebarData({ cityId: apiCityId });
+                }
+            }
+
             hotels = hotels.concat(nextHotels);
-        }
-
-        totalCount = hotels[0]?.totalCount || hotels.length;
-
-        const cityId = hotels[0]?.cityId ?? hotels[0]?.CityId;
-        if (cityId) {
-            sidebarData = await getSidebarData({ cityId });
         }
     } catch (err) {
         console.error('Error initializing city brand details:', err);
@@ -97,6 +100,21 @@ export default async function CityBrandDetails({ params }) {
     return (
         <>
             <CountryHeroSection />
+            <section className="mobile-actions d-lg-none">
+                <div className="container px-0">
+                    <div className="mobile-actions__bottom">
+                        <button type="button" className="mobile-actions__link">
+                            Sort
+                        </button>
+                        <button type="button" className="mobile-actions__link">
+                            Filter
+                        </button>
+                        <button type="button" className="mobile-actions__link">
+                            Map
+                        </button>
+                    </div>
+                </div>
+            </section>
             <div className="breadcrumb-section">
                 <div className="container">
                     <div className="d-flex align-items-center small">
@@ -142,7 +160,8 @@ export default async function CityBrandDetails({ params }) {
                                 totalCount={totalCount}
                                 currentPage={currentPage}
                                 pageSize={PAGE_SIZE}
-                                citySlugPath={`${toSlug(cityName)}/${toSlug(brandName)}`}
+                                citySlug={fullSlug}
+                                citySlugPath={fullSlug}
                                 pageCookieName={pageCookieName}
                                 pageIntentCookieName={pageIntentCookieName}
                             />

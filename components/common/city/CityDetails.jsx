@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import CityHotelList from './CityHotelList';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
-import { getCityHotels } from '@/lib/api/public/cityapi';
+import { getHotelList } from '@/lib/api/public/hotelapi';
 import { getCountriesApi } from '@/lib/api/public/countryapi';
 import { getSidebarData } from '@/lib/api/sidebarapi';
 import { buildCategorySidebarSections } from '@/lib/api/public/cityCategoryapi';
@@ -64,18 +64,26 @@ export default async function CityDetails({ params }) {
     if (citySlug) {
         try {
             for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
-                const pageData = await getCityHotels(citySlug, pageNumber, PAGE_SIZE);
-                const nextHotels = pageData || [];
+                const pageResponse = await getHotelList(citySlug, pageNumber, PAGE_SIZE);
+                const nextHotels = pageResponse?.hotels || [];
 
                 if (!nextHotels.length) {
                     break;
                 }
 
+                if (pageNumber === 1) {
+                    totalCount = pageResponse?.totalCount || nextHotels.length;
+                    content = nextHotels[0]?.content || '';
+                    
+                    // Extract IDs from API response (not from first hotel)
+                    const apiCityId = pageResponse?.cityId;
+                    if (apiCityId !== null && apiCityId !== undefined) {
+                        sidebarData = await getSidebarData({ cityId: apiCityId });
+                    }
+                }
+
                 hotels = hotels.concat(nextHotels);
             }
-
-            content = hotels[0]?.content || '';
-            totalCount = hotels[0]?.totalCount || hotels.length;
 
             if (hotels.length > 0) {
                 const firstHotel = hotels[0];
@@ -97,12 +105,6 @@ export default async function CityDetails({ params }) {
                         }
                     }
                 }
-
-                const cityId = getFirstDefined(firstHotel?.cityId, firstHotel?.cityId, firstHotel?.CityId);
-
-                if (cityId) {
-                    sidebarData = await getSidebarData({ cityId });
-                }
             }
         } catch (error) {
             console.error('Error fetching hotels:', error);
@@ -117,7 +119,21 @@ export default async function CityDetails({ params }) {
     return (
         <>
             <CountryHeroSection />
-
+            <section className="mobile-actions d-lg-none">
+                <div className="container px-0">
+                    <div className="mobile-actions__bottom">
+                        <button type="button" className="mobile-actions__link">
+                            Sort
+                        </button>
+                        <button type="button" className="mobile-actions__link">
+                            Filter
+                        </button>
+                        <button type="button" className="mobile-actions__link">
+                            Map
+                        </button>
+                    </div>
+                </div>
+            </section>
             <div className="py-2">
                 <div className="container">
                     <div className="d-flex align-items-center small">

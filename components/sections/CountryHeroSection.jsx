@@ -9,7 +9,7 @@ import '../../public/assets/css/DatePicker.css';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { globalSearchapi } from '@/lib/api/public/globalsearchapi';
 
-function CountryHeroSection({ }) {
+function CountryHeroSection({}) {
     const [checkInDate, setCheckInDate] = useState(null);
     const [checkOutDate, setCheckOutDate] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -221,7 +221,10 @@ function CountryHeroSection({ }) {
                 <div className="container p-2 hero-search-shell country-hero-search-shell">
                     <form action="#">
                         <div className="row align-items-end hero-search-row country-hero-search-row" style={{ gap: '11px 0' }}>
-                            <div className="col-12 col-md-4 col-lg-3 mb-3 mb-lg-0 position-relative hero-search-col hotel-search-col" ref={searchRef}>
+                            <div
+                                className="col-12 col-md-4 col-lg-3 mb-3 mb-lg-0 position-relative hero-search-col hotel-search-col"
+                                ref={searchRef}
+                            >
                                 <label className="form-label custom-form-label text-white">Destination or Hotel Name</label>
                                 <div className="input-group custom-input-group-textbox">
                                     <span className="input-group-text bg-white">
@@ -370,10 +373,7 @@ function CountryHeroSection({ }) {
                                     )}
                                 </div>
                             </div>
-                            <div
-                                className="col-12 col-md-6 col-lg-2 mb-3 mb-lg-0 hero-search-col rooms-search-col"
-                                ref={roomsDropdownRef}
-                            >
+                            <div className="col-12 col-md-6 col-lg-2 mb-3 mb-lg-0 hero-search-col rooms-search-col" ref={roomsDropdownRef}>
                                 <label htmlFor="daterange" className="form-label custom-form-label text-white">
                                     Rooms & Guests
                                 </label>
@@ -465,7 +465,11 @@ function CountryHeroSection({ }) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-4 col-md-2 col-lg-1 mb-3 mb-lg-0 hero-search-col children-search-col country-children-search-col">
+                            <div
+                                className={`col-6 col-md-3 col-lg-2 hero-search-col children-search-col country-children-search-col country-children-select-col${
+                                    childrenCount === 0 ? ' country-children-select-col--empty' : ''
+                                }`}
+                            >
                                 <label className="form-label custom-form-label text-white">Children</label>
                                 <select
                                     className="dropdown-toggle rooms-guest-dd form-select custom-input-select-children-dd"
@@ -479,7 +483,8 @@ function CountryHeroSection({ }) {
                                     ))}
                                 </select>
                             </div>
-                            <div className="col-3 col-md-1 col-lg-1 mb-0 mb-lg-0 hero-search-col filter-search-col country-filter-search-col">
+
+                            <div className="col-3 col-md-2 col-lg-1 mb-0 mb-lg-0 hero-search-col filter-search-col country-filter-search-col">
                                 <label className="custom-form-label text-white form-label-maring-bottom">Filter</label>
                                 <div
                                     className={`filter-button d-flex${showFilters ? ' active' : ''}`}
@@ -490,20 +495,13 @@ function CountryHeroSection({ }) {
                                     <img src="/image/filter.webp" className="m-auto" alt="" />
                                 </div>
                             </div>
-                            <div className="col-9 col-md-5 col-lg-3 mb-0 mb-lg-0 hero-search-col submit-search-col country-submit-search-col">
-                                <button
-                                    type="submit"
-                                    className="theme-button-orange rounded rounded rounded rounded rounded w-100 font-weight-bold-submit-search country-submit-search-button"
-                                >
-                                    See Deals Now
-                                </button>
-                            </div>
+
                             {childrenCount > 0 && (
-                                <div className="col-12 mb-3 mb-lg-0">
+                                <div className="col-12 col-lg-auto mb-3 mb-lg-0 hero-search-col country-age-search-col">
                                     <label className="form-label custom-form-label text-white">Age</label>
-                                    <div className="row g-2">
+                                    <div className="country-age-search-col__list">
                                         {childrenAges.map((age, index) => (
-                                            <div key={index} className="col-4 col-md-2 col-lg-1">
+                                            <div key={index} className="country-age-search-col__item">
                                                 <select
                                                     className="dropdown-toggle rooms-guest-dd form-select custom-input-select-children-dd"
                                                     value={age}
@@ -520,6 +518,15 @@ function CountryHeroSection({ }) {
                                     </div>
                                 </div>
                             )}
+
+                            <div className="col-9 col-md-5 col-lg-3 mb-0 mb-lg-0 hero-search-col submit-search-col country-submit-search-col">
+                                <button
+                                    type="submit"
+                                    className="theme-button-orange rounded rounded rounded rounded rounded w-100 font-weight-bold-submit-search country-submit-search-button"
+                                >
+                                    See Deals Now
+                                </button>
+                            </div>
                         </div>
                         {showFilters && (
                             <div className="advaance-form-field-wrap mt-4 p-3 p-md-5" id="filterSection">

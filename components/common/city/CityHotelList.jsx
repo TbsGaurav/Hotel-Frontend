@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
-import { getCityHotels } from '@/lib/api/public/cityapi';
-import { getHotelRates } from '@/lib/api/public/hotelapi';
+import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 
 export default function CityHotelList({
@@ -210,8 +209,9 @@ export default function CityHotelList({
             return;
         }
 
-        getCityHotels(citySlug, nextPage, pageSize)
-            .then((nextHotels) => {
+        getHotelList(citySlug, nextPage, pageSize)
+            .then((response) => {
+                const nextHotels = response?.hotels || [];
                 if (!nextHotels.length) {
                     setHasMore(false);
                     return;

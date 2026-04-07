@@ -2,10 +2,9 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import Dropdown from '@/components/ui/Dropdown';
-import { getCitiesByRegion } from '@/lib/api/public/countryapi';
-import { getCityHotels } from '@/lib/api/public/cityapi';
+import { getCitiesByRegion } from '@/lib/api/public/regionapi';
+import { getHotelList } from '@/lib/api/public/hotelapi';
 import { getSidebarData } from '@/lib/api/sidebarapi';
-import { getRegionHotels } from '@/lib/api/public/regionapi';
 import CityHotelList from '../city/CityHotelList';
 import { formatCountryName } from '@/lib/utils';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
@@ -64,7 +63,8 @@ async function fetchAllHotelsFromCities(cities = [], hotelsPerPage = REGION_PAGE
             let cityPage = 1;
 
             while (true) {
-                const hotelsForPage = await getCityHotels(citySlug, cityPage, hotelsPerPage);
+                const pageResponse = await getHotelList(citySlug, cityPage, hotelsPerPage);
+                const hotelsForPage = pageResponse?.hotels || [];
 
                 if (!hotelsForPage.length) {
                     break;
@@ -94,7 +94,7 @@ export default async function RegionDetails({ params, regionId }) {
     const countryName = formatCountryName(countrySlug);
     const regionName = formatCountryName(regionSlug);
 
-    const urlName = `/${countrySlug}/${regionSlug}`;
+    const urlName = `${countrySlug}/${regionSlug}`;
 
     const response = await getCitiesByRegion(countrySlug, regionSlug);
     const regionData = response?.data;
@@ -108,11 +108,53 @@ export default async function RegionDetails({ params, regionId }) {
             .toLowerCase()
             .replace(/\s+/g, '-')}`
     }));
+    const normalizedRegionSlug = toSlug(regionSlug);
 
+    const cookieStore = await cookies();
+    const regionPageCookieName = getRegionPageCookieName(countrySlug, regionSlug);
+    const pageIntentCookieName = getRegionPageIntentCookieName(countrySlug, regionSlug);
+    const hasPaginationIntent = Boolean(cookieStore.get(pageIntentCookieName)?.value);
+    const currentPage = hasPaginationIntent ? parsePageNumber(cookieStore.get(regionPageCookieName)?.value) : 1;
+
+    const requestedCount = currentPage * REGION_PAGE_SIZE;
+
+    let hotels = [];
+    let totalCount = cities.reduce((sum, city) => sum + Number(city?.hotelCount || 0), 0);
+    let fallbackRegionHotels = [];
+    let resolvedRegionId = regionId;
+
+    try {
+        for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
+            const pageResponse = await getHotelList(urlName, pageNumber, REGION_PAGE_SIZE);
+            const nextHotels = pageResponse?.hotels || [];
+
+            if (!nextHotels.length) break;
+
+            if (pageNumber === 1) {
+                // Extract regionId from API response
+                if (pageResponse?.regionId) {
+                    resolvedRegionId = pageResponse.regionId;
+                }
+                totalCount = pageResponse?.totalCount || 0;
+            }
+
+            hotels = hotels.concat(nextHotels);
+        }
+
+        if (!hotels.length && cities.length > 0) {
+            fallbackRegionHotels = await fetchAllHotelsFromCities(cities, REGION_PAGE_SIZE);
+            totalCount = fallbackRegionHotels.length;
+            hotels = fallbackRegionHotels.slice(0, requestedCount);
+        }
+    } catch (err) {
+        console.error('Region hotels error:', err);
+    }
+
+    // Fetch sidebar data using extracted regionId
     let sidebarData = {};
-    if (regionId) {
+    if (resolvedRegionId) {
         try {
-            sidebarData = await getSidebarData({ regionId });
+            sidebarData = await getSidebarData({ regionId: resolvedRegionId });
         } catch (error) {
             console.error('Error fetching region sidebar data:', error);
         }
@@ -122,7 +164,7 @@ export default async function RegionDetails({ params, regionId }) {
         contextName: regionName,
         propertyTypeHeader: regionName ? `${regionName} Hotels` : 'Property Type'
     });
-    const normalizedRegionSlug = toSlug(regionSlug);
+
     const sidebarSectionsWithLinks = sidebarSections.map((section) => ({
         ...section,
         items: (section.items || []).map((item) => {
@@ -150,43 +192,24 @@ export default async function RegionDetails({ params, regionId }) {
         })
     }));
 
-    const cookieStore = await cookies();
-    const regionPageCookieName = getRegionPageCookieName(countrySlug, regionSlug);
-    const pageIntentCookieName = getRegionPageIntentCookieName(countrySlug, regionSlug);
-    const hasPaginationIntent = Boolean(cookieStore.get(pageIntentCookieName)?.value);
-    const currentPage = hasPaginationIntent ? parsePageNumber(cookieStore.get(regionPageCookieName)?.value) : 1;
-
-    const requestedCount = currentPage * REGION_PAGE_SIZE;
-
-    let hotels = [];
-    let totalCount = cities.reduce((sum, city) => sum + Number(city?.hotelCount || 0), 0);
-    let fallbackRegionHotels = [];
-
-    try {
-        for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
-            const res = await getRegionHotels(urlName, pageNumber, REGION_PAGE_SIZE);
-
-            const nextHotels = res?.hotelData || [];
-
-            if (!nextHotels.length) break;
-
-            hotels = hotels.concat(nextHotels);
-            totalCount = res?.totalCount || 0;
-        }
-
-        if (!hotels.length && cities.length > 0) {
-            fallbackRegionHotels = await fetchAllHotelsFromCities(cities, REGION_PAGE_SIZE);
-            totalCount = fallbackRegionHotels.length;
-            hotels = fallbackRegionHotels.slice(0, requestedCount);
-        }
-    } catch (err) {
-        console.error('Region hotels error:', err);
-    }
-
     return (
         <>
             <CountryHeroSection />
-
+            <section className="mobile-actions d-lg-none">
+                <div className="container px-0">
+                    <div className="mobile-actions__bottom">
+                        <button type="button" className="mobile-actions__link">
+                            Sort
+                        </button>
+                        <button type="button" className="mobile-actions__link">
+                            Filter
+                        </button>
+                        <button type="button" className="mobile-actions__link">
+                            Map
+                        </button>
+                    </div>
+                </div>
+            </section>
             <div className="py-2">
                 <div className="container">
                     <div className="d-flex align-items-center small">

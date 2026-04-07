@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
-import { getCountryBrandHotels } from '@/lib/api/public/brandapi';
+import { getHotelList } from '@/lib/api/public/hotelapi';
 import { getCitySidebar } from '@/lib/api/public/cityapi';
 import { getCountryByUrlName, resolveSlug } from '@/lib/api/public/countryapi';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
@@ -67,14 +67,14 @@ export default async function CountryBrandDetails({ params }) {
 
     const countrySlug = slug[0];
     const brandSlug = decodeURIComponent(slug[1]);
-    const countryName = capitalize(countrySlug);
     const brandName = brandSlug;
-    const formattedBrand = formatBrand(brandName);
-    const fullSlug = `/${countrySlug}/${brandName}`;
+    const countryName = capitalize(countrySlug);
+    const formattedBrand = formatBrand(brandSlug);
+    const fullSlug = `${countrySlug}/${brandSlug}`;
 
     const cookieStore = await cookies();
-    const pageCookieName = getCountryBrandPageCookieName(countrySlug, brandName);
-    const pageIntentCookieName = getCountryBrandPageIntentCookieName(countrySlug, brandName);
+    const pageCookieName = getCountryBrandPageCookieName(countrySlug, brandSlug);
+    const pageIntentCookieName = getCountryBrandPageIntentCookieName(countrySlug, brandSlug);
     const hasPaginationIntent = Boolean(cookieStore.get(pageIntentCookieName)?.value);
     const currentPage = hasPaginationIntent ? parsePageNumber(cookieStore.get(pageCookieName)?.value) : 1;
 
@@ -95,26 +95,25 @@ export default async function CountryBrandDetails({ params }) {
         }
 
         for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
-            const pageHotels = await getCountryBrandHotels(fullSlug, pageNumber, PAGE_SIZE);
-            const nextHotels = pageHotels || [];
-            lastFetchedPageSize = nextHotels.length;
+            const pageResponse = await getHotelList(fullSlug, pageNumber, PAGE_SIZE);
+            const nextHotels = pageResponse?.hotels || [];
 
             if (!nextHotels.length) {
                 break;
             }
 
-            hotels = hotels.concat(nextHotels);
-            totalCount = Math.max(totalCount, resolveTotalCount(nextHotels));
+            if (pageNumber === 1) {
+                totalCount = pageResponse?.totalCount || 0;
 
-            if (nextHotels.length < PAGE_SIZE) {
-                break;
+                // Extract countryId from API response if not already resolved
+                if (!countryId) {
+                    countryId = pageResponse?.countryId;
+                }
             }
-        }
 
-        const firstHotel = hotels[0];
-        countryId =
-            countryId ||
-            getFirstDefined(firstHotel?.countryId, firstHotel?.countryId, firstHotel?.CountryId);
+            hotels = hotels.concat(nextHotels);
+            lastFetchedPageSize = nextHotels.length;
+        }
 
         if (countryId) {
             const sidebar = await getCitySidebar({ countryId });
@@ -133,6 +132,21 @@ export default async function CountryBrandDetails({ params }) {
     return (
         <>
             <CountryHeroSection />
+            <section className="mobile-actions d-lg-none">
+                <div className="container px-0">
+                    <div className="mobile-actions__bottom">
+                        <button type="button" className="mobile-actions__link">
+                            Sort
+                        </button>
+                        <button type="button" className="mobile-actions__link">
+                            Filter
+                        </button>
+                        <button type="button" className="mobile-actions__link">
+                            Map
+                        </button>
+                    </div>
+                </div>
+            </section>
             <div className="breadcrumb-section">
                 <div className="container">
                     <div className="d-flex align-items-center small">
@@ -167,20 +181,22 @@ export default async function CountryBrandDetails({ params }) {
                     </div>
 
                     <div className="col-lg-9 order-1 order-lg-2">
-                        {hotels.length > 0 ? (
-                            <CountryBrandHotelList
-                                hotels={hotels}
-                                brand={brandName}
-                                currentPage={currentPage}
-                                hasMore={hasMore}
-                                pageCookieName={pageCookieName}
-                                pageIntentCookieName={pageIntentCookieName}
-                            />
-                        ) : (
-                            <div className="text-center py-5">
-                                <p className="text-muted">No hotels available for this brand in {displayCountryName}.</p>
-                            </div>
-                        )}
+                        <div id="country-brand-hotel-list">
+                            {hotels.length > 0 ? (
+                                <CountryBrandHotelList
+                                    hotels={hotels}
+                                    brand={brandName}
+                                    currentPage={currentPage}
+                                    hasMore={hasMore}
+                                    pageCookieName={pageCookieName}
+                                    pageIntentCookieName={pageIntentCookieName}
+                                />
+                            ) : (
+                                <div className="text-center py-5">
+                                    <p className="text-muted">No hotels available for this brand in {displayCountryName}.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </section>
