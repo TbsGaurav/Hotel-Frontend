@@ -7,6 +7,7 @@ import { getCountryByUrlName, resolveSlug } from '@/lib/api/public/countryapi';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { buildListingSidebarSections } from '@/lib/listingSidebar';
 import CountryBrandHotelList from '../hotel/CountryBrandHotelList';
+import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 
 function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -91,7 +92,11 @@ export default async function CountryBrandDetails({ params }) {
 
         if (!countryId) {
             const countrySlugInfo = await resolveSlug(`/${countrySlug}`);
-            countryId = getFirstDefined(countrySlugInfo?.data?.countryId, countrySlugInfo?.data?.countryId, countrySlugInfo?.data?.entityId);
+            countryId = getFirstDefined(
+                countrySlugInfo?.data?.countryId,
+                countrySlugInfo?.data?.countryId,
+                countrySlugInfo?.data?.entityId
+            );
         }
 
         for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
@@ -138,43 +143,46 @@ export default async function CountryBrandDetails({ params }) {
                         <button type="button" className="mobile-actions__link">
                             Sort
                         </button>
-                        <button type="button" className="mobile-actions__link">
-                            Filter
-                        </button>
+                        <MobileFilterDrawer sidebarSections={sidebarSections} />
                         <button type="button" className="mobile-actions__link">
                             Map
                         </button>
                     </div>
                 </div>
             </section>
-            <div className="breadcrumb-section">
+            <div className="py-2 py-lg-3">
                 <div className="container">
-                    <div className="d-flex align-items-center small">
-                        <Link href="/brands" className="text-dark text-decoration-none">
-                            All Brands
-                        </Link>
+                    <nav aria-label="breadcrumb" className="mb-0">
+                        <ol className="breadcrumb mb-0">
+                            <li className="breadcrumb-item small-para-14-px">
+                                <Link href="/brands" className="text-dark text-decoration-none">
+                                    All Brands
+                                </Link>
+                            </li>
 
-                        <span className="mx-2 text-muted">&bull;</span>
+                            <li className="breadcrumb-item small-para-14-px">
+                                <Link href={`/brand/${brandName}`} className="text-dark text-decoration-none text-capitalize">
+                                    {formattedBrand}
+                                </Link>
+                            </li>
 
-                        <Link href={`/brand/${brandName}`} className="text-dark text-decoration-none text-capitalize">
-                            {formattedBrand}
-                        </Link>
-
-                        <span className="mx-2 text-muted">&bull;</span>
-
-                        <Link href={`/${countrySlug}/${brandName}`} className=" text-decoration-none text-primary text-capitalize">
-                            {countryName}
-                        </Link>
-                    </div>
+                            <li className="breadcrumb-item small-para-14-px active text-capitalize">
+                                <Link href={`/${countrySlug}/${brandName}`} className="text-decoration-none">
+                                    {displayCountryName}
+                                </Link>
+                            </li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
 
-            <section className="container py-5">
+            <section className="container py-2">
                 <h3 className="mb-4 text-capitalize">
                     {formattedBrand} {displayCountryName}
                 </h3>
                 <div className="row g-4 align-items-start">
-                    <div className="col-lg-3 order-2 order-lg-1">
+                    <div className="col-lg-3 d-none d-lg-block order-lg-1">
+                        {' '}
                         <div className="position-sticky" style={{ top: '16px' }}>
                             <ListingSidebar title="Filters" sections={sidebarSections} />
                         </div>

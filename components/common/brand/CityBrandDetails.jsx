@@ -6,6 +6,7 @@ import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { getSidebarData } from '@/lib/api/sidebarapi';
 import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
 import CityHotelList from '../city/CityHotelList';
+import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 
 function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -75,7 +76,7 @@ export default async function CityBrandDetails({ params }) {
 
             if (pageNumber === 1) {
                 totalCount = pageResponse?.totalCount || 0;
-                
+
                 // Extract cityId from API response
                 const apiCityId = pageResponse?.cityId;
                 if (apiCityId !== null && apiCityId !== undefined) {
@@ -106,54 +107,62 @@ export default async function CityBrandDetails({ params }) {
                         <button type="button" className="mobile-actions__link">
                             Sort
                         </button>
-                        <button type="button" className="mobile-actions__link">
-                            Filter
-                        </button>
+                        <MobileFilterDrawer sidebarSections={sidebarSections} />
                         <button type="button" className="mobile-actions__link">
                             Map
                         </button>
                     </div>
                 </div>
             </section>
-            <div className="breadcrumb-section">
+            <div className="py-2 py-lg-3">
                 <div className="container">
-                    <div className="d-flex align-items-center small">
-                        <Link href="/brands" className="text-dark text-decoration-none">
-                            All Brands
-                        </Link>
-                        <span className="mx-2 text-muted">&bull;</span>
-                        <Link href={`/brand/${brandName}`} className="text-dark text-decoration-none text-capitalize">
-                            {formattedBrand}
-                        </Link>
-                        {countrySlug && (
-                            <>
-                                <span className="mx-2 text-muted">&bull;</span>
-                                <Link href={`/${countrySlug}/${brandName}`} className="text-dark text-decoration-none text-capitalize">
-                                    {formattedBrand} {countrySlug}
+                    <nav aria-label="breadcrumb" className="mb-0">
+                        <ol className="breadcrumb mb-0">
+                            <li className="breadcrumb-item small-para-14-px">
+                                <Link href="/brands" className="text-dark text-decoration-none">
+                                    All Brands
                                 </Link>
-                            </>
-                        )}
-                        <span className="mx-2 text-muted">&bull;</span>
-                        <span className="text-primary text-capitalize">
-                            {formattedBrand} {cityName}
-                        </span>
-                    </div>
+                            </li>
+
+                            <li className="breadcrumb-item small-para-14-px">
+                                <Link href={`/brand/${brandName}`} className="text-dark text-decoration-none text-capitalize">
+                                    {formattedBrand}
+                                </Link>
+                            </li>
+
+                            {countrySlug && (
+                                <li className="breadcrumb-item small-para-14-px">
+                                    <Link href={`/${countrySlug}/${brandName}`} className="text-dark text-decoration-none text-capitalize">
+                                        {formattedBrand} {countrySlug}
+                                    </Link>
+                                </li>
+                            )}
+
+                            <li className="breadcrumb-item small-para-14-px active text-capitalize">
+                                <Link href={`/${toSlug(cityName)}/${toSlug(brandName)}`} className="text-decoration-none">
+                                    {formattedBrand} {cityName}
+                                </Link>
+                            </li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
+            
 
-            <section className="container py-5">
+            <section className="container py-2">
                 <h3 className="mb-4 text-capitalize">
                     {formattedBrand} {cityName}
                 </h3>
-
                 <div className="row g-4 align-items-start">
-                    <div className="col-lg-3 order-2 order-lg-1">
+                    <div className="col-lg-3 d-none d-lg-block order-lg-1">
+                        {' '}
                         <div className="position-sticky" style={{ top: '16px' }}>
                             <ListingSidebar title="Filters" sections={sidebarSections} />
                         </div>
                     </div>
 
-                    <div className="col-lg-9 order-1 order-lg-2">
+                    {/* <div className="col-lg-9 order-1 order-lg-2"> */}
+                    <div className="col-12 col-lg-9 order-1 order-lg-2">
                         {hotels.length > 0 ? (
                             <CityHotelList
                                 hotels={hotels}

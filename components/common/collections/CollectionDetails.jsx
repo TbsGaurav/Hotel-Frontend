@@ -13,7 +13,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const content = collection?.collectionContent;
 
     function getBookingId(hotel) {
-        return hotel?.bookingId ?? null;
+        return hotel?.bookingId ?? hotel?.bookingID ?? hotel?.BookingId ?? null;
     }
 
     function getHotelIdentity(hotel) {
@@ -258,7 +258,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                 </div>
             ) : (
                 <>
-                    <div className="py-2">
+                    {/* <div className="py-2">
                         <div className="container">
                             <div className="d-flex align-items-center small">
                                 <Link href="/" className="text-dark text-decoration-none">
@@ -267,6 +267,25 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                 <span className="mx-2 text-muted">•</span>
                                 <span className="fw-semibold text-decoration-none text-primary">{basic[0]?.name}</span>
                             </div>
+                        </div>
+                    </div> */}
+                    <div className="py-2 py-lg-3">
+                        <div className="container">
+                            <nav aria-label="breadcrumb" className="mb-0">
+                                <ol className="breadcrumb mb-0">
+                                    <li className="breadcrumb-item small-para-14-px">
+                                        <Link href="/" className="text-dark text-decoration-none">
+                                            Home
+                                        </Link>
+                                    </li>
+
+                                    <li className="breadcrumb-item small-para-14-px active">
+                                        <Link href={`/${basic[0]?.name}`} className="text-decoration-none">
+                                            {basic[0]?.name}
+                                        </Link>
+                                    </li>
+                                </ol>
+                            </nav>
                         </div>
                     </div>
 

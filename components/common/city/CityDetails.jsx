@@ -6,6 +6,7 @@ import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { getHotelList } from '@/lib/api/public/hotelapi';
 import { getCountriesApi } from '@/lib/api/public/countryapi';
 import { getSidebarData } from '@/lib/api/sidebarapi';
+import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { buildCategorySidebarSections } from '@/lib/api/public/cityCategoryapi';
 
 // Utility functions
@@ -80,7 +81,7 @@ export default async function CityDetails({ params }) {
                 if (pageNumber === 1) {
                     totalCount = pageResponse?.totalCount || nextHotels.length;
                     content = nextHotels[0]?.content || '';
-                    
+
                     // Extract IDs from API response (not from first hotel)
                     const apiCityId = pageResponse?.cityId;
                     if (apiCityId !== null && apiCityId !== undefined) {
@@ -125,48 +126,51 @@ export default async function CityDetails({ params }) {
     return (
         <>
             <CountryHeroSection />
+
             <section className="mobile-actions d-lg-none">
                 <div className="container px-0">
                     <div className="mobile-actions__bottom">
-                        <button type="button" className="mobile-actions__link">
-                            Sort
-                        </button>
-                        <button type="button" className="mobile-actions__link">
-                            Filter
-                        </button>
-                        <button type="button" className="mobile-actions__link">
-                            Map
-                        </button>
+                        <button className="mobile-actions__link">Sort</button>
+
+                        <MobileFilterDrawer sidebarSections={sidebarSections} />
+
+                        <button className="mobile-actions__link">Map</button>
                     </div>
                 </div>
             </section>
-            <div className="py-2">
+            <div className="py-3">
                 <div className="container">
-                    <div className="d-flex align-items-center small">
-                        <Link href="/destinations" className="text-dark text-decoration-none">
-                            All Countries
-                        </Link>
-                        {countryName && (
-                            <>
-                                <span className="mx-2 text-muted">•</span>
-                                <Link href={`/${toSlug(countryUrl)}`} className="text-dark text-decoration-none">
-                                    {countryName}
+                    <nav aria-label="breadcrumb" className="mb-0">
+                        <ol className="breadcrumb mb-0">
+                            <li className="breadcrumb-item small-para-14-px">
+                                <Link href="/destinations" className="text-dark text-decoration-none">
+                                    All Countries
                                 </Link>
-                            </>
-                        )}
-                        <span className="mx-2 text-muted">•</span>
-                        <Link className="text-primary text-decoration-none" href={`/${citySlugPath}`}>
-                            {cityName}
-                        </Link>
-                    </div>
+                            </li>
+
+                            {countryName && (
+                                <li className="breadcrumb-item small-para-14-px">
+                                    <Link href={`/${toSlug(countryUrl)}`} className="text-dark text-decoration-none">
+                                        {countryName}
+                                    </Link>
+                                </li>
+                            )}
+
+                            <li className="breadcrumb-item small-para-14-px active">
+                                <Link href={`/${citySlugPath}`} className="text-decoration-none">
+                                    {cityName}
+                                </Link>
+                            </li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
 
-            <section className="container py-5">
-                <h2 className="mb-3">Hotel Accommodation in {cityName}</h2>
+            <section className="container py-2">
+                {/* <h2 className="mb-3">Hotel Accommodation in {cityName}</h2> */}
 
                 <div className="row g-4 align-items-start">
-                    <div className="col-lg-3 order-2 order-lg-1">
+                    <div className="col-lg-3 d-none d-lg-block order-lg-1">
                         <div className="position-sticky" style={{ top: '16px' }}>
                             <ListingSidebar title="Filters" sections={sidebarSections} />
                         </div>
