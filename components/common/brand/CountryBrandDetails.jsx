@@ -176,10 +176,10 @@ export default async function CountryBrandDetails({ params }) {
             </div>
 
             <section className="container py-2">
-                <h3 className="mb-4 text-capitalize">
+                {/* <h3 className="mb-4 text-capitalize">
                     {formattedBrand} {displayCountryName}
-                </h3>
-                <div className="row g-4 align-items-start">
+                </h3> */}
+                <div className="row g-0 g-lg-4 align-items-start">
                     <div className="col-lg-3 d-none d-lg-block order-lg-1">
                         {' '}
                         <div className="position-sticky" style={{ top: '16px' }}>
@@ -187,7 +187,7 @@ export default async function CountryBrandDetails({ params }) {
                         </div>
                     </div>
 
-                    <div className="col-lg-9 order-1 order-lg-2">
+                    <div className="col-12 col-lg-9 order-1 order-lg-2">
                         <div id="country-brand-hotel-list">
                             {hotels.length > 0 ? (
                                 <CountryBrandHotelList
