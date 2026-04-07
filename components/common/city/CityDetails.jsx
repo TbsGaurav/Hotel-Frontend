@@ -21,7 +21,9 @@ function getFirstDefined(...values) {
     }
     return null;
 }
-
+function getCityPageIntentCookieName(citySlug = '') {
+    return `city_page_intent_${toSlug(citySlug).replace(/[^a-z0-9_-]/g, '_')}`;
+}
 function getBookingCountryCode(url = '') {
     const match = String(url || '').match(/\/hotel\/([a-z]{2})\//i);
     return match?.[1]?.toLowerCase() || '';
@@ -48,12 +50,13 @@ function parsePageNumber(value) {
 export default async function CityDetails({ params }) {
     const { slug } = await params;
     const citySlug = slug?.[0] || '';
-
     const citySlugPath = toSlug(citySlug);
     const cityName = formatCityName(citySlug);
     const cookieStore = await cookies();
     const pageCookieName = getCityPageCookieName(citySlug);
-    const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
+    const pageIntentCookieName = getCityPageIntentCookieName(citySlug);
+    const hasPaginationIntent = Boolean(cookieStore.get(pageIntentCookieName)?.value);
+    const currentPage = hasPaginationIntent ? parsePageNumber(cookieStore.get(pageCookieName)?.value) : 1;
 
     let hotels = [];
     let totalCount = 0;
@@ -132,6 +135,10 @@ export default async function CityDetails({ params }) {
                     </div>
                 </div>
             </section>
+            {/* <div className="py-3">
+                <div className="container">
+                    <div className="breadcrumb-wrapper">
+                        <nav aria-label="breadcrumb" className="mb-0"> */}
             <div className="py-3">
                 <div className="container">
                     <nav aria-label="breadcrumb" className="mb-0">
@@ -160,17 +167,17 @@ export default async function CityDetails({ params }) {
                 </div>
             </div>
 
-            <section className="container py-2">
+            <section className="container py-2 ">
                 {/* <h2 className="mb-3">Hotel Accommodation in {cityName}</h2> */}
 
-                <div className="row g-4 align-items-start">
+                <div className="row g-0 g-lg-4 align-items-start">
                     <div className="col-lg-3 d-none d-lg-block order-lg-1">
                         <div className="position-sticky" style={{ top: '16px' }}>
                             <ListingSidebar title="Filters" sections={sidebarSections} />
                         </div>
                     </div>
 
-                    <div className="col-lg-9 order-1 order-lg-2">
+                    <div className="col-12 col-lg-9 order-1 order-lg-2">
                         <CityHotelList
                             hotels={hotels}
                             totalCount={totalCount}
@@ -179,6 +186,7 @@ export default async function CityDetails({ params }) {
                             pageCookieName={pageCookieName}
                             citySlug={citySlug}
                             citySlugPath={citySlugPath}
+                            pageIntentCookieName={pageIntentCookieName}
                             content={content}
                         />
                     </div>

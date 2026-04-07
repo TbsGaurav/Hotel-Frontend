@@ -153,7 +153,7 @@ export default async function CityBrandDetails({ params }) {
                 <h3 className="mb-4 text-capitalize">
                     {formattedBrand} {cityName}
                 </h3>
-                <div className="row g-4 align-items-start">
+                <div className="row g-0 g-lg-4 align-items-start">
                     <div className="col-lg-3 d-none d-lg-block order-lg-1">
                         {' '}
                         <div className="position-sticky" style={{ top: '16px' }}>

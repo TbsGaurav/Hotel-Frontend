@@ -63,7 +63,13 @@ export default function CityHotelList({
     const getReviewScore = (hotel) =>
         hotel?.reviewScore ?? hotel?.ReviewScore ?? hotel?.review_score ?? hotel?.ratingScore ?? hotel?.rating ?? hotel?.score ?? null;
     const getReviewCount = (hotel) =>
-        hotel?.reviewCount ?? hotel?.ReviewCount ?? hotel?.review_count ?? hotel?.reviews ?? hotel?.reviewTotal ?? hotel?.totalReviews ?? null;
+        hotel?.reviewCount ??
+        hotel?.ReviewCount ??
+        hotel?.review_count ??
+        hotel?.reviews ??
+        hotel?.reviewTotal ??
+        hotel?.totalReviews ??
+        null;
 
     const fetchRatesForHotels = async (hotelsToRate, selectedCurrency) => {
         const bookingIds = hotelsToRate.map(getBookingId).filter(Boolean);
@@ -127,14 +133,7 @@ export default function CityHotelList({
 
     const getHotelKey = (hotel, index) => {
         const bookingId = getBookingId(hotel);
-        const rawKey = getFirstDefined(
-            bookingId,
-            hotel?.hotelId,
-            hotel?.hotelID,
-            hotel?.id,
-            hotel?.urlName,
-            hotel?.url
-        );
+        const rawKey = getFirstDefined(bookingId, hotel?.hotelId, hotel?.hotelID, hotel?.id, hotel?.urlName, hotel?.url);
 
         return rawKey ? `${rawKey}-${index}` : `hotel-${index}`;
     };
@@ -269,7 +268,7 @@ export default function CityHotelList({
     };
 
     return (
-        <div className="container">
+        <div className="container p-0">
             {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
 
             <div className="d-flex flex-column gap-3">
@@ -277,14 +276,10 @@ export default function CityHotelList({
                     const rate = getHotelRate(getBookingId(hotel));
                     const reviewScore = getReviewScore(hotel);
                     const reviewScoreValue =
-                        reviewScore !== null && reviewScore !== undefined && reviewScore !== ''
-                            ? Number(reviewScore)
-                            : null;
+                        reviewScore !== null && reviewScore !== undefined && reviewScore !== '' ? Number(reviewScore) : null;
                     const reviewCount = getReviewCount(hotel);
                     const reviewCountValue =
-                        reviewCount !== null && reviewCount !== undefined && reviewCount !== ''
-                            ? Number(reviewCount)
-                            : null;
+                        reviewCount !== null && reviewCount !== undefined && reviewCount !== '' ? Number(reviewCount) : null;
                     const badges = rate?.badges || [];
                     const hotelFacilitiesText = getHotelFacilitiesText(hotel);
                     const imageBadges = badges.filter(
@@ -346,15 +341,17 @@ export default function CityHotelList({
                                 <div className="col-12 col-md-8 collection-hotel-content-col">
                                     <div className="text-decoration-none">
                                         <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-header">
-                                            <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row">
+                                            <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-2 mb-md-0 collection-hotel-title-row">
+                                                {/* <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row"> */}
                                                 <Link
                                                     href={`${hotel.urlName}`}
-                                                    className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title "
+                                                    className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3"
+                                                    // className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     {hotel.hotelName}
                                                 </Link>
-                                                <div className="text-warning collection-hotel-stars">
+                                                <div className="text-warning mt-1 mt-md-0 collection-hotel-stars">
                                                     {[...Array(5)].map((_, i) => (
                                                         <MdOutlineStarPurple500
                                                             key={i}

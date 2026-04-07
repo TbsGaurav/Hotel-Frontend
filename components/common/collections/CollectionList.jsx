@@ -68,7 +68,6 @@ export default function CollectionList({ initialCollections, initialCountries })
                 setLoading(true);
 
                 const { geoNodeType, sourceId } = getFinalGeoSelection();
-
                 const res = await getCollectionList({
                     status: statusFilter || null,
                     geoNodeType,
@@ -76,6 +75,7 @@ export default function CollectionList({ initialCollections, initialCountries })
                     pageNumber,
                     pageSize
                 });
+                console.log('Collection List Response:', res);
 
                 setCollections(res?.data?.collections || []);
 
@@ -155,6 +155,7 @@ export default function CollectionList({ initialCollections, initialCountries })
                 geoNodeType,
                 sourceId
             });
+            console.log('Updated Collection List Response after cloning:', updated);
 
             setCollections(updated?.data?.collections || []);
             setTotalRecords(Number(updated?.data?.totalRecords || 0));
