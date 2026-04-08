@@ -13,7 +13,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const content = collection?.collectionContent;
 
     function getBookingId(hotel) {
-        return hotel?.bookingId ?? hotel?.bookingID ?? hotel?.BookingId ?? null;
+        return hotel?.bookingId ??  hotel?.BookingId ?? null;
     }
 
     function getHotelIdentity(hotel) {

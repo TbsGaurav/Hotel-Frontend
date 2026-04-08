@@ -12,6 +12,7 @@ export default function CityHotelList({
     totalCount = 0,
     currentPage = 1,
     pageSize = 10,
+    fetchMoreHotels,
     citySlugPath,
     content,
     citySlug,
@@ -30,6 +31,16 @@ export default function CityHotelList({
     const loadRequestInFlightRef = useRef(false);
 
     const defaultImage = '/image/property-img.webp';
+    const computeHasMore = ({ loadedCount = 0, knownTotalCount = 0, currentPageNumber = 1, currentPageSize = 10, lastBatchSize = 0 }) => {
+        const normalizedTotal = Number(knownTotalCount || 0);
+
+        if (normalizedTotal > 0) {
+            return loadedCount < normalizedTotal && currentPageNumber * currentPageSize < normalizedTotal;
+        }
+
+        return lastBatchSize === currentPageSize;
+    };
+
     const getFirstDefined = (...values) => {
         for (const value of values) {
             if (value !== undefined && value !== null && value !== '') return value;
@@ -37,13 +48,16 @@ export default function CityHotelList({
         return null;
     };
 
-    const getBookingId = (hotel) => hotel?.bookingId ?? null;
+    const getBookingId = (hotel) => {
+        const bookingId = Number(hotel?.bookingId);
+        return Number.isInteger(bookingId) && bookingId > 0 ? bookingId : null;
+    };
 
     const dedupeHotels = (list) => {
         const seen = new Set();
         const result = [];
         list.forEach((hotel) => {
-            const id = getBookingId(hotel) ?? hotel?.hotelId ?? hotel?.hotelID ?? hotel?.id;
+            const id = getBookingId(hotel) ?? hotel?.hotelId ?? hotel?.id;
             const key = id !== undefined && id !== null && id !== '' ? String(id) : null;
             if (key && seen.has(key)) return;
             if (key) seen.add(key);
@@ -71,9 +85,18 @@ export default function CityHotelList({
 
     useEffect(() => {
         const timer = window.setTimeout(() => {
-            setAllHotels(dedupeHotels(hotels || []));
+            const dedupedHotels = dedupeHotels(hotels || []);
+            setAllHotels(dedupedHotels);
             setPage(currentPage || 1);
-            setHasMore((hotels?.length || 0) < (totalCount || 0) || (hotels?.length || 0) === pageSize);
+            setHasMore(
+                computeHasMore({
+                    loadedCount: dedupedHotels.length,
+                    knownTotalCount: totalCount,
+                    currentPageNumber: currentPage || 1,
+                    currentPageSize: pageSize,
+                    lastBatchSize: hotels?.length || 0
+                })
+            );
         }, 0);
 
         return () => window.clearTimeout(timer);
@@ -152,7 +175,7 @@ export default function CityHotelList({
 
     const getHotelKey = (hotel, index) => {
         const bookingId = getBookingId(hotel);
-        const rawKey = getFirstDefined(bookingId, hotel?.hotelId, hotel?.hotelID, hotel?.id, hotel?.urlName, hotel?.url);
+        const rawKey = getFirstDefined(bookingId, hotel?.hotelId, hotel?.id, hotel?.urlName, hotel?.url);
 
         return rawKey ? `${rawKey}-${index}` : `hotel-${index}`;
     };
@@ -210,6 +233,53 @@ export default function CityHotelList({
             return;
         }
 
+        if (typeof fetchMoreHotels === 'function') {
+            Promise.resolve(
+                fetchMoreHotels({
+                    pageNumber: nextPage,
+                    pageSize
+                })
+            )
+                .then((response) => {
+                    const normalizedResponse = Array.isArray(response) ? { hotels: response } : response || {};
+                    const normalizedHotels = Array.isArray(normalizedResponse.hotels) ? normalizedResponse.hotels : [];
+                    if (!normalizedHotels.length) {
+                        setHasMore(false);
+                        return;
+                    }
+
+                    const mergedHotels = dedupeHotels([...allHotels, ...normalizedHotels]);
+                    const resolvedPageNo = Number(normalizedResponse.pageNo || nextPage || 1);
+                    const resolvedPageSize = Number(normalizedResponse.pageSize || pageSize || 10);
+                    const resolvedTotalCount = Number(normalizedResponse.totalCount || totalCount || 0);
+                    const listGrew = mergedHotels.length > allHotels.length;
+                    setAllHotels(mergedHotels);
+                    setPage(resolvedPageNo);
+                    setHasMore(
+                        listGrew &&
+                        computeHasMore({
+                            loadedCount: mergedHotels.length,
+                            knownTotalCount: resolvedTotalCount,
+                            currentPageNumber: resolvedPageNo,
+                            currentPageSize: resolvedPageSize,
+                            lastBatchSize: normalizedHotels.length
+                        })
+                    );
+
+                    if (pageCookieName) {
+                        document.cookie = `${pageCookieName}=${resolvedPageNo}; path=/; SameSite=Lax`;
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading more hotels:', error);
+                })
+                .finally(() => {
+                    loadRequestInFlightRef.current = false;
+                    setLoading(false);
+                });
+            return;
+        }
+
         if (!citySlug) {
             setHasMore(false);
             setLoading(false);
@@ -227,7 +297,15 @@ export default function CityHotelList({
 
                 setAllHotels((prev) => dedupeHotels([...prev, ...nextHotels]));
                 setPage(nextPage);
-                setHasMore(nextHotels.length === pageSize);
+                setHasMore(
+                    computeHasMore({
+                        loadedCount: allHotels.length + nextHotels.length,
+                        knownTotalCount: Number(response?.totalCount || totalCount || 0),
+                        currentPageNumber: nextPage,
+                        currentPageSize: pageSize,
+                        lastBatchSize: nextHotels.length
+                    })
+                );
 
                 if (pageCookieName) {
                     document.cookie = `${pageCookieName}=${nextPage}; path=/; SameSite=Lax`;
@@ -428,15 +506,15 @@ export default function CityHotelList({
                                                         .split('|')
                                                         .map((facility) => facility.trim())
                                                         .filter(Boolean).length > 5 && (
-                                                        <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
-                                                            +
-                                                            {hotelFacilitiesText
-                                                                .split('|')
-                                                                .map((facility) => facility.trim())
-                                                                .filter(Boolean).length - 5}{' '}
-                                                            more
-                                                        </span>
-                                                    )}
+                                                            <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
+                                                                +
+                                                                {hotelFacilitiesText
+                                                                    .split('|')
+                                                                    .map((facility) => facility.trim())
+                                                                    .filter(Boolean).length - 5}{' '}
+                                                                more
+                                                            </span>
+                                                        )}
                                                 </>
                                             )}
                                         </div>
@@ -529,6 +607,7 @@ export default function CityHotelList({
                                                 <i className="fa-solid fa-arrow-right ms-2"></i>
                                             </Link>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>

@@ -374,7 +374,14 @@ export default function CityCategoryDetails({
     ]);
 
     const fetchMoreHotels = async ({ pageNumber, pageSize: nextPageSize }) => {
-        if ((!resolvedCityId && !resolvedRegionId) || !effectiveCategoryId) return [];
+        if ((!resolvedCityId && !resolvedRegionId) || !effectiveCategoryId) {
+            return {
+                hotels: [],
+                totalCount,
+                pageNo: pageNumber,
+                pageSize: nextPageSize
+            };
+        }
 
         const response = await getCityCategoryHotels({
             cityId: resolvedCityId,
@@ -384,9 +391,7 @@ export default function CityCategoryDetails({
             pageSize: nextPageSize
         });
 
-        setPageSize(Number(response.pageSize || nextPageSize || 10));
-        setCurrentPage(Number(response.pageNo || pageNumber || 1));
-        return Array.isArray(response.hotels) ? response.hotels : [];
+        return response;
     };
 
     const isRegionContext = Boolean(resolvedRegionId || queryCountrySlug || resolvedRegionCountrySlug);

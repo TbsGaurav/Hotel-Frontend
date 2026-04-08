@@ -129,7 +129,7 @@ export default function CountryBrandHotelList({
 
     const getHotelKey = (hotel, index) => {
         const bookingId = hotel?.bookingId;
-        const rawKey = bookingId ?? hotel?.hotelId ?? hotel?.hotelID ?? hotel?.id ?? hotel?.urlName ?? hotel?.url;
+        const rawKey = bookingId ?? hotel?.hotelId ?? hotel?.id ?? hotel?.urlName ?? hotel?.url;
         return rawKey ? `${rawKey}-${index}` : `hotel-${index}`;
     };
 
@@ -137,7 +137,7 @@ export default function CountryBrandHotelList({
         const seen = new Set();
         const result = [];
         list.forEach((hotel) => {
-            const id = hotel?.bookingId ?? hotel?.hotelId ?? hotel?.hotelID ?? hotel?.id;
+            const id = hotel?.bookingId ?? hotel?.hotelId ?? hotel?.id;
             const key = id !== undefined && id !== null && id !== '' ? String(id) : null;
             if (key && seen.has(key)) return;
             if (key) seen.add(key);
