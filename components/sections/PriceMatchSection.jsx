@@ -27,7 +27,7 @@ export default function PriceMatchSection() {
 
                     <p className="text-muted mx-auto mb-5" style={{ maxWidth: '700px' }}>
                         If you find a cheaper price after booking look for
-                        <strong> "Found this room cheaper elsewhere?" </strong>
+                        <strong> &quot;Found this room cheaper elsewhere?&quot; </strong>
                         on your confirmation page to request a price match and see price match terms.
                     </p>
                 </div>

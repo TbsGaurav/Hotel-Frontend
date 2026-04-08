@@ -37,6 +37,21 @@ export default function CityHotelList({
         return null;
     };
 
+    const getBookingId = (hotel) => hotel?.bookingId ?? null;
+
+    const dedupeHotels = (list) => {
+        const seen = new Set();
+        const result = [];
+        list.forEach((hotel) => {
+            const id = getBookingId(hotel) ?? hotel?.hotelId ?? hotel?.hotelID ?? hotel?.id;
+            const key = id !== undefined && id !== null && id !== '' ? String(id) : null;
+            if (key && seen.has(key)) return;
+            if (key) seen.add(key);
+            result.push(hotel);
+        });
+        return result;
+    };
+
     useEffect(() => {
         const timer = window.setTimeout(() => {
             setTimestamp(Date.now().toString());
@@ -55,12 +70,15 @@ export default function CityHotelList({
     }, []);
 
     useEffect(() => {
-        setAllHotels(dedupeHotels(hotels || []));
-        setPage(currentPage || 1);
-        setHasMore((hotels?.length || 0) < (totalCount || 0) || (hotels?.length || 0) === pageSize);
+        const timer = window.setTimeout(() => {
+            setAllHotels(dedupeHotels(hotels || []));
+            setPage(currentPage || 1);
+            setHasMore((hotels?.length || 0) < (totalCount || 0) || (hotels?.length || 0) === pageSize);
+        }, 0);
+
+        return () => window.clearTimeout(timer);
     }, [hotels, totalCount, currentPage, pageSize]);
 
-    const getBookingId = (hotel) => hotel?.bookingId ?? null;
     const getReviewScore = (hotel) =>
         hotel?.reviewScore ?? hotel?.ReviewScore ?? hotel?.review_score ?? hotel?.ratingScore ?? hotel?.rating ?? hotel?.score ?? null;
     const getReviewCount = (hotel) =>
@@ -137,19 +155,6 @@ export default function CityHotelList({
         const rawKey = getFirstDefined(bookingId, hotel?.hotelId, hotel?.hotelID, hotel?.id, hotel?.urlName, hotel?.url);
 
         return rawKey ? `${rawKey}-${index}` : `hotel-${index}`;
-    };
-
-    const dedupeHotels = (list) => {
-        const seen = new Set();
-        const result = [];
-        list.forEach((hotel) => {
-            const id = getBookingId(hotel) ?? hotel?.hotelId ?? hotel?.hotelID ?? hotel?.id;
-            const key = id !== undefined && id !== null && id !== '' ? String(id) : null;
-            if (key && seen.has(key)) return;
-            if (key) seen.add(key);
-            result.push(hotel);
-        });
-        return result;
     };
 
     const getRatingText = (score) => {

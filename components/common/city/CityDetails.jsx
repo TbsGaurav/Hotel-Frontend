@@ -56,8 +56,7 @@ export default async function CityDetails({ params }) {
     const cookieStore = await cookies();
     const pageCookieName = getCityPageCookieName(citySlug);
     const pageIntentCookieName = getCityPageIntentCookieName(citySlug);
-    const hasPaginationIntent = Boolean(cookieStore.get(pageIntentCookieName)?.value);
-    const currentPage = hasPaginationIntent ? parsePageNumber(cookieStore.get(pageCookieName)?.value) : 1;
+    const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
 
     let hotels = [];
     let totalCount = 0;

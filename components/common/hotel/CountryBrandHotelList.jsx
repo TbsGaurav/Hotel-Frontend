@@ -28,9 +28,13 @@ export default function CountryBrandHotelList({
     const normalizedBrand = String(brand || '').replace(/^\/+|\/+$/g, '');
 
     useEffect(() => {
-        setAllHotels(hotels || []);
-        setPage(currentPage || 1);
-        setLocalHasMore(hasMore);
+        const timer = window.setTimeout(() => {
+            setAllHotels(hotels || []);
+            setPage(currentPage || 1);
+            setLocalHasMore(hasMore);
+        }, 0);
+
+        return () => window.clearTimeout(timer);
     }, [hotels, currentPage, hasMore]);
 
     useEffect(() => {
@@ -246,7 +250,7 @@ export default function CountryBrandHotelList({
 
     const getCityBrandPath = (cityUrlName) => {
         const normalizedCity = String(cityUrlName || '').replace(/^\/+|\/+$/g, '');
-        return `/${normalizedCity}/${normalizedBrand}`;
+        return `/${encodeURIComponent(normalizedCity)}/${encodeURIComponent(normalizedBrand)}`;
     };
 
     const formattedBrand = brand.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());

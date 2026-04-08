@@ -12,6 +12,22 @@ function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
 
+function safeDecodeURIComponent(value = '') {
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return String(value || '');
+    }
+}
+
+function formatCityName(slug = '') {
+    return String(slug || '')
+        .split('-')
+        .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : ''))
+        .filter(Boolean)
+        .join(' ');
+}
+
 function formatBrand(text) {
     return text.replace(/-/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
 }
@@ -49,17 +65,17 @@ export default async function CityBrandDetails({ params }) {
     }
 
     const citySlug = slug[0];
-    const brandSlug = decodeURIComponent(slug[1]);
-    const brandName = brandSlug;
-    const cityName = capitalize(citySlug);
-    const formattedBrand = formatBrand(brandSlug);
-    const fullSlug = `${citySlug}/${brandSlug}`;
+    const brandSegment = String(slug[1] ?? '');
+    const decodedBrandSegment = safeDecodeURIComponent(brandSegment);
+    const brandName = decodedBrandSegment;
+    const cityName = formatCityName(citySlug) || capitalize(citySlug);
+    const formattedBrand = formatBrand(decodedBrandSegment);
+    const fullSlug = `${citySlug}/${brandSegment}`;
 
     const cookieStore = await cookies();
-    const pageCookieName = getCityBrandPageCookieName(citySlug, brandSlug);
-    const pageIntentCookieName = getCityBrandPageIntentCookieName(citySlug, brandSlug);
-    const hasPaginationIntent = Boolean(cookieStore.get(pageIntentCookieName)?.value);
-    const currentPage = hasPaginationIntent ? parsePageNumber(cookieStore.get(pageCookieName)?.value) : 1;
+    const pageCookieName = getCityBrandPageCookieName(citySlug, brandSegment);
+    const pageIntentCookieName = getCityBrandPageIntentCookieName(citySlug, brandSegment);
+    const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
 
     let hotels = [];
     let totalCount = 0;
@@ -124,21 +140,30 @@ export default async function CityBrandDetails({ params }) {
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href={`/brand/${brandName}`} className="text-dark text-decoration-none text-capitalize">
+                                <Link
+                                    href={`/brand/${encodeURIComponent(brandSegment)}`}
+                                    className="text-dark text-decoration-none text-capitalize"
+                                >
                                     {formattedBrand}
                                 </Link>
                             </li>
 
                             {countrySlug && (
                                 <li className="breadcrumb-item small-para-14-px">
-                                    <Link href={`/${countrySlug}/${brandName}`} className="text-dark text-decoration-none text-capitalize">
+                                    <Link
+                                        href={`/${encodeURIComponent(countrySlug)}/${encodeURIComponent(brandSegment)}`}
+                                        className="text-dark text-decoration-none text-capitalize"
+                                    >
                                         {formattedBrand} {countrySlug}
                                     </Link>
                                 </li>
                             )}
 
                             <li className="breadcrumb-item small-para-14-px active text-capitalize">
-                                <Link href={`/${toSlug(cityName)}/${toSlug(brandName)}`} className="text-decoration-none">
+                                <Link
+                                    href={`/${encodeURIComponent(citySlug)}/${encodeURIComponent(brandSegment)}`}
+                                    className="text-decoration-none"
+                                >
                                     {formattedBrand} {cityName}
                                 </Link>
                             </li>

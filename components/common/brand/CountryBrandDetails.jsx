@@ -17,6 +17,14 @@ function formatBrand(text) {
     return text.replace(/-/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
 }
 
+function safeDecodeURIComponent(value = '') {
+    try {
+        return decodeURIComponent(value);
+    } catch {
+        return String(value || '');
+    }
+}
+
 const PAGE_SIZE = 10;
 
 function resolveTotalCount(hotelsData = []) {
@@ -67,17 +75,17 @@ export default async function CountryBrandDetails({ params }) {
     }
 
     const countrySlug = slug[0];
-    const brandSlug = decodeURIComponent(slug[1]);
-    const brandName = brandSlug;
+    const brandSegment = String(slug[1] ?? '');
+    const decodedBrandSegment = safeDecodeURIComponent(brandSegment);
+    const brandName = decodedBrandSegment;
     const countryName = capitalize(countrySlug);
-    const formattedBrand = formatBrand(brandSlug);
-    const fullSlug = `${countrySlug}/${brandSlug}`;
+    const formattedBrand = formatBrand(decodedBrandSegment);
+    const fullSlug = `${countrySlug}/${brandSegment}`;
 
     const cookieStore = await cookies();
-    const pageCookieName = getCountryBrandPageCookieName(countrySlug, brandSlug);
-    const pageIntentCookieName = getCountryBrandPageIntentCookieName(countrySlug, brandSlug);
-    const hasPaginationIntent = Boolean(cookieStore.get(pageIntentCookieName)?.value);
-    const currentPage = hasPaginationIntent ? parsePageNumber(cookieStore.get(pageCookieName)?.value) : 1;
+    const pageCookieName = getCountryBrandPageCookieName(countrySlug, brandSegment);
+    const pageIntentCookieName = getCountryBrandPageIntentCookieName(countrySlug, brandSegment);
+    const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
 
     let hotels = [];
     let totalCount = 0;
@@ -160,13 +168,16 @@ export default async function CountryBrandDetails({ params }) {
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href={`/brand/${brandName}`} className="text-dark text-decoration-none text-capitalize">
+                                <Link
+                                    href={`/brand/${encodeURIComponent(brandSegment)}`}
+                                    className="text-dark text-decoration-none text-capitalize"
+                                >
                                     {formattedBrand}
                                 </Link>
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px active text-capitalize">
-                                <Link href={`/${countrySlug}/${brandName}`} className="text-decoration-none">
+                                <Link href={`/${encodeURIComponent(countrySlug)}/${encodeURIComponent(brandSegment)}`} className="text-decoration-none">
                                     {displayCountryName}
                                 </Link>
                             </li>
@@ -192,7 +203,7 @@ export default async function CountryBrandDetails({ params }) {
                             {hotels.length > 0 ? (
                                 <CountryBrandHotelList
                                     hotels={hotels}
-                                    brand={brandName}
+                                    brand={brandSegment}
                                     currentPage={currentPage}
                                     hasMore={hasMore}
                                     pageCookieName={pageCookieName}

@@ -11,6 +11,13 @@ import CityCategoryRouteApp from '@/components/common/city/CityCategoryRouteApp'
 import HotelDetailsWrapper from '@/components/common/hotel/HotelDetailsWrapper';
 import CityBrandDetails from '@/components/common/brand/CityBrandDetails';
 
+function normalizeEntityType(value) {
+    return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z]/g, '');
+}
+
 export default async function DynamicPage({ params, searchParams }) {
     const { slug } = await params;
     const slugArray = slug || [];
@@ -20,37 +27,38 @@ export default async function DynamicPage({ params, searchParams }) {
 
     if (result?.status === 'success') {
         const data = result.data;
+        const entityType = normalizeEntityType(data?.entityType ?? data?.EntityType);
 
         // COUNTRY PAGE
-        if (slugArray.length === 1 && data.entityType === 'Country') {
+        if (slugArray.length === 1 && entityType === 'country') {
             return <CountryDetails country={slugArray[0]} />;
         }
 
         // REGION PAGE
-        if (slugArray.length === 2 && data.entityType === 'Region') {
+        if (slugArray.length === 2 && entityType === 'region') {
             return <RegionDetails country={slugArray[0]} region={slugArray[1]} regionId={data.entityId} params={params} />;
         }
 
         // COUNTRY BRAND PAGE
-        if (slugArray.length === 2 && data.entityType === 'CountryBrand') {
+        if (slugArray.length === 2 && entityType === 'countrybrand') {
             return <CountryBrandDetails country={slugArray[0]} params={params} />;
         }
 
         // COLLECTION PAGE
-        if ((slugArray.length === 1 || slugArray.length === 2) && data.entityType === 'Collection') {
+        if ((slugArray.length === 1 || slugArray.length === 2) && entityType === 'collection') {
             return <CollectionDetailsWrapper slug={slugArray.join('/')} entityId={data.entityId} />;
         }
 
         // HOTEL PAGE
-        if (slugArray.length === 2 && data.entityType === 'Hotel') {
+        if (slugArray.length === 2 && entityType === 'hotel') {
             return <HotelDetailsWrapper city={slugArray[0]} hotel={slugArray[1]} />;
         }
 
-        if (slugArray.length === 1 && data.entityType === 'City') {
+        if (slugArray.length === 1 && entityType === 'city') {
             return <CityDetails city={slugArray[0]} params={params} />;
         }
 
-        if (slugArray.length === 2 && data.entityType === 'CityBrand') {
+        if (slugArray.length === 2 && entityType === 'citybrand') {
             return <CityBrandDetails city={slugArray[0]} params={params} />;
         }
     }
