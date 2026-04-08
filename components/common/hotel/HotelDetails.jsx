@@ -309,22 +309,26 @@ export default function HotelDetails({ initialData }) {
 
                 {/* Image Gallery Skeleton */}
                 <div className="row g-2 mb-3">
-                    <div className="col-12 col-md-8">
+                    <div className="col-12 col-lg-8">
                         {' '}
-                        <div className="skeleton-image rounded-4" style={{ height: '400px', width: '100%' }}></div>
+                        <div className="skeleton-image rounded-4" style={{ width: '100%' }}></div>
                     </div>
                     <div className="col-md-4">
                         <div className="row g-2 h-100">
-                            <div className="col-6">
+                            {/* <div className="col-6"> */}
+                            <div className="col-12">
                                 <div className="skeleton-image rounded-4" style={{ height: '190px', width: '100%' }}></div>
                             </div>
-                            <div className="col-6">
+                            {/* <div className="col-6"> */}
+                            <div className="col-12">
                                 <div className="skeleton-image rounded-4" style={{ height: '190px', width: '100%' }}></div>
                             </div>
-                            <div className="col-6">
+                            {/* <div className="col-6"> */}
+                            <div className="col-12">
                                 <div className="skeleton-image rounded-4" style={{ height: '190px', width: '100%' }}></div>
                             </div>
-                            <div className="col-6">
+                            {/* <div className="col-6"> */}
+                            <div className="col-12">
                                 <div className="skeleton-image rounded-4" style={{ height: '190px', width: '100%' }}></div>
                             </div>
                         </div>
@@ -382,6 +386,11 @@ export default function HotelDetails({ initialData }) {
     function toSlug(value = '') {
         return value.toLowerCase().replace(/\s+/g, '-');
     }
+    const openMap = (lat, lng) => {
+        if (!lat || !lng) return;
+        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+    };
+
     return (
         <>
             <CountryHeroSection />
@@ -438,13 +447,12 @@ export default function HotelDetails({ initialData }) {
                     {' '}
                     <div className="me-auto">
                         <div className="d-flex align-items-center mb-2">
-                            <h4 className="fw-600 mb-0 me-3 hotel-detail-title"> {hotelInfo.hotelName}</h4>
+                            <h4 className="fw-600 mb-0 me-3 fs-5 fw-bold hotel-detail-title"> {hotelInfo.hotelName}</h4>
                             <div className="text-warning d-flex align-items-center me-3">
                                 {[...Array(5)].map((_, i) => (
                                     <MdOutlineStarPurple500 key={i} size={18} color={i < hotelInfo.stars ? '#f0831e' : '#ddd'} />
                                 ))}
                             </div>
-                            {/* Hotel Type Tag */}
                             <span
                                 className="text-white px-3 py-1 mb-2 d-inline-block"
                                 style={{
@@ -457,29 +465,54 @@ export default function HotelDetails({ initialData }) {
                             </span>
                         </div>
                         <div className="hotel-detail-location mb-2">
-                            <p className="mb-1 hotel-detail-address">{hotelInfo.address}</p>
+                            <p
+                                className="hotel-address-text mb-1"
+                                style={{ cursor: 'pointer' }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openMap(hotelInfo.latitude, hotelInfo.longitude);
+                                }}
+                            >
+                                {hotelInfo.address}
+                            </p>
 
                             <div className="d-flex align-items-center gap-1 hotel-detail-map">
                                 <FaMapMarkerAlt />
-                                <p className="mb-0">View on map and nearby hotels</p>
+                                <p className="hotel-map-link mb-0">View on map and nearby hotels</p>
                             </div>
                         </div>
                     </div>
-                    {/* Review Score Box */}
                     <div className="hotel-detail-review mb-2">
                         {' '}
                         <div className="d-flex align-items-start mt-3 mt-md-0 me-3">
                             <div
                                 className="d-flex flex-column align-items-center justify-content-center p-2"
-                                style={{ background: '#003580', borderRadius: '12px 12px 12px 0', minWidth: '70px' }}
+                                style={{
+                                    background: '#003580',
+                                    borderRadius: '10px 10px 10px 0px',
+                                    width: '40px',
+                                    height: '40px',
+                                    fontSize: '12px'
+                                }}
                             >
-                                <span className="text-white fw-bold fs-4">{hotelInfo.reviewScore}</span>
+                                <span className="text-white  fs-9">{hotelInfo.reviewScore}</span>
                             </div>
                             <div className="ms-2 d-flex flex-column justify-content-center">
-                                <span className="fw-bold">{hotelInfo.reviewScore}</span>
+                                <span className="fw-bold">{hotelInfo.ratingText}</span>
                                 <span className="text-muted small">{hotelInfo.reviewCount} verified reviews</span>
                             </div>
                         </div>
+                    </div>
+                    <div className="d-none d-md-flex align-items-center ms-auto hotel-detail-price-btn-desktop ">
+                        <Link
+                            href={hotelInfo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="theme-button-blue d-flex align-items-center justify-content-center px-3"
+                            style={{ height: '48px', borderRadius: '6px' }}
+                        >
+                            See Rooms & Prices
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -488,11 +521,11 @@ export default function HotelDetails({ initialData }) {
             <section className="container py-3">
                 <div className="row g-2">
                     {/* Main image with carousel */}
-                    <div className="col-12 col-md-8">
+                    <div className="col-12 col-lg-8">
                         {' '}
                         <div
                             id="hotelCarousel"
-                            className="carousel slide rounded-4 overflow-hidden"
+                            className="carousel slide rounded-4 overflow-hidden position-relative"
                             data-bs-ride="carousel"
                             style={{ height: '400px' }}
                         >
@@ -524,6 +557,7 @@ export default function HotelDetails({ initialData }) {
                                     </div>
                                 ))}
                             </div>
+
                             {/* Carousel controls */}
                             <button className="carousel-control-prev" type="button" data-bs-target="#hotelCarousel" data-bs-slide="prev">
                                 <span className="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
@@ -537,35 +571,44 @@ export default function HotelDetails({ initialData }) {
                     </div>
 
                     {/* Side images grid */}
-                    <div className="col-md-4 hotel-detail-side-images">
+                    <div className="col-lg-4 d-none d-lg-block hotel-detail-side-images">
                         {' '}
                         <div className="row g-2 h-100">
-                            {hotelPhotos.slice(0, 4).map((photo, idx) => (
-                                <div key={idx} className="col-6">
+                            {hotelPhotos.slice(0, 2).map((photo, idx) => (
+                                <div key={idx} className="col-12 mb-2">
                                     <div
                                         className="rounded-4 overflow-hidden position-relative photo-hover-container"
-                                        style={{ height: '100%', minHeight: '190px', cursor: 'pointer' }}
+                                        style={{ height: '190px', cursor: 'pointer' }}
                                         onClick={() => openPhotoModal(idx + 1)}
                                     >
                                         <img
                                             src={getImageUrl(photo.photo)}
                                             className="w-100 h-100"
                                             style={{ objectFit: 'cover' }}
-                                            alt={`${hotelInfo.hotelName} photo ${idx + 1}`}
-                                            onError={handleImageError}
+                                            alt="hotel"
                                         />
-                                        <div className="photo-hover-overlay d-flex align-items-center justify-content-center">
-                                            <span className="btn btn-light border rounded-pill px-3 py-1">
-                                                <FaCamera className="me-1" /> View
-                                            </span>
-                                        </div>
+
+                                        {/* ✅ ONLY ON LAST IMAGE */}
+                                        {idx === 1 && (
+                                            <div className="side-view-photos-btn">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openPhotoModal();
+                                                    }}
+                                                >
+                                                    View all photos ({allPhotos.length})
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
-                <div className="mt-3 mt-md-0 hotel-detail-price-btn">
+                <div className="mt-3 d-block d-md-none hotel-detail-price-btn">
+                    {' '}
                     <Link
                         href={hotelInfo.url}
                         target="_blank"
@@ -577,7 +620,8 @@ export default function HotelDetails({ initialData }) {
                 </div>
 
                 {/* View all photos button */}
-                <div className="mt-2">
+                {/* <div className="mt-2 d-none d-lg-block">
+                    {' '}
                     <button
                         className="btn btn-light border rounded-pill px-4 py-2 shadow-sm view-photos-btn"
                         onClick={() => openPhotoModal()}
@@ -585,7 +629,7 @@ export default function HotelDetails({ initialData }) {
                         <FaCamera className="me-2" />
                         View all {allPhotos.length} photos
                     </button>
-                </div>
+                </div> */}
             </section>
 
             {/* Tabs Section */}
