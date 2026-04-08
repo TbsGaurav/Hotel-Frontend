@@ -12,6 +12,8 @@ import * as yup from 'yup';
 export default function HotelDetails({ initialData }) {
     const hotelData = initialData;
     const loading = !initialData;
+    const hotelInfo = hotelData?.hotel;
+    const hotelPhotos = hotelData?.hotelPhotos || [];
     const [error, setError] = useState(null);
     const [showPhotoModal, setShowPhotoModal] = useState(false);
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -194,6 +196,7 @@ export default function HotelDetails({ initialData }) {
 
     // Default image path
     const defaultImage = '/image/property-img.webp';
+    const modalPhotos = [hotelInfo?.mainPhoto || defaultImage, ...hotelPhotos.map((p) => p.photo)].filter(Boolean);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -201,6 +204,16 @@ export default function HotelDetails({ initialData }) {
         }, 0);
         return () => clearTimeout(timer);
     }, []);
+
+    useEffect(() => {
+        if (!showPhotoModal || modalPhotos.length <= 1) return undefined;
+
+        const autoSlide = setInterval(() => {
+            setCurrentPhotoIndex((prev) => (prev + 1) % modalPhotos.length);
+        }, 3000);
+
+        return () => clearInterval(autoSlide);
+    }, [showPhotoModal, modalPhotos.length]);
 
     // Generate cache-busted URL
     const getImageUrl = (photo) => {
@@ -250,7 +263,7 @@ export default function HotelDetails({ initialData }) {
         </div>
     );
 
-    if (error || !hotelData?.hotel) {
+    if (error || !hotelInfo) {
         return (
             <>
                 <CountryHeroSection />
@@ -359,7 +372,7 @@ export default function HotelDetails({ initialData }) {
         );
     }
 
-    if (error || !hotelData?.hotel) {
+    if (error || !hotelInfo) {
         return (
             <>
                 <CountryHeroSection />
@@ -373,8 +386,6 @@ export default function HotelDetails({ initialData }) {
         );
     }
 
-    const hotelInfo = hotelData.hotel;
-    const hotelPhotos = hotelData.hotelPhotos || [];
     const hotelFacilities = hotelData.hotelFacilities || [];
     const hotelReviews = hotelData.hotelReviews || [];
 
@@ -1105,40 +1116,44 @@ export default function HotelDetails({ initialData }) {
             {showPhotoModal && (
                 <div className="photo-modal-overlay" onClick={closePhotoModal}>
                     <div className="photo-modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="photo-modal-header">
-                            <h3 className="photo-modal-title">{hotelInfo.hotelName}</h3>
-                            <span className="photo-modal-counter">
-                                {currentPhotoIndex + 1} of {allPhotos.length}
-                            </span>
-                            <button className="photo-modal-close" onClick={closePhotoModal}>
-                                <FaTimes />
-                            </button>
-                        </div>
+                     
                         <div className="photo-modal-body">
-                            <button className="photo-modal-nav photo-modal-prev" onClick={prevPhoto}>
-                                <FaChevronLeft />
-                            </button>
-                            <img
-                                src={allPhotos[currentPhotoIndex]}
-                                alt={`Photo ${currentPhotoIndex + 1}`}
-                                className="photo-modal-image"
-                                onError={handleImageError}
-                            />
-                            <button className="photo-modal-nav photo-modal-next" onClick={nextPhoto}>
-                                <FaChevronRight />
-                            </button>
-                        </div>
-                        <div className="photo-modal-footer">
-                            {allPhotos.map((photo, idx) => (
+                            <div className="photo-modal-image-stage">
                                 <img
-                                    key={idx}
-                                    src={photo}
-                                    alt={`Thumbnail ${idx + 1}`}
-                                    className={`photo-thumbnail ${currentPhotoIndex === idx ? 'active' : ''}`}
-                                    onClick={() => setCurrentPhotoIndex(idx)}
+                                    src={getImageUrl(allPhotos[currentPhotoIndex])}
+                                    alt={`Photo ${currentPhotoIndex + 1}`}
+                                    className="photo-modal-image"
                                     onError={handleImageError}
                                 />
-                            ))}
+                                <button className="photo-modal-nav photo-modal-prev" onClick={prevPhoto}>
+                                    <FaChevronLeft />
+                                </button>
+                                <button className="photo-modal-nav photo-modal-next" onClick={nextPhoto}>
+                                    <FaChevronRight />
+                                </button>
+                                <div className="photo-modal-indicators" aria-hidden="true">
+                                    {allPhotos.map((_, idx) => (
+                                        <span
+                                            key={idx}
+                                            className={`photo-modal-indicator ${currentPhotoIndex === idx ? 'active' : ''}`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="photo-modal-footer">
+                            <div className="photo-thumbnail-strip">
+                                {allPhotos.map((photo, idx) => (
+                                    <img
+                                        key={idx}
+                                        src={getImageUrl(photo)}
+                                        alt={`Thumbnail ${idx + 1}`}
+                                        className={`photo-thumbnail ${currentPhotoIndex === idx ? 'active' : ''}`}
+                                        onClick={() => setCurrentPhotoIndex(idx)}
+                                        onError={handleImageError}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
