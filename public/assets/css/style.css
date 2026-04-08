@@ -59,6 +59,62 @@ a {
     overflow-x: hidden !important;
     overflow-y: auto !important;
 }
+/* Rooms & Guests dropdown sizing */
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item {
+    width: 300px;
+    max-width: 92vw;
+    min-width: 0;
+    left: 0;
+    right: auto;
+}
+/* Ensure dropdown anchors under Rooms & Guests */
+.main-hero-search-row .rooms-search-col {
+    position: relative;
+}
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item {
+    top: calc(100% + 8px);
+    margin-top: 0;
+    transform: none;
+}
+/* Rooms & Guests dropdown layout polish */
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .number-in-dec {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .mb-3 {
+    margin-bottom: 14px !important;
+}
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .form-label {
+    margin-bottom: 6px;
+}
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .number-in-dec p {
+    margin-bottom: 6px;
+}
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .number-in-dec .para {
+    width: 64px;
+    height: 40px;
+    font-size: 18px;
+}
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .custom-input-select-children-dd {
+    width: 72px !important;
+}
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .row.g-2 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 10px;
+    justify-items: start;
+    align-items: start;
+    justify-content: start;
+}
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .row.g-2 > [class*='col-'] {
+    max-width: 100%;
+    flex: 0 0 auto;
+}
+.main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .theme-button-orange {
+    width: 100%;
+    margin-top: 6px;
+}
 .language-switcher-menu-item li a,
 .language-switcher-menu-item li button {
     padding: 10px 15px !important;

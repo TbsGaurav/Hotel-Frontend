@@ -552,23 +552,17 @@ export default function HeroSection() {
                                         </div>
                                         <div className="mb-3">
                                             <label className="form-label custom-form-label">Children</label>
-                                            <div className="number number-in-dec">
-                                                <button
-                                                    type="button"
-                                                    className="minus"
-                                                    onClick={() => updateChildrenCount(childrenCount - 1)}
-                                                >
-                                                    -
-                                                </button>
-                                                <input type="text" className="para" value={childrenCount} readOnly />
-                                                <button
-                                                    type="button"
-                                                    className="plus"
-                                                    onClick={() => updateChildrenCount(childrenCount + 1)}
-                                                >
-                                                    +
-                                                </button>
-                                            </div>
+                                            <select
+                                                className="form-select custom-input-select-rooms-guest-dd"
+                                                value={childrenCount}
+                                                onChange={(e) => updateChildrenCount(Number(e.target.value))}
+                                            >
+                                                {[...Array(11)].map((_, i) => (
+                                                    <option key={i} value={i}>
+                                                        {i}
+                                                    </option>
+                                                ))}
+                                            </select>
                                         </div>
                                         {childrenCount > 0 && (
                                             <div className="mb-3">
