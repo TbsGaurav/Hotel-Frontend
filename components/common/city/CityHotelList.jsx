@@ -220,19 +220,6 @@ export default function CityHotelList({
 
         const nextPage = page + 1;
 
-        if (pageIntentCookieName) {
-            if (!pageCookieName) {
-                loadRequestInFlightRef.current = false;
-                setLoading(false);
-                return;
-            }
-
-            document.cookie = `${pageCookieName}=${nextPage}; path=/; SameSite=Lax`;
-            document.cookie = `${pageIntentCookieName}=1; path=/; SameSite=Lax; Max-Age=20`;
-            window.location.reload();
-            return;
-        }
-
         if (typeof fetchMoreHotels === 'function') {
             Promise.resolve(
                 fetchMoreHotels({
@@ -277,6 +264,19 @@ export default function CityHotelList({
                     loadRequestInFlightRef.current = false;
                     setLoading(false);
                 });
+            return;
+        }
+
+        if (pageIntentCookieName) {
+            if (!pageCookieName) {
+                loadRequestInFlightRef.current = false;
+                setLoading(false);
+                return;
+            }
+
+            document.cookie = `${pageCookieName}=${nextPage}; path=/; SameSite=Lax`;
+            document.cookie = `${pageIntentCookieName}=1; path=/; SameSite=Lax; Max-Age=20`;
+            window.location.reload();
             return;
         }
 

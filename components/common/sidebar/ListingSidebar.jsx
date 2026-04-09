@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import { buildCategoryListingPath } from '@/lib/api/public/cityCategoryapi';
  
 function normalizeLabel(item) {
     return String(item?.categoryName ?? item?.name ?? item?.label ?? '').trim();
@@ -28,7 +29,8 @@ function normalizeHref(item, label) {
                 search.set('categoryId', String(categoryId));
             }
 
-            return `/city/${encodeURIComponent(city)}/${encodeURIComponent(category)}${search.toString() ? `?${search.toString()}` : ''}`;
+            const basePath = buildCategoryListingPath(city, category);
+            return `${basePath}${search.toString() ? `?${search.toString()}` : ''}`;
         }
 
         return pathname || '#';

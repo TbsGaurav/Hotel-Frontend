@@ -10,6 +10,7 @@ import { formatCountryName } from '@/lib/utils';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
+import { buildCategoryListingPath } from '@/lib/api/public/cityCategoryapi';
 
 const REGION_PAGE_SIZE = 10;
 
@@ -175,21 +176,21 @@ export default async function RegionDetails({ params, regionId }) {
             if (categoryId !== null && categoryId !== undefined && categoryId !== '') {
                 query.set('categoryId', String(categoryId));
             }
-            if (regionId !== null && regionId !== undefined && regionId !== '') {
-                query.set('regionId', String(regionId));
+            if (resolvedRegionId !== null && resolvedRegionId !== undefined && resolvedRegionId !== '') {
+                query.set('regionId', String(resolvedRegionId));
             }
             if (countrySlug) {
                 query.set('country', String(countrySlug));
             }
 
-            const baseHref = `/${encodeURIComponent(normalizedRegionSlug)}/${encodeURIComponent(categorySlug)}`;
+            const baseHref = buildCategoryListingPath(normalizedRegionSlug, categorySlug);
             const href = query.toString() ? `${baseHref}?${query.toString()}` : baseHref;
 
             return {
                 ...item,
                 href,
                 categoryId,
-                regionId
+                regionId: resolvedRegionId
             };
         })
     }));
