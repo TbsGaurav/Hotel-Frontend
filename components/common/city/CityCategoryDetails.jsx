@@ -156,6 +156,9 @@ export default function CityCategoryDetails({
     const [cityName, setCityName] = useState(initialData?.cityName || '');
     const [countryName, setCountryName] = useState(initialData?.countryName || '');
     const [countryUrl, setCountryUrl] = useState(initialData?.countryUrl || '');
+    const [cityUrl, setCityUrl] = useState(initialData?.cityUrl || '');
+    const [regionUrl, setRegionUrl] = useState(initialData?.regionUrl || '');
+    const [locationInfo, setLocationInfo] = useState(initialData?.locationInfo || {});
 
     const slugKey = useMemo(() => `${toSlug(citySlug)}|${toSlug(categorySlug)}`, [citySlug, categorySlug]);
 
@@ -197,6 +200,9 @@ export default function CityCategoryDetails({
             setCityName('');
             setCountryName('');
             setCountryUrl('');
+            setCityUrl('');
+            setRegionUrl('');
+            setLocationInfo({});
             setResolvedRegionCountrySlug('');
 
             try {
@@ -284,6 +290,7 @@ export default function CityCategoryDetails({
                 if (cancelled) return;
 
                 const categories = normalizeCategoryItems(response.categories || []);
+                const responseLocationInfo = response.locationInfo || {};
 
                 const selectedCategory =
                     categories.find((item) => String(item?.categoryId) === String(effectiveCategoryId)) ||
@@ -292,15 +299,24 @@ export default function CityCategoryDetails({
                 const selectedCategoryName = getCategoryDisplayName(selectedCategory) || '';
 
                 const firstHotel = Array.isArray(response.hotels) ? response.hotels[0] : null;
+                const resolvedRegionNameValue = String(
+                    responseLocationInfo?.regionName || firstHotel?.regionName || regionContext?.regionName || ''
+                ).trim();
                 const resolvedCityName =
-                    String(firstHotel?.cityName || firstHotel?.city || firstHotel?.cityLabel || '').trim() ||
+                    String(responseLocationInfo?.cityName || firstHotel?.cityName || firstHotel?.city || firstHotel?.cityLabel || '').trim() ||
                     String(cityContext?.cityName || regionContext?.regionName || '').trim() ||
                     formatCityName(citySlug);
                 const resolvedCountryName =
-                    String(firstHotel?.countryName || firstHotel?.country || '').trim();
+                    String(responseLocationInfo?.countryName || firstHotel?.countryName || firstHotel?.country || '').trim();
                 const resolvedCountryUrl =
-                    String(firstHotel?.countryUrlName || firstHotel?.countryUrl || '').trim() ||
+                    String(responseLocationInfo?.countryUrl || firstHotel?.countryUrlName || firstHotel?.countryUrl || '').trim() ||
                     (resolvedCountryName ? toSlug(resolvedCountryName) : '');
+                const resolvedCityUrl =
+                    String(responseLocationInfo?.cityUrl || firstHotel?.cityUrlName || firstHotel?.cityUrl || '').trim() ||
+                    (resolvedCityName ? `/${toSlug(resolvedCityName)}` : '');
+                const resolvedRegionUrl =
+                    String(responseLocationInfo?.regionUrl || firstHotel?.regionUrlName || firstHotel?.regionUrl || '').trim() ||
+                    (resolvedCountryUrl && resolvedRegionNameValue ? `/${toSlug(resolvedCountryUrl)}/${toSlug(resolvedRegionNameValue)}` : '');
 
                 setHotelRows(Array.isArray(response.hotels) ? response.hotels : []);
                 if (cityId) {
@@ -317,6 +333,10 @@ export default function CityCategoryDetails({
                 setCityName(resolvedCityName);
                 setCountryName(resolvedCountryName);
                 setCountryUrl(resolvedCountryUrl);
+                setCityUrl(resolvedCityUrl);
+                setRegionUrl(resolvedRegionUrl);
+                setLocationInfo(responseLocationInfo);
+                setResolvedRegionName(resolvedRegionNameValue);
 
                 onPageInfoChange?.({
                     title: selectedCategoryName || formatCityName(categorySlug),
@@ -434,16 +454,19 @@ export default function CityCategoryDetails({
         return response;
     };
 
-    const isRegionContext = Boolean(resolvedRegionId || queryCountrySlug || resolvedRegionCountrySlug);
-    const locationName = isRegionContext
-        ? resolvedRegionName || cityName || formatCityName(citySlug)
-        : cityName || formatCityName(citySlug);
-    const locationHref = isRegionContext && countrySlugForRegion
-        ? `/${encodeURIComponent(toSlug(countrySlugForRegion))}/${encodeURIComponent(toSlug(citySlug))}`
-        : `/${encodeURIComponent(toSlug(citySlug))}`;
+    const normalizeBreadcrumbHref = (value = '') => {
+        const trimmed = String(value || '').trim();
+        if (!trimmed) return '';
+        return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    };
 
-    const countryBreadcrumbSlug = queryCountrySlug || countryUrl || toSlug(countryName);
-    const countryBreadcrumbLabel = countryName || (countryBreadcrumbSlug ? formatCityName(countryBreadcrumbSlug) : '');
+    const isRegionContext = Boolean(resolvedRegionId || queryCountrySlug || resolvedRegionCountrySlug);
+    const countryBreadcrumbHref = normalizeBreadcrumbHref(locationInfo?.countryUrl || queryCountrySlug || countryUrl || toSlug(countryName));
+    const countryBreadcrumbLabel = String(locationInfo?.countryName || countryName || '').trim();
+    const regionBreadcrumbHref = normalizeBreadcrumbHref(locationInfo?.regionUrl || regionUrl);
+    const regionBreadcrumbLabel = String(locationInfo?.regionName || resolvedRegionName || '').trim();
+    const cityBreadcrumbHref = normalizeBreadcrumbHref(locationInfo?.cityUrl || cityUrl);
+    const cityBreadcrumbLabel = String(locationInfo?.cityName || cityName || '').trim();
 
     const breadcrumb = (
         <div className="container">
@@ -451,18 +474,30 @@ export default function CityCategoryDetails({
                 <Link href="/destinations" className="text-dark text-decoration-none">
                     All countries
                 </Link>
-                {countryBreadcrumbLabel && countryBreadcrumbSlug && (
+                {countryBreadcrumbLabel && countryBreadcrumbHref && (
                     <>
                         <span className="mx-2 text-muted">&bull;</span>
-                        <Link href={`/${encodeURIComponent(toSlug(countryBreadcrumbSlug))}`} className="text-dark text-decoration-none">
+                        <Link href={countryBreadcrumbHref} className="text-dark text-decoration-none">
                             {countryBreadcrumbLabel}
                         </Link>
                     </>
                 )}
-                <span className="mx-2 text-muted">&bull;</span>
-                <Link href={locationHref} className="text-dark text-decoration-none">
-                    {locationName}
-                </Link>
+                {regionBreadcrumbLabel && regionBreadcrumbHref && (
+                    <>
+                        <span className="mx-2 text-muted">&bull;</span>
+                        <Link href={regionBreadcrumbHref} className="text-dark text-decoration-none">
+                            {regionBreadcrumbLabel}
+                        </Link>
+                    </>
+                )}
+                {!isRegionContext && cityBreadcrumbLabel && cityBreadcrumbHref && (
+                    <>
+                        <span className="mx-2 text-muted">&bull;</span>
+                        <Link href={cityBreadcrumbHref} className="text-dark text-decoration-none">
+                            {cityBreadcrumbLabel}
+                        </Link>
+                    </>
+                )}
                 <span className="mx-2 text-muted">&bull;</span>
                 <span className="text-primary">{categoryName || formatCityName(categorySlug)}</span>
             </div>
