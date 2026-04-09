@@ -6,7 +6,7 @@ import CityDropdown from '@/components/common/city/CityDropdown';
 export default function CountryDropdownSection({ regions, countryName, data, hotelBrands, hotelTypes }) {
     const cities = data?.countryData?.filter((i) => i.type === 0) ?? [];
     return (
-        <section className="container py-4">
+        <>
             <div className="accordion" id="countryAccordion">
                 <Dropdown id="regions" items={regions} parentId="countryAccordion" title="All Regions" />
 
@@ -15,6 +15,16 @@ export default function CountryDropdownSection({ regions, countryName, data, hot
                 <Dropdown id="hotelbrand" items={hotelBrands} parentId="countryAccordion" title={`Top Hotel Brands in ${countryName}`} />
                 <Dropdown id="hoteltype" items={hotelTypes} parentId="countryAccordion" title={`Top Hotel Types in ${countryName}`} />
             </div>
-        </section>
+        </>
+        // <section className="container py-4">
+        //     <div className="accordion" id="countryAccordion">
+        //         <Dropdown id="regions" items={regions} parentId="countryAccordion" title="All Regions" />
+
+        //         <CityDropdown countryName={countryName} initialCities={cities} parentId="countryAccordion" />
+
+        //         <Dropdown id="hotelbrand" items={hotelBrands} parentId="countryAccordion" title={`Top Hotel Brands in ${countryName}`} />
+        //         <Dropdown id="hoteltype" items={hotelTypes} parentId="countryAccordion" title={`Top Hotel Types in ${countryName}`} />
+        //     </div>
+        // </section>
     );
 }

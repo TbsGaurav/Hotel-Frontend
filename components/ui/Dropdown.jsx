@@ -7,7 +7,7 @@ export default function Dropdown({ id, title, items = [], parentId, defaultOpen 
     const collapseId = `collapse-${id}`;
 
     return (
-        <div className="accordion mb-4" id={parentId}>
+        <div className="accordion mb-4 accordion-top" id={parentId}>
             <div className="accordion-item border-0">
                 <h2 className="accordion-header" id={headingId}>
                     <button
@@ -35,21 +35,16 @@ export default function Dropdown({ id, title, items = [], parentId, defaultOpen 
                     data-bs-parent={`#${parentId}`}
                 >
                     <div
-                        className="accordion-body"
-                        style={{
-                            padding: '20px',
-                            borderTop: 'none'
-                        }}
-                    >
+                        className="accordion-body accordion-main">
                         <div className="row">
                             {items.length === 0 ? (
                                 <div className="col-12 text-muted">No data found</div>
                             ) : (
                                 items.map((item, index) => (
-                                    <div key={index} className="col-6 col-md-4 col-lg-3 mb-2">
+                                    <div key={index} className="col-6 col-md-4 col-lg-3 country-list">
                                         {item.href ? (
                                             <Link href={item.href} className="text-decoration-none text-dark" prefetch={false}>
-                                                • {item.label}
+                                                 {item.label}
                                             </Link>
                                         ) : (
                                             <span className="text-dark">• {item.label}</span>
@@ -57,9 +52,7 @@ export default function Dropdown({ id, title, items = [], parentId, defaultOpen 
 
                                         {item.count != null && (
                                             <div
-                                                className="property-count"
-                                                style={{ fontSize: '13px', marginLeft: '14px', lineHeight: '1.2' }}
-                                            >
+                                                className="property-count" >
                                                 <Link href={item.href} className="text-decoration-none property-link" prefetch={false}>
                                                     ({item.count} properties)
                                                 </Link>
