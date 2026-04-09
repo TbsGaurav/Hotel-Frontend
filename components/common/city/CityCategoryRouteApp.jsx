@@ -73,6 +73,9 @@ async function getInitialCategoryPageData({
         cityName: '',
         countryName: '',
         countryUrl: '',
+        cityUrl: '',
+        regionUrl: '',
+        locationInfo: {},
         error: '',
         loading: false
     };
@@ -182,19 +185,27 @@ async function getInitialCategoryPageData({
         };
 
         const categories = normalizeCategoryItems(response.categories || []);
+        const locationInfo = response.locationInfo || {};
         const selectedCategory =
             categories.find((item) => String(item?.categoryId) === String(effectiveCategoryId)) ||
             null;
         const selectedCategoryName = getCategoryDisplayName(selectedCategory) || '';
         const firstHotel = Array.isArray(response.hotels) ? response.hotels[0] : null;
         const resolvedCityLabel =
-            String(firstHotel?.cityName || firstHotel?.city || firstHotel?.cityLabel || '').trim() ||
+            String(locationInfo?.cityName || firstHotel?.cityName || firstHotel?.city || firstHotel?.cityLabel || '').trim() ||
             String(cityContext?.cityName || regionContext?.regionName || '').trim() ||
             formatCityName(citySlug);
-        const resolvedCountryName = String(firstHotel?.countryName || firstHotel?.country || '').trim();
+        const resolvedCountryName = String(locationInfo?.countryName || firstHotel?.countryName || firstHotel?.country || '').trim();
         const resolvedCountryUrl =
-            String(firstHotel?.countryUrlName || firstHotel?.countryUrl || '').trim() ||
+            String(locationInfo?.countryUrl || firstHotel?.countryUrlName || firstHotel?.countryUrl || '').trim() ||
             (resolvedCountryName ? toSlug(resolvedCountryName) : '');
+        const resolvedRegionNameValue = String(locationInfo?.regionName || regionContext?.regionName || '').trim();
+        const resolvedCityUrl =
+            String(locationInfo?.cityUrl || firstHotel?.cityUrlName || firstHotel?.cityUrl || '').trim() ||
+            (resolvedCityLabel ? `/${toSlug(resolvedCityLabel)}` : '');
+        const resolvedRegionUrl =
+            String(locationInfo?.regionUrl || firstHotel?.regionUrlName || firstHotel?.regionUrl || '').trim() ||
+            (resolvedCountryUrl && resolvedRegionNameValue ? `/${toSlug(resolvedCountryUrl)}/${toSlug(resolvedRegionNameValue)}` : '');
         const resolvedSidebarData = cityId
             ? await getSidebarData({ cityId })
             : regionIdForRequest
@@ -211,12 +222,15 @@ async function getInitialCategoryPageData({
             currentPage,
             resolvedCityId: cityId,
             resolvedRegionId: regionIdForRequest,
-            resolvedRegionName: regionContext?.regionName || '',
+            resolvedRegionName: resolvedRegionNameValue,
             resolvedRegionCountrySlug: regionContext?.countrySlug || queryCountrySlug || '',
             categoryName: selectedCategoryName || formatCityName(categorySlug),
             cityName: resolvedCityLabel,
             countryName: resolvedCountryName,
-            countryUrl: resolvedCountryUrl
+            countryUrl: resolvedCountryUrl,
+            cityUrl: resolvedCityUrl,
+            regionUrl: resolvedRegionUrl,
+            locationInfo
         };
     } catch (error) {
         console.error('Error loading city category hotels:', error);
