@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
@@ -31,6 +32,7 @@ export default function CityHotelList({
     const loadRequestInFlightRef = useRef(false);
 
     const defaultImage = '/image/property-img.webp';
+    const passthroughImageLoader = ({ src }) => src;
     const computeHasMore = ({ loadedCount = 0, knownTotalCount = 0, currentPageNumber = 1, currentPageSize = 10, lastBatchSize = 0 }) => {
         const normalizedTotal = Number(knownTotalCount || 0);
 
@@ -257,13 +259,13 @@ export default function CityHotelList({
                     setPage(resolvedPageNo);
                     setHasMore(
                         listGrew &&
-                        computeHasMore({
-                            loadedCount: mergedHotels.length,
-                            knownTotalCount: resolvedTotalCount,
-                            currentPageNumber: resolvedPageNo,
-                            currentPageSize: resolvedPageSize,
-                            lastBatchSize: normalizedHotels.length
-                        })
+                            computeHasMore({
+                                loadedCount: mergedHotels.length,
+                                knownTotalCount: resolvedTotalCount,
+                                currentPageNumber: resolvedPageNo,
+                                currentPageSize: resolvedPageSize,
+                                lastBatchSize: normalizedHotels.length
+                            })
                     );
 
                     if (pageCookieName) {
@@ -416,6 +418,14 @@ export default function CityHotelList({
                                             </>
                                         )}
 
+                                        {/* <Image
+                                            src={getImageUrl(hotel?.photo)}
+                                            width={400}
+                                            height={270}
+                                            className="d-block w-100 rounded-4 collection-hotel-image"
+                                            alt={hotel.hotelName}
+                                            onError={handleImageError}
+                                        /> */}
                                         <img
                                             src={getImageUrl(hotel?.photo)}
                                             className="d-block w-100 rounded-4 collection-hotel-image"
@@ -506,15 +516,15 @@ export default function CityHotelList({
                                                         .split('|')
                                                         .map((facility) => facility.trim())
                                                         .filter(Boolean).length > 5 && (
-                                                            <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
-                                                                +
-                                                                {hotelFacilitiesText
-                                                                    .split('|')
-                                                                    .map((facility) => facility.trim())
-                                                                    .filter(Boolean).length - 5}{' '}
-                                                                more
-                                                            </span>
-                                                        )}
+                                                        <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
+                                                            +
+                                                            {hotelFacilitiesText
+                                                                .split('|')
+                                                                .map((facility) => facility.trim())
+                                                                .filter(Boolean).length - 5}{' '}
+                                                            more
+                                                        </span>
+                                                    )}
                                                 </>
                                             )}
                                         </div>
@@ -607,7 +617,6 @@ export default function CityHotelList({
                                                 <i className="fa-solid fa-arrow-right ms-2"></i>
                                             </Link>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>

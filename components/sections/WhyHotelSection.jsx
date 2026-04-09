@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export default function WhyHotelSection() {
     const benefits = [
         'Free cancellation on most rooms',
@@ -29,16 +31,12 @@ export default function WhyHotelSection() {
                         </ul>
                     </div>
 
-                    {/* Right Image */}
+                  
+
                     <div className="col-lg-5 text-center">
-                        <img
-                            src="/image/property-img.webp"
-                            className="img-fluid rounded-4"
-                            style={{
-                                maxHeight: '260px',
-                                objectFit: 'cover'
-                            }}
-                        />
+                        <div className="why-image-wrap">
+                            <Image src="/image/property-img.webp" alt="hotel" fill className="why-image rounded-4" />
+                        </div>
                     </div>
                 </div>
             </div>

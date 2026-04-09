@@ -4,6 +4,7 @@ import CountryHeroSection from '@/components/sections/CountryHeroSection';
 
 export default function ListingLayout({
     breadcrumb = null,
+    mobileActions = null,
     header = null,
     topContent = null,
     sidebar = null,
@@ -18,6 +19,7 @@ export default function ListingLayout({
         <>
             {showHero ? <CountryHeroSection /> : null}
 
+            {mobileActions}
             {breadcrumb ? <div className="py-2">{breadcrumb}</div> : null}
 
             <section className={sectionClassName}>

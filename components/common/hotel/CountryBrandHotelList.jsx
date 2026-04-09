@@ -6,6 +6,7 @@ import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
+import Image from 'next/image';
 
 export default function CountryBrandHotelList({
     hotels = [],
@@ -349,10 +350,12 @@ export default function CountryBrandHotelList({
                                                         ))}
                                                     </>
                                                 )}
-                                                <img
+
+                                                <Image
                                                     src={getImageUrl(hotel?.photo)}
+                                                    width={400}
+                                                    height={270}
                                                     className="d-block w-100 rounded-4 collection-hotel-image"
-                                                    style={{ height: '270px', objectFit: 'cover' }}
                                                     alt={hotel.hotelName}
                                                     onError={handleImageError}
                                                 />

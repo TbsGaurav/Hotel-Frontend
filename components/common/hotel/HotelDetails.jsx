@@ -8,6 +8,7 @@ import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import { saveCustomerReview } from '@/lib/api/public/hotelapi';
 import { toast } from 'react-hot-toast';
 import * as yup from 'yup';
+import Image from 'next/image';
 
 export default function HotelDetails({ initialData }) {
     const hotelData = initialData;
@@ -551,20 +552,22 @@ export default function HotelDetails({ initialData }) {
                             </div>
                             <div className="carousel-inner h-100">
                                 <div className="carousel-item active h-100">
-                                    <img
+                                    <Image
+                                        fill
                                         src={getImageUrl(mainPhoto)}
+                                        sizes="(max-width: 991px) 100vw, 66vw"
                                         className="d-block w-100 h-100"
-                                        style={{ objectFit: 'cover' }}
                                         alt={hotelInfo.hotelName}
                                         onError={handleImageError}
                                     />
                                 </div>
                                 {carouselPhotos.map((photo, idx) => (
                                     <div key={idx} className="carousel-item h-100">
-                                        <img
+                                        <Image
+                                            fill
                                             src={getImageUrl(photo.photo)}
+                                            sizes="(max-width: 991px) 100vw, 66vw"
                                             className="d-block w-100 h-100"
-                                            style={{ objectFit: 'cover' }}
                                             alt={`${hotelInfo.hotelName} photo ${idx + 1}`}
                                             onError={handleImageError}
                                         />
@@ -595,11 +598,13 @@ export default function HotelDetails({ initialData }) {
                                         style={{ height: '190px', cursor: 'pointer' }}
                                         onClick={() => openPhotoModal(idx + 1)}
                                     >
-                                        <img
+                                        <Image
                                             src={getImageUrl(photo.photo)}
                                             className="w-100 h-100"
-                                            style={{ objectFit: 'cover' }}
+                                            // style={{ objectFit: 'cover' }}
                                             alt="hotel"
+                                            fill
+                                            sizes="33vw"
                                         />
 
                                         {/* ✅ ONLY ON LAST IMAGE */}
@@ -1119,14 +1124,16 @@ export default function HotelDetails({ initialData }) {
             {showPhotoModal && (
                 <div className="photo-modal-overlay" onClick={closePhotoModal}>
                     <div className="photo-modal-content" onClick={(e) => e.stopPropagation()}>
-                     
                         <div className="photo-modal-body">
                             <div className="photo-modal-image-stage">
-                                <img
+                                <Image
                                     src={getImageUrl(allPhotos[currentPhotoIndex])}
                                     alt={`Photo ${currentPhotoIndex + 1}`}
                                     className="photo-modal-image"
                                     onError={handleImageError}
+                                    width={1400}
+                                    height={900}
+                                    sizes="(max-width: 767px) 94vw, 980px"
                                 />
                                 <button className="photo-modal-nav photo-modal-prev" onClick={prevPhoto}>
                                     <FaChevronLeft />
@@ -1136,10 +1143,7 @@ export default function HotelDetails({ initialData }) {
                                 </button>
                                 <div className="photo-modal-indicators" aria-hidden="true">
                                     {allPhotos.map((_, idx) => (
-                                        <span
-                                            key={idx}
-                                            className={`photo-modal-indicator ${currentPhotoIndex === idx ? 'active' : ''}`}
-                                        />
+                                        <span key={idx} className={`photo-modal-indicator ${currentPhotoIndex === idx ? 'active' : ''}`} />
                                     ))}
                                 </div>
                             </div>
@@ -1147,13 +1151,15 @@ export default function HotelDetails({ initialData }) {
                         <div className="photo-modal-footer">
                             <div className="photo-thumbnail-strip">
                                 {allPhotos.map((photo, idx) => (
-                                    <img
+                                    <Image
                                         key={idx}
                                         src={getImageUrl(photo)}
                                         alt={`Thumbnail ${idx + 1}`}
                                         className={`photo-thumbnail ${currentPhotoIndex === idx ? 'active' : ''}`}
                                         onClick={() => setCurrentPhotoIndex(idx)}
                                         onError={handleImageError}
+                                        width={74}
+                                        height={52}
                                     />
                                 ))}
                             </div>

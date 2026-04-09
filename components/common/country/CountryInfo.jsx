@@ -30,11 +30,6 @@ export default function CountryIntro({ countryName, descriptionHtml }) {
                             }}
                         />
                     </div>
-
-                    {/* RIGHT IMAGE */}
-                    {/* <div className="col-md-5 text-center">
-                    <img src={heroImage} alt={countryName} className="img-fluid rounded" style={{ maxHeight: 280 }} />
-                </div> */}
                 </div>
             </section>
         </>

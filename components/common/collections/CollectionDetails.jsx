@@ -7,6 +7,7 @@ import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
 import CountryHeroSection from '@/components/sections/CountryHeroSection';
 import { getHotelsByCollection, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
+import Image from 'next/image';
 
 export default function CollectionDetails({ collection, hotels, hotelRates, totalCount, currentPage, pageSize, collectionId }) {
     const basic = collection?.basicCollection;
@@ -380,10 +381,11 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         }
                                                         return null;
                                                     })()}
-                                                    <img
+                                                    <Image
                                                         src={getImageUrl(hotel?.photo)}
+                                                        width={400}
+                                                        height={270}
                                                         className="d-block w-100 rounded-4 collection-hotel-image"
-                                                        style={{ height: '270px', objectFit: 'cover' }}
                                                         alt={hotel.hotelName}
                                                         onError={handleImageError}
                                                     />

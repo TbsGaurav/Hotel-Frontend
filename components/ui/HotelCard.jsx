@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { useId } from 'react';
 
 export default function  HotelCard({ hotel }) {
@@ -23,7 +24,7 @@ export default function  HotelCard({ hotel }) {
                 <div className="carousel-inner rounded-3 overflow-hidden">
                     {hotel.images.map((img, i) => (
                         <div key={i} className={`carousel-item ${i === 0 ? 'active' : ''}`}>
-                            <img
+                            <Image
                                 src={img}
                                 className="d-block w-100"
                                 alt="hotel"

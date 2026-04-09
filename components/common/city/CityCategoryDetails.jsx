@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import CityHotelList from './CityHotelList';
+import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { getSidebarData } from '@/lib/api/sidebarapi';
 import ListingLayout from '@/components/common/listing/ListingLayout';
 import {
@@ -431,6 +432,22 @@ export default function CityCategoryDetails({
 
     const header = <h2 className="mb-3">{categoryName || formatCityName(categorySlug)}</h2>;
 
+    const mobileActions = (
+        <section className="mobile-actions d-lg-none">
+            <div className="container px-0">
+                <div className="mobile-actions__bottom">
+                    <button type="button" className="mobile-actions__link">
+                        Sort
+                    </button>
+                    <MobileFilterDrawer sidebarSections={sidebarSections} />
+                    <button type="button" className="mobile-actions__link">
+                        Map
+                    </button>
+                </div>
+            </div>
+        </section>
+    );
+
     const sidebar = (
         <div className="position-sticky" style={{ top: '16px' }}>
             <ListingSidebar title="Filters" sections={sidebarSections} />
@@ -440,9 +457,13 @@ export default function CityCategoryDetails({
     if (loading) {
         return (
             <ListingLayout
+                mobileActions={mobileActions}
                 breadcrumb={breadcrumb}
                 header={header}
                 sidebar={sidebar}
+                rowClassName="row g-0 g-lg-4 align-items-start"
+                sidebarClassName="col-lg-3 d-none d-lg-block order-lg-1"
+                mainClassName="col-12 col-lg-9 order-1 order-lg-2"
                 main={<div className="text-center py-5 text-muted">Loading category hotels...</div>}
             />
         );
@@ -451,9 +472,13 @@ export default function CityCategoryDetails({
     if (error) {
         return (
             <ListingLayout
+                mobileActions={mobileActions}
                 breadcrumb={breadcrumb}
                 header={header}
                 sidebar={sidebar}
+                rowClassName="row g-0 g-lg-4 align-items-start"
+                sidebarClassName="col-lg-3 d-none d-lg-block order-lg-1"
+                mainClassName="col-12 col-lg-9 order-1 order-lg-2"
                 main={<div className="alert alert-danger mb-0">{error}</div>}
             />
         );
@@ -461,9 +486,13 @@ export default function CityCategoryDetails({
 
     return (
         <ListingLayout
+            mobileActions={mobileActions}
             breadcrumb={breadcrumb}
             header={header}
             sidebar={sidebar}
+            rowClassName="row g-0 g-lg-4 align-items-start"
+            sidebarClassName="col-lg-3 d-none d-lg-block order-lg-1"
+            mainClassName="col-12 col-lg-9 order-1 order-lg-2"
             main={
                 hotelRows.length > 0 ? (
                     <CityHotelList

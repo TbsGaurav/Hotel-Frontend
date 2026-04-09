@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 
 export default function RegionCard() {
@@ -43,30 +44,21 @@ export default function RegionCard() {
                             {/* Images */}
                             <div className="carousel-inner">
                                 <div className="carousel-item active">
-                                    <img
-                                        src="/image/property-img.webp"
-                                        className="d-block w-100 "
-                                        style={{ height: '340px', objectFit: 'cover' }}
-                                        alt=""
-                                    />
+                                    <div className="carousel-image-wrap">
+                                        <Image src="/image/property-img.webp" fill className="carousel-image" alt="" />
+                                    </div>
                                 </div>
 
                                 <div className="carousel-item">
-                                    <img
-                                        src="/image/property-img.webp"
-                                        className="d-block w-100"
-                                        style={{ height: '340px', objectFit: 'cover' }}
-                                        alt=""
-                                    />
+                                    <div className="carousel-image-wrap">
+                                        <Image src="/image/property-img.webp" fill className="carousel-image" alt="" />
+                                    </div>
                                 </div>
 
                                 <div className="carousel-item">
-                                    <img
-                                        src="/image/property-img.webp"
-                                        className="d-block w-100"
-                                        style={{ height: '340px', objectFit: 'cover' }}
-                                        alt=""
-                                    />
+                                    <div className="carousel-image-wrap">
+                                        <Image src="/image/property-img.webp" fill className="carousel-image" alt="" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -96,15 +88,15 @@ export default function RegionCard() {
                         <p className="small-para-14-px font-weight-bold my-auto me-2">Facilities</p>
 
                         <div className="facility-icons d-flex me-2">
-                            <img src="/image/facility.webp" className="m-auto" alt="" />
+                            <Image src="/image/facility.webp"  fill className="m-auto" alt="" />
                         </div>
 
                         <div className="facility-icons d-flex me-2">
-                            <img src="/image/facility.webp" className="m-auto" alt="" />
+                            <Image src="/image/facility.webp"  fill className="m-auto" alt="" />
                         </div>
 
                         <div className="facility-icons d-flex me-2">
-                            <img src="/image/facility.webp" className="m-auto" alt="" />
+                            <Image src="/image/facility.webp"  fill className="m-auto" alt="" />
                         </div>
                     </div>
 

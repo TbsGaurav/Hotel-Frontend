@@ -2320,6 +2320,20 @@ a.text-sky-blue:hover {
 .collection-hotel-title {
     font-weight: 600 !important;
 }
+
+.collection-hotel-image-wrap {
+    position: relative;
+    height: 290px;
+    overflow: hidden;
+}
+
+.collection-hotel-image {
+    object-fit: cover;
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+
 @media (max-width: 767.98px) {
     .collection-hotel-card {
         border-radius: 0 !important;
@@ -2341,11 +2355,17 @@ a.text-sky-blue:hover {
         flex: 0 0 62%;
         width: 62%;
     }
-    .collection-hotel-image-wrap,
-    .collection-hotel-image {
-        height: 100% !important;
-        min-height: 180px;
+    .collection-hotel-image-wrap {
+        height: 100%;
+        aspect-ratio: 4 / 5;
+        overflow: hidden;
         border-radius: 8px !important;
+        width: 100%;
+    }
+    .collection-hotel-image {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
     }
     .collection-hotel-header {
         margin-bottom: 8px !important;
@@ -2632,6 +2652,7 @@ a.text-sky-blue:hover {
 }
 .photo-hover-container:hover .photo-hover-overlay {
     opacity: 1;
+    object-fit: cover;
 }
 .photo-hover-overlay {
     position: absolute;
@@ -3396,7 +3417,7 @@ a.text-sky-blue:hover {
 @media (max-width: 485px) {
     .property-grid-title {
         max-width: 20ch;
-        white-space: nowrap;
+        /* white-space: nowrap; */
     }
     .collection-hotel-card {
         padding: 0px 0px 12px 0px !important;
@@ -3461,4 +3482,92 @@ a.text-sky-blue:hover {
 .button-new {
     position: absolute;
     bottom: 25px;
+}
+.brand-logo-wrap {
+    position: relative;
+    height: 130px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-logo {
+    object-fit: contain;
+}
+
+.price-match-intro {
+    max-width: 700px;
+}
+
+.price-match-logos {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    align-items: center;
+}
+
+.price-match-logos-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 26px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.price-match-logo-cell {
+    width: 110px;
+    display: flex;
+    justify-content: center;
+}
+
+.price-match-logo-wrap {
+    position: relative;
+    width: 110px;
+    height: 58px;
+    display: block;
+}
+
+.price-match-logo {
+    object-fit: contain;
+}
+
+@media (max-width: 575.98px) {
+    .price-match-logos {
+        gap: 18px;
+    }
+
+    .price-match-logos-row {
+        gap: 14px;
+    }
+
+    .price-match-logo-cell,
+    .price-match-logo-wrap {
+        width: 106px;
+    }
+
+    .price-match-logo-wrap {
+        height: 56px;
+    }
+}
+
+.why-image-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    height: 260px;
+}
+
+.why-image {
+    object-fit: cover;
+}
+.carousel-image-wrap {
+    position: relative;
+    width: 100%;
+    height: 340px;
+}
+
+.carousel-image {
+    object-fit: cover;
 }
