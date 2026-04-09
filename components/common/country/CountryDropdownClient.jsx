@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function CountryDropdownBootstrap({ countries }) {
     return (
-        <div className="accordion mb-4" id="countryAccordion">
+        <div className="accordion mb-4 accordion-top" id="countryAccordion">
             <div className="accordion-item border-0">
                 <h2 className="accordion-header" id="headingCountries">
                     <button
@@ -31,29 +31,22 @@ export default function CountryDropdownBootstrap({ countries }) {
                     aria-labelledby="headingCountries"
                     data-bs-parent="#countryAccordion"
                 >
-                    <div
-                        className="accordion-body"
-                        style={{
-                            padding: '20px',
-                            border: '1px solid #eee',
-                            borderTop: 'none'
-                        }}
-                    >
+                    <div className="accordion-body accordion-main"                    >
                         <div className="row">
                             {countries.map((country, index) => (
                                 <div key={country.countryId ?? country.urlName ?? index}
-                                 className="col-6 col-md-4 col-lg-3 mb-2">
+                                 className="col-6 col-md-4 col-lg-3 country-list">
                                     {country.urlName ? (
                                         <Link
                                             href={`/${country.urlName}`}
-                                            className="text-decoration-none text-dark fw-semibold"
+                                            className="text-decoration-none text-dark "
                                             prefetch={false} 
                                         >
-                                            • {country.name}
+                                             {country.name}
                                         </Link>
                                     ) : (
-                                        <span className="text-decoration-none text-dark fw-semibold">
-                                            • {country.name}
+                                        <span className="text-decoration-none text-dark ">
+                                             {country.name}
                                         </span>
                                     )}
                                 </div>

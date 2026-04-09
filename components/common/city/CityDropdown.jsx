@@ -38,7 +38,7 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
     };
 
     return (
-        <div className="accordion mb-4" id={parentId}>
+        <div className="accordion mb-4 accordion-top" id={parentId}>
             <div className="accordion-item border-0">
                 <h2 className="accordion-header" id="headingCities">
                     <button
@@ -66,13 +66,7 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                     data-bs-parent={`#${parentId}`}
                 >
                     <div
-                        className="accordion-body"
-                        style={{
-                            padding: '20px',
-                            border: '1px solid #eee',
-                            borderTop: 'none'
-                        }}
-                    >
+                        className="accordion-body accordion-main">
                         {/* Alphabet Filter */}
                         <div className="d-flex flex-wrap gap-2 mb-4">
                             {ALPHABETS.map((letter) => (
@@ -92,13 +86,13 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                         ) : (
                             <div className="row">
                                 {cities.map((city) => (
-                                    <div key={city.id} className="col-6 col-md-4 col-lg-3 mb-2">
+                                    <div key={city.id} className="col-6 col-md-4 col-lg-3 country-list">
                                         {city.urlName ? (
                                             <Link href={`${city.urlName}`} className="text-decoration-none text-dark" prefetch={false}>
-                                                • {city.itemName}
+                                                {city.itemName}
                                             </Link>
                                         ) : (
-                                            <span className="text-dark ">• {city.itemName}</span>
+                                            <span className="text-dark "> {city.itemName}</span>
                                         )}
                                     </div>
                                 ))}

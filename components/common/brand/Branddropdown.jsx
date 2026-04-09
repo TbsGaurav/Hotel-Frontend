@@ -26,7 +26,7 @@ export default function BrandDropdown({ parentId, initialBrands }) {
     };
 
     return (
-        <div className="accordion mb-4" id={parentId}>
+        <div className="accordion mb-4 accordion-top" id={parentId}>
             <div className="accordion-item border-0">
                 <h2 className="accordion-header" id="headingCities">
                     <button
@@ -54,7 +54,7 @@ export default function BrandDropdown({ parentId, initialBrands }) {
                     data-bs-parent={`#${parentId}`}
                 >
                     <div
-                        className="accordion-body"
+                        className="accordion-body accordion-main"
                         style={{
                             padding: '20px',
                             borderTop: 'none'
@@ -77,13 +77,13 @@ export default function BrandDropdown({ parentId, initialBrands }) {
                         ) : (
                             <div className="row">
                                 {brands.map((brand) => (
-                                    <div key={brand.brandId} className="col-6 col-md-4 col-lg-3 mb-2">
+                                    <div key={brand.brandId} className="col-6 col-md-4 col-lg-3 country-list"> 
                                         {brand.urlName ? (
                                             <Link href={`/brand/${brand.urlName}`} className="text-decoration-none text-dark fw-semibold">
-                                                • {brand.name}
+                                                 {brand.name}
                                             </Link>
                                         ) : (
-                                            <span className="text-dark fw-semibold">• {brand.name}</span>
+                                            <span className="text-dark fw-semibold"> {brand.name}</span>
                                         )}
                                     </div>
                                 ))}

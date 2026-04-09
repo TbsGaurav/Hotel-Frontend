@@ -992,7 +992,7 @@ a:hover.custom-form-label {
     border-bottom-color: #ebedf1 !important;
 }
 .small-heading-19-px {
-    font-size: 19px;
+    font-size: 16px;
     line-height: 1.4em;
     font-weight: 500;
 }
@@ -2155,6 +2155,7 @@ a.text-sky-blue:hover {
 .property-link {
     color: #3181c7; /* light blue */
     transition: color 0.2s ease;
+    margin-left: 14px;
 }
 
 .property-link:hover {
@@ -2623,6 +2624,9 @@ a.text-sky-blue:hover {
     .write-review-submit-wrap {
         padding-left: 0;
     }
+        .main-hero-search-row {
+    padding: 10px;
+}
 }
 
 .view-photos-btn:hover {
@@ -3014,6 +3018,7 @@ a.text-sky-blue:hover {
         width: 100%;
         min-height: 52px;
         white-space: nowrap;
+        margin-left: 10px;
     }
 }
 
@@ -3023,9 +3028,9 @@ a.text-sky-blue:hover {
     }
     .main-hero-search-row .filter-search-col {
         flex: 0 0 100%;
-        max-width: 100%;
+        max-width: 25%;
         margin-bottom: 0;
-        display: flex;
+        display:block;
         align-items: center;
         justify-content: flex-start;
         gap: 10px;
@@ -3036,9 +3041,8 @@ a.text-sky-blue:hover {
     }
     .main-hero-search-row .submit-search-col {
         flex: 0 0 100%;
-        max-width: 100%;
+        max-width:75%;
         display: flex;
-        align-items: center;
         justify-content: center;
     }
     .main-hero-search-row .submit-search-col .font-weight-bold-submit-search {
@@ -3431,6 +3435,24 @@ a.text-sky-blue:hover {
         bottom: 0px;
         width: 100% !important;
     }
+    .main-hero-search-row {
+    padding: 10px;
+}
+.second-footer {
+    padding: 10px;
+}
+.top-footer {
+    padding: 10px;
+}
+.property-grid-tabs {
+    overflow-x: auto !important;
+    justify-content: left !important;
+    align-items: center;
+    padding: 5px 10px;
+}
+.main-div {
+        padding: 0px 0px 0px 20px;
+    }
 }
 
 @media (max-width: 320px) {
@@ -3461,4 +3483,38 @@ a.text-sky-blue:hover {
 .button-new {
     position: absolute;
     bottom: 25px;
+}
+.custom-subscribe-textbox input::placeholder {
+  color: #cccccc;
+  opacity: 1; 
+}
+.country-list {
+    padding: 5px 10px;
+    font-size: 16px;
+    align-items: center;
+}
+.country-list a {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.country-list a:before {
+    content: "";
+    background-color: #000;
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 100px;
+    margin-top: 9px;
+}
+.country-list a a::before,
+.property-count a::before {
+  content: none !important;
+}
+.accordion-top{
+    padding: 0px 5px;
+}
+.accordion-body.accordion-main {
+    padding: 0px 10px;
 }
