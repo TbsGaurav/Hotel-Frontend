@@ -35,12 +35,7 @@ export default function Dropdown({ id, title, items = [], parentId, defaultOpen 
                     data-bs-parent={`#${parentId}`}
                 >
                     <div
-                        className="accordion-body accordion-main"
-                        style={{
-                            padding: '20px',
-                            borderTop: 'none'
-                        }}
-                    >
+                        className="accordion-body accordion-main">
                         <div className="row">
                             {items.length === 0 ? (
                                 <div className="col-12 text-muted">No data found</div>

@@ -68,7 +68,7 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                     <div
                         className="accordion-body accordion-main">
                         {/* Alphabet Filter */}
-                        <div className="d-flex flex-wrap gap-2 mb-4">
+                        <div className="d-flex flex-wrap gap-2 mb-4 mt-2">
                             {ALPHABETS.map((letter) => (
                                 <button
                                     key={letter}

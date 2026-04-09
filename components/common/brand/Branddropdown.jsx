@@ -54,12 +54,7 @@ export default function BrandDropdown({ parentId, initialBrands }) {
                     data-bs-parent={`#${parentId}`}
                 >
                     <div
-                        className="accordion-body accordion-main"
-                        style={{
-                            padding: '20px',
-                            borderTop: 'none'
-                        }}
-                    >
+                        className="accordion-body accordion-main">
                         <div className="d-flex flex-wrap gap-2 mb-4">
                             {ALPHABETS.map((letter) => (
                                 <button

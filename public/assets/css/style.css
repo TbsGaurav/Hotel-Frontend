@@ -2156,6 +2156,7 @@ a.text-sky-blue:hover {
     color: #3181c7; /* light blue */
     transition: color 0.2s ease;
     margin-left: 14px;
+    font-size: 14px;
 }
 
 .property-link:hover {
@@ -3492,6 +3493,7 @@ a.text-sky-blue:hover {
     padding: 5px 10px;
     font-size: 16px;
     align-items: center;
+    word-break: break-all;
 }
 .country-list a {
   display: flex;
@@ -3515,6 +3517,6 @@ a.text-sky-blue:hover {
 .accordion-top{
     padding: 0px 5px;
 }
-.accordion-body.accordion-main {
+.accordion-main {
     padding: 0px 10px;
 }
