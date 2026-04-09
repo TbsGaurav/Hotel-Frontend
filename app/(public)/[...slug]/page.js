@@ -22,6 +22,8 @@ export default async function DynamicPage({ params, searchParams }) {
     const { slug } = await params;
     const slugArray = slug || [];
     const fullSlug = '/' + slugArray.join('/');
+    const primarySlug = slugArray[0] || '';
+    const categorySlug = slugArray.slice(1).join('/');
     const resolvedSearchParams = await searchParams;
     const result = await resolveSlug(fullSlug);
 
@@ -63,44 +65,53 @@ export default async function DynamicPage({ params, searchParams }) {
         }
     }
 
-    if (slugArray.length === 2) {
+    if (slugArray.length >= 2) {
         const queryCategoryId = Number(resolvedSearchParams?.categoryId);
         const queryRegionId = Number(resolvedSearchParams?.regionId);
         if (Number.isInteger(queryCategoryId) && queryCategoryId > 0) {
             return (
                 <CityCategoryRouteApp
-                    citySlug={slugArray[0]}
-                    categorySlug={slugArray[1]}
+                    citySlug={primarySlug}
+                    categorySlug={categorySlug}
                     resolvedCategoryId={queryCategoryId}
                     resolvedRegionId={Number.isInteger(queryRegionId) ? queryRegionId : null}
+                    queryRegionId={Number.isInteger(queryRegionId) ? queryRegionId : null}
+                    queryCountrySlug={String(resolvedSearchParams?.country || '')}
                 />
             );
         }
 
-        const resolvedCategory = await resolveCategoryFromSlug(slugArray[1], slugArray[0]);
+        const resolvedCategory = await resolveCategoryFromSlug(categorySlug, primarySlug);
 
         if (resolvedCategory?.categoryId) {
             return (
                 <CityCategoryRouteApp
-                    citySlug={slugArray[0]}
-                    categorySlug={slugArray[1]}
+                    citySlug={primarySlug}
+                    categorySlug={categorySlug}
                     resolvedCategoryId={resolvedCategory.categoryId}
                     resolvedCityId={resolvedCategory.cityId}
                     resolvedCityName={resolvedCategory.cityName}
+                    queryCountrySlug={String(resolvedSearchParams?.country || '')}
                 />
             );
         }
 
-        const resolvedRegionCategory = await resolveCategoryFromRegionSlug(slugArray[1], slugArray[0]);
+        const resolvedRegionCategory = await resolveCategoryFromRegionSlug(
+            categorySlug,
+            primarySlug,
+            String(resolvedSearchParams?.country || '')
+        );
 
         if (resolvedRegionCategory?.categoryId) {
             return (
                 <CityCategoryRouteApp
-                    citySlug={slugArray[0]}
-                    categorySlug={slugArray[1]}
+                    citySlug={primarySlug}
+                    categorySlug={categorySlug}
                     resolvedCategoryId={resolvedRegionCategory.categoryId}
                     resolvedRegionId={resolvedRegionCategory.regionId}
                     resolvedRegionName={resolvedRegionCategory.regionName}
+                    queryRegionId={resolvedRegionCategory.regionId}
+                    queryCountrySlug={String(resolvedSearchParams?.country || '')}
                 />
             );
         }
@@ -113,14 +124,16 @@ export default async function DynamicPage({ params, searchParams }) {
                 const storedHref = String(parsed?.href || '')
                     .split('?')[0]
                     .replace(/\/+$/, '');
-                const currentPath = `/${slugArray[0]}/${slugArray[1]}`;
+                const currentPath = `/${primarySlug}/${categorySlug}`;
                 if (storedHref === currentPath) {
                     return (
                         <CityCategoryRouteApp
-                            citySlug={slugArray[0]}
-                            categorySlug={slugArray[1]}
+                            citySlug={primarySlug}
+                            categorySlug={categorySlug}
                             resolvedCategoryId={Number(parsed?.categoryId || 0)}
                             resolvedRegionId={Number(parsed?.regionId || 0)}
+                            queryRegionId={Number(parsed?.regionId || 0)}
+                            queryCountrySlug={String(resolvedSearchParams?.country || '')}
                         />
                     );
                 }
@@ -129,7 +142,14 @@ export default async function DynamicPage({ params, searchParams }) {
             }
         }
 
-        return <CityCategoryRouteApp citySlug={slugArray[0]} categorySlug={slugArray[1]} />;
+        return (
+            <CityCategoryRouteApp
+                citySlug={primarySlug}
+                categorySlug={categorySlug}
+                queryRegionId={Number.isInteger(queryRegionId) ? queryRegionId : null}
+                queryCountrySlug={String(resolvedSearchParams?.country || '')}
+            />
+        );
     }
 
     return notFound();

@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
- 
+import { buildCategoryListingPath } from '@/lib/api/public/cityCategoryapi';
+
 function normalizeLabel(item) {
     return String(item?.categoryName ?? item?.name ?? item?.label ?? '').trim();
 }
- 
+
 function normalizeKey(item, label) {
     return String(item?.categoryId ?? item?.id ?? item?.value ?? label).trim();
 }
@@ -28,7 +29,8 @@ function normalizeHref(item, label) {
                 search.set('categoryId', String(categoryId));
             }
 
-            return `/city/${encodeURIComponent(city)}/${encodeURIComponent(category)}${search.toString() ? `?${search.toString()}` : ''}`;
+            const basePath = buildCategoryListingPath(city, category);
+            return `${basePath}${search.toString() ? `?${search.toString()}` : ''}`;
         }
 
         return pathname || '#';
@@ -93,11 +95,11 @@ function LinkRow({ label, href, isActive = false, onClick = null, item = null })
                 style={
                     isActive
                         ? {
-                              background: 'rgba(240, 131, 30, 0.12)',
-                              color: '#c55f00',
-                              borderRadius: '10px',
-                              padding: '8px 10px'
-                          }
+                            background: 'rgba(240, 131, 30, 0.12)',
+                            color: '#c55f00',
+                            borderRadius: '10px',
+                            padding: '8px 10px'
+                        }
                         : { padding: '8px 10px' }
                 }
             >
@@ -153,10 +155,10 @@ export function PriceRangeBlock() {
         </div>
     );
 }
- 
+
 function SectionBlock({ title, items = [], maxVisible = 5, defaultOpen = true, emptyText = 'No items available' }) {
     const [showMore, setShowMore] = useState(false);
- 
+
     const normalizedItems = useMemo(() => {
         const seen = new Set();
         return (Array.isArray(items) ? items : []).filter((item) => {
@@ -166,10 +168,10 @@ function SectionBlock({ title, items = [], maxVisible = 5, defaultOpen = true, e
             return true;
         });
     }, [items]);
- 
+
     const visibleItems = showMore ? normalizedItems : normalizedItems.slice(0, maxVisible);
     const hasMore = normalizedItems.length > maxVisible;
- 
+
     return (
         <section className="sidebar-filter-section border-bottom">
             <div className="px-3 pt-3 pb-2 d-flex align-items-start justify-content-between">
@@ -214,7 +216,7 @@ function SectionBlock({ title, items = [], maxVisible = 5, defaultOpen = true, e
         </section>
     );
 }
- 
+
 export default function ListingSidebar({
     title = 'Filters',
     topContent = null,
@@ -233,9 +235,9 @@ export default function ListingSidebar({
                     {title}
                 </div>
             </div>
- 
+
             {topContent}
- 
+
             <div>
                 {sections.map((section) => (
                     <SectionBlock
