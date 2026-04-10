@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import DatePicker from 'react-datepicker';
+import dynamic from 'next/dynamic';
 import { addMonths, format } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../../public/assets/css/DatePicker.css';
@@ -8,6 +8,8 @@ import { globalSearchapi } from '@/lib/api/public/globalsearchapi';
 import { useRouter } from 'next/navigation';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import Image from 'next/image';
+
+const DatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
 
 export default function HeroSection() {
     const [checkInDate, setCheckInDate] = useState(null);
