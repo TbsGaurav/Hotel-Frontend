@@ -507,7 +507,14 @@ export default function CityCategoryDetails({
 
     const sidebar = (
         <div className="position-sticky" style={{ top: '16px' }}>
-            <ListingSidebar title="Filters" sections={sidebarSections} />
+            <ListingSidebar
+                title="Filters"
+                sections={sidebarSections}
+                regionContext={{
+                    regionId: resolvedRegionId,
+                    countrySlug: countrySlugForRegion
+                }}
+            />
         </div>
     );
 

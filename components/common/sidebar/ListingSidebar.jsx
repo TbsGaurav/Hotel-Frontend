@@ -12,7 +12,7 @@ function normalizeKey(item, label) {
     return String(item?.categoryId ?? item?.id ?? item?.value ?? label).trim();
 }
 
-function normalizeHref(item, label) {
+function normalizeHref(item, label, context = {}) {
     if (item?.href) {
         if (typeof item.href === 'string') return item.href;
 
@@ -29,8 +29,16 @@ function normalizeHref(item, label) {
                 search.set('categoryId', String(categoryId));
             }
 
+            if (context.regionId) {
+                search.set('regionId', String(context.regionId));
+            }
+            if (context.countrySlug) {
+                search.set('country', String(context.countrySlug));
+            }
+
             const basePath = buildCategoryListingPath(city, category);
-            return `${basePath}${search.toString() ? `?${search.toString()}` : ''}`;
+            const queryString = search.toString();
+            return `${basePath}${queryString ? `?${queryString}` : ''}`;
         }
 
         return pathname || '#';
@@ -38,10 +46,20 @@ function normalizeHref(item, label) {
 
     const raw = item?.categoryUrlName || item?.urlName || label;
     if (!raw) return '#';
-    return `#${String(raw).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+    const baseUrl = `#${String(raw).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+    if (context.regionId && context.countrySlug) {
+        const searchParams = new URLSearchParams();
+        searchParams.set('regionId', String(context.regionId));
+        searchParams.set('country', context.countrySlug);
+        return `${baseUrl}?${searchParams.toString()}`;
+    }
+
+    return baseUrl;
 }
 
-function LinkRow({ label, href, isActive = false, onClick = null, item = null }) {
+function LinkRow({ label, href, isActive = false, onClick = null, item = null, context = {} }) {
     const className = [
         'sidebar-filter-link d-flex align-items-start gap-2 w-100 text-start',
         isActive ? 'active fw-semibold' : ''
@@ -54,8 +72,8 @@ function LinkRow({ label, href, isActive = false, onClick = null, item = null })
 
         try {
             const categoryId = item?.categoryId ?? item?.CategoryId ?? item?.id ?? null;
-            const regionId = item?.regionId ?? item?.RegionId ?? null;
-            const countrySlug = item?.countrySlug ?? item?.country ?? null;
+            const regionId = context.regionId || (item?.regionId ?? item?.RegionId ?? null);
+            const countrySlug = context.countrySlug || (item?.countrySlug ?? item?.country ?? null);
 
             if (categoryId || regionId || countrySlug) {
                 const payload = JSON.stringify({
@@ -156,7 +174,7 @@ export function PriceRangeBlock() {
     );
 }
 
-function SectionBlock({ title, items = [], maxVisible = 5, defaultOpen = true, emptyText = 'No items available' }) {
+function SectionBlock({ title, items = [], maxVisible = 5, emptyText = 'No items available', context = {} }) {
     const [showMore, setShowMore] = useState(false);
 
     const normalizedItems = useMemo(() => {
@@ -184,7 +202,7 @@ function SectionBlock({ title, items = [], maxVisible = 5, defaultOpen = true, e
                         {visibleItems.map((item) => {
                             const label = normalizeLabel(item);
                             const key = normalizeKey(item, label);
-                            const href = normalizeHref(item, label);
+                            const href = normalizeHref(item, label, context);
                             const isActive = Boolean(item?.isActive);
 
                             return (
@@ -195,6 +213,7 @@ function SectionBlock({ title, items = [], maxVisible = 5, defaultOpen = true, e
                                     isActive={isActive}
                                     onClick={item?.onClick}
                                     item={item}
+                                    context={context}
                                 />
                             );
                         })}
@@ -220,7 +239,8 @@ function SectionBlock({ title, items = [], maxVisible = 5, defaultOpen = true, e
 export default function ListingSidebar({
     title = 'Filters',
     topContent = null,
-    sections = []
+    sections = [],
+    regionContext = {}
 }) {
     return (
         <aside
@@ -247,6 +267,7 @@ export default function ListingSidebar({
                         maxVisible={section.maxVisible ?? 5}
                         defaultOpen={section.defaultOpen ?? true}
                         emptyText={section.emptyText}
+                        context={regionContext}
                     />
                 ))}
             </div>
