@@ -41,6 +41,7 @@ export default function CityCategoryDetails({
     resolvedCityName: initialResolvedCityName = '',
     resolvedRegionId: initialResolvedRegionId = null,
     resolvedRegionName: initialResolvedRegionName = '',
+    resolvedRegionCountrySlug: initialResolvedRegionCountrySlug = '',
     initialData = null,
     pageCookieName = '',
     pageIntentCookieName = '',
@@ -123,20 +124,16 @@ export default function CityCategoryDetails({
 
         setQueryIds({ categoryId: nextCategoryId, regionId: nextRegionId, countrySlug: nextCountrySlug, initialized: true });
 
-        if (hasCategoryId || hasRegionId) {
+        const hasQueryStringParams = hasCategoryId || hasRegionId;
+        const hasServerResolvedContext = initialResolvedRegionId && Number(initialResolvedRegionId) > 0;
+
+        if (hasQueryStringParams && hasServerResolvedContext && hasRegionId) {
             const cleanPath = buildCategoryListingPath(citySlug, categorySlug);
             if (cleanPath) {
-                const params = new URLSearchParams();
-                if (hasRegionId && nextRegionId) {
-                    params.set('regionId', String(nextRegionId));
-                }
-                if ((hasCountrySlug || nextCountrySlug) && (hasRegionId || nextRegionId)) {
-                    params.set('country', String(nextCountrySlug || rawCountrySlug || ''));
-                }
-                router.replace(params.toString() ? `${cleanPath}?${params.toString()}` : cleanPath, { scroll: false });
+                router.replace(cleanPath, { scroll: false });
             }
         }
-    }, [queryIds.initialized, searchParams, router, citySlug, categorySlug]);
+    }, [queryIds.initialized, searchParams, router, citySlug, categorySlug, initialResolvedRegionId]);
 
     const queryCategoryId = queryIds.categoryId;
     const regionId = queryIds.regionId;
@@ -152,7 +149,7 @@ export default function CityCategoryDetails({
     const [resolvedCityId, setResolvedCityId] = useState(Number(initialData?.resolvedCityId) || null);
     const [resolvedRegionId, setResolvedRegionId] = useState(Number(initialData?.resolvedRegionId) || null);
     const [resolvedRegionName, setResolvedRegionName] = useState(initialData?.resolvedRegionName || '');
-    const [resolvedRegionCountrySlug, setResolvedRegionCountrySlug] = useState(initialData?.resolvedRegionCountrySlug || '');
+    const [resolvedRegionCountrySlug, setResolvedRegionCountrySlug] = useState(initialData?.resolvedRegionCountrySlug || initialResolvedRegionCountrySlug || '');
     const [categoryName, setCategoryName] = useState(initialData?.categoryName || '');
     const [cityName, setCityName] = useState(initialData?.cityName || '');
     const [countryName, setCountryName] = useState(initialData?.countryName || '');
@@ -303,10 +300,16 @@ export default function CityCategoryDetails({
                 const resolvedRegionNameValue = String(
                     responseLocationInfo?.regionName || firstHotel?.regionName || regionContext?.regionName || ''
                 ).trim();
+
                 const resolvedCityName =
                     String(responseLocationInfo?.cityName || firstHotel?.cityName || firstHotel?.city || firstHotel?.cityLabel || '').trim() ||
-                    String(cityContext?.cityName || regionContext?.regionName || '').trim() ||
-                    formatCityName(citySlug);
+                    String(cityContext?.cityName || '').trim() ||
+                    (resolvedRegionNameValue ? resolvedRegionNameValue : formatCityName(citySlug));
+
+                const finalCategoryName = regionIdForRequest && resolvedRegionNameValue && selectedCategoryName
+                    ? `${formatCityName(categorySlug)}`
+                    : formatCityName(categorySlug);
+
                 const resolvedCountryName =
                     String(responseLocationInfo?.countryName || firstHotel?.countryName || firstHotel?.country || '').trim();
                 const resolvedCountryUrl =
@@ -330,7 +333,7 @@ export default function CityCategoryDetails({
                 setTotalCount(Number(response.totalCount || response.hotels?.length || 0));
                 setPageSize(Number(response.pageSize || 10));
                 setCurrentPage(Number(response.pageNo || 1));
-                setCategoryName(selectedCategoryName || formatCityName(categorySlug));
+                setCategoryName(finalCategoryName);
                 setCityName(resolvedCityName);
                 setCountryName(resolvedCountryName);
                 setCountryUrl(resolvedCountryUrl);
@@ -394,28 +397,7 @@ export default function CityCategoryDetails({
                 regionName: resolvedRegionName || cityName || formatCityName(citySlug),
                 activeCategorySlug: categorySlug
             });
-            const countrySlugForLinks = countrySlugForRegion;
-            if (!countrySlugForLinks) return sections;
-            return sections.map((section) => ({
-                ...section,
-                items: (section.items || []).map((item) => {
-                    if (!item?.href) return { ...item, countrySlug: countrySlugForLinks };
-                    const [path, queryString] = String(item.href).split('?');
-                    const params = new URLSearchParams(queryString || '');
-                    if (!params.has('country')) {
-                        params.set('country', String(countrySlugForLinks));
-                    }
-                    if (!params.has('regionId') && resolvedRegionId) {
-                        params.set('regionId', String(resolvedRegionId));
-                    }
-                    return {
-                        ...item,
-                        countrySlug: countrySlugForLinks,
-                        regionId: item?.regionId ?? resolvedRegionId ?? null,
-                        href: `${path}?${params.toString()}`
-                    };
-                })
-            }));
+            return sections;
         }
 
         return buildCategorySidebarSections(sidebarData, {
@@ -461,13 +443,15 @@ export default function CityCategoryDetails({
         return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
     };
 
-    const isRegionContext = Boolean(resolvedRegionId || queryCountrySlug || resolvedRegionCountrySlug);
+    const isRegionContext = Boolean(resolvedRegionId || (queryCountrySlug && resolvedRegionName));
     const countryBreadcrumbHref = normalizeBreadcrumbHref(locationInfo?.countryUrl || queryCountrySlug || countryUrl || toSlug(countryName));
     const countryBreadcrumbLabel = String(locationInfo?.countryName || countryName || '').trim();
     const regionBreadcrumbHref = normalizeBreadcrumbHref(locationInfo?.regionUrl || regionUrl);
     const regionBreadcrumbLabel = String(locationInfo?.regionName || resolvedRegionName || '').trim();
     const cityBreadcrumbHref = normalizeBreadcrumbHref(locationInfo?.cityUrl || cityUrl);
     const cityBreadcrumbLabel = String(locationInfo?.cityName || cityName || '').trim();
+
+    const header = <h2 className="mb-3">{categoryName || formatCityName(categorySlug)}</h2>;
 
     const breadcrumb = (
         <div className="container">
@@ -505,8 +489,6 @@ export default function CityCategoryDetails({
         </div>
     );
 
-    const header = <h2 className="mb-3">{categoryName || formatCityName(categorySlug)}</h2>;
-
     const mobileActions = (
         <section className="mobile-actions d-lg-none">
             <div className="container px-0">
@@ -525,7 +507,14 @@ export default function CityCategoryDetails({
 
     const sidebar = (
         <div className="position-sticky" style={{ top: '16px' }}>
-            <ListingSidebar title="Filters" sections={sidebarSections} />
+            <ListingSidebar
+                title="Filters"
+                sections={sidebarSections}
+                regionContext={{
+                    regionId: resolvedRegionId,
+                    countrySlug: countrySlugForRegion
+                }}
+            />
         </div>
     );
 

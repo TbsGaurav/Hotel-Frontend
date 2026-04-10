@@ -55,7 +55,7 @@ export default function BrandDropdown({ parentId, initialBrands }) {
                 >
                     <div
                         className="accordion-body accordion-main">
-                        <div className="d-flex flex-wrap gap-2 mb-4">
+                        <div className="d-flex flex-wrap gap-2 mb-4 mt-2">
                             {ALPHABETS.map((letter) => (
                                 <button
                                     key={letter}
@@ -74,7 +74,7 @@ export default function BrandDropdown({ parentId, initialBrands }) {
                                 {brands.map((brand) => (
                                     <div key={brand.brandId} className="col-6 col-md-4 col-lg-3 country-list"> 
                                         {brand.urlName ? (
-                                            <Link href={`/brand/${brand.urlName}`} className="text-decoration-none text-dark fw-semibold">
+                                            <Link href={`/brand/${brand.urlName}`} className="text-decoration-none text-dark ">
                                                  {brand.name}
                                             </Link>
                                         ) : (

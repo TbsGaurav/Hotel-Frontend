@@ -103,6 +103,7 @@ export default async function DynamicPage({ params, searchParams }) {
         );
 
         if (resolvedRegionCategory?.categoryId) {
+            const countrySlugFromRegion = resolvedRegionCategory.countrySlug || String(resolvedSearchParams?.country || '');
             return (
                 <CityCategoryRouteApp
                     citySlug={primarySlug}
@@ -110,8 +111,9 @@ export default async function DynamicPage({ params, searchParams }) {
                     resolvedCategoryId={resolvedRegionCategory.categoryId}
                     resolvedRegionId={resolvedRegionCategory.regionId}
                     resolvedRegionName={resolvedRegionCategory.regionName}
+                    resolvedRegionCountrySlug={countrySlugFromRegion}
                     queryRegionId={resolvedRegionCategory.regionId}
-                    queryCountrySlug={String(resolvedSearchParams?.country || '')}
+                    queryCountrySlug={countrySlugFromRegion}
                 />
             );
         }

@@ -12,7 +12,7 @@ export default async function BrandsPage() {
 
             <div className="breadcrumb-section">
                 <div className="container">
-                    <div className="d-flex align-items-center small">
+                    <div className="d-flex align-items-center small accordion-main">
                         <Link href="/brands" className="text-dark text-decoration-none">
                             All Brands
                         </Link>
@@ -20,18 +20,15 @@ export default async function BrandsPage() {
                 </div>
             </div>
 
-            <section className="container py-4">
-                <section className="container py-5">
+            <section className="container py-3 ">
                     <div className="row align-items-start">
                         <div className="col-lg-6">
-                            <h3 className="fw-bold mb-4">All Brand List</h3>
+                            <h3 className="fw-bold mb-4 accordion-main">All Brand List</h3>
                         </div>
                     </div>
-                </section>
-
-                <div className="row">
+               
                     <BrandDropdown initialBrands={initialBrands} parentId="countryAccordion" />
-                </div>
+               
             </section>
         </>
     );
