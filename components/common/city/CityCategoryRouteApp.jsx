@@ -52,6 +52,7 @@ async function getInitialCategoryPageData({
     resolvedCityName = '',
     resolvedRegionId = null,
     resolvedRegionName = '',
+    resolvedRegionCountrySlug = '',
     queryRegionId = null,
     queryCountrySlug = '',
     currentPage = 1
@@ -68,7 +69,7 @@ async function getInitialCategoryPageData({
         resolvedCityId: null,
         resolvedRegionId: Number(resolvedRegionId) || Number(queryRegionId) || null,
         resolvedRegionName: resolvedRegionName || '',
-        resolvedRegionCountrySlug: queryCountrySlug || '',
+        resolvedRegionCountrySlug: resolvedRegionCountrySlug || queryCountrySlug || '',
         categoryName: '',
         cityName: '',
         countryName: '',
