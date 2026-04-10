@@ -33,7 +33,7 @@ export default function WhyHotelSection() {
 
                   
 
-                    <div className="col-lg-5 text-center">
+                                        <div className="col-lg-5 text-center main-div">
                         <div className="why-image-wrap">
                             <Image
                                 src="/image/property-img.webp"
