@@ -45,19 +45,37 @@ export default function RegionCard() {
                             <div className="carousel-inner">
                                 <div className="carousel-item active">
                                     <div className="carousel-image-wrap">
-                                        <Image src="/image/property-img.webp" fill className="carousel-image" alt="" />
+                                        <Image
+                                            src="/image/property-img.webp"
+                                            fill
+                                            sizes="(max-width: 767px) 100vw, (max-width: 1199px) 34vw, 300px"
+                                            className="carousel-image"
+                                            alt=""
+                                        />
                                     </div>
                                 </div>
 
                                 <div className="carousel-item">
                                     <div className="carousel-image-wrap">
-                                        <Image src="/image/property-img.webp" fill className="carousel-image" alt="" />
+                                        <Image
+                                            src="/image/property-img.webp"
+                                            fill
+                                            sizes="(max-width: 767px) 100vw, (max-width: 1199px) 34vw, 300px"
+                                            className="carousel-image"
+                                            alt=""
+                                        />
                                     </div>
                                 </div>
 
                                 <div className="carousel-item">
                                     <div className="carousel-image-wrap">
-                                        <Image src="/image/property-img.webp" fill className="carousel-image" alt="" />
+                                        <Image
+                                            src="/image/property-img.webp"
+                                            fill
+                                            sizes="(max-width: 767px) 100vw, (max-width: 1199px) 34vw, 300px"
+                                            className="carousel-image"
+                                            alt=""
+                                        />
                                     </div>
                                 </div>
                             </div>

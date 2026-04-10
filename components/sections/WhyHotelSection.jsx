@@ -35,7 +35,13 @@ export default function WhyHotelSection() {
 
                     <div className="col-lg-5 text-center">
                         <div className="why-image-wrap">
-                            <Image src="/image/property-img.webp" alt="hotel" fill className="why-image rounded-4" />
+                            <Image
+                                src="/image/property-img.webp"
+                                alt="hotel"
+                                fill
+                                sizes="(max-width: 991px) 100vw, 42vw"
+                                className="why-image rounded-4"
+                            />
                         </div>
                     </div>
                 </div>
