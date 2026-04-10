@@ -7,6 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import '../../public/assets/css/DatePicker.css';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { globalSearchapi } from '@/lib/api/public/globalsearchapi';
+import Image from 'next/image';
 
 function CountryHeroSection({}) {
     const [checkInDate, setCheckInDate] = useState(null);
@@ -490,7 +491,7 @@ function CountryHeroSection({}) {
                                     onClick={() => setShowFilters((prev) => !prev)}
                                     style={{ cursor: 'pointer' }}
                                 >
-                                    <img src="/image/filter.webp" className="m-auto" alt="" />
+                                    <Image src="/image/filter.webp" className="m-auto" alt="" width={24} height={24} />
                                 </div>
                             </div>
 

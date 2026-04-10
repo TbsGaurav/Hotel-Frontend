@@ -7,6 +7,7 @@ import '../../public/assets/css/DatePicker.css';
 import { globalSearchapi } from '@/lib/api/public/globalsearchapi';
 import { useRouter } from 'next/navigation';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
+import Image from 'next/image';
 
 export default function HeroSection() {
     const [checkInDate, setCheckInDate] = useState(null);
@@ -287,13 +288,13 @@ export default function HeroSection() {
                         <div className="my-auto d-flex">
                             <ul className="list-unstyled p-0 m-0 overlap-avatar">
                                 <li>
-                                    <img src="image/1.webp" alt="" />
+                                    <Image src="/image/1.webp" alt="" width={60} height={60} />
                                 </li>
                                 <li>
-                                    <img src="image/2.webp" alt="" />
+                                    <Image src="/image/2.webp" alt="" width={60} height={60} />
                                 </li>
                                 <li>
-                                    <img src="image/3.webp" alt="" />
+                                    <Image src="/image/3.webp" alt="" width={60} height={60} />
                                 </li>
                             </ul>
                             <div className="ms-4">
@@ -674,7 +675,7 @@ export default function HeroSection() {
                                     onClick={() => setShowFilters((prev) => !prev)}
                                     style={{ cursor: 'pointer' }}
                                 >
-                                    <img src="image/filter.webp" className="m-auto" alt="" />
+                                    <Image src="/image/filter.webp" className="m-auto" alt="" width={24} height={24} />
                                 </div>
                             </div>
                             <div className="col-9 col-md-5 col-lg-3 mb-0 mb-lg-0 d-flex hero-search-col submit-search-col">
