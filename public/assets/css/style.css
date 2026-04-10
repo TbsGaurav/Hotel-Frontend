@@ -3613,6 +3613,29 @@ a.text-sky-blue:hover {
 .carousel-image {
     object-fit: cover;
 }
+
+.country-hotel-card {
+    border-radius: 18px;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.country-hotel-card-inner {
+    padding: 12px;
+}
+
+.country-hotel-carousel-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.country-hotel-more-btn {
+    border-radius: 4px;
+}
 .custom-subscribe-textbox input::placeholder {
     color: #cccccc;
     opacity: 1;
