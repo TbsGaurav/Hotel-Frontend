@@ -443,14 +443,10 @@ export default function CityHotelList({
                                             className="d-block w-100 rounded-4 collection-hotel-image"
                                             alt={hotel.hotelName}
                                             onError={() => handleImageError(hotelKey)}
+                                            priority
+
                                         />
-                                        {/* <img
-                                            src={getImageUrl(hotel?.photo)}
-                                            className="d-block w-100 rounded-4 collection-hotel-image"
-                                            style={{ height: '270px', objectFit: 'cover' }}
-                                            alt={hotel.hotelName}
-                                            onError={handleImageError}
-                                        /> */}
+                                        
                                     </div>
                                 </div>
 
