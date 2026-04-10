@@ -557,6 +557,9 @@ a {
         white-space: nowrap;
     }
 }
+.submit-search{
+        margin-left: 20px !important;
+    }
 @media (min-width: 992px) and (max-width: 1199.98px) {
     .hero-search-row .rooms-search-col {
         grid-column: auto;
@@ -612,11 +615,7 @@ a {
         align-items: center;
         justify-content: center;
     }
-    /* .country-hero .hero-search-row {
-        column-gap: 14px;
-        row-gap: 14px;
-        grid-template-columns: minmax(0, 0.74fr) minmax(0, 0.74fr) minmax(0, 0.48fr) 70px 54px;
-    } */
+   
     .country-hero .hero-search-row {
         column-gap: 12px;
         row-gap: 12px;

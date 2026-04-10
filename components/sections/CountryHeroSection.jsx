@@ -286,8 +286,7 @@ function CountryHeroSection({}) {
                                                         handleOpenDatePicker();
                                                     }}
                                                     style={{ cursor: 'pointer' }}
-                                                >
-                                                </span>
+                                                ></span>
                                             </div>
                                         </div>
                                     </div>
@@ -521,10 +520,13 @@ function CountryHeroSection({}) {
                             )}
 
                             <div className="col-6 col-md-5 col-lg-3 mb-0 mb-lg-0 hero-search-col submit-search-col country-submit-search-col">
-                                <button
+                                {/* <button
                                     type="submit"
                                     className="theme-button-orange rounded rounded rounded rounded rounded w-100 font-weight-bold-submit-search country-submit-search-button"
                                 >
+                                    See Deals Now
+                                </button> */}
+                                <button type="submit" className="theme-button-orange rounded font-weight-bold-submit-search submit-search">
                                     See Deals Now
                                 </button>
                             </div>

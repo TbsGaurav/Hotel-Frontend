@@ -601,7 +601,6 @@ export default function HotelDetails({ initialData }) {
                                         <Image
                                             src={getImageUrl(photo.photo)}
                                             className="w-100 h-100"
-                                            // style={{ objectFit: 'cover' }}
                                             alt="hotel"
                                             fill
                                             sizes="33vw"
