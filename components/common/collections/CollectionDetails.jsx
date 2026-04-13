@@ -35,6 +35,12 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         });
     }
 
+    const getFirstDefined = (...values) => {
+        for (const value of values) {
+            if (value !== undefined && value !== null && value !== '') return value;
+        }
+        return null;
+    };
     // Pagination state
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(() => mergeUniqueHotels([], hotels || []));
@@ -46,6 +52,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const loadMoreTriggerRef = useRef(null);
     const loadRequestInFlightRef = useRef(false);
     const pageRef = useRef(currentPage || 1);
+    const [timestamp, setTimestamp] = useState('');
 
     const openMap = (lat, lng) => {
         if (!lat || !lng) return;
@@ -142,19 +149,13 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
     // Default image path
     const defaultImage = '/image/property-img.webp';
-    const [timestamp, setTimestamp] = useState('');
 
     const getHotelKey = (hotel, index) => {
-        const identity = getHotelIdentity(hotel);
-        return identity ? `${identity}-${index}` : `hotel-${index}`;
-    };
+        const bookingId = getBookingId(hotel);
+        const rawKey = getFirstDefined(bookingId, hotel?.hotelId, hotel?.id, hotel?.urlName, hotel?.url);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setTimestamp(Date.now().toString());
-        }, 0);
-        return () => clearTimeout(timer);
-    }, []);
+        return rawKey ? `${rawKey}-${index}` : `hotel-${index}`;
+    };
 
     const handleImageError = (imageKey) => {
         setFailedImageKeys((prev) => {
@@ -177,14 +178,12 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         return defaultImage;
     };
 
-    // Generate cache-busted URL
     const getImageUrl = (photo) => {
         const normalizedUrl = normalizeImageUrl(photo);
         if (normalizedUrl === defaultImage) return defaultImage;
         const sep = normalizedUrl.includes('?') ? '&' : '?';
         return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
     };
-
     function decodeHtml(html) {
         if (!html) return '';
 
@@ -267,7 +266,13 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return () => observer.disconnect();
     }, [hasMore, loading, page, collectionId, pageSize, currency, totalCount, allHotels.length]);
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            setTimestamp(Date.now().toString());
+        }, 0);
 
+        return () => window.clearTimeout(timer);
+    }, []);
     return (
         <>
             <CountryHeroSection />
@@ -407,6 +412,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         })()}
                                                         <Image
                                                             src={failedImageKeys.has(hotelKey) ? defaultImage : getImageUrl(hotel?.photo)}
+                                                            unoptimized
                                                             width={400}
                                                             height={270}
                                                             className="d-block w-100 rounded-4 collection-hotel-image"
@@ -597,7 +603,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                     );
 
                                                                     return (
-                                                                        <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
+                                                                        <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block">
                                                                             <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                                 1 night, 2 adults
                                                                             </p>

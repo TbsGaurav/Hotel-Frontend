@@ -2454,24 +2454,30 @@ a.text-sky-blue:hover {
     .collection-hotel-price-block {
         padding: 0 !important;
         margin-bottom: 10px !important;
-        width: 100%;
+        width: auto;
+        margin-left: auto !important;
+        text-align: right !important;
     }
     .collection-hotel-price-caption {
-        display: none;
+        display: block !important;
+        font-size: 12px !important;
+        line-height: 1.2;
+        margin-bottom: 2px !important;
+        color: #6c757d !important;
     }
     .collection-hotel-original-price {
-        text-align: left !important;
+        text-align: right !important;
         font-size: 12px !important;
     }
     .collection-hotel-current-price-row {
-        justify-content: flex-start !important;
+        justify-content: flex-end !important;
     }
     .collection-hotel-current-price {
         font-size: 18px !important;
         color: #111 !important;
     }
     .collection-hotel-cta-row {
-        margin-top: 4px;
+        display: none !important;
     }
     .collection-hotel-cta-col {
         width: 100%;
