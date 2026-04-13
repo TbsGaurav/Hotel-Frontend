@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
-import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import HeroSection from '@/components/sections/HeroSection';
 import { getHotelsByCollection, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 import Image from 'next/image';
@@ -275,7 +275,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     }, []);
     return (
         <>
-            <CountryHeroSection />
+            <HeroSection variant="common" />
 
             {!collection ? (
                 <div className="container py-5 text-center">
@@ -640,19 +640,18 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             })()}
                                                         </div>
 
-                                                        <div className="row collection-hotel-cta-row">
-                                                            <div className="col-12 col-md-4 col-lg-3 ms-auto collection-hotel-cta-col">
-                                                                <Link
-                                                                    className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
-                                                                    href={`${hotel.url}`}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                >
-                                                                    <span>See Availability</span>
-                                                                    <i className="fa-solid fa-arrow-right ms-2"></i>
-                                                                </Link>
-                                                            </div>
+                                                      
+                                                        <div className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col">
+                                                            <Link
+                                                                className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
+                                                                href={`${hotel.url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                <span>See Availability</span>
+                                                                <i className="fa-solid fa-arrow-right ms-2"></i>
+                                                            </Link>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -678,3 +677,4 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         </>
     );
 }
+

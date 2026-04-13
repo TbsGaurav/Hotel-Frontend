@@ -1,7 +1,7 @@
 import { getCountryByUrlName } from '@/lib/api/public/countryapi';
 import CountryDropdownSection from '@/components/common/country/CountryDropdownSection';
 import CountryIntro from '@/components/common/country/CountryInfo';
-import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import HeroSection from '@/components/sections/HeroSection';
 import { formatCountryName } from '@/lib/utils';
 import CountryHotelCarousel from '@/components/common/country/CountryHotelCarousel';
 import { notFound } from 'next/navigation';
@@ -55,7 +55,7 @@ export default async function CountryDetails({ country }) {
 
     return (
         <>
-            <CountryHeroSection />
+            <HeroSection variant="common" />
             <CountryIntro countryName={countryName} descriptionHtml={descriptionHtml} heroImage="/image/country.webp" />
 
             <section className="container py-4">
@@ -73,3 +73,4 @@ export default async function CountryDetails({ country }) {
         </>
     );
 }
+

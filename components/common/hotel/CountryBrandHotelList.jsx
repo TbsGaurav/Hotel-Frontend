@@ -505,7 +505,7 @@ export default function CountryBrandHotelList({
                                                             const discountPercentage = dealInfo?.discount_percentage;
                                                             const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
                                                             return (
-                                                                <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
+                                                                <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block">
                                                                     <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                         1 night, 2 adults
                                                                     </p>

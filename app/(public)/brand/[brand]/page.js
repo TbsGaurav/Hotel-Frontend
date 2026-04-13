@@ -1,4 +1,4 @@
-import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import HeroSection from '@/components/sections/HeroSection';
 import Dropdown from '@/components/ui/Dropdown';
 import { getBrandCountries } from '@/lib/api/public/brandapi';
 import Link from 'next/link';
@@ -43,7 +43,7 @@ export default async function BrandPage({ params }) {
 
     return (
         <>
-            <CountryHeroSection />
+            <HeroSection variant="common" />
 
             <div className="breadcrumb-section">
                 <div className="container">

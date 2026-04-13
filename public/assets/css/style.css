@@ -498,7 +498,6 @@ a {
         grid-column: span 1;
     }
     .hero-search-row .submit-search-col {
-        grid-column: 1 / -1;
         display: flex;
         align-items: flex-end;
         justify-content: flex-start;
@@ -530,7 +529,6 @@ a {
 
     .main-hero-search-row {
         display: grid;
-        grid-template-columns: repeat(12, minmax(0, 1fr));
         align-items: end;
     }
     .main-hero-search-row .hotel-search-col {
@@ -552,14 +550,15 @@ a {
         justify-content: flex-start;
     }
     .main-hero-search-row .submit-search-col .font-weight-bold-submit-search {
-        width: 100%;
+        width: 95%;
         min-height: 56px;
         white-space: nowrap;
+        margin-left: 20px;
     }
 }
-.submit-search{
-        margin-left: 20px !important;
-    }
+.submit-search {
+    margin-left: 20px !important;
+}
 @media (min-width: 992px) and (max-width: 1199.98px) {
     .hero-search-row .rooms-search-col {
         grid-column: auto;
@@ -615,16 +614,10 @@ a {
         align-items: center;
         justify-content: center;
     }
-   
+
     .country-hero .hero-search-row {
         column-gap: 12px;
         row-gap: 12px;
-        grid-template-columns:
-            minmax(0, 0.65fr) /* Destination */
-            minmax(0, 0.65fr) /* Date */
-            minmax(120px, 0.35fr) /* Rooms (reduced) */
-            60px /* Children */
-            50px; /* Filter */
     }
     .country-hero .hero-search-row .country-children-select-col {
         max-width: 66px;
@@ -672,7 +665,7 @@ a {
 }
 @media (min-width: 1200px) {
     .hero-search-shell {
-        max-width: 1480px;
+        max-width: 1320px;
     }
     .hero-search-row {
         display: flex;
@@ -680,7 +673,7 @@ a {
         align-items: flex-end;
     }
     .country-hero .country-hero-search-shell {
-        padding: 20px 34px 22px !important;
+        padding: 20px 20px 22px !important;
     }
     .country-hero .hero-search-row {
         column-gap: 22px;
@@ -875,6 +868,7 @@ a:hover.custom-form-label {
     font-weight: 700;
     font-size: 22px;
     padding: 20px 30px;
+    width: 100%;
 }
 .font-weight-bold-submit-search:hover {
     background-color: #f0831e;
@@ -2475,6 +2469,7 @@ a.text-sky-blue:hover {
     .collection-hotel-current-price {
         font-size: 18px !important;
         color: #111 !important;
+        padding-right: 7px;
     }
     .collection-hotel-cta-row {
         display: none !important;
@@ -3735,6 +3730,14 @@ a.text-sky-blue:hover {
         display: grid;
         gap: 1px;
         grid-template-columns: 20% 24% 21% 9% 25%;
-      grid-column: inherit !important;
+        grid-column: inherit !important;
     }
+}
+
+.hotel-para {
+    display: flex;
+    align-items: center;
+}
+.hotel-para-padding {
+    padding-bottom: 20px;
 }
