@@ -262,13 +262,13 @@ export default function CityHotelList({
                     setPage(resolvedPageNo);
                     setHasMore(
                         listGrew &&
-                            computeHasMore({
-                                loadedCount: mergedHotels.length,
-                                knownTotalCount: resolvedTotalCount,
-                                currentPageNumber: resolvedPageNo,
-                                currentPageSize: resolvedPageSize,
-                                lastBatchSize: normalizedHotels.length
-                            })
+                        computeHasMore({
+                            loadedCount: mergedHotels.length,
+                            knownTotalCount: resolvedTotalCount,
+                            currentPageNumber: resolvedPageNo,
+                            currentPageSize: resolvedPageSize,
+                            lastBatchSize: normalizedHotels.length
+                        })
                     );
 
                     if (pageCookieName) {
@@ -528,15 +528,15 @@ export default function CityHotelList({
                                                         .split('|')
                                                         .map((facility) => facility.trim())
                                                         .filter(Boolean).length > 5 && (
-                                                        <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
-                                                            +
-                                                            {hotelFacilitiesText
-                                                                .split('|')
-                                                                .map((facility) => facility.trim())
-                                                                .filter(Boolean).length - 5}{' '}
-                                                            more
-                                                        </span>
-                                                    )}
+                                                            <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
+                                                                +
+                                                                {hotelFacilitiesText
+                                                                    .split('|')
+                                                                    .map((facility) => facility.trim())
+                                                                    .filter(Boolean).length - 5}{' '}
+                                                                more
+                                                            </span>
+                                                        )}
                                                 </>
                                             )}
                                         </div>
@@ -614,6 +614,9 @@ export default function CityHotelList({
                                                                 {rate.price.book}
                                                             </span>
                                                         </div>
+                                                        <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                            Includes taxes and charges
+                                                        </p>
                                                     </div>
                                                 );
                                             })()}

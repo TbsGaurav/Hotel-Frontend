@@ -532,6 +532,9 @@ export default function CountryBrandHotelList({
                                                                             {rate.price.book}
                                                                         </span>
                                                                     </div>
+                                                                    <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                                        Includes taxes and charges
+                                                                    </p>
                                                                 </div>
                                                             );
                                                         }

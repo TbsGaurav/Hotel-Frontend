@@ -337,9 +337,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                         <span>
                                             {Array.isArray(basic) && basic.length > 0
                                                 ? basic
-                                                      .map((item) => item.cityName || item.regionName || item.countryName)
-                                                      .filter(Boolean)
-                                                      .join(', ')
+                                                    .map((item) => item.cityName || item.regionName || item.countryName)
+                                                    .filter(Boolean)
+                                                    .join(', ')
                                                 : basic?.cityName || basic?.districtName || basic?.regionName || basic?.countryName}
                                         </span>
                                     </div>
@@ -630,6 +630,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                     {rate.price.book}
                                                                                 </span>
                                                                             </div>
+                                                                            <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                                                Includes taxes and charges
+                                                                            </p>
                                                                             {/* <p className="para-12px text-muted mb-0">
                                                                             + {rate.price.total} taxes and charges
                                                                         </p> */}
@@ -640,7 +643,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             })()}
                                                         </div>
 
-                                                      
+
                                                         <div className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col">
                                                             <Link
                                                                 className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
