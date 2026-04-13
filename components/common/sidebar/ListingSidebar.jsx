@@ -5,14 +5,24 @@ import { useMemo, useState } from 'react';
 import { buildCategoryListingPath } from '@/lib/api/public/cityCategoryapi';
 
 function normalizeLabel(item) {
+    if (item?.collectionName) {
+        return item.collectionName;
+    }
     return String(item?.categoryName ?? item?.name ?? item?.label ?? '').trim();
 }
 
 function normalizeKey(item, label) {
+    if (item?.collectionId) {
+        return `collection-${item.collectionId}`;
+    }
     return String(item?.categoryId ?? item?.id ?? item?.value ?? label).trim();
 }
 
 function normalizeHref(item, label, context = {}) {
+    if (item?.collectionSlug) {
+        return `/${item.collectionSlug}`;
+    }
+
     if (item?.href) {
         if (typeof item.href === 'string') return item.href;
 
