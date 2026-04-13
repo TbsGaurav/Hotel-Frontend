@@ -364,6 +364,7 @@ export default function CountryBrandHotelList({
                                                     className="d-block w-100 rounded-4 collection-hotel-image"
                                                     alt={hotel.hotelName}
                                                     onError={() => handleImageError(hotelKey)}
+                                                    priority
                                                 />
                                             </div>
                                         </div>

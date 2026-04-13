@@ -1,8 +1,10 @@
 'use client';
 
-import RichTextEditor from '@/components/ui/RichTextEditor';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+
+const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), { ssr: false });
 
 export default function ContentTab({ data, setData, onNext, onBack, loading }) {
     const [errors, setErrors] = useState({});

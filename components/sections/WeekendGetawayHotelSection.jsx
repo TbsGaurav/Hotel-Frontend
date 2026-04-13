@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 
@@ -91,29 +92,6 @@ function WeekendGetawayHotelSection() {
             }
         ],
 
-        // Gold Coast: [
-        //     {
-        //         name: 'Brisbane Marriott',
-        //         address: '515 Queen St Brisbane',
-        //         oldPrice: 'AUD $700',
-        //         price: 'AUD $390',
-        //         image: '/image/property-img.webp'
-        //     },
-        //     {
-        //         name: 'Hilton Brisbane',
-        //         address: '190 Elizabeth St Brisbane',
-        //         oldPrice: 'AUD $650',
-        //         price: 'AUD $360',
-        //         image: '/image/property-img.webp'
-        //     },
-        //     {
-        //         name: 'Oaks Brisbane',
-        //         address: '347 Ann St Brisbane',
-        //         oldPrice: 'AUD $620',
-        //         price: 'AUD $340',
-        //         image: '/image/property-img.webp'
-        //     }
-        // ],
         Hobart: [
             {
                 name: 'Brisbane Marriott',
@@ -190,10 +168,11 @@ function WeekendGetawayHotelSection() {
                 oldPrice: 'AUD $720',
                 price: 'AUD $420',
                 image: '/image/property-img.webp'
-            }
+            },
         ]
     };
     const hotels = hotelsByCity[activeCity] || [];
+    const canLoopHotels = hotels.length > 3;
 
     return (
         <section>
@@ -230,7 +209,7 @@ function WeekendGetawayHotelSection() {
                         modules={[Navigation]}
                         slidesPerView={3}
                         spaceBetween={35}
-                        loop
+                        loop={canLoopHotels}
                         navigation={{
                             prevEl: '.custom-prev',
                             nextEl: '.custom-next'
@@ -242,19 +221,9 @@ function WeekendGetawayHotelSection() {
                         }}
                     >
                         {hotels.map((hotel, index) => (
-                            <SwiperSlide key={index} style={{ padding: '15px 5px' }}>
+                            <SwiperSlide key={index} className="weekend-getaway-slide">
                                 {' '}
-                                <div
-                                    className="property-grid-box p-2"
-                                    style={{
-                                        borderRadius: '18px',
-                                        background: '#fff',
-                                        border: '1px solid #e9ecef',
-                                        maxWidth: '420px',
-                                        margin: '0 auto',
-                                        overflow: 'hidden'
-                                    }}
-                                >
+                                <div className="property-grid-box p-2 weekend-getaway-card">
                                     <Swiper
                                         modules={[Autoplay, Pagination]}
                                         slidesPerView={1}
@@ -268,79 +237,41 @@ function WeekendGetawayHotelSection() {
                                             clickable: true
                                         }}
                                         className="image-swiper"
-                                        style={{ borderRadius: '14px', overflow: 'hidden' }}
                                     >
                                         <SwiperSlide>
-                                            <img
-                                                src="/image/property-img.webp"
-                                                style={{ height: '200px', width: '100%', objectFit: 'cover' }}
+                                            <Image
+                                                src={hotel.image}
+                                                width={800}
+                                                height={400}
+                                                sizes="(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 420px"
+                                                className="weekend-getaway-image"
+                                                alt={hotel.name}
                                             />
                                         </SwiperSlide>
 
                                         <SwiperSlide>
-                                            <img
-                                                src="/image/property-img.webp"
-                                                style={{ height: '200px', width: '100%', objectFit: 'cover' }}
+                                            <Image
+                                                src={hotel.image}
+                                                width={800}
+                                                height={400}
+                                                sizes="(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 420px"
+                                                className="weekend-getaway-image"
+                                                alt={hotel.name}
                                             />
                                         </SwiperSlide>
 
                                         <SwiperSlide>
-                                            <img
-                                                src="/image/property-img.webp"
-                                                style={{ height: '200px', width: '100%', objectFit: 'cover' }}
+                                            <Image
+                                                src={hotel.image}
+                                                width={800}
+                                                height={400}
+                                                sizes="(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 420px"
+                                                className="weekend-getaway-image"
+                                                alt={hotel.name}
                                             />
                                         </SwiperSlide>
                                     </Swiper>
 
-                                    {/* <div
-                                        id={`hotelCarousel-${index}`}
-                                        className="carousel slide position-relative mb-3"
-                                        data-bs-ride="carousel"
-                                        data-bs-interval="2500"
-                                    >
-                                        <div className="carousel-indicators">
-                                            <button
-                                                type="button"
-                                                data-bs-target={`#hotelCarousel-${index}`}
-                                                data-bs-slide-to="0"
-                                                className="active"
-                                            ></button>
-
-                                            <button type="button" data-bs-target={`#hotelCarousel-${index}`} data-bs-slide-to="1"></button>
-
-                                            <button type="button" data-bs-target={`#hotelCarousel-${index}`} data-bs-slide-to="2"></button>
-                                        </div>
-
-                                        <div className="carousel-inner rounded-4">
-                                            <div className="carousel-item active">
-                                                <img
-                                                    src="/image/property-img.webp"
-                                                    className="d-block w-100"
-                                                    style={{
-                                                        height: '200px',
-                                                        objectFit: 'cover',
-                                                        borderRadius: '14px'
-                                                    }}
-                                                />
-                                            </div>
-
-                                            <div className="carousel-item">
-                                                <img
-                                                    src="/image/property-img.webp"
-                                                    className="d-block w-100"
-                                                    style={{ height: '220px', objectFit: 'cover' }}
-                                                />
-                                            </div>
-
-                                            <div className="carousel-item">
-                                                <img
-                                                    src="/image/property-img.webp"
-                                                    className="d-block w-100"
-                                                    style={{ height: '220px', objectFit: 'cover' }}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div> */}
                                     <div className="card-content">
                                         <div className="d-flex mb-2">
                                             <h4 className="property-grid-title my-auto me-3">{hotel.name}</h4>
