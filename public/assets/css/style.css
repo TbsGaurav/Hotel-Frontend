@@ -2434,7 +2434,7 @@ a.text-sky-blue:hover {
     }
     .collection-hotel-meta-row {
         align-items: flex-start !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 5px !important;
     }
     .collection-hotel-pay-later {
         display: none;
@@ -2445,8 +2445,8 @@ a.text-sky-blue:hover {
         margin-bottom: 2px !important;
     }
     .collection-hotel-price-block {
-        padding: 0 !important;
-        margin-bottom: 10px !important;
+         padding: 0 !important;
+        margin-bottom: -5px !important;
         width: auto;
         margin-left: auto !important;
         text-align: right !important;
@@ -3341,6 +3341,11 @@ a.text-sky-blue:hover {
     border-bottom: 3px solid #0071c2;
 }
 @media (max-width: 767.98px) {
+    .collection-hotel-review-row {
+        flex-direction: row;
+        justify-content: flex-start !important;
+        width: 100% !important;
+    }
     .main-div {
         padding: 0px 20px 0px 20px;
     }
@@ -3430,17 +3435,24 @@ a.text-sky-blue:hover {
     color: #0c1927;
     line-height: 1.5em;
     white-space: normal;
-    max-width: 25cm;
+    width:auto;
     -webkit-line-clamp: 1;
     line-clamp: 1;
     text-overflow: ellipsis;
     overflow: hidden;
+    margin-right: 8px !important;
+    word-break: break-all;
 }
 .breadcrumb-wrapper {
     padding-right: 20px;
 }
 
 @media (max-width: 485px) {
+    .collection-hotel-review-row {
+        flex-direction: row;
+        justify-content: flex-start !important;
+        width: 100% !important;
+    }
     .property-grid-title {
         max-width: 20ch;
         /* white-space: nowrap; */
@@ -3696,6 +3708,16 @@ a.text-sky-blue:hover {
         min-height: 0;
         max-width: 100%;
     }
+    .para-12px {
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.5em;
+}
+.button-new {
+    position: absolute;
+    bottom: 10px;
+}
+
 }
 
 .finding-best-section .image-wrapper {
@@ -3731,6 +3753,11 @@ a.text-sky-blue:hover {
         grid-template-columns: 23% 24% 21% 9% 25%;
         grid-column: inherit !important;
     }
+    .collection-hotel-review-row {
+    flex-direction: row;
+    justify-content: flex-end;
+    width: 40% !important;
+}
 }
 
 .hotel-para {
@@ -3739,4 +3766,23 @@ a.text-sky-blue:hover {
 }
 .hotel-para-padding {
     padding-bottom: 20px;
+}
+.collection-hotel-stars {
+    align-items: flex-start;
+    display: flex;
+    margin-top: 5px !important;
+}
+.collection-hotel-header {
+    width: 100%;
+}
+.collection-hotel-title-row {
+    display: flex !important;
+    width: auto;
+    margin-right: 10px;
+    align-items: flex-start !important;
+}
+.collection-hotel-review-row {
+    width: 37%;
+    flex-direction: row;
+    justify-content: flex-end;
 }

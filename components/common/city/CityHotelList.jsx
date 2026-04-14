@@ -450,7 +450,7 @@ export default function CityHotelList({
 
                                 <div className="col-12 col-md-8 collection-hotel-content-col">
                                     <div className="text-decoration-none">
-                                        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-header">
+                                        <div className="d-flex flex-column flex-md-row align-items-start justify-content-between mb-2 collection-hotel-header">
                                             <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-2 mb-md-0 collection-hotel-title-row">
                                                 {/* <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row"> */}
                                                 <Link
@@ -592,7 +592,7 @@ export default function CityHotelList({
 
                                                 return (
                                                     // <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
-                                                    <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block">
+                                                    <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
                                                         <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                             1 night, 2 adults
                                                         </p>
