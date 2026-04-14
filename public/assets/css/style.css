@@ -3441,7 +3441,7 @@ a.text-sky-blue:hover {
     text-overflow: ellipsis;
     overflow: hidden;
     margin-right: 8px !important;
-    word-break: break-all;
+
 }
 .breadcrumb-wrapper {
     padding-right: 20px;
