@@ -64,6 +64,8 @@ export default async function CityDetails({ params }) {
     let content = '';
     let countryName = '';
     let countryUrl = '';
+    let regionName = '';
+    let regionUrl = '';
 
     if (citySlug) {
         try {
@@ -93,6 +95,8 @@ export default async function CityDetails({ params }) {
                 const firstHotel = hotels[0];
                 countryName = firstHotel?.countryName || firstHotel?.country || '';
                 countryUrl = firstHotel?.countryUrlName || firstHotel?.countryUrl || toSlug(countryName);
+                regionName = firstHotel?.regionName || firstHotel?.region || '';
+                regionUrl = firstHotel?.regionUrlName || firstHotel?.regionUrl || toSlug(regionName);
 
                 if (!countryName || !countryUrl) {
                     const countryCode = getBookingCountryCode(firstHotel?.url);
@@ -153,6 +157,14 @@ export default async function CityDetails({ params }) {
                                 <li className="breadcrumb-item small-para-14-px">
                                     <Link href={`/${toSlug(countryUrl)}`} className="text-dark text-decoration-none">
                                         {countryName}
+                                    </Link>
+                                </li>
+                            )}
+
+                            {regionName && (
+                                <li className="breadcrumb-item small-para-14-px">
+                                    <Link href={`${toSlug(regionUrl)}`} className="text-dark text-decoration-none">
+                                        {regionName}
                                     </Link>
                                 </li>
                             )}
