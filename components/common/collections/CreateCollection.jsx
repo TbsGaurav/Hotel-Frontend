@@ -48,26 +48,6 @@ const getSlugParts = (slug = '') => {
     };
 };
 
-const extractHotelArray = (payload) => {
-    if (Array.isArray(payload)) return payload;
-    if (Array.isArray(payload?.data)) return payload.data;
-    if (Array.isArray(payload?.hotels)) return payload.hotels;
-    if (Array.isArray(payload?.collectionPreviewHotels)) return payload.collectionPreviewHotels;
-    return [];
-};
-
-const extractHotelPagination = (payload) => {
-    const source = payload?.data && typeof payload.data === 'object' ? payload.data : payload || {};
-
-    return {
-        pageNumber: source?.pageNumber ?? null,
-        pageSize: source?.pageSize ?? null,
-        totalCount: source?.totalCount ?? null,
-        totalPages: source?.totalPages ?? null,
-        hasNextPage: source?.hasNextPage ?? null
-    };
-};
-
 const mergeHotelsById = (existingHotels = [], nextHotels = []) => {
     const hotelMap = new Map();
 
@@ -310,8 +290,8 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                     pageSize: 20,
                     searchTerm: search || ''
                 });
-                results = extractHotelArray(previewRes?.data);
-                pagination = extractHotelPagination(previewRes);
+                results = Array.isArray(previewRes?.hotels) ? previewRes.hotels : [];
+                pagination = previewRes || {};
             } catch (error) {
                 console.error('Failed to load preview hotels:', error);
             }
@@ -325,8 +305,8 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                     pageSize: 20
                 });
 
-                results = extractHotelArray(res?.data);
-                pagination = extractHotelPagination(res);
+                results = Array.isArray(res?.hotels) ? res.hotels : [];
+                pagination = res || {};
             } catch (error) {
                 console.error('Failed to load hotels by geo-node:', error);
                 toast.error('Unable to load hotels for the selected geo-node');

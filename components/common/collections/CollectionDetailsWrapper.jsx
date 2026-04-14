@@ -45,12 +45,11 @@ export default async function CollectionDetailsWrapper({ slug, collectionData, e
         // Fetch first page of hotels
         const hotelsRes = await getHotelsByCollection(collectionId, 1, 10);
 
-        // Handle new API response structure: data.hotelData and data.totalCount
-        const hotelsData = hotelsRes?.data?.hotelData || hotelsRes?.data || [];
-        hotels = hotelsData;
-        totalCount = hotelsRes?.data?.totalCount || hotelsRes?.totalCount || 0;
-        currentPage = hotelsRes?.data?.currentPage || 1;
-        pageSize = hotelsRes?.data?.pageSize || 10;
+
+        hotels = hotelsRes.hotels;
+        totalCount = hotelsRes.totalCount;
+        currentPage = hotelsRes.currentPage;
+        pageSize = hotelsRes.pageSize;
     }
 
     return (

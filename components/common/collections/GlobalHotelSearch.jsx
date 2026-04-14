@@ -45,7 +45,7 @@ export default function GlobalHotelSearch({ selectedHotels = [], hotelList = [],
                 setError('');
 
                 const response = await searchHotelsGlobally(trimmed);
-                const rawResults = response?.data?.hotels || response?.data || [];
+                const rawResults = response.hotels;
                 const normalized = Array.isArray(rawResults) ? rawResults.map(normalizeHotel).filter((hotel) => hotel.id) : [];
 
                 if (cancelled) return;

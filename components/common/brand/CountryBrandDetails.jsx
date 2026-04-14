@@ -2,9 +2,8 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import HeroSection from '@/components/sections/HeroSection';
 import { getHotelList } from '@/lib/api/public/hotelapi';
-import { getCitySidebar } from '@/lib/api/public/cityapi';
 import { getCountryByUrlName, resolveSlug } from '@/lib/api/public/countryapi';
-import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
+import { getCitySidebar } from '@/lib/api/public/cityapi';
 import { buildListingSidebarSections } from '@/lib/listingSidebar';
 import CountryBrandHotelList from '../hotel/CountryBrandHotelList';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
@@ -191,14 +190,7 @@ export default async function CountryBrandDetails({ params }) {
                     {formattedBrand} {displayCountryName}
                 </h3> */}
                 <div className="row g-0 g-lg-4 align-items-start">
-                    <div className="col-lg-3 d-none d-lg-block order-lg-1">
-                        {' '}
-                        <div className="position-sticky" style={{ top: '16px' }}>
-                            <ListingSidebar title="Filters" sections={sidebarSections} />
-                        </div>
-                    </div>
-
-                    <div className="col-12 col-lg-9 order-1 order-lg-2">
+                    <div className="col-12 order-1">
                         <div id="country-brand-hotel-list">
                             {hotels.length > 0 ? (
                                 <CountryBrandHotelList

@@ -220,9 +220,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         try {
             const hotelsRes = await getHotelsByCollection(collectionId, nextPage, pageSize);
-            // Handle new API response structure: data.hotelData and data.totalCount
-            const newHotels = hotelsRes?.data?.hotelData || hotelsRes?.data || [];
-
+            const { hotels: newHotels } = hotelsRes;
             if (newHotels.length > 0) {
                 const uniqueNewHotels = mergeUniqueHotels([], newHotels);
                 let newRates = [];
@@ -266,6 +264,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return () => observer.disconnect();
     }, [hasMore, loading, page, collectionId, pageSize, currency, totalCount, allHotels.length]);
+
     useEffect(() => {
         const timer = window.setTimeout(() => {
             setTimestamp(Date.now().toString());
@@ -273,6 +272,17 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return () => window.clearTimeout(timer);
     }, []);
+
+    const CountryName = Array.isArray(basic) && basic.length > 0 ? basic[0].countryName : basic?.countryName;
+    const RegionName = Array.isArray(basic) && basic.length > 0 ? basic[0].regionName : basic?.regionName;
+    const CityName = Array.isArray(basic) && basic.length > 0 ? basic[0].cityName : basic?.cityName;
+    const CollectionName = Array.isArray(basic) && basic.length > 0 ? basic[0].name : basic?.name;
+
+    const CountryUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].countryUrl : basic?.countryUrl;
+    const RegionUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].regionUrl : basic?.regionUrl;
+    const CityUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].cityUrl : basic?.cityUrl;
+    const CollectionUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].slug : basic?.slug;
+
     return (
         <>
             <HeroSection variant="common" />
@@ -302,14 +312,34 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                             <nav aria-label="breadcrumb" className="mb-0">
                                 <ol className="breadcrumb mb-0">
                                     <li className="breadcrumb-item small-para-14-px">
-                                        <Link href="/" className="text-dark text-decoration-none">
+                                        <Link href="/destinations" className="text-dark text-decoration-none">
                                             Home
                                         </Link>
                                     </li>
-
+                                    {CountryName && CountryUrl && (
+                                        <li className="breadcrumb-item small-para-14-px">
+                                            <Link href={`/${CountryUrl}`} className="text-dark text-decoration-none">
+                                                {CountryName}
+                                            </Link>
+                                        </li>
+                                    )}
+                                    {RegionName && RegionUrl && (
+                                        <li className="breadcrumb-item small-para-14-px">
+                                            <Link href={`${RegionUrl}`} className="text-dark text-decoration-none">
+                                                {RegionName}
+                                            </Link>
+                                        </li>
+                                    )}
+                                    {CityName && CityUrl && (
+                                        <li className="breadcrumb-item small-para-14-px">
+                                            <Link href={`${CityUrl}`} className="text-dark text-decoration-none">
+                                                {CityName}
+                                            </Link>
+                                        </li>
+                                    )}
                                     <li className="breadcrumb-item small-para-14-px active">
-                                        <Link href={`/${basic[0]?.name}`} className="text-decoration-none">
-                                            {basic[0]?.name}
+                                        <Link href={`/${CollectionUrl}`} className="text-decoration-none">
+                                            {CollectionName}
                                         </Link>
                                     </li>
                                 </ol>
@@ -337,9 +367,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                         <span>
                                             {Array.isArray(basic) && basic.length > 0
                                                 ? basic
-                                                    .map((item) => item.cityName || item.regionName || item.countryName)
-                                                    .filter(Boolean)
-                                                    .join(', ')
+                                                      .map((item) => item.cityName || item.regionName || item.countryName)
+                                                      .filter(Boolean)
+                                                      .join(', ')
                                                 : basic?.cityName || basic?.districtName || basic?.regionName || basic?.countryName}
                                         </span>
                                     </div>
@@ -643,7 +673,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             })()}
                                                         </div>
 
-
                                                         <div className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col">
                                                             <Link
                                                                 className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
@@ -680,4 +709,3 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         </>
     );
 }
-
