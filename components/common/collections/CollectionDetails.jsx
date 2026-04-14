@@ -308,7 +308,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                     </li>
 
                                     <li className="breadcrumb-item small-para-14-px active">
-                                        <Link href={`/${basic[0]?.name}`} className="text-decoration-none">
+                                        <Link href={`/${basic[0]?.slug}`} className="text-decoration-none">
                                             {basic[0]?.name}
                                         </Link>
                                     </li>
