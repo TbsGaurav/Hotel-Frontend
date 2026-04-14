@@ -8,6 +8,8 @@ import { getCountriesApi } from '@/lib/api/public/countryapi';
 import { getSidebarData } from '@/lib/api/sidebarapi';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { buildCategorySidebarSections } from '@/lib/api/public/cityCategoryapi';
+import { buildCitySeo } from '@/lib/seo';
+import SeoDetailsCard from '@/components/common/SeoDetailsCard';
 
 // Utility functions
 function toSlug(value = '') {
@@ -15,12 +17,6 @@ function toSlug(value = '') {
     return value.toString().trim().toLowerCase().replace(/\s+/g, '-');
 }
 
-function getFirstDefined(...values) {
-    for (const value of values) {
-        if (value !== undefined && value !== null && value !== '') return value;
-    }
-    return null;
-}
 function getCityPageIntentCookieName(citySlug = '') {
     return `city_page_intent_${toSlug(citySlug).replace(/[^a-z0-9_-]/g, '_')}`;
 }
@@ -41,7 +37,6 @@ const PAGE_SIZE = 10;
 function getCityPageCookieName(citySlug = '') {
     return `city_page_${toSlug(citySlug).replace(/[^a-z0-9_-]/g, '_')}`;
 }
-
 
 function parsePageNumber(value) {
     const page = Number(value);
@@ -66,6 +61,7 @@ export default async function CityDetails({ params }) {
     let countryUrl = '';
     let regionName = '';
     let regionUrl = '';
+    let firstHotel = null;
 
     if (citySlug) {
         try {
@@ -92,7 +88,7 @@ export default async function CityDetails({ params }) {
             }
 
             if (hotels.length > 0) {
-                const firstHotel = hotels[0];
+                firstHotel = hotels[0];
                 countryName = firstHotel?.countryName || firstHotel?.country || '';
                 countryUrl = firstHotel?.countryUrlName || firstHotel?.countryUrl || toSlug(countryName);
                 regionName = firstHotel?.regionName || firstHotel?.region || '';
@@ -122,6 +118,16 @@ export default async function CityDetails({ params }) {
     const sidebarSections = buildCategorySidebarSections(sidebarData, {
         citySlug: citySlugPath,
         cityName
+    });
+    const seo = buildCitySeo({
+        citySlug,
+        resolvedSlugData: {
+            metaDescription: content,
+            content
+        },
+        firstHotel,
+        countryName,
+        countrySlug: countryUrl
     });
 
     return (
@@ -180,6 +186,12 @@ export default async function CityDetails({ params }) {
             </div>
 
             <section className="container py-2 ">
+                <SeoDetailsCard
+                    heading={seo.heading}
+                    metaTitle={seo.metaTitle}
+                    metaDescription={seo.metaDescription}
+                    canonicalPath={seo.canonicalPath}
+                />
                 {/* <h2 className="mb-3">Hotel Accommodation in {cityName}</h2> */}
 
                 <div className="row g-0 g-lg-4 align-items-start">
