@@ -220,9 +220,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         try {
             const hotelsRes = await getHotelsByCollection(collectionId, nextPage, pageSize);
-            // Handle new API response structure: data.hotelData and data.totalCount
-            const newHotels = hotelsRes?.data?.hotelData || hotelsRes?.data || [];
-
+            const { hotels: newHotels } = hotelsRes;
             if (newHotels.length > 0) {
                 const uniqueNewHotels = mergeUniqueHotels([], newHotels);
                 let newRates = [];
@@ -337,9 +335,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                         <span>
                                             {Array.isArray(basic) && basic.length > 0
                                                 ? basic
-                                                    .map((item) => item.cityName || item.regionName || item.countryName)
-                                                    .filter(Boolean)
-                                                    .join(', ')
+                                                      .map((item) => item.cityName || item.regionName || item.countryName)
+                                                      .filter(Boolean)
+                                                      .join(', ')
                                                 : basic?.cityName || basic?.districtName || basic?.regionName || basic?.countryName}
                                         </span>
                                     </div>
@@ -643,7 +641,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             })()}
                                                         </div>
 
-
                                                         <div className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col">
                                                             <Link
                                                                 className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
@@ -680,4 +677,3 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         </>
     );
 }
-

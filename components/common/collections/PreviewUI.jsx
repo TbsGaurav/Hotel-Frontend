@@ -33,14 +33,6 @@ const decodeHtml = (html) => {
     return decoded;
 };
 
-const extractHotelArray = (payload) => {
-    if (Array.isArray(payload)) return payload;
-    if (Array.isArray(payload?.data)) return payload.data;
-    if (Array.isArray(payload?.hotels)) return payload.hotels;
-    if (Array.isArray(payload?.collectionPreviewHotels)) return payload.collectionPreviewHotels;
-    return [];
-};
-
 export default function PreviewUI({ initialData, id }) {
     const [collection, setCollection] = useState(initialData);
     const router = useRouter();
@@ -59,7 +51,7 @@ export default function PreviewUI({ initialData, id }) {
             const collectionCuration = Array.isArray(data?.collectionCuration) ? data.collectionCuration : [];
             const collectionContent = normalizeSingleItem(data?.collectionContent);
             const previewRes = await getcollectionHotelsByMultipleNodes(id);
-            const previewHotels = extractHotelArray(previewRes?.data);
+            const previewHotels = Array.isArray(previewRes?.hotels) ? previewRes.hotels : [];
             setCollection({
                 ...(data || {}),
                 basicCollection,
