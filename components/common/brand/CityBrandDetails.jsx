@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
-import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import HeroSection from '@/components/sections/HeroSection';
 import { getHotelList } from '@/lib/api/public/hotelapi';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { getSidebarData } from '@/lib/api/sidebarapi';
@@ -115,7 +115,7 @@ export default async function CityBrandDetails({ params }) {
 
     return (
         <>
-            <CountryHeroSection />
+            <HeroSection variant="common" />
             <section className="mobile-actions d-lg-none">
                 <div className="container px-0">
                     <div className="mobile-actions__bottom">
@@ -209,3 +209,4 @@ export default async function CityBrandDetails({ params }) {
         </>
     );
 }
+

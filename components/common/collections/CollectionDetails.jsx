@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
-import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import HeroSection from '@/components/sections/HeroSection';
 import { getHotelsByCollection, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 import Image from 'next/image';
@@ -35,6 +35,12 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         });
     }
 
+    const getFirstDefined = (...values) => {
+        for (const value of values) {
+            if (value !== undefined && value !== null && value !== '') return value;
+        }
+        return null;
+    };
     // Pagination state
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(() => mergeUniqueHotels([], hotels || []));
@@ -46,6 +52,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const loadMoreTriggerRef = useRef(null);
     const loadRequestInFlightRef = useRef(false);
     const pageRef = useRef(currentPage || 1);
+    const [timestamp, setTimestamp] = useState('');
 
     const openMap = (lat, lng) => {
         if (!lat || !lng) return;
@@ -142,19 +149,13 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
     // Default image path
     const defaultImage = '/image/property-img.webp';
-    const [timestamp, setTimestamp] = useState('');
 
     const getHotelKey = (hotel, index) => {
-        const identity = getHotelIdentity(hotel);
-        return identity ? `${identity}-${index}` : `hotel-${index}`;
-    };
+        const bookingId = getBookingId(hotel);
+        const rawKey = getFirstDefined(bookingId, hotel?.hotelId, hotel?.id, hotel?.urlName, hotel?.url);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setTimestamp(Date.now().toString());
-        }, 0);
-        return () => clearTimeout(timer);
-    }, []);
+        return rawKey ? `${rawKey}-${index}` : `hotel-${index}`;
+    };
 
     const handleImageError = (imageKey) => {
         setFailedImageKeys((prev) => {
@@ -177,14 +178,12 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         return defaultImage;
     };
 
-    // Generate cache-busted URL
     const getImageUrl = (photo) => {
         const normalizedUrl = normalizeImageUrl(photo);
         if (normalizedUrl === defaultImage) return defaultImage;
         const sep = normalizedUrl.includes('?') ? '&' : '?';
         return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
     };
-
     function decodeHtml(html) {
         if (!html) return '';
 
@@ -267,10 +266,16 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return () => observer.disconnect();
     }, [hasMore, loading, page, collectionId, pageSize, currency, totalCount, allHotels.length]);
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            setTimestamp(Date.now().toString());
+        }, 0);
 
+        return () => window.clearTimeout(timer);
+    }, []);
     return (
         <>
-            <CountryHeroSection />
+            <HeroSection variant="common" />
 
             {!collection ? (
                 <div className="container py-5 text-center">
@@ -332,9 +337,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                         <span>
                                             {Array.isArray(basic) && basic.length > 0
                                                 ? basic
-                                                      .map((item) => item.cityName || item.regionName || item.countryName)
-                                                      .filter(Boolean)
-                                                      .join(', ')
+                                                    .map((item) => item.cityName || item.regionName || item.countryName)
+                                                    .filter(Boolean)
+                                                    .join(', ')
                                                 : basic?.cityName || basic?.districtName || basic?.regionName || basic?.countryName}
                                         </span>
                                     </div>
@@ -407,6 +412,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                         })()}
                                                         <Image
                                                             src={failedImageKeys.has(hotelKey) ? defaultImage : getImageUrl(hotel?.photo)}
+                                                            unoptimized
                                                             width={400}
                                                             height={270}
                                                             className="d-block w-100 rounded-4 collection-hotel-image"
@@ -597,7 +603,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                     );
 
                                                                     return (
-                                                                        <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
+                                                                        <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block">
                                                                             <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                                 1 night, 2 adults
                                                                             </p>
@@ -624,6 +630,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                     {rate.price.book}
                                                                                 </span>
                                                                             </div>
+                                                                            <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                                                Includes taxes and charges
+                                                                            </p>
                                                                             {/* <p className="para-12px text-muted mb-0">
                                                                             + {rate.price.total} taxes and charges
                                                                         </p> */}
@@ -634,19 +643,18 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             })()}
                                                         </div>
 
-                                                        <div className="row collection-hotel-cta-row">
-                                                            <div className="col-12 col-md-4 col-lg-3 ms-auto collection-hotel-cta-col">
-                                                                <Link
-                                                                    className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
-                                                                    href={`${hotel.url}`}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                >
-                                                                    <span>See Availability</span>
-                                                                    <i className="fa-solid fa-arrow-right ms-2"></i>
-                                                                </Link>
-                                                            </div>
+
+                                                        <div className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col">
+                                                            <Link
+                                                                className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
+                                                                href={`${hotel.url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                <span>See Availability</span>
+                                                                <i className="fa-solid fa-arrow-right ms-2"></i>
+                                                            </Link>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -672,3 +680,4 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         </>
     );
 }
+

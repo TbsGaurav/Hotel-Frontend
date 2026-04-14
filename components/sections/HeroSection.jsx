@@ -11,7 +11,7 @@ import Image from 'next/image';
 
 const DatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
 
-export default function HeroSection() {
+export default function HeroSection({ variant = 'home' }) {
     const [checkInDate, setCheckInDate] = useState(null);
     const [checkOutDate, setCheckOutDate] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -92,6 +92,7 @@ export default function HeroSection() {
     });
     const searchRef = useRef(null);
     const roomsDropdownRef = useRef(null);
+    const filterButtonRef = useRef(null);
 
     const MIN_PRICE = 0;
     const MAX_PRICE = 1000;
@@ -222,7 +223,10 @@ export default function HeroSection() {
 
     useEffect(() => {
         function handleFilterOutsideClick(event) {
-            if (filterRef.current && !filterRef.current.contains(event.target)) {
+            const clickedInsideFilterPanel = filterRef.current?.contains(event.target);
+            const clickedFilterButton = filterButtonRef.current?.contains(event.target);
+
+            if (!clickedInsideFilterPanel && !clickedFilterButton) {
                 setShowFilters(false);
             }
         }
@@ -282,61 +286,92 @@ export default function HeroSection() {
         };
     }, [isSliding, priceRange]);
 
+    const isCountryVariant = variant === 'common';
+    const sectionClassName = isCountryVariant ? 'container-fluid p-0' : 'container-fluid';
+
+    const heroClassName = isCountryVariant
+        ? 'country-hero d-flex flex-column justify-content-between'
+        : 'hero py-5 px-2 px-md-4 px-lg-5 d-flex flex-column justify-content-between';
+    const heroShellClassName = isCountryVariant
+        ? 'container p-2 hero-search-shell country-hero-search-shell'
+        : 'container p-4 hero-form hero-search-shell main-hero-search-shell';
+    const heroSearchRowClassName = isCountryVariant
+        ? 'row hero-search-row main-hero-search-row'
+        : 'row hero-search-row main-hero-search-row';
+    // const heroSearchRowClassName = isCountryVariant
+    //     ? 'row align-items-end hero-search-row country-hero-search-row'
+    //     : 'row hero-search-row main-hero-search-row';
+    const heroStyle = isCountryVariant
+        ? {
+              backgroundColor: '#0071b9',
+              padding: '20px 0'
+          }
+        : undefined;
+
     return (
-        <section className="container-fluid">
-            <div className="hero py-5 px-2 px-md-4 px-lg-5 d-flex flex-column justify-content-between">
-                <div className="row">
-                    <div className="col-12 col-md-5 col-lg-4 d-flex justify-content-center justify-content-md-start mb-4 mb-md-0">
-                        <div className="my-auto d-flex">
-                            <ul className="list-unstyled p-0 m-0 overlap-avatar">
-                                <li>
-                                    <Image src="/image/1.webp" alt="" width={60} height={60} />
-                                </li>
-                                <li>
-                                    <Image src="/image/2.webp" alt="" width={60} height={60} />
-                                </li>
-                                <li>
-                                    <Image src="/image/3.webp" alt="" width={60} height={60} />
-                                </li>
-                            </ul>
-                            <div className="ms-4">
-                                <h5 className="overlap-avatar-count">5k +</h5>
-                                <p className="mb-0 small-para-14-px text-white">Reccomdations</p>
+        <section className={sectionClassName}>
+            <div className={heroClassName} style={heroStyle}>
+                {!isCountryVariant && (
+                    <div className="row">
+                        <div className="col-12 col-md-5 col-lg-4 d-flex justify-content-center justify-content-md-start mb-4 mb-md-0">
+                            <div className="my-auto d-flex">
+                                <ul className="list-unstyled p-0 m-0 overlap-avatar">
+                                    <li>
+                                        <Image src="/image/1.webp" alt="" width={60} height={60} />
+                                    </li>
+                                    <li>
+                                        <Image src="/image/2.webp" alt="" width={60} height={60} />
+                                    </li>
+                                    <li>
+                                        <Image src="/image/3.webp" alt="" width={60} height={60} />
+                                    </li>
+                                </ul>
+                                <div className="ms-4">
+                                    <h5 className="overlap-avatar-count">5k +</h5>
+                                    <p className="mb-0 small-para-14-px text-white">Reccomdations</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-12 col-md-7 col-lg-8 d-flex justify-content-center justify-content-md-end">
+                            <div className="my-auto d-flex">
+                                <div className="me-3 me-lg-5">
+                                    <h5 className="text-center overlap-avatar-count">15k +</h5>
+                                    <p className="mb-0 small-para-14-px text-white">Satisfied Visitors</p>
+                                </div>
+                                <div className="me-3 me-lg-5">
+                                    <h5 className="text-center overlap-avatar-count">3.5k+</h5>
+                                    <p className="mb-0 small-para-14-px text-white">Amazing Hotels</p>
+                                </div>
+                                <div>
+                                    <h5 className="text-center overlap-avatar-count">
+                                        <i className="fa-sharp fa-solid fa-tag text-theme-green flip-reverse me-2"></i>2k+
+                                    </h5>
+                                    <p className="mb-0 small-para-14-px text-white">Best Deals</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div className="col-12 col-md-7 col-lg-8 d-flex justify-content-center justify-content-md-end">
-                        <div className="my-auto d-flex">
-                            <div className="me-3 me-lg-5">
-                                <h5 className="text-center overlap-avatar-count">15k +</h5>
-                                <p className="mb-0 small-para-14-px text-white">Satisfied Visitors</p>
-                            </div>
-                            <div className="me-3 me-lg-5">
-                                <h5 className="text-center overlap-avatar-count">3.5k+</h5>
-                                <p className="mb-0 small-para-14-px text-white">Amazing Hotels</p>
-                            </div>
-                            <div>
-                                <h5 className="text-center overlap-avatar-count">
-                                    <i className="fa-sharp fa-solid fa-tag text-theme-green flip-reverse me-2"></i>2k+
-                                </h5>
-                                <p className="mb-0 small-para-14-px text-white">Best Deals</p>
-                            </div>
-                        </div>
+                )}
+                {!isCountryVariant && <div className="space-100px"></div>}
+
+                {!isCountryVariant && (
+                    <div className="text-center">
+                        <h1 className="hero-heading text-white">Find the best hotel deals</h1>
+                        <h4 className="small-heading-hero text-white">With Price Guardian a price robot on your side</h4>
                     </div>
-                </div>
-                <div className="space-100px"></div>
+                )}
+                {!isCountryVariant && <div className="space-100px"></div>}
 
-                <div className="text-center">
-                    <h1 className="hero-heading text-white">Find the best hotel deals</h1>
-                    <h4 className="small-heading-hero text-white">With Price Guardian a price robot on your side</h4>
-                </div>
-                <div className="space-100px"></div>
-
-                <div className="container p-4 hero-form hero-search-shell main-hero-search-shell">
+                <div className={heroShellClassName}>
                     <form action="#" onSubmit={handleSearchSubmit}>
-                        <div className="row hero-search-row main-hero-search-row">
-                            <div className="col-12 col-md-4 col-lg-3 mb-3 mb-lg-0 position-relative hero-search-col hotel-search-col" ref={searchRef}>
-                                <label className="form-label custom-form-label text-white">Hotel Name</label>
+                        <div className={heroSearchRowClassName} style={isCountryVariant ? { gap: '11px 0' } : undefined}>
+                            <div
+                                className="col-12 col-md-4 col-lg-3 mb-3 mb-lg-0 position-relative hero-search-col hotel-search-col"
+                                ref={searchRef}
+                            >
+                                <label className="form-label custom-form-label text-white">
+                                    {isCountryVariant ? 'Destination or Hotel Name' : 'Hotel Name'}
+                                </label>
 
                                 <div className="input-group custom-input-group-textbox">
                                     <span className="input-group-text bg-white">
@@ -401,8 +436,7 @@ export default function HeroSection() {
                                                         handleOpenDatePicker();
                                                     }}
                                                     style={{ cursor: 'pointer' }}
-                                                >
-                                                </span>
+                                                ></span>
                                             </div>
                                         </div>
                                     </div>
@@ -497,10 +531,7 @@ export default function HeroSection() {
                                     )}
                                 </div>
                             </div>
-                            <div
-                                className="col-12 col-md-6 col-lg-2 mb-3 mb-lg-0 hero-search-col rooms-search-col"
-                                ref={roomsDropdownRef}
-                            >
+                            <div className="col-12 col-md-6 col-lg-2 mb-3 mb-lg-0 hero-search-col rooms-search-col" ref={roomsDropdownRef}>
                                 <label htmlFor="daterange" className="form-label custom-form-label text-white">
                                     Rooms & Guests
                                 </label>
@@ -625,19 +656,11 @@ export default function HeroSection() {
                                         </div>
                                         <div className="number number-in-dec mx-auto mb-4">
                                             <p className="custom-form-label mb-2">Children</p>
-                                            <button
-                                                type="button"
-                                                className="minus"
-                                                onClick={() => updateChildrenCount(childrenCount - 1)}
-                                            >
+                                            <button type="button" className="minus" onClick={() => updateChildrenCount(childrenCount - 1)}>
                                                 -
                                             </button>
                                             <input type="text" className="para" value={childrenCount} readOnly />
-                                            <button
-                                                type="button"
-                                                className="plus"
-                                                onClick={() => updateChildrenCount(childrenCount + 1)}
-                                            >
+                                            <button type="button" className="plus" onClick={() => updateChildrenCount(childrenCount + 1)}>
                                                 +
                                             </button>
                                         </div>
@@ -674,6 +697,7 @@ export default function HeroSection() {
                                 <div
                                     className={`filter-button d-flex${showFilters ? ' active' : ''}`}
                                     id="filterButton"
+                                    ref={filterButtonRef}
                                     onClick={() => setShowFilters((prev) => !prev)}
                                     style={{ cursor: 'pointer' }}
                                 >
@@ -681,7 +705,10 @@ export default function HeroSection() {
                                 </div>
                             </div>
                             <div className="col-9 col-md-5 col-lg-3 mb-0 mb-lg-0 d-flex hero-search-col submit-search-col">
-                                <button type="submit" className="theme-button-orange rounded font-weight-bold-submit-search">
+                                <button
+                                    type="submit"
+                                    className={`theme-button-orange rounded font-weight-bold-submit-search${isCountryVariant ? ' submit-search' : ''}`}
+                                >
                                     See Deals Now
                                 </button>
                             </div>

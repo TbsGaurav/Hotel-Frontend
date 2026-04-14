@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaCamera, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { SiAmericanexpress, SiVisa, SiMastercard, SiDinersclub, SiJcb, SiWesternunion } from 'react-icons/si';
-import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import HeroSection from '@/components/sections/HeroSection';
 import { saveCustomerReview } from '@/lib/api/public/hotelapi';
 import { toast } from 'react-hot-toast';
 import * as yup from 'yup';
@@ -276,7 +276,7 @@ export default function HotelDetails({ initialData }) {
     if (error || !hotelInfo) {
         return (
             <>
-                <CountryHeroSection />
+                <HeroSection variant="common" />
                 <div className="container py-5 text-center">
                     <h3>{error || 'Hotel not found'}</h3>
                     <Link href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
@@ -385,7 +385,7 @@ export default function HotelDetails({ initialData }) {
     if (error || !hotelInfo) {
         return (
             <>
-                <CountryHeroSection />
+                <HeroSection variant="common" />
                 <div className="container py-5 text-center">
                     <h3>{error || 'Hotel not found'}</h3>
                     <Link href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
@@ -408,7 +408,7 @@ export default function HotelDetails({ initialData }) {
 
     return (
         <>
-            <CountryHeroSection />
+            <HeroSection variant="common" />
 
             {/* Breadcrumb */}
 
@@ -601,7 +601,6 @@ export default function HotelDetails({ initialData }) {
                                         <Image
                                             src={getImageUrl(photo.photo)}
                                             className="w-100 h-100"
-                                            // style={{ objectFit: 'cover' }}
                                             alt="hotel"
                                             fill
                                             sizes="33vw"
@@ -1170,3 +1169,4 @@ export default function HotelDetails({ initialData }) {
         </>
     );
 }
+

@@ -1,5 +1,5 @@
 import BrandDropdown from '@/components/common/brand/Branddropdown';
-import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import HeroSection from '@/components/sections/HeroSection';
 import { getBrandList } from '@/lib/api/public/brandapi';
 import Link from 'next/link';
 
@@ -8,7 +8,7 @@ export default async function BrandsPage() {
 
     return (
         <>
-            <CountryHeroSection />
+            <HeroSection variant="common" />
 
             <div className="breadcrumb-section">
                 <div className="container">
@@ -33,3 +33,4 @@ export default async function BrandsPage() {
         </>
     );
 }
+

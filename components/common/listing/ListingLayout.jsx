@@ -1,6 +1,6 @@
 'use client';
 
-import CountryHeroSection from '@/components/sections/CountryHeroSection';
+import HeroSection from '@/components/sections/HeroSection';
 
 export default function ListingLayout({
     breadcrumb = null,
@@ -17,7 +17,7 @@ export default function ListingLayout({
 }) {
     return (
         <>
-            {showHero ? <CountryHeroSection /> : null}
+            {showHero ? <HeroSection variant="common" /> : null}
 
             {mobileActions}
             {breadcrumb ? <div className="py-2">{breadcrumb}</div> : null}
@@ -34,3 +34,4 @@ export default function ListingLayout({
         </>
     );
 }
+

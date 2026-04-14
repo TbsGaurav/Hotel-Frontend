@@ -1,8 +1,7 @@
 
-
 import Image from 'next/image';
 import React from 'react';
-
+ 
 function FindingBestHotelSection() {
     return (
         <section className="finding-best-section pt-5">
@@ -16,14 +15,16 @@ function FindingBestHotelSection() {
                     If a cheaper price comes up you can simply re-book the cheaper rate or upgrade your room and cancel the original
                     booking.
                 </p>
-                <div className="row finding-best-row mt-4">
-                    <div className="col-md-6 d-flex">
-                        <div>
-                            <p className="small-para-14-px mb-3 mb-md-0 text-center text-md-start">{`Hotel prices fluctuate. Unfortunately finding a good price today doesn't mean there won't be a better price tomorrow! There could always be a sale starting tomorrow but how would you know unless you kept searching after you booked your hotel?
-                        Price Guardian is a price intelligence on your side, checking prices every day for you – now that’s a smart way to book.`}</p>
-                        </div>
+                <div className="row finding-best-row mt-4 hotel-para">
+                    <div className="col-md-6">
+                            <p className="small-para-14-px mb-3 mb-md-0 text-center text-md-start hotel-para-padding">{`Hotel prices fluctuate. Unfortunately finding a good price today doesn't mean there won't be a better price tomorrow! There could always be a sale starting tomorrow but how would you know unless you kept searching after you booked your hotel?
+                        `}</p>
+                       
+                          <p className="small-para-14-px mb-3 mb-md-0 text-center text-md-start">{`Price Guardian is a price intelligence on your side, checking prices every day for you – now that’s a smart way to book.`}</p>
+ 
+ 
                     </div>
-                    <div className="col-md-6 d-flex">
+                    <div className="col-md-6">
                         <div className="image-wrapper">
                             <Image
                                 src="/image/about.webp"
@@ -40,5 +41,5 @@ function FindingBestHotelSection() {
         </section>
     );
 }
-
+ 
 export default FindingBestHotelSection;
