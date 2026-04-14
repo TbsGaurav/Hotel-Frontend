@@ -327,14 +327,14 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                     )}
                                     {RegionName && RegionUrl && (
                                         <li className="breadcrumb-item small-para-14-px">
-                                            <Link href={`/${RegionUrl}`} className="text-dark text-decoration-none">
+                                            <Link href={`${RegionUrl}`} className="text-dark text-decoration-none">
                                                 {RegionName}
                                             </Link>
                                         </li>
                                     )}
                                     {CityName && CityUrl && (
                                         <li className="breadcrumb-item small-para-14-px">
-                                            <Link href={`/${CityUrl}`} className="text-dark text-decoration-none">
+                                            <Link href={`${CityUrl}`} className="text-dark text-decoration-none">
                                                 {CityName}
                                             </Link>
                                         </li>
