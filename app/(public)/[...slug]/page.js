@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { resolveSlug } from '@/lib/api/public/countryapi';
+import { getCountryByUrlName, resolveSlug } from '@/lib/api/public/countryapi';
+import { getHotelList } from '@/lib/api/public/hotelapi';
 import { resolveCategoryFromRegionSlug, resolveCategoryFromSlug } from '@/lib/api/public/cityCategoryapi';
 import CountryDetails from '@/components/common/country/CountryDetails';
 import RegionDetails from '@/components/common/region/RegionDetails';
@@ -10,12 +11,125 @@ import CityDetails from '@/components/common/city/CityDetails';
 import CityCategoryRouteApp from '@/components/common/city/CityCategoryRouteApp';
 import HotelDetailsWrapper from '@/components/common/hotel/HotelDetailsWrapper';
 import CityBrandDetails from '@/components/common/brand/CityBrandDetails';
+import { buildBrandSeo, buildCountrySeo, buildCitySeo, buildRegionSeo } from '@/lib/seo';
 
 function normalizeEntityType(value) {
     return String(value || '')
         .trim()
         .toLowerCase()
         .replace(/[^a-z]/g, '');
+}
+
+export async function generateMetadata({ params }) {
+    const { slug } = await params;
+    const slugArray = slug || [];
+    const fullSlug = `/${slugArray.join('/')}`;
+
+    if (slugArray.length === 1) {
+        const result = await resolveSlug(fullSlug);
+        const data = result?.status === 'success' ? result.data || {} : {};
+    
+        const entityType = normalizeEntityType(data?.entityType ?? data?.EntityType);
+
+        if (entityType === 'country') {
+            let countryData = {};
+
+            try {
+                countryData = (await getCountryByUrlName(slugArray[0])) || {};
+            } catch (error) {
+                console.error('Error generating country metadata:', error);
+            }
+
+            const seo = buildCountrySeo({
+                countrySlug: slugArray[0],
+                resolvedSlugData: {
+                    ...countryData,
+                    ...data
+                }
+            });
+
+            return {
+                title: seo.metaTitle,
+                description: seo.metaDescription,
+                alternates: {
+                    canonical: seo.canonicalUrl
+                }
+            };
+        }
+
+        if (entityType === 'city') {
+            let pageResponse = {};
+
+            try {
+                pageResponse = await getHotelList(slugArray[0], 1, 1);
+            } catch (error) {
+                console.error('Error generating city metadata:', error);
+            }
+
+            const seo = buildCitySeo({
+                citySlug: slugArray[0],
+                resolvedSlugData: data,
+                firstHotel: pageResponse?.hotels?.[0] || {}
+            });
+
+            return {
+                title: seo.metaTitle,
+                description: seo.metaDescription,
+                alternates: {
+                    canonical: seo.canonicalUrl
+                }
+            };
+        }
+
+    }
+
+    if (slugArray.length !== 2) {
+        return {};
+    }
+
+    const result = await resolveSlug(fullSlug);
+
+    if (result?.status !== 'success') {
+        return {};
+    }
+
+    const data = result.data || {};
+    const entityType = normalizeEntityType(data?.entityType ?? data?.EntityType);
+
+    if (entityType === 'region') {
+        const seo = buildRegionSeo({
+            countrySlug: slugArray[0],
+            regionSlug: slugArray[1],
+            resolvedSlugData: data
+        });
+
+        return {
+            title: seo.metaTitle,
+            description: seo.metaDescription,
+            alternates: {
+                canonical: seo.canonicalUrl
+            }
+        };
+    }
+
+    if (entityType === 'countrybrand' || entityType === 'citybrand') {
+        const seo = buildBrandSeo({
+            parentSlug: slugArray[0],
+            brandSlug: slugArray[1] || '',
+            resolvedSlugData: data,
+            pageType: entityType
+        });
+
+        return {
+            title: seo.metaTitle,
+            description: seo.metaDescription,
+            alternates: {
+                canonical: seo.canonicalUrl
+            }
+        };
+    }
+
+    return {};
 }
 
 export default async function DynamicPage({ params, searchParams }) {
@@ -33,17 +147,25 @@ export default async function DynamicPage({ params, searchParams }) {
 
         // COUNTRY PAGE
         if (slugArray.length === 1 && entityType === 'country') {
-            return <CountryDetails country={slugArray[0]} />;
+            return <CountryDetails country={slugArray[0]} resolvedSlugData={data} />;
         }
 
         // REGION PAGE
         if (slugArray.length === 2 && entityType === 'region') {
-            return <RegionDetails country={slugArray[0]} region={slugArray[1]} regionId={data.entityId} params={params} />;
+            return (
+                <RegionDetails
+                    country={slugArray[0]}
+                    region={slugArray[1]}
+                    regionId={data.entityId}
+                    resolvedSlugData={data}
+                    params={params}
+                />
+            );
         }
 
         // COUNTRY BRAND PAGE
         if (slugArray.length === 2 && entityType === 'countrybrand') {
-            return <CountryBrandDetails country={slugArray[0]} params={params} />;
+            return <CountryBrandDetails country={slugArray[0]} params={params} resolvedSlugData={data} />;
         }
 
         // COLLECTION PAGE
@@ -61,7 +183,7 @@ export default async function DynamicPage({ params, searchParams }) {
         }
 
         if (slugArray.length === 2 && entityType === 'citybrand') {
-            return <CityBrandDetails city={slugArray[0]} params={params} />;
+            return <CityBrandDetails city={slugArray[0]} params={params} resolvedSlugData={data} />;
         }
     }
 

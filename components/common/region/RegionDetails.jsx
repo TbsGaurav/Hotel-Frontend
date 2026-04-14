@@ -11,6 +11,8 @@ import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { buildCategoryListingPath } from '@/lib/api/public/cityCategoryapi';
+import { buildRegionSeo } from '@/lib/seo';
+import SeoDetailsCard from '@/components/common/SeoDetailsCard';
 
 const REGION_PAGE_SIZE = 10;
 
@@ -88,13 +90,18 @@ async function fetchAllHotelsFromCities(cities = [], hotelsPerPage = REGION_PAGE
     return cityHotelBatches.flat();
 }
 
-export default async function RegionDetails({ params, regionId }) {
+export default async function RegionDetails({ params, regionId, resolvedSlugData = {} }) {
     const { slug } = await params;
 
     const countrySlug = slug?.[0] || '';
     const regionSlug = slug?.[1] || '';
     const countryName = formatCountryName(countrySlug);
     const regionName = formatCountryName(regionSlug);
+    const seo = buildRegionSeo({
+        countrySlug,
+        regionSlug,
+        resolvedSlugData
+    });
 
     const urlName = `${countrySlug}/${regionSlug}`;
 
@@ -238,6 +245,13 @@ export default async function RegionDetails({ params, regionId }) {
             </div>
 
             <section className="container py-2">
+                <SeoDetailsCard
+                    heading={seo.heading}
+                    metaTitle={seo.metaTitle}
+                    metaDescription={seo.metaDescription}
+                    canonicalPath={seo.canonicalPath}
+                />
+            
                 <div className="row g-4 align-items-start">
                     <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
                     <hr className="my-5" />
@@ -264,4 +278,3 @@ export default async function RegionDetails({ params, regionId }) {
         </>
     );
 }
-
