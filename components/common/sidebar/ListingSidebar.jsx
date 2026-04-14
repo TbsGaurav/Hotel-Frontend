@@ -54,10 +54,15 @@ function normalizeHref(item, label, context = {}) {
         return pathname || '#';
     }
 
-    const raw = item?.categoryUrlName || item?.urlName || label;
+    const raw = item?.categoryUrlName || item?.urlName || item?.href || label;
     if (!raw) return '#';
 
-    const baseUrl = `#${String(raw).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+    const isAbsolutePath = raw.startsWith('/') || raw.startsWith('http');
+    if (isAbsolutePath) {
+        return raw;
+    }
+
+    const baseUrl = `${String(raw).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
     if (context.regionId && context.countrySlug) {
         const searchParams = new URLSearchParams();
