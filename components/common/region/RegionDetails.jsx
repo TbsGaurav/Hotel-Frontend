@@ -246,7 +246,6 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
 
             <section className="container py-2">
                 <SeoDetailsCard
-                    heading={seo.heading}
                     metaTitle={seo.metaTitle}
                     metaDescription={seo.metaDescription}
                     canonicalPath={seo.canonicalPath}

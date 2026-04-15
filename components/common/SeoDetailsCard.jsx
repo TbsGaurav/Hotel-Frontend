@@ -1,4 +1,4 @@
-export default function SeoDetailsCard({ heading, metaTitle, metaDescription, canonicalPath }) {
+export default function SeoDetailsCard({ metaTitle, metaDescription, canonicalPath }) {
     return (
         <div className="mx-2 mx-md-0 mb-4 p-3 p-md-4 ">
             <div className="row g-3 align-items-start">

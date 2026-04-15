@@ -195,7 +195,6 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
 
             <section className="container py-2">
                 <SeoDetailsCard
-                    heading={seo.heading}
                     metaTitle={seo.metaTitle}
                     metaDescription={seo.metaDescription}
                     canonicalPath={seo.canonicalPath}
