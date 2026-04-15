@@ -58,18 +58,9 @@ export async function generateMetadata({ params }) {
         }
 
         if (entityType === 'city') {
-            let pageResponse = {};
-
-            try {
-                pageResponse = await getHotelList(slugArray[0], 1, 1);
-            } catch (error) {
-                console.error('Error generating city metadata:', error);
-            }
-
             const seo = buildCitySeo({
                 citySlug: slugArray[0],
                 resolvedSlugData: data,
-                firstHotel: pageResponse?.hotels?.[0] || {}
             });
 
             return {
@@ -179,7 +170,7 @@ export default async function DynamicPage({ params, searchParams }) {
         }
 
         if (slugArray.length === 1 && entityType === 'city') {
-            return <CityDetails city={slugArray[0]} params={params} />;
+            return <CityDetails city={slugArray[0]} params={params} resolvedSlugData={data} />;
         }
 
         if (slugArray.length === 2 && entityType === 'citybrand') {

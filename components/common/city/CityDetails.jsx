@@ -43,7 +43,7 @@ function parsePageNumber(value) {
     return Number.isInteger(page) && page > 0 ? page : 1;
 }
 
-export default async function CityDetails({ params }) {
+export default async function CityDetails({ params, resolvedSlugData = {} }) {
     const { slug } = await params;
     const citySlug = slug?.[0] || '';
     const citySlugPath = toSlug(citySlug);
@@ -76,7 +76,6 @@ export default async function CityDetails({ params }) {
                 if (pageNumber === 1) {
                     totalCount = pageResponse?.totalCount || nextHotels.length;
                     content = nextHotels[0]?.content || '';
-
                     // Extract IDs from API response (not from first hotel)
                     const apiCityId = pageResponse?.cityId;
                     if (apiCityId !== null && apiCityId !== undefined) {
@@ -122,8 +121,7 @@ export default async function CityDetails({ params }) {
     const seo = buildCitySeo({
         citySlug,
         resolvedSlugData: {
-            metaDescription: content,
-            content
+            ...resolvedSlugData
         },
         firstHotel,
         countryName,
@@ -186,11 +184,7 @@ export default async function CityDetails({ params }) {
             </div>
 
             <section className="container py-2 ">
-                <SeoDetailsCard
-                    metaTitle={seo.metaTitle}
-                    metaDescription={seo.metaDescription}
-                    canonicalPath={seo.canonicalPath}
-                />
+                <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
                 {/* <h2 className="mb-3">Hotel Accommodation in {cityName}</h2> */}
 
                 <div className="row g-0 g-lg-4 align-items-start">
@@ -218,4 +212,3 @@ export default async function CityDetails({ params }) {
         </>
     );
 }
-
