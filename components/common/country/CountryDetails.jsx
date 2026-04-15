@@ -5,10 +5,18 @@ import HeroSection from '@/components/sections/HeroSection';
 import { formatCountryName } from '@/lib/utils';
 import CountryHotelCarousel from '@/components/common/country/CountryHotelCarousel';
 import { notFound } from 'next/navigation';
+import { buildCountrySeo } from '@/lib/seo';
 
-export default async function CountryDetails({ country }) {
+export default async function CountryDetails({ country, resolvedSlugData = {} }) {
     const data = await getCountryByUrlName(country);
     const countryName = formatCountryName(country);
+    const seo = buildCountrySeo({
+        countrySlug: country,
+        resolvedSlugData: {
+            ...data,
+            ...resolvedSlugData
+        }
+    });
 
     if (!data) {
         return notFound();
@@ -56,7 +64,7 @@ export default async function CountryDetails({ country }) {
     return (
         <>
             <HeroSection variant="common" />
-            <CountryIntro countryName={countryName} descriptionHtml={descriptionHtml} heroImage="/image/country.webp" />
+            <CountryIntro countryName={countryName}  heroImage="/image/country.webp" seo={seo} />
 
             <section className="container py-4">
                 <CountryDropdownSection
@@ -73,4 +81,3 @@ export default async function CountryDetails({ country }) {
         </>
     );
 }
-

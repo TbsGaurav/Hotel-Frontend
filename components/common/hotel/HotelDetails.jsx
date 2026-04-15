@@ -541,7 +541,6 @@ export default function HotelDetails({ initialData }) {
                         <div
                             id="hotelCarousel"
                             className="carousel slide rounded-4 overflow-hidden position-relative"
-                            data-bs-ride="carousel"
                             style={{ height: '400px' }}
                         >
                             <div className="carousel-indicators">
