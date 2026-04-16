@@ -197,10 +197,22 @@ export default function HotelDetails({ initialData }) {
 
     // Default image path
     const defaultImage = '/image/property-img.webp';
+    const normalizeImageUrl = (photo) => {
+        if (typeof photo !== 'string') return defaultImage;
+
+        const trimmed = photo.trim();
+        const normalized = trimmed.toLowerCase();
+
+        if (!trimmed || normalized === 'null' || normalized === 'undefined') return defaultImage;
+        if (trimmed.startsWith('//')) return `https:${trimmed}`;
+        if (trimmed.startsWith('/')) return trimmed;
+        if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+        return defaultImage;
+    };
+    const isExternalImageUrl = (url) => /^https?:\/\//i.test(String(url || ''));
     const isValidPhotoUrl = (url) => {
-        if (typeof url !== 'string') return false;
-        const normalized = url.trim().toLowerCase();
-        return normalized !== '' && normalized !== 'null' && normalized !== 'undefined';
+        return normalizeImageUrl(url) !== defaultImage;
     };
     const validHotelPhotos = hotelPhotos.filter((photo) => isValidPhotoUrl(photo?.photo));
     const mainPhoto = isValidPhotoUrl(hotelInfo?.mainPhoto) ? hotelInfo.mainPhoto : defaultImage;
@@ -227,9 +239,10 @@ export default function HotelDetails({ initialData }) {
 
     // Generate cache-busted URL
     const getImageUrl = (photo) => {
-        if (!photo) return defaultImage;
-        const sep = photo.includes('?') ? '&' : '?';
-        return timestamp ? `${photo}${sep}t=${timestamp}` : photo;
+        const normalizedUrl = normalizeImageUrl(photo);
+        if (normalizedUrl === defaultImage) return defaultImage;
+        const sep = normalizedUrl.includes('?') ? '&' : '?';
+        return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
     };
 
     const openPhotoModal = (index = 0) => {
@@ -558,6 +571,7 @@ export default function HotelDetails({ initialData }) {
                                         className="d-block w-100 h-100"
                                         alt={hotelInfo.hotelName}
                                         onError={handleImageError}
+                                        unoptimized={isExternalImageUrl(getImageUrl(mainPhoto))}
                                     />
                                 </div>
                                 {carouselPhotos.map((photo, idx) => (
@@ -569,6 +583,7 @@ export default function HotelDetails({ initialData }) {
                                             className="d-block w-100 h-100"
                                             alt={`${hotelInfo.hotelName} photo ${idx + 1}`}
                                             onError={handleImageError}
+                                            unoptimized={isExternalImageUrl(getImageUrl(photo.photo))}
                                         />
                                     </div>
                                 ))}
@@ -603,6 +618,8 @@ export default function HotelDetails({ initialData }) {
                                             alt="hotel"
                                             fill
                                             sizes="33vw"
+                                            unoptimized={isExternalImageUrl(getImageUrl(photo.photo))}
+                                            onError={handleImageError}
                                         />
 
                                         {/* ✅ ONLY ON LAST IMAGE */}
@@ -1132,6 +1149,7 @@ export default function HotelDetails({ initialData }) {
                                     width={1400}
                                     height={900}
                                     sizes="(max-width: 767px) 94vw, 980px"
+                                    unoptimized={isExternalImageUrl(getImageUrl(allPhotos[currentPhotoIndex]))}
                                 />
                                 <button className="photo-modal-nav photo-modal-prev" onClick={prevPhoto}>
                                     <FaChevronLeft />
@@ -1158,6 +1176,7 @@ export default function HotelDetails({ initialData }) {
                                         onError={handleImageError}
                                         width={74}
                                         height={52}
+                                        unoptimized={isExternalImageUrl(getImageUrl(photo))}
                                     />
                                 ))}
                             </div>

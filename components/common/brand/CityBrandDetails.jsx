@@ -72,11 +72,11 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
     const brandName = decodedBrandSegment;
     const cityName = formatCityName(citySlug) || capitalize(citySlug);
     const formattedBrand = formatBrand(decodedBrandSegment);
-    const fullSlug = `${citySlug}/${brandSegment}`;
+    const fullSlug = `${citySlug}/${decodedBrandSegment}`;
 
     const cookieStore = await cookies();
-    const pageCookieName = getCityBrandPageCookieName(citySlug, brandSegment);
-    const pageIntentCookieName = getCityBrandPageIntentCookieName(citySlug, brandSegment);
+    const pageCookieName = getCityBrandPageCookieName(citySlug, decodedBrandSegment);
+    const pageIntentCookieName = getCityBrandPageIntentCookieName(citySlug, decodedBrandSegment);
     const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
 
     let hotels = [];
@@ -116,7 +116,7 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
     });
     const seo = buildBrandSeo({
         parentSlug: citySlug,
-        brandSlug: brandSegment,
+        brandSlug: decodedBrandSegment,
         resolvedSlugData,
         pageType: 'citybrand'
     });
@@ -149,7 +149,7 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
 
                             <li className="breadcrumb-item small-para-14-px">
                                 <Link
-                                    href={`/brand/${encodeURIComponent(brandSegment)}`}
+                                    href={`/brand/${encodeURIComponent(decodedBrandSegment)}`}
                                     className="text-dark text-decoration-none text-capitalize"
                                 >
                                     {formattedBrand}
@@ -159,7 +159,7 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
                             {countrySlug && (
                                 <li className="breadcrumb-item small-para-14-px">
                                     <Link
-                                        href={`/${encodeURIComponent(countrySlug)}/${encodeURIComponent(brandSegment)}`}
+                                        href={`/${encodeURIComponent(countrySlug)}/${encodeURIComponent(decodedBrandSegment)}`}
                                         className="text-dark text-decoration-none text-capitalize"
                                     >
                                         {formattedBrand} {countrySlug}
@@ -169,7 +169,7 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
 
                             <li className="breadcrumb-item small-para-14-px active text-capitalize">
                                 <Link
-                                    href={`/${encodeURIComponent(citySlug)}/${encodeURIComponent(brandSegment)}`}
+                                    href={`/${encodeURIComponent(citySlug)}/${encodeURIComponent(decodedBrandSegment)}`}
                                     className="text-decoration-none"
                                 >
                                     {formattedBrand} {cityName}
