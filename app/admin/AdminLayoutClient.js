@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import AdminHeader from './_layout_components/Header';
 import AdminTopNav from './_layout_components/AdminTopNav';
 import { ADMIN_ROUTES } from '@/lib/route';
+import { isRole } from '@/lib/utils';
 
 export default function AdminLayoutClient({ children }) {
     const router = useRouter();
@@ -23,7 +24,7 @@ export default function AdminLayoutClient({ children }) {
             return;
         }
 
-        if (!['Admin', 'Editor', 'Viewer'].includes(role)) {
+        if (!isRole(role)) {
             router.replace('/');
             return;
         }
@@ -54,5 +55,4 @@ export default function AdminLayoutClient({ children }) {
             <main className="flex-fill p-4 bg-light">{children}</main>
         </div>
     );
-   
 }

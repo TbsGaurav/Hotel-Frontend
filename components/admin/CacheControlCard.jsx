@@ -2,6 +2,7 @@
 
 import { clearCacheApi } from '@/lib/api/admin/cacheapi';
 import { useEffect, useState } from 'react';
+import { isAdminRole } from '@/lib/utils';
 
 export default function CacheControlCard() {
     const [loading, setLoading] = useState(false);
@@ -10,7 +11,7 @@ export default function CacheControlCard() {
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        setIsAdmin(localStorage.getItem('adminRole') === 'Admin');
+        setIsAdmin(isAdminRole(localStorage.getItem('adminRole')));
     }, []);
 
     if (!isAdmin) {
