@@ -7,6 +7,8 @@ import { getSidebarData } from '@/lib/api/sidebarapi';
 import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
 import CityHotelList from '../city/CityHotelList';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
+import { buildBrandSeo } from '@/lib/seo';
+import SeoDetailsCard from '@/components/common/SeoDetailsCard';
 
 function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -56,7 +58,7 @@ function parsePageNumber(value) {
 
 const PAGE_SIZE = 10;
 
-export default async function CityBrandDetails({ params }) {
+export default async function CityBrandDetails({ params, resolvedSlugData = {} }) {
     const { slug: slugData } = await params;
     const slug = slugData || [];
 
@@ -111,6 +113,12 @@ export default async function CityBrandDetails({ params }) {
     const sidebarSections = buildSidebarSections(sidebarData, {
         contextName: cityName,
         propertyTypeHeader: cityName ? `${cityName} Apartments, Suites and Family Hotels` : 'Property Type'
+    });
+    const seo = buildBrandSeo({
+        parentSlug: citySlug,
+        brandSlug: brandSegment,
+        resolvedSlugData,
+        pageType: 'citybrand'
     });
 
     return (
@@ -174,9 +182,11 @@ export default async function CityBrandDetails({ params }) {
             
 
             <section className="container py-2">
-                <h3 className="mb-4 text-capitalize">
-                    {formattedBrand} {cityName}
-                </h3>
+                <SeoDetailsCard
+                    metaTitle={seo.metaTitle}
+                    metaDescription={seo.metaDescription}
+                    canonicalPath={seo.canonicalPath}
+                />
                 <div className="row g-0 g-lg-4 align-items-start">
                     <div className="col-lg-3 d-none d-lg-block order-lg-1">
                         {' '}

@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import SeoDetailsCard from '@/components/common/SeoDetailsCard';
 
-export default function CountryIntro({ countryName, descriptionHtml }) {
+export default function CountryIntro({ countryName, seo = {} }) {
     return (
         <>
             <div className="py-2 accordion-main">
@@ -12,25 +13,18 @@ export default function CountryIntro({ countryName, descriptionHtml }) {
 
                         <span className="mx-2 text-muted">•</span>
 
-                        <Link href={`/${countryName}`} className="fw-semibold text-decoration-none">
+                        <Link href={seo?.canonicalPath || `/${countryName}`} className="fw-semibold text-decoration-none">
                             {countryName}
                         </Link>
                     </div>
                 </div>
             </div>
             <section className="container py-3">
-                <div className="row align-items-center">
-                    {/* LEFT CONTENT */}
-                    <div className="col-md-7 ">
-                        <h2 className="heading mb-3 accordion-main">Hotel Accommodation in {countryName}</h2>
-                        <div
-                            className="text-muted country-description"
-                            dangerouslySetInnerHTML={{
-                                __html: descriptionHtml || ''
-                            }}
-                        />
-                    </div>
-                </div>
+                <SeoDetailsCard
+                    metaTitle={seo?.metaTitle || ` ${countryName}`}
+                    metaDescription={seo?.metaDescription || ''}
+                    canonicalPath={seo?.canonicalPath || `/${countryName}`}
+                />
             </section>
         </>
     );

@@ -29,7 +29,6 @@ export default function RegionCard() {
                         <div
                             id="hotelCarousel"
                             className="carousel slide rounded-4 overflow-hidden"
-                            data-bs-ride="carousel"
                             data-bs-interval="2500"
                             data-bs-pause="false"
                             data-bs-wrap="true"

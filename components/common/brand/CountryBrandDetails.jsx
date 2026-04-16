@@ -7,6 +7,8 @@ import { getCitySidebar } from '@/lib/api/public/cityapi';
 import { buildListingSidebarSections } from '@/lib/listingSidebar';
 import CountryBrandHotelList from '../hotel/CountryBrandHotelList';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
+import { buildBrandSeo } from '@/lib/seo';
+import SeoDetailsCard from '@/components/common/SeoDetailsCard';
 
 function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -65,7 +67,7 @@ function getFirstDefined(...values) {
     return null;
 }
 
-export default async function CountryBrandDetails({ params }) {
+export default async function CountryBrandDetails({ params, resolvedSlugData = {} }) {
     const { slug: slugData } = await params;
     const slug = slugData || [];
 
@@ -139,6 +141,12 @@ export default async function CountryBrandDetails({ params }) {
     const hasFullLastPage = lastFetchedPageSize === PAGE_SIZE;
     const hasMore = hasFullLastPage && (!hasReliableTotalCount || hotels.length < Number(totalCount));
     const sidebarSections = buildListingSidebarSections(sidebarData, displayCountryName);
+    const seo = buildBrandSeo({
+        parentSlug: countrySlug,
+        brandSlug: brandSegment,
+        resolvedSlugData,
+        pageType: 'countrybrand'
+    });
 
     return (
         <>
@@ -186,9 +194,11 @@ export default async function CountryBrandDetails({ params }) {
             </div>
 
             <section className="container py-2">
-                {/* <h3 className="mb-4 text-capitalize">
-                    {formattedBrand} {displayCountryName}
-                </h3> */}
+                <SeoDetailsCard
+                    metaTitle={seo.metaTitle}
+                    metaDescription={seo.metaDescription}
+                    canonicalPath={seo.canonicalPath}
+                />
                 <div className="row g-0 g-lg-4 align-items-start">
                     <div className="col-12 order-1">
                         <div id="country-brand-hotel-list">

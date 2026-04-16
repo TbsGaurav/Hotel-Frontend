@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { adminLoginApi } from '@/lib/api/admin/authapi';
 import { ADMIN_ROUTES } from '@/lib/route';
 import toast from 'react-hot-toast';
+import { isRole } from '@/lib/utils';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
@@ -31,7 +32,7 @@ export default function LoginPage() {
 
             if (roleName === 'User') {
                 router.replace('/');
-            } else if (['Admin', 'Editor', 'Viewer'].includes(roleName)) {
+            } else if (isRole(roleName)) {
                 router.replace(ADMIN_ROUTES.dashboard);
             } else {
                 router.replace(ADMIN_ROUTES.login);

@@ -1,9 +1,10 @@
 'use client';
 
 import { useAuthGuard } from '@/hooks/useAuthGuard';
+import { ROLES } from '@/lib/utils';
 
 const Page = () => {
-    useAuthGuard(['Admin', 'Editor', 'Viewer']);
+    useAuthGuard(ROLES);
 
     return (
         <div className="d-grid gap-4">
