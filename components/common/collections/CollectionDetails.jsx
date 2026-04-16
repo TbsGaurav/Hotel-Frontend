@@ -8,10 +8,18 @@ import HeroSection from '@/components/sections/HeroSection';
 import { getHotelsByCollection, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 import Image from 'next/image';
+import HotelMapView from '@/components/common/listing/HotelMapView';
 
 export default function CollectionDetails({ collection, hotels, hotelRates, totalCount, currentPage, pageSize, collectionId }) {
     const basic = collection?.basicCollection;
     const content = collection?.collectionContent;
+    const [isHotelMapVisible, setIsHotelMapVisible] = useState(false);
+
+    useEffect(() => {
+        const handler = () => setIsHotelMapVisible((prev) => !prev);
+        window.addEventListener('hotel-map-toggle', handler);
+        return () => window.removeEventListener('hotel-map-toggle', handler);
+    }, []);
 
     function getBookingId(hotel) {
         return hotel?.bookingId ?? hotel?.BookingId ?? null;
@@ -386,6 +394,19 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                     <div className="container">
                         {allHotels.length > 0 ? (
                             <div className="d-flex flex-column gap-3">
+                                <div className="d-flex justify-content-start mb-2">
+                                    <button
+                                        type="button"
+                                        className={`${isHotelMapVisible ? 'theme-button-orange' : 'theme-button-blue'} rounded-2 px-3 d-flex align-items-center justify-content-center gap-2 py-2`}
+                                        onClick={() => setIsHotelMapVisible((prev) => !prev)}
+                                    >
+                                        <FaMapMarkerAlt />
+                                        <span>Hotel Map</span>
+                                    </button>
+                                </div>
+
+                                {isHotelMapVisible ? <HotelMapView hotels={allHotels} className="mb-2" /> : null}
+
                                 {allHotels.map((hotel, index) => {
                                     const hotelKey = getHotelKey(hotel, index);
                                     return (

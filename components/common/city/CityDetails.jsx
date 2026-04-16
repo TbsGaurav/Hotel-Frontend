@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import HeroSection from '@/components/sections/HeroSection';
-import CityHotelList from './CityHotelList';
-import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
+import CityHotelListingWithMap from './CityHotelListingWithMap';
 import { getHotelList } from '@/lib/api/public/hotelapi';
 import { getCountriesApi } from '@/lib/api/public/countryapi';
 import { getSidebarData } from '@/lib/api/sidebarapi';
@@ -10,6 +9,7 @@ import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { buildCategorySidebarSections } from '@/lib/api/public/cityCategoryapi';
 import { buildCitySeo } from '@/lib/seo';
 import SeoDetailsCard from '@/components/common/SeoDetailsCard';
+import MobileHotelMapButton from '@/components/common/listing/MobileHotelMapButton';
 
 // Utility functions
 function toSlug(value = '') {
@@ -62,11 +62,15 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
     let regionName = '';
     let regionUrl = '';
     let firstHotel = null;
+    let resolvedCountryId = null;
 
     if (citySlug) {
         try {
             for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
-                const pageResponse = await getHotelList(citySlug, pageNumber, PAGE_SIZE);
+                const pageResponse =
+                    pageNumber === 1
+                        ? await getHotelList(citySlug, { pageNumber, pageSize: PAGE_SIZE })
+                        : await getHotelList(citySlug, { countryId: resolvedCountryId, pageNumber, pageSize: PAGE_SIZE });
                 const nextHotels = pageResponse?.hotels || [];
 
                 if (!nextHotels.length) {
@@ -76,6 +80,8 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
                 if (pageNumber === 1) {
                     totalCount = pageResponse?.totalCount || nextHotels.length;
                     content = nextHotels[0]?.content || '';
+                    resolvedCountryId = pageResponse?.countryId ?? null;
+
                     // Extract IDs from API response (not from first hotel)
                     const apiCityId = pageResponse?.cityId;
                     if (apiCityId !== null && apiCityId !== undefined) {
@@ -139,7 +145,7 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
 
                         <MobileFilterDrawer sidebarSections={sidebarSections} />
 
-                        <button className="mobile-actions__link">Map</button>
+                        <MobileHotelMapButton label="Map" />
                     </div>
                 </div>
             </section>
@@ -187,27 +193,19 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
                 <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
                 {/* <h2 className="mb-3">Hotel Accommodation in {cityName}</h2> */}
 
-                <div className="row g-0 g-lg-4 align-items-start">
-                    <div className="col-lg-3 d-none d-lg-block order-lg-1">
-                        <div className="position-sticky" style={{ top: '16px' }}>
-                            <ListingSidebar title="Filters" sections={sidebarSections} />
-                        </div>
-                    </div>
-
-                    <div className="col-12 col-lg-9 order-1 order-lg-2">
-                        <CityHotelList
-                            hotels={hotels}
-                            totalCount={totalCount}
-                            currentPage={currentPage}
-                            pageSize={PAGE_SIZE}
-                            pageCookieName={pageCookieName}
-                            pageIntentCookieName={pageIntentCookieName}
-                            citySlug={citySlug}
-                            citySlugPath={citySlugPath}
-                            content={content}
-                        />
-                    </div>
-                </div>
+                <CityHotelListingWithMap
+                    sidebarSections={sidebarSections}
+                    hotels={hotels}
+                    totalCount={totalCount}
+                    currentPage={currentPage}
+                    pageSize={PAGE_SIZE}
+                    pageCookieName={pageCookieName}
+                    pageIntentCookieName={pageIntentCookieName}
+                    citySlug={citySlug}
+                    citySlugPath={citySlugPath}
+                    countryId={resolvedCountryId}
+                    content={content}
+                />
             </section>
         </>
     );
