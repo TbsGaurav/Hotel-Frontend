@@ -6,8 +6,10 @@ import Link from 'next/link';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import CityHotelList from './CityHotelList';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
+import SeoDetailsCard from '@/components/common/SeoDetailsCard';
 import { getSidebarData } from '@/lib/api/sidebarapi';
 import ListingLayout from '@/components/common/listing/ListingLayout';
+import { buildCategorySeo } from '@/lib/seo';
 import {
     buildCategoryListingPath,
     buildCategorySidebarSections,
@@ -149,7 +151,9 @@ export default function CityCategoryDetails({
     const [resolvedCityId, setResolvedCityId] = useState(Number(initialData?.resolvedCityId) || null);
     const [resolvedRegionId, setResolvedRegionId] = useState(Number(initialData?.resolvedRegionId) || null);
     const [resolvedRegionName, setResolvedRegionName] = useState(initialData?.resolvedRegionName || '');
-    const [resolvedRegionCountrySlug, setResolvedRegionCountrySlug] = useState(initialData?.resolvedRegionCountrySlug || initialResolvedRegionCountrySlug || '');
+    const [resolvedRegionCountrySlug, setResolvedRegionCountrySlug] = useState(
+        initialData?.resolvedRegionCountrySlug || initialResolvedRegionCountrySlug || ''
+    );
     const [categoryName, setCategoryName] = useState(initialData?.categoryName || '');
     const [cityName, setCityName] = useState(initialData?.cityName || '');
     const [countryName, setCountryName] = useState(initialData?.countryName || '');
@@ -157,6 +161,7 @@ export default function CityCategoryDetails({
     const [cityUrl, setCityUrl] = useState(initialData?.cityUrl || '');
     const [regionUrl, setRegionUrl] = useState(initialData?.regionUrl || '');
     const [locationInfo, setLocationInfo] = useState(initialData?.locationInfo || {});
+    const [pageDescription, setPageDescription] = useState(initialData?.metaDescription || initialData?.content || '');
 
     const slugKey = useMemo(() => `${toSlug(citySlug)}|${toSlug(categorySlug)}`, [citySlug, categorySlug]);
 
@@ -167,9 +172,10 @@ export default function CityCategoryDetails({
             Number.isInteger(queryCategoryId) && queryCategoryId > 0
                 ? queryCategoryId
                 : Number.isInteger(Number(resolvedCategoryId)) && Number(resolvedCategoryId) > 0
-                    ? Number(resolvedCategoryId)
-                    : null;
-        const requestedRegionId = Number(regionId) > 0 ? Number(regionId) : Number(initialResolvedRegionId) > 0 ? Number(initialResolvedRegionId) : null;
+                  ? Number(resolvedCategoryId)
+                  : null;
+        const requestedRegionId =
+            Number(regionId) > 0 ? Number(regionId) : Number(initialResolvedRegionId) > 0 ? Number(initialResolvedRegionId) : null;
 
         if (hydratedFromServerRef.current) {
             const initialCategoryId = Number(initialData?.effectiveCategoryId || 0) || null;
@@ -201,14 +207,13 @@ export default function CityCategoryDetails({
             setCityUrl('');
             setRegionUrl('');
             setLocationInfo({});
+            setPageDescription('');
             setResolvedRegionCountrySlug('');
 
             try {
                 let cityContext = null;
                 let regionContext = null;
-                const hasKnownRegionId =
-                    Number(regionId) > 0 ||
-                    Number(initialResolvedRegionId) > 0;
+                const hasKnownRegionId = Number(regionId) > 0 || Number(initialResolvedRegionId) > 0;
 
                 if (Number(initialResolvedCityId) > 0) {
                     cityContext = {
@@ -290,9 +295,7 @@ export default function CityCategoryDetails({
                 const categories = normalizeCategoryItems(response.categories || []);
                 const responseLocationInfo = response.locationInfo || {};
 
-                const selectedCategory =
-                    categories.find((item) => String(item?.categoryId) === String(effectiveCategoryId)) ||
-                    null;
+                const selectedCategory = categories.find((item) => String(item?.categoryId) === String(effectiveCategoryId)) || null;
 
                 const selectedCategoryName = getCategoryDisplayName(selectedCategory) || '';
 
@@ -302,16 +305,21 @@ export default function CityCategoryDetails({
                 ).trim();
 
                 const resolvedCityName =
-                    String(responseLocationInfo?.cityName || firstHotel?.cityName || firstHotel?.city || firstHotel?.cityLabel || '').trim() ||
+                    String(
+                        responseLocationInfo?.cityName || firstHotel?.cityName || firstHotel?.city || firstHotel?.cityLabel || ''
+                    ).trim() ||
                     String(cityContext?.cityName || '').trim() ||
                     (resolvedRegionNameValue ? resolvedRegionNameValue : formatCityName(citySlug));
 
-                const finalCategoryName = regionIdForRequest && resolvedRegionNameValue && selectedCategoryName
-                    ? `${formatCityName(categorySlug)}`
-                    : formatCityName(categorySlug);
+                const finalCategoryName =
+                    regionIdForRequest && resolvedRegionNameValue && selectedCategoryName
+                        ? `${formatCityName(categorySlug)}`
+                        : formatCityName(categorySlug);
 
-                const resolvedCountryName =
-                    String(responseLocationInfo?.countryName || firstHotel?.countryName || firstHotel?.country || '').trim();
+                const resolvedCountryName = String(
+                    responseLocationInfo?.countryName || firstHotel?.countryName || firstHotel?.country || ''
+                ).trim();
+                const resolvedDescription = String(responseLocationInfo?.metaDescription).trim();
                 const resolvedCountryUrl =
                     String(responseLocationInfo?.countryUrl || firstHotel?.countryUrlName || firstHotel?.countryUrl || '').trim() ||
                     (resolvedCountryName ? toSlug(resolvedCountryName) : '');
@@ -320,7 +328,9 @@ export default function CityCategoryDetails({
                     (resolvedCityName ? `/${toSlug(resolvedCityName)}` : '');
                 const resolvedRegionUrl =
                     String(responseLocationInfo?.regionUrl || firstHotel?.regionUrlName || firstHotel?.regionUrl || '').trim() ||
-                    (resolvedCountryUrl && resolvedRegionNameValue ? `/${toSlug(resolvedCountryUrl)}/${toSlug(resolvedRegionNameValue)}` : '');
+                    (resolvedCountryUrl && resolvedRegionNameValue
+                        ? `/${toSlug(resolvedCountryUrl)}/${toSlug(resolvedRegionNameValue)}`
+                        : '');
 
                 setHotelRows(Array.isArray(response.hotels) ? response.hotels : []);
                 if (cityId) {
@@ -340,6 +350,7 @@ export default function CityCategoryDetails({
                 setCityUrl(resolvedCityUrl);
                 setRegionUrl(resolvedRegionUrl);
                 setLocationInfo(responseLocationInfo);
+                setPageDescription(resolvedDescription);
                 setResolvedRegionName(resolvedRegionNameValue);
 
                 onPageInfoChange?.({
@@ -405,16 +416,7 @@ export default function CityCategoryDetails({
             cityName: cityName || formatCityName(citySlug),
             activeCategorySlug: categorySlug
         });
-    }, [
-        categorySlug,
-        cityName,
-        citySlug,
-        sidebarData,
-        regionId,
-        resolvedRegionId,
-        resolvedRegionName,
-        countrySlugForRegion
-    ]);
+    }, [categorySlug, cityName, citySlug, sidebarData, regionId, resolvedRegionId, resolvedRegionName, countrySlugForRegion]);
 
     const fetchMoreHotels = async ({ pageNumber, pageSize: nextPageSize }) => {
         if ((!resolvedCityId && !resolvedRegionId) || !effectiveCategoryId) {
@@ -444,14 +446,14 @@ export default function CityCategoryDetails({
     };
 
     const isRegionContext = Boolean(resolvedRegionId || (queryCountrySlug && resolvedRegionName));
-    const countryBreadcrumbHref = normalizeBreadcrumbHref(locationInfo?.countryUrl || queryCountrySlug || countryUrl || toSlug(countryName));
+    const countryBreadcrumbHref = normalizeBreadcrumbHref(
+        locationInfo?.countryUrl || queryCountrySlug || countryUrl || toSlug(countryName)
+    );
     const countryBreadcrumbLabel = String(locationInfo?.countryName || countryName || '').trim();
     const regionBreadcrumbHref = normalizeBreadcrumbHref(locationInfo?.regionUrl || regionUrl);
     const regionBreadcrumbLabel = String(locationInfo?.regionName || resolvedRegionName || '').trim();
     const cityBreadcrumbHref = normalizeBreadcrumbHref(locationInfo?.cityUrl || cityUrl);
     const cityBreadcrumbLabel = String(locationInfo?.cityName || cityName || '').trim();
-
-    const header = <h2 className="mb-3">{categoryName || formatCityName(categorySlug)}</h2>;
 
     const breadcrumb = (
         <div className="container">
@@ -518,16 +520,77 @@ export default function CityCategoryDetails({
         </div>
     );
 
+    const pageTitle = categoryName || formatCityName(categorySlug);
+    const seo = buildCategorySeo({
+        citySlug,
+        categorySlug,
+        cityName: pageTitle,
+        countryName
+    });
+    const metaDescription = pageDescription || seo.metaDescription || '';
+
+    useEffect(() => {
+        if (typeof document === 'undefined') return undefined;
+
+        const previousTitle = document.title;
+        const previousDescriptionTag = document.head.querySelector('meta[name="description"]');
+        const previousDescriptionContent = previousDescriptionTag?.getAttribute('content');
+        const previousCanonicalTag = document.head.querySelector('link[rel="canonical"]');
+        const previousCanonicalHref = previousCanonicalTag?.getAttribute('href');
+
+        let descriptionTag = previousDescriptionTag;
+        if (!descriptionTag) {
+            descriptionTag = document.createElement('meta');
+            descriptionTag.setAttribute('name', 'description');
+            document.head.appendChild(descriptionTag);
+        }
+        descriptionTag.setAttribute('content', metaDescription);
+
+        let canonicalTag = previousCanonicalTag;
+        if (!canonicalTag) {
+            canonicalTag = document.createElement('link');
+            canonicalTag.setAttribute('rel', 'canonical');
+            document.head.appendChild(canonicalTag);
+        }
+        canonicalTag.setAttribute('href', seo.canonicalUrl || '');
+
+        document.title = pageTitle;
+
+        return () => {
+            document.title = previousTitle;
+
+            if (previousDescriptionTag) {
+                previousDescriptionTag.setAttribute('content', previousDescriptionContent || '');
+            } else if (descriptionTag?.parentNode) {
+                descriptionTag.parentNode.removeChild(descriptionTag);
+            }
+
+            if (previousCanonicalTag) {
+                previousCanonicalTag.setAttribute('href', previousCanonicalHref || '');
+            } else if (canonicalTag?.parentNode) {
+                canonicalTag.parentNode.removeChild(canonicalTag);
+            }
+        };
+    }, [metaDescription, pageTitle, seo.canonicalUrl]);
+
+    const topContent = (
+        <SeoDetailsCard
+            metaTitle={pageTitle}
+            metaDescription={metaDescription}
+            canonicalPath={seo.canonicalPath}
+        />
+    );
+
     if (loading) {
         return (
             <ListingLayout
                 mobileActions={mobileActions}
                 breadcrumb={breadcrumb}
-                header={header}
                 sidebar={sidebar}
                 rowClassName="row g-0 g-lg-4 align-items-start"
                 sidebarClassName="col-lg-3 d-none d-lg-block order-lg-1"
                 mainClassName="col-12 col-lg-9 order-1 order-lg-2"
+                topContent={topContent}
                 main={<div className="text-center py-5 text-muted">Loading category hotels...</div>}
             />
         );
@@ -538,11 +601,11 @@ export default function CityCategoryDetails({
             <ListingLayout
                 mobileActions={mobileActions}
                 breadcrumb={breadcrumb}
-                header={header}
                 sidebar={sidebar}
                 rowClassName="row g-0 g-lg-4 align-items-start"
                 sidebarClassName="col-lg-3 d-none d-lg-block order-lg-1"
                 mainClassName="col-12 col-lg-9 order-1 order-lg-2"
+                topContent={topContent}
                 main={<div className="alert alert-danger mb-0">{error}</div>}
             />
         );
@@ -552,11 +615,11 @@ export default function CityCategoryDetails({
         <ListingLayout
             mobileActions={mobileActions}
             breadcrumb={breadcrumb}
-            header={header}
             sidebar={sidebar}
             rowClassName="row g-0 g-lg-4 align-items-start"
             sidebarClassName="col-lg-3 d-none d-lg-block order-lg-1"
             mainClassName="col-12 col-lg-9 order-1 order-lg-2"
+            topContent={topContent}
             main={
                 hotelRows.length > 0 ? (
                     <CityHotelList
