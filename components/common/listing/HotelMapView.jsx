@@ -30,11 +30,22 @@ function getHotelUrl(hotel) {
     return getFirstDefined(hotel?.url, hotel?.urlName, hotel?.Url) || '';
 }
 
+function getRatingText(score) {
+    const value = Number(score);
+    if (!value) return 'Not rated';
+    if (value >= 9) return 'Exceptional';
+    if (value >= 8) return 'Excellent';
+    if (value >= 7) return 'Very good';
+    if (value >= 6) return 'Good';
+    return 'Pleasant';
+}
+
 export default function HotelMapView({
     hotels = [],
     apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     height = 420,
-    className = ''
+    className = '',
+    allRates = []
 }) {
     const containerRef = useRef(null);
     const mapRef = useRef(null);
@@ -42,12 +53,122 @@ export default function HotelMapView({
     const infoWindowRef = useRef(null);
 
     const [error, setError] = useState('');
+    const [failedImageKeys, setFailedImageKeys] = useState(() => new Set());
+
+    const defaultImage = '/image/property-img.webp';
 
     const hotelsWithCoords = useMemo(() => {
         return (Array.isArray(hotels) ? hotels : [])
             .map((hotel) => ({ hotel, pos: getHotelLatLng(hotel) }))
             .filter((item) => Boolean(item.pos));
     }, [hotels]);
+
+    const getHotelRate = (bookingId) => {
+        return allRates?.find((rate) => String(rate?.id) === String(bookingId));
+    };
+
+    const getBookingId = (hotel) => {
+        const bookingId = Number(hotel?.bookingId);
+        return Number.isInteger(bookingId) && bookingId > 0 ? bookingId : null;
+    };
+
+    const normalizeImageUrl = (photo) => {
+        if (typeof photo !== 'string') return defaultImage;
+        const trimmed = photo.trim();
+        const normalized = trimmed.toLowerCase();
+        if (!trimmed || normalized === 'null' || normalized === 'undefined') return defaultImage;
+        if (trimmed.startsWith('//')) return `https:${trimmed}`;
+        if (trimmed.startsWith('/')) return trimmed;
+        if (/^https?:\/\//i.test(trimmed)) return trimmed;
+        return defaultImage;
+    };
+
+    const getImageUrl = (photo) => {
+        const normalizedUrl = normalizeImageUrl(photo);
+        if (normalizedUrl === defaultImage) return defaultImage;
+        return normalizedUrl;
+    };
+
+    const formatOriginalPrice = (currentPriceStr, originalPrice) => {
+        if (!currentPriceStr || !originalPrice) return null;
+        const match = currentPriceStr.match(/^[^\d-]+/u);
+        if (match) {
+            const detectedCurrency = match[0].trim();
+            const formattedNum = originalPrice.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+            return `${detectedCurrency}${formattedNum}`;
+        }
+        return `$${originalPrice.toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        })}`;
+    };
+
+    const createInfoWindowContent = (hotel) => {
+        const title = getHotelTitle(hotel);
+        const url = getHotelUrl(hotel);
+        const stars = hotel?.stars || 0;
+        const address = hotel?.hotelAddress || hotel?.address || '';
+        const rate = getHotelRate(getBookingId(hotel));
+
+        const safeTitle = title.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const safeAddress = address.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // Generate star HTML
+        let starsHtml = '';
+        for (let i = 0; i < 5; i++) {
+            starsHtml += `<svg viewBox="0 0 24 24" fill="${i < stars ? '#f0831e' : '#ddd'}">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+        </svg>`;
+        }
+
+        // Price HTML
+        let priceHtml = '';
+        if (rate?.price) {
+            const dealInfo = rate?.deal_info || {};
+            const originalPrice = dealInfo?.public_price;
+            const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
+
+            priceHtml = `
+            <div class="info-window-price-section">
+                ${formattedOriginal && originalPrice > rate.price.total ? `
+                    <div class="info-window-original-price">${formattedOriginal}</div>
+                ` : ''}
+                <div class="info-window-current-price">${rate.price.book}</div>
+            </div>
+        `;
+        }
+
+        return `
+        <div class="info-window-container">
+            <button class="custom-info-window-close" onclick="this.closest('.info-window-container').parentElement.parentElement.parentElement.querySelector('button[title=\\'Close\\']').click()">×</button>
+            <div class="info-window-grid">
+                <img src="${getImageUrl(hotel?.photo)}" 
+                     class="info-window-image"
+                     onerror="this.src='${defaultImage}'"
+                     alt="${safeTitle}"/>
+                <div class="info-window-details">
+                    <div class="info-window-title">${safeTitle}</div>
+                    <div class="info-window-stars">${starsHtml}</div>
+                    <div class="info-window-address" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${hotel.latitude},${hotel.longitude}', '_blank')">
+                        <span>${safeAddress.substring(0, 60)}${safeAddress.length > 60 ? '...' : ''}</span>
+                    </div>
+                    ${priceHtml}
+                    <div>
+                        <a href="${url}" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="info-window-book-btn">
+                            Book Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    };
 
     useEffect(() => {
         let cancelled = false;
@@ -73,7 +194,9 @@ export default function HotelMapView({
                 }
 
                 if (!infoWindowRef.current) {
-                    infoWindowRef.current = new maps.InfoWindow();
+                    infoWindowRef.current = new maps.InfoWindow({
+                        maxWidth: 340
+                    });
                 }
 
                 markersRef.current.forEach((m) => m.setMap(null));
@@ -89,19 +212,15 @@ export default function HotelMapView({
 
                 hotelsWithCoords.forEach(({ hotel, pos }) => {
                     const title = getHotelTitle(hotel);
+
                     const marker = new maps.Marker({
                         position: pos,
                         map: mapRef.current,
-                        title
+                        title,
                     });
 
                     const handleClick = () => {
-                        const title = getHotelTitle(hotel);
-                        const url = getHotelUrl(hotel);
-                        const safeTitle = title.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                        const content = url
-                            ? `<div style="min-width:180px"><div style="font-weight:600;margin-bottom:6px">${safeTitle}</div><a href="${url}" target="_blank" rel="noopener noreferrer">Open hotel</a></div>`
-                            : `<div style="min-width:180px"><div style="font-weight:600">${safeTitle}</div></div>`;
+                        const content = createInfoWindowContent(hotel);
                         infoWindowRef.current.setContent(content);
                         infoWindowRef.current.open({ map: mapRef.current, anchor: marker });
                     };
@@ -123,19 +242,16 @@ export default function HotelMapView({
         return () => {
             cancelled = true;
         };
-    }, [apiKey, hotelsWithCoords]);
+    }, [apiKey, hotelsWithCoords, allRates]);
 
     return (
         <div className={className}>
             {error ? <div className="alert alert-warning mb-3">{error}</div> : null}
             <div
                 ref={containerRef}
+                className="map-container"
                 style={{
-                    height: typeof height === 'number' ? `${height}px` : height,
-                    width: '100%',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    background: '#f1f3f5'
+                    height: typeof height === 'number' ? `${height}px` : height
                 }}
             />
         </div>

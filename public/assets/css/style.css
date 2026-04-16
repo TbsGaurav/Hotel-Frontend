@@ -3208,3 +3208,228 @@ input[type='range']:active::-webkit-slider-thumb {
     flex-direction: row;
     justify-content: flex-end;
 }
+.gm-style-iw {
+    border-radius: 16px !important;
+    padding: 0 !important;
+}
+
+.gm-style-iw button[title="Close"] {
+    opacity: 0.8 !important;
+}
+
+.gm-style-iw button[title="Close"]:hover {
+    opacity: 1 !important;
+}
+
+.gm-style-iw .gm-style-iw-d {
+    overflow: auto !important;
+    max-height: 400px !important;
+    padding: 8px !important;
+}
+
+.gm-style-iw .gm-style-iw-d::-webkit-scrollbar {
+    width: 6px;
+}
+
+.gm-style-iw .gm-style-iw-d::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.gm-style-iw .gm-style-iw-d::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+/* Info Window Container */
+.info-window-container {
+    min-width: 280px;
+    max-width: 320px;
+    font-family: system-ui, -apple-system, sans-serif;
+    position: relative;
+    padding: 10px;
+}
+
+.info-window-grid {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px;
+    margin-right: 24px; 
+}
+
+.info-window-image {
+    width: 120px;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.info-window-details {
+    flex: 1;
+}
+
+.info-window-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.info-window-stars {
+    margin-bottom: 6px;
+}
+
+.info-window-stars svg {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    margin-right: 2px;
+}
+
+.info-window-address {
+    font-size: 11px;
+    color: #6c757d;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+.info-window-price-section {
+    margin-bottom: 6px;
+    text-align: right;
+}
+
+.info-window-original-price {
+    font-size: 11px;
+    color: red;
+    text-decoration: line-through;
+    margin-bottom: 4px;
+}
+
+.info-window-current-price {
+    font-size: 20px;
+    font-weight: bold;
+    color: #f0831e;
+}
+
+.info-window-book-btn {
+    display: inline-block;
+    background: #003b95;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.info-window-book-btn:hover {
+    background: #002a6b;
+    color: white;
+    text-decoration: none;
+}
+
+/* Close button without background */
+.gm-style-iw button[title="Close"] {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    opacity: 0.6 !important;
+}
+
+.gm-style-iw button[title="Close"]:hover {
+    opacity: 1 !important;
+    background: transparent !important;
+}
+
+.gm-style-iw button[title="Close"] img {
+    filter: brightness(0) !important;
+}
+.map-container {
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f1f3f5;
+}
+/* Custom Close Button */
+.custom-info-window-close {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    background: transparent !important;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #666;
+    z-index: 10;
+    box-shadow: none ;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.custom-info-window-close:hover {
+    background: #f0f0f0;
+    color: #333;
+    transform: scale(1.05);
+}
+
+.custom-info-window-close:active {
+    transform: scale(0.95);
+}
+/* Hide default Google Maps close button */
+.gm-style-iw button[title="Close"] {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Alternative: Make it invisible but keep clickable area small */
+.gm-style-iw button[title="Close"] {
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+.gm-style-iw-ch {
+    display: none !important;
+}
+
+.gm-style-iw-chr {
+    display: none !important;
+}
+
+.gm-style-iw-tc {
+    display: none !important;
+}
+
+.gm-style-iw .gm-ui-hover-effect {
+    display: none !important;
+}
+
+.gm-style-iw-t {
+    top: 0px !important;
+}
+
+/* Hide the close button container */
+.gm-style-iw .gm-style-iw-c {
+    padding: 0 !important;
+}
+
+/* Hide any default content wrapper */
+.gm-style .gm-style-iw-d {
+    overflow: auto !important;
+    padding: 0 !important;
+}

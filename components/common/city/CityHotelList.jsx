@@ -380,7 +380,7 @@ export default function CityHotelList({
         <div className="container p-0">
             {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
 
-            {mapVisible ? <HotelMapView hotels={allHotels} className="mb-4" /> : null}
+            {mapVisible ? <HotelMapView hotels={allHotels} className="mb-4" allRates={allRates} /> : null}
 
             <div className="d-flex flex-column gap-3">
                 {allHotels.map((hotel, index) => {
