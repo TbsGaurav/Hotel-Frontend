@@ -9,6 +9,7 @@ import CountryBrandHotelList from '../hotel/CountryBrandHotelList';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { buildBrandSeo } from '@/lib/seo';
 import SeoDetailsCard from '@/components/common/SeoDetailsCard';
+import MobileHotelMapButton from '@/components/common/listing/MobileHotelMapButton';
 
 function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -158,9 +159,7 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
                             Sort
                         </button>
                         <MobileFilterDrawer sidebarSections={sidebarSections} />
-                        <button type="button" className="mobile-actions__link">
-                            Map
-                        </button>
+                        <MobileHotelMapButton label="Map" />
                     </div>
                 </div>
             </section>

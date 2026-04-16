@@ -7,6 +7,7 @@ import { FaMapMarkerAlt } from 'react-icons/fa';
 import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 import Image from 'next/image';
+import HotelMapView from '@/components/common/listing/HotelMapView';
 
 export default function CountryBrandHotelList({
     hotels = [],
@@ -26,6 +27,7 @@ export default function CountryBrandHotelList({
     const [page, setPage] = useState(currentPage || 1);
     const [localHasMore, setLocalHasMore] = useState(hasMore);
     const [failedImageKeys, setFailedImageKeys] = useState(() => new Set());
+    const [isMapVisible, setIsMapVisible] = useState(false);
     const loadMoreTriggerRef = useRef(null);
     const normalizedBrand = String(brand || '').replace(/^\/+|\/+$/g, '');
 
@@ -38,6 +40,12 @@ export default function CountryBrandHotelList({
 
         return () => window.clearTimeout(timer);
     }, [hotels, currentPage, hasMore]);
+
+    useEffect(() => {
+        const handler = () => setIsMapVisible((prev) => !prev);
+        window.addEventListener('hotel-map-toggle', handler);
+        return () => window.removeEventListener('hotel-map-toggle', handler);
+    }, []);
 
     useEffect(() => {
         const timer = window.setTimeout(() => {
@@ -289,6 +297,19 @@ export default function CountryBrandHotelList({
 
     return (
         <div className="container">
+            <div className="d-flex justify-content-start mb-3">
+                <button
+                    type="button"
+                    className={`${isMapVisible ? 'theme-button-orange' : 'theme-button-blue'} rounded-2 px-3 d-flex align-items-center justify-content-center gap-2 py-2`}
+                    onClick={() => setIsMapVisible((prev) => !prev)}
+                >
+                    <FaMapMarkerAlt />
+                    <span>Hotel Map</span>
+                </button>
+            </div>
+
+            {isMapVisible ? <HotelMapView hotels={allHotels} className="mb-4" /> : null}
+
             <div className="d-flex flex-column gap-3">
                 {groupedHotels.map((city) => (
                     <div key={city.cityName} className="d-flex flex-column gap-3">

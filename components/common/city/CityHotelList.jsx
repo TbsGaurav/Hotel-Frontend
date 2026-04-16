@@ -7,6 +7,7 @@ import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
+import HotelMapView from '@/components/common/listing/HotelMapView';
 
 export default function CityHotelList({
     hotels,
@@ -20,7 +21,8 @@ export default function CityHotelList({
     countryId = null,
     regionHotelsSource = [],
     pageIntentCookieName = '',
-    pageCookieName
+    pageCookieName,
+    mapVisible = false
 }) {
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(hotels || []);
@@ -377,6 +379,8 @@ export default function CityHotelList({
     return (
         <div className="container p-0">
             {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
+
+            {mapVisible ? <HotelMapView hotels={allHotels} className="mb-4" /> : null}
 
             <div className="d-flex flex-column gap-3">
                 {allHotels.map((hotel, index) => {

@@ -13,6 +13,8 @@ import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { buildCategoryListingPath } from '@/lib/api/public/cityCategoryapi';
 import { buildRegionSeo } from '@/lib/seo';
 import SeoDetailsCard from '@/components/common/SeoDetailsCard';
+import RegionHotelListingWithMap from './RegionHotelListingWithMap';
+import MobileHotelMapButton from '@/components/common/listing/MobileHotelMapButton';
 
 const REGION_PAGE_SIZE = 10;
 
@@ -212,9 +214,7 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                             Sort
                         </button>
                         <MobileFilterDrawer sidebarSections={sidebarSections} />
-                        <button type="button" className="mobile-actions__link">
-                            Map
-                        </button>
+                        <MobileHotelMapButton label="Map" />
                     </div>
                 </div>
             </section>
@@ -255,23 +255,18 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                     <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
                     <hr className="my-5" />
 
-                    <div className="col-lg-3 d-none d-lg-block">
-                        <ListingSidebar title="Filters" sections={sidebarSectionsWithLinks} />
-                    </div>
-                    <div className="col-lg-9">
-                        <h2 className="text-center fw-bold mb-4">Featured Properties in {regionName}</h2>
-                        <CityHotelList
-                            hotels={hotels}
-                            totalCount={totalCount}
-                            currentPage={currentPage}
-                            pageSize={REGION_PAGE_SIZE}
-                            citySlug={urlName}
-                            pageCookieName={regionPageCookieName}
-                            pageIntentCookieName={pageIntentCookieName}
-                            regionHotelsSource={fallbackRegionHotels}
-                            content={description}
-                        />
-                    </div>
+                    <RegionHotelListingWithMap
+                        sidebarSections={sidebarSectionsWithLinks}
+                        hotels={hotels}
+                        totalCount={totalCount}
+                        currentPage={currentPage}
+                        pageSize={REGION_PAGE_SIZE}
+                        citySlug={urlName}
+                        pageCookieName={regionPageCookieName}
+                        pageIntentCookieName={pageIntentCookieName}
+                        regionHotelsSource={fallbackRegionHotels}
+                        content={description}
+                    />
                 </div>
             </section>
         </>
