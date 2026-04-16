@@ -17,6 +17,7 @@ export default function CityHotelList({
     citySlugPath,
     content,
     citySlug,
+    countryId = null,
     regionHotelsSource = [],
     pageIntentCookieName = '',
     pageCookieName
@@ -305,7 +306,7 @@ export default function CityHotelList({
             return;
         }
 
-        getHotelList(citySlug, nextPage, pageSize)
+        getHotelList(citySlug, { countryId, pageNumber: nextPage, pageSize })
             .then((response) => {
                 const nextHotels = response?.hotels || [];
                 if (!nextHotels.length) {

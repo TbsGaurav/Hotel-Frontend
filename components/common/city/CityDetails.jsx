@@ -62,11 +62,15 @@ export default async function CityDetails({ params }) {
     let regionName = '';
     let regionUrl = '';
     let firstHotel = null;
+    let resolvedCountryId = null;
 
     if (citySlug) {
         try {
             for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
-                const pageResponse = await getHotelList(citySlug, pageNumber, PAGE_SIZE);
+                const pageResponse =
+                    pageNumber === 1
+                        ? await getHotelList(citySlug, { pageNumber, pageSize: PAGE_SIZE })
+                        : await getHotelList(citySlug, { countryId: resolvedCountryId, pageNumber, pageSize: PAGE_SIZE });
                 const nextHotels = pageResponse?.hotels || [];
 
                 if (!nextHotels.length) {
@@ -76,6 +80,7 @@ export default async function CityDetails({ params }) {
                 if (pageNumber === 1) {
                     totalCount = pageResponse?.totalCount || nextHotels.length;
                     content = nextHotels[0]?.content || '';
+                    resolvedCountryId = pageResponse?.countryId ?? null;
 
                     // Extract IDs from API response (not from first hotel)
                     const apiCityId = pageResponse?.cityId;
@@ -210,6 +215,7 @@ export default async function CityDetails({ params }) {
                             pageIntentCookieName={pageIntentCookieName}
                             citySlug={citySlug}
                             citySlugPath={citySlugPath}
+                            countryId={resolvedCountryId}
                             content={content}
                         />
                     </div>
