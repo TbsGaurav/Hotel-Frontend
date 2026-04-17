@@ -180,8 +180,8 @@ export default function HotelMapView({
                         center: first,
                         zoom: hotelsWithCoords.length ? 12 : 4,
                         mapTypeControl: true,
-                        fullscreenControl: false,
-                        streetViewControl: false
+                        fullscreenControl: true,
+                        streetViewControl: true
                     });
                 }
 
