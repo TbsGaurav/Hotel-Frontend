@@ -10,6 +10,7 @@ import SeoDetailsCard from '@/components/common/SeoDetailsCard';
 import { getSidebarData } from '@/lib/api/sidebarapi';
 import ListingLayout from '@/components/common/listing/ListingLayout';
 import { buildCategorySeo } from '@/lib/seo';
+import { FaMapMarkerAlt } from 'react-icons/fa';
 import {
     buildCategoryListingPath,
     buildCategorySidebarSections,
@@ -145,6 +146,7 @@ export default function CityCategoryDetails({
     const [error, setError] = useState(initialData?.error || '');
     const [hotelRows, setHotelRows] = useState(Array.isArray(initialData?.hotelRows) ? initialData.hotelRows : []);
     const [sidebarData, setSidebarData] = useState(initialData?.sidebarData || {});
+    const [isHotelMapVisible, setIsHotelMapVisible] = useState(false);
     const [totalCount, setTotalCount] = useState(Number(initialData?.totalCount || 0));
     const [pageSize, setPageSize] = useState(Number(initialData?.pageSize || 10));
     const [currentPage, setCurrentPage] = useState(Number(initialData?.currentPage || 1));
@@ -499,7 +501,11 @@ export default function CityCategoryDetails({
                         Sort
                     </button>
                     <MobileFilterDrawer sidebarSections={sidebarSections} />
-                    <button type="button" className="mobile-actions__link">
+                    <button
+                        type="button"
+                        className="mobile-actions__link"
+                        onClick={() => setIsHotelMapVisible((prev) => !prev)}
+                    >
                         Map
                     </button>
                 </div>
@@ -509,6 +515,14 @@ export default function CityCategoryDetails({
 
     const sidebar = (
         <div className="position-sticky" style={{ top: '16px' }}>
+            <button
+                type="button"
+                className={`${isHotelMapVisible ? 'theme-button-blue' : 'theme-button-orange'} rounded-2 w-100 mb-3 d-flex align-items-center justify-content-center gap-2 py-2`}
+                onClick={() => setIsHotelMapVisible((prev) => !prev)}
+            >
+                <FaMapMarkerAlt />
+                <span>Hotel Map</span>
+            </button>
             <ListingSidebar
                 title="Filters"
                 sections={sidebarSections}
@@ -632,6 +646,7 @@ export default function CityCategoryDetails({
                         fetchMoreHotels={fetchMoreHotels}
                         pageCookieName={pageCookieName}
                         pageIntentCookieName={pageIntentCookieName}
+                        mapVisible={isHotelMapVisible}
                     />
                 ) : (
                     <div className="text-center py-5">

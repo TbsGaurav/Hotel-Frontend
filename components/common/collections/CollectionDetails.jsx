@@ -8,10 +8,19 @@ import HeroSection from '@/components/sections/HeroSection';
 import { getHotelsByCollection, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 import Image from 'next/image';
+import HotelMapView from '@/components/common/listing/HotelMapView';
+import ViewModeToggle from '@/components/common/listing/ViewModeToggle';
 
 export default function CollectionDetails({ collection, hotels, hotelRates, totalCount, currentPage, pageSize, collectionId }) {
     const basic = collection?.basicCollection;
     const content = collection?.collectionContent;
+    const [isHotelMapVisible, setIsHotelMapVisible] = useState(false);
+
+    useEffect(() => {
+        const handler = () => setIsHotelMapVisible((prev) => !prev);
+        window.addEventListener('hotel-map-toggle', handler);
+        return () => window.removeEventListener('hotel-map-toggle', handler);
+    }, []);
 
     function getBookingId(hotel) {
         return hotel?.bookingId ?? hotel?.BookingId ?? null;
@@ -53,6 +62,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const loadRequestInFlightRef = useRef(false);
     const pageRef = useRef(currentPage || 1);
     const [timestamp, setTimestamp] = useState('');
+    const [viewMode, setViewMode] = useState('list');
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
 
     const openMap = (lat, lng) => {
         if (!lat || !lng) return;
@@ -273,6 +284,22 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         return () => window.clearTimeout(timer);
     }, []);
 
+    useEffect(() => {
+        const syncViewport = () => {
+            setIsMobileViewport(window.innerWidth < 768);
+        };
+
+        syncViewport();
+        window.addEventListener('resize', syncViewport);
+        return () => window.removeEventListener('resize', syncViewport);
+    }, []);
+
+    useEffect(() => {
+        if (isMobileViewport && viewMode !== 'list') {
+            setViewMode('list');
+        }
+    }, [isMobileViewport, viewMode]);
+
     const CountryName = Array.isArray(basic) && basic.length > 0 ? basic[0].countryName : basic?.countryName;
     const RegionName = Array.isArray(basic) && basic.length > 0 ? basic[0].regionName : basic?.regionName;
     const CityName = Array.isArray(basic) && basic.length > 0 ? basic[0].cityName : basic?.cityName;
@@ -282,6 +309,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const RegionUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].regionUrl : basic?.regionUrl;
     const CityUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].cityUrl : basic?.cityUrl;
     const CollectionUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].slug : basic?.slug;
+    const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
 
     return (
         <>
@@ -386,27 +414,43 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                     <div className="container">
                         {allHotels.length > 0 ? (
                             <div className="d-flex flex-column gap-3">
-                                {allHotels.map((hotel, index) => {
+                                <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                    <button
+                                        type="button"
+                                        className={`${isHotelMapVisible ? 'theme-button-orange' : 'theme-button-blue'} rounded-2 px-3 d-flex align-items-center justify-content-center gap-2 py-2`}
+                                        onClick={() => setIsHotelMapVisible((prev) => !prev)}
+                                    >
+                                        <FaMapMarkerAlt />
+                                        <span>Hotel Map</span>
+                                    </button>
+                                    {!isMobileViewport ? <ViewModeToggle viewMode={viewMode} onChange={setViewMode} /> : null}
+                                </div>
+
+                                {isHotelMapVisible ? <HotelMapView hotels={allHotels} className="mb-2" /> : null}
+
+                                <div className={effectiveViewMode === 'grid' ? 'row g-3' : 'd-flex flex-column gap-3'}>
+                                    {allHotels.map((hotel, index) => {
                                     const hotelKey = getHotelKey(hotel, index);
                                     return (
-                                        <div
-                                            key={hotelKey}
-                                            className="card border-0 rounded-4 p-3 p-md-4 hotel-list-card collection-hotel-card"
-                                            style={{
-                                                boxShadow: '0 4px 18px rgba(0,0,0,0.08)'
-                                            }}
-                                            onClick={() => navigateToHotel(hotel.url)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                    e.preventDefault();
-                                                    navigateToHotel(hotel.url);
-                                                }
-                                            }}
-                                            role="link"
-                                            tabIndex={0}
-                                        >
+                                        <div key={hotelKey} className={effectiveViewMode === 'grid' ? 'col-12 col-md-6' : ''}>
+                                            <div
+                                                className={`card border-0 rounded-4 hotel-list-card collection-hotel-card ${effectiveViewMode === 'grid' ? 'p-3 h-100' : 'p-3 p-md-4'}`}
+                                                style={{
+                                                    boxShadow: '0 4px 18px rgba(0,0,0,0.08)',
+                                                    minHeight: effectiveViewMode === 'grid' && !isMobileViewport ? '620px' : undefined
+                                                }}
+                                                onClick={() => navigateToHotel(hotel.url)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                        e.preventDefault();
+                                                        navigateToHotel(hotel.url);
+                                                    }
+                                                }}
+                                                role="link"
+                                                tabIndex={0}
+                                            >
                                             <div className="row g-3 collection-hotel-card-row">
-                                                <div className="col-12 col-md-4 collection-hotel-image-col">
+                                                <div className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-4'} collection-hotel-image-col`}>
                                                     <div className="position-relative collection-hotel-image-wrap">
                                                         {(() => {
                                                             const rate = getHotelRate(getBookingId(hotel));
@@ -445,14 +489,14 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             unoptimized
                                                             width={400}
                                                             height={270}
-                                                            className="d-block w-100 rounded-4 collection-hotel-image"
+                                                            className={`d-block w-100 rounded-4 collection-hotel-image ${effectiveViewMode === 'grid' ? 'h-auto' : ''}`}
                                                             alt={hotel.hotelName}
                                                             onError={() => handleImageError(hotelKey)}
                                                             priority
                                                         />
                                                     </div>
                                                 </div>
-                                                <div className="col-12 col-md-8 collection-hotel-content-col">
+                                                <div className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-8'} collection-hotel-content-col`}>
                                                     <div className="text-decoration-none">
                                                         <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-header">
                                                             <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row">
@@ -633,7 +677,10 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                     );
 
                                                                     return (
-                                                                        <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block">
+                                                                        <div
+                                                                            className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block"
+                                                                            style={{ overflow: 'visible', minHeight: '98px' }}
+                                                                        >
                                                                             <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                                 1 night, 2 adults
                                                                             </p>
@@ -673,7 +720,10 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             })()}
                                                         </div>
 
-                                                        <div className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col">
+                                                        <div
+                                                            className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col"
+                                                            style={effectiveViewMode === 'grid' ? { paddingTop: '6px' } : undefined}
+                                                        >
                                                             <Link
                                                                 className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
                                                                 href={`${hotel.url}`}
@@ -689,8 +739,10 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                 </div>
                                             </div>
                                         </div>
+                                        </div>
                                     );
                                 })}
+                                </div>
 
                                 {hasMore && (
                                     <div ref={loadMoreTriggerRef} className="text-center py-4">

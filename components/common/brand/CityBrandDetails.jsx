@@ -5,10 +5,11 @@ import { getHotelList } from '@/lib/api/public/hotelapi';
 import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { getSidebarData } from '@/lib/api/sidebarapi';
 import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
-import CityHotelList from '../city/CityHotelList';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { buildBrandSeo } from '@/lib/seo';
 import SeoDetailsCard from '@/components/common/SeoDetailsCard';
+import CityBrandHotelListingWithMap from './CityBrandHotelListingWithMap';
+import MobileHotelMapButton from '@/components/common/listing/MobileHotelMapButton';
 
 function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -72,11 +73,11 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
     const brandName = decodedBrandSegment;
     const cityName = formatCityName(citySlug) || capitalize(citySlug);
     const formattedBrand = formatBrand(decodedBrandSegment);
-    const fullSlug = `${citySlug}/${brandSegment}`;
+    const fullSlug = `${citySlug}/${decodedBrandSegment}`;
 
     const cookieStore = await cookies();
-    const pageCookieName = getCityBrandPageCookieName(citySlug, brandSegment);
-    const pageIntentCookieName = getCityBrandPageIntentCookieName(citySlug, brandSegment);
+    const pageCookieName = getCityBrandPageCookieName(citySlug, decodedBrandSegment);
+    const pageIntentCookieName = getCityBrandPageIntentCookieName(citySlug, decodedBrandSegment);
     const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
 
     let hotels = [];
@@ -116,7 +117,7 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
     });
     const seo = buildBrandSeo({
         parentSlug: citySlug,
-        brandSlug: brandSegment,
+        brandSlug: decodedBrandSegment,
         resolvedSlugData,
         pageType: 'citybrand'
     });
@@ -131,9 +132,7 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
                             Sort
                         </button>
                         <MobileFilterDrawer sidebarSections={sidebarSections} />
-                        <button type="button" className="mobile-actions__link">
-                            Map
-                        </button>
+                        <MobileHotelMapButton label="Map" />
                     </div>
                 </div>
             </section>
@@ -149,7 +148,7 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
 
                             <li className="breadcrumb-item small-para-14-px">
                                 <Link
-                                    href={`/brand/${encodeURIComponent(brandSegment)}`}
+                                    href={`/brand/${encodeURIComponent(decodedBrandSegment)}`}
                                     className="text-dark text-decoration-none text-capitalize"
                                 >
                                     {formattedBrand}
@@ -159,7 +158,7 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
                             {countrySlug && (
                                 <li className="breadcrumb-item small-para-14-px">
                                     <Link
-                                        href={`/${encodeURIComponent(countrySlug)}/${encodeURIComponent(brandSegment)}`}
+                                        href={`/${encodeURIComponent(countrySlug)}/${encodeURIComponent(decodedBrandSegment)}`}
                                         className="text-dark text-decoration-none text-capitalize"
                                     >
                                         {formattedBrand} {countrySlug}
@@ -169,7 +168,7 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
 
                             <li className="breadcrumb-item small-para-14-px active text-capitalize">
                                 <Link
-                                    href={`/${encodeURIComponent(citySlug)}/${encodeURIComponent(brandSegment)}`}
+                                    href={`/${encodeURIComponent(citySlug)}/${encodeURIComponent(decodedBrandSegment)}`}
                                     className="text-decoration-none"
                                 >
                                     {formattedBrand} {cityName}
@@ -187,34 +186,23 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
                     metaDescription={seo.metaDescription}
                     canonicalPath={seo.canonicalPath}
                 />
-                <div className="row g-0 g-lg-4 align-items-start">
-                    <div className="col-lg-3 d-none d-lg-block order-lg-1">
-                        {' '}
-                        <div className="position-sticky" style={{ top: '16px' }}>
-                            <ListingSidebar title="Filters" sections={sidebarSections} />
-                        </div>
+                {hotels.length > 0 ? (
+                    <CityBrandHotelListingWithMap
+                        sidebarSections={sidebarSections}
+                        hotels={hotels}
+                        totalCount={totalCount}
+                        currentPage={currentPage}
+                        pageSize={PAGE_SIZE}
+                        citySlug={fullSlug}
+                        citySlugPath={fullSlug}
+                        pageCookieName={pageCookieName}
+                        pageIntentCookieName={pageIntentCookieName}
+                    />
+                ) : (
+                    <div className="text-center py-5">
+                        <p className="text-muted">No hotels available for this brand in {cityName}.</p>
                     </div>
-
-                    {/* <div className="col-lg-9 order-1 order-lg-2"> */}
-                    <div className="col-12 col-lg-9 order-1 order-lg-2">
-                        {hotels.length > 0 ? (
-                            <CityHotelList
-                                hotels={hotels}
-                                totalCount={totalCount}
-                                currentPage={currentPage}
-                                pageSize={PAGE_SIZE}
-                                citySlug={fullSlug}
-                                citySlugPath={fullSlug}
-                                pageCookieName={pageCookieName}
-                                pageIntentCookieName={pageIntentCookieName}
-                            />
-                        ) : (
-                            <div className="text-center py-5">
-                                <p className="text-muted">No hotels available for this brand in {cityName}.</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                )}
             </section>
         </>
     );

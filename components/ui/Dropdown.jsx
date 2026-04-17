@@ -17,6 +17,7 @@ export default function Dropdown({ id, title, items = [], parentId, defaultOpen 
                         data-bs-target={`#${collapseId}`}
                         aria-expanded={defaultOpen}
                         aria-controls={collapseId}
+                        suppressHydrationWarning
                         style={{
                             background: '#f5f6f7',
                             borderRadius: '11px',
@@ -33,6 +34,7 @@ export default function Dropdown({ id, title, items = [], parentId, defaultOpen 
                     className={`accordion-collapse collapse ${defaultOpen ? 'show' : ''}`}
                     aria-labelledby={headingId}
                     data-bs-parent={`#${parentId}`}
+                    suppressHydrationWarning
                 >
                     <div
                         className="accordion-body accordion-main">
