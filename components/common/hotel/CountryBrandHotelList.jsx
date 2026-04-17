@@ -8,6 +8,7 @@ import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 import Image from 'next/image';
 import HotelMapView from '@/components/common/listing/HotelMapView';
+import ViewModeToggle from '@/components/common/listing/ViewModeToggle';
 
 export default function CountryBrandHotelList({
     hotels = [],
@@ -22,6 +23,8 @@ export default function CountryBrandHotelList({
     const [loadingMore, setLoadingMore] = useState(false);
     const [timestamp, setTimestamp] = useState('');
     const [currency, setCurrency] = useState(null);
+    const [viewMode, setViewMode] = useState('list');
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
     const [allRates, setAllRates] = useState(hotelRates || []);
     const [allHotels, setAllHotels] = useState(hotels || []);
     const [page, setPage] = useState(currentPage || 1);
@@ -54,6 +57,22 @@ export default function CountryBrandHotelList({
 
         return () => window.clearTimeout(timer);
     }, []);
+
+    useEffect(() => {
+        const syncViewport = () => {
+            setIsMobileViewport(window.innerWidth < 768);
+        };
+
+        syncViewport();
+        window.addEventListener('resize', syncViewport);
+        return () => window.removeEventListener('resize', syncViewport);
+    }, []);
+
+    useEffect(() => {
+        if (isMobileViewport && viewMode !== 'list') {
+            setViewMode('list');
+        }
+    }, [isMobileViewport, viewMode]);
 
     useEffect(() => {
         async function initCurrency() {
@@ -159,17 +178,6 @@ export default function CountryBrandHotelList({
         return result;
     };
 
-    const loadMoreHotels = () => {
-        if (!localHasMore || loadingMore || !pageCookieName || !pageIntentCookieName) return;
-
-        setLoadingMore(true);
-        const nextPage = page + 1;
-
-        document.cookie = `${pageCookieName}=${nextPage}; path=/; SameSite=Lax`;
-        document.cookie = `${pageIntentCookieName}=1; path=/; SameSite=Lax; Max-Age=20`;
-        window.location.reload();
-    };
-
     const getCountryBrandSlug = () => {
         const pathParts = window.location.pathname.split('/').filter(Boolean);
         if (pathParts.length >= 2) {
@@ -206,6 +214,10 @@ export default function CountryBrandHotelList({
                 if (pageCookieName) {
                     document.cookie = `${pageCookieName}=${nextPage}; path=/; SameSite=Lax`;
                 }
+
+                if (pageIntentCookieName) {
+                    document.cookie = `${pageIntentCookieName}=1; path=/; SameSite=Lax; Max-Age=20`;
+                }
             })
             .catch((error) => {
                 console.error('Error loading more hotels:', error);
@@ -221,11 +233,7 @@ export default function CountryBrandHotelList({
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
-                    if (pageIntentCookieName) {
-                        loadMoreHotels();
-                    } else {
-                        fetchMoreHotels();
-                    }
+                    fetchMoreHotels();
                 }
             },
             { rootMargin: '300px 0px' }
@@ -295,9 +303,15 @@ export default function CountryBrandHotelList({
         window.open(url, '_blank', 'noopener,noreferrer');
     };
 
+    const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
+    const hotelsByViewMode =
+        effectiveViewMode === 'grid'
+            ? [{ cityName: 'all-hotels', cityUrlName: '', hotels: allHotels }]
+            : groupedHotels;
+
     return (
         <div className="container">
-            <div className="d-flex justify-content-start mb-3">
+            <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                 <button
                     type="button"
                     className={`${isMapVisible ? 'theme-button-orange' : 'theme-button-blue'} rounded-2 px-3 d-flex align-items-center justify-content-center gap-2 py-2`}
@@ -306,20 +320,24 @@ export default function CountryBrandHotelList({
                     <FaMapMarkerAlt />
                     <span>Hotel Map</span>
                 </button>
+                {!isMobileViewport ? <ViewModeToggle viewMode={viewMode} onChange={setViewMode} /> : null}
             </div>
 
             {isMapVisible ? <HotelMapView hotels={allHotels} className="mb-4" /> : null}
 
             <div className="d-flex flex-column gap-3">
-                {groupedHotels.map((city) => (
+                {hotelsByViewMode.map((city) => (
                     <div key={city.cityName} className="d-flex flex-column gap-3">
-                        <Link href={getCityBrandPath(city.cityUrlName)} className="text-decoration-none">
-                            <h5 className="text-warning city-hover">
-                                {formattedBrand} {city.cityName}
-                            </h5>
-                        </Link>
+                        {effectiveViewMode !== 'grid' ? (
+                            <Link href={getCityBrandPath(city.cityUrlName)} className="text-decoration-none">
+                                <h5 className="text-warning city-hover">
+                                    {formattedBrand} {city.cityName}
+                                </h5>
+                            </Link>
+                        ) : null}
 
-                        {city.hotels.map((hotel, hotelIndex) => {
+                        <div className={effectiveViewMode === 'grid' ? 'row g-3' : 'd-flex flex-column gap-3'}>
+                            {city.hotels.map((hotel, hotelIndex) => {
                             const hotelKey = getHotelKey(hotel, hotelIndex);
                             const rate = getHotelRate(getBookingId(hotel));
                             const badges = rate?.badges || [];
@@ -337,24 +355,25 @@ export default function CountryBrandHotelList({
                                 : [];
 
                             return (
-                                <div
-                                    key={hotelKey}
-                                    className="card border-0 rounded-4 p-3 p-md-4 hotel-list-card collection-hotel-card"
-                                    style={{
-                                        boxShadow: '0 4px 18px rgba(0,0,0,0.08)'
-                                    }}
-                                    onClick={() => navigateToHotel(hotel.url)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            navigateToHotel(hotel.url);
-                                        }
-                                    }}
-                                    role="link"
-                                    tabIndex={0}
-                                >
-                                    <div className="row g-3 collection-hotel-card-row">
-                                        <div className="col-12 col-md-4 collection-hotel-image-col">
+                                <div key={hotelKey} className={effectiveViewMode === 'grid' ? 'col-12 col-md-6' : ''}>
+                                    <div
+                                        className={`card border-0 rounded-4 hotel-list-card collection-hotel-card ${effectiveViewMode === 'grid' ? 'p-3 h-100' : 'p-3 p-md-4'}`}
+                                        style={{
+                                            boxShadow: '0 4px 18px rgba(0,0,0,0.08)',
+                                            minHeight: effectiveViewMode === 'grid' && !isMobileViewport ? '620px' : undefined
+                                        }}
+                                        onClick={() => navigateToHotel(hotel.url)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                navigateToHotel(hotel.url);
+                                            }
+                                        }}
+                                        role="link"
+                                        tabIndex={0}
+                                    >
+                                        <div className="row g-3 collection-hotel-card-row">
+                                            <div className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-4'} collection-hotel-image-col`}>
                                             <div className="position-relative collection-hotel-image-wrap">
                                                 {imageBadges.length > 0 && (
                                                     <>
@@ -382,7 +401,7 @@ export default function CountryBrandHotelList({
                                                     unoptimized
                                                     width={400}
                                                     height={270}
-                                                    className="d-block w-100 rounded-4 collection-hotel-image"
+                                                    className={`d-block w-100 rounded-4 collection-hotel-image ${effectiveViewMode === 'grid' ? 'h-auto' : ''}`}
                                                     alt={hotel.hotelName}
                                                     onError={() => handleImageError(hotelKey)}
                                                     priority
@@ -390,7 +409,7 @@ export default function CountryBrandHotelList({
                                             </div>
                                         </div>
 
-                                        <div className="col-12 col-md-8 collection-hotel-content-col">
+                                            <div className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-8'} collection-hotel-content-col`}>
                                             <div className="text-decoration-none">
                                                 <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-header">
                                                     <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-2 mb-md-0 collection-hotel-title-row">
@@ -526,7 +545,9 @@ export default function CountryBrandHotelList({
                                                             const discountPercentage = dealInfo?.discount_percentage;
                                                             const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
                                                             return (
-                                                                <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block">
+                                                                <div
+                                                                    className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block"
+                                                                >
                                                                     <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                         1 night, 2 adults
                                                                     </p>
@@ -563,7 +584,10 @@ export default function CountryBrandHotelList({
                                                     })()}
                                                 </div>
 
-                                                <div className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col">
+                                                <div
+                                                    className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col"
+                                                    style={effectiveViewMode === 'grid' ? { paddingTop: '6px' } : undefined}
+                                                >
                                                     <Link
                                                         className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
                                                         href={`${hotel.url}`}
@@ -579,8 +603,10 @@ export default function CountryBrandHotelList({
                                         </div>
                                     </div>
                                 </div>
+                                </div>
                             );
-                        })}
+                            })}
+                        </div>
                     </div>
                 ))}
             </div>
