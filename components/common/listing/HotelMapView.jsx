@@ -179,7 +179,7 @@ export default function HotelMapView({
                     mapRef.current = new maps.Map(containerRef.current, {
                         center: first,
                         zoom: hotelsWithCoords.length ? 12 : 4,
-                        mapTypeControl: false,
+                        mapTypeControl: true,
                         fullscreenControl: false,
                         streetViewControl: false
                     });
