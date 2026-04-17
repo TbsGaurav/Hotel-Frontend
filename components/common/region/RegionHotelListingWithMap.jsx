@@ -29,15 +29,6 @@ export default function RegionHotelListingWithMap({
         <div className="row g-4 align-items-start">
             <div className="col-lg-3 d-none d-lg-block">
                 <div className="position-sticky" style={{ top: '16px' }}>
-                    <button
-                        type="button"
-                        className={`${isHotelMapVisible ? 'theme-button-orange' : 'theme-button-blue'} rounded-2 w-100 mb-3 d-flex align-items-center justify-content-center gap-2 py-2`}
-                        onClick={() => setIsHotelMapVisible((prev) => !prev)}
-                    >
-                        <FaMapMarkerAlt />
-                        <span>Hotel Map</span>
-                    </button>
-
                     <ListingSidebar title="Filters" sections={sidebarSections} />
                 </div>
             </div>
@@ -54,6 +45,7 @@ export default function RegionHotelListingWithMap({
                     regionHotelsSource={regionHotelsSource}
                     content={content}
                     mapVisible={isHotelMapVisible}
+                    onMapVisibleChange={setIsHotelMapVisible}
                 />
             </div>
         </div>

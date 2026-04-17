@@ -501,11 +501,7 @@ export default function CityCategoryDetails({
                         Sort
                     </button>
                     <MobileFilterDrawer sidebarSections={sidebarSections} />
-                    <button
-                        type="button"
-                        className="mobile-actions__link"
-                        onClick={() => setIsHotelMapVisible((prev) => !prev)}
-                    >
+                    <button type="button" className="mobile-actions__link" onClick={() => setIsHotelMapVisible((prev) => !prev)}>
                         Map
                     </button>
                 </div>
@@ -515,14 +511,6 @@ export default function CityCategoryDetails({
 
     const sidebar = (
         <div className="position-sticky" style={{ top: '16px' }}>
-            <button
-                type="button"
-                className={`${isHotelMapVisible ? 'theme-button-blue' : 'theme-button-orange'} rounded-2 w-100 mb-3 d-flex align-items-center justify-content-center gap-2 py-2`}
-                onClick={() => setIsHotelMapVisible((prev) => !prev)}
-            >
-                <FaMapMarkerAlt />
-                <span>Hotel Map</span>
-            </button>
             <ListingSidebar
                 title="Filters"
                 sections={sidebarSections}
@@ -587,13 +575,7 @@ export default function CityCategoryDetails({
         };
     }, [metaDescription, pageTitle, seo.canonicalUrl]);
 
-    const topContent = (
-        <SeoDetailsCard
-            metaTitle={pageTitle}
-            metaDescription={metaDescription}
-            canonicalPath={seo.canonicalPath}
-        />
-    );
+    const topContent = <SeoDetailsCard metaTitle={pageTitle} metaDescription={metaDescription} canonicalPath={seo.canonicalPath} />;
 
     if (loading) {
         return (
@@ -647,6 +629,7 @@ export default function CityCategoryDetails({
                         pageCookieName={pageCookieName}
                         pageIntentCookieName={pageIntentCookieName}
                         mapVisible={isHotelMapVisible}
+                        onMapVisibleChange={setIsHotelMapVisible}
                     />
                 ) : (
                     <div className="text-center py-5">
