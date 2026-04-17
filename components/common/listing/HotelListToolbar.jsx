@@ -4,9 +4,9 @@ import { FaMapMarkerAlt, FaList, FaThLarge } from 'react-icons/fa';
 
 export default function HotelListToolbar({
     viewMode = 'list',
-    onViewModeChange = () => {},
+    onViewModeChange = () => { },
     mapVisible = false,
-    onMapToggle = () => {},
+    onMapToggle = () => { },
     className = '',
     resultsCount = 0
 }) {
@@ -36,28 +36,6 @@ export default function HotelListToolbar({
                     border: '1px solid transparent'
                 }}
             >
-                <button
-                    type="button"
-                    onClick={onMapToggle}
-                    style={{
-                        padding: '8px 16px',
-                        borderRadius: '999px',
-                        background: mapVisible ? '#ffffff' : 'transparent',
-                        border: 'none',
-                        boxShadow: mapVisible ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                        fontSize: '14px',
-                        fontWeight: 500,
-                        lineHeight: 1.2,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        color: '#333'
-                    }}
-                >
-                    <FaMapMarkerAlt size={14} />
-                    <span>Hotel Map</span>
-                </button>
                 <button
                     type="button"
                     aria-pressed={isList}
@@ -103,6 +81,28 @@ export default function HotelListToolbar({
                 >
                     <FaThLarge size={12} />
                     Grid
+                </button>
+                <button
+                    type="button"
+                    onClick={onMapToggle}
+                    style={{
+                        padding: '8px 16px',
+                        borderRadius: '999px',
+                        background: mapVisible ? '#ffffff' : 'transparent',
+                        border: 'none',
+                        boxShadow: mapVisible ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        lineHeight: 1.2,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: '#333'
+                    }}
+                >
+                    <FaMapMarkerAlt size={14} />
+                    <span>Map</span>
                 </button>
             </div>
         </div>
