@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { loadGoogleMaps } from '@/lib/googleMapsLoader';
+import { renderToStaticMarkup } from 'react-dom/server';
+import MapPinIcon from '@/components/ui/MapPinIcon';
 
 function getFirstDefined(...values) {
     for (const value of values) {
@@ -28,16 +30,6 @@ function getHotelTitle(hotel) {
 
 function getHotelUrl(hotel) {
     return getFirstDefined(hotel?.url, hotel?.urlName, hotel?.Url) || '';
-}
-
-function getRatingText(score) {
-    const value = Number(score);
-    if (!value) return 'Not rated';
-    if (value >= 9) return 'Exceptional';
-    if (value >= 8) return 'Excellent';
-    if (value >= 7) return 'Very good';
-    if (value >= 6) return 'Good';
-    return 'Pleasant';
 }
 
 export default function HotelMapView({
@@ -213,10 +205,23 @@ export default function HotelMapView({
                 hotelsWithCoords.forEach(({ hotel, pos }) => {
                     const title = getHotelTitle(hotel);
 
+                    const stars = Number(hotel?.stars || hotel?.Stars || hotel?.reviewScore || hotel?.rating || 0);
+                    const color = stars >= 5 ? '#5e2283' : '#df4312';
+                    const number = stars >= 5 ? '5' : '4';
+
+                    const svgString = renderToStaticMarkup(<MapPinIcon number={number} color={color} />);
+                    const iconUrl = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgString);
+
+
                     const marker = new maps.Marker({
                         position: pos,
                         map: mapRef.current,
                         title,
+                        icon: {
+                            url: iconUrl,
+                            scaledSize: new maps.Size(40, 56),
+                            anchor: new maps.Point(20, 56)
+                        }
                     });
 
                     const handleClick = () => {
