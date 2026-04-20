@@ -7,7 +7,7 @@ export default function  HotelCard({ hotel }) {
     return (
         <div className="property-grid-box p-3 bg-white border-radius-10px">
             {/* Image Carousel */}
-            <div id={`carousel-${carouselId}`} className="carousel slide position-relative" data-bs-ride="carousel" data-bs-interval="2000">
+            <div id={`carousel-${carouselId}`} className="carousel slide position-relative" data-bs-interval="2000">
                 {/* Indicators INSIDE image */}
                 <div className="carousel-indicators custom-indicators">
                     {hotel.images.map((_, i) => (

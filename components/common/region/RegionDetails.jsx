@@ -13,6 +13,8 @@ import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { buildCategoryListingPath } from '@/lib/api/public/cityCategoryapi';
 import { buildRegionSeo } from '@/lib/seo';
 import SeoDetailsCard from '@/components/common/SeoDetailsCard';
+import RegionHotelListingWithMap from './RegionHotelListingWithMap';
+import MobileHotelMapButton from '@/components/common/listing/MobileHotelMapButton';
 
 const REGION_PAGE_SIZE = 10;
 
@@ -212,13 +214,11 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                             Sort
                         </button>
                         <MobileFilterDrawer sidebarSections={sidebarSections} />
-                        <button type="button" className="mobile-actions__link">
-                            Map
-                        </button>
+                        <MobileHotelMapButton label="Map" />
                     </div>
                 </div>
             </section>
-            <div className="py-2 py-lg-3">
+            <div className="py-2 py-lg-3 mx-2">
                 <div className="container">
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
@@ -244,24 +244,16 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                 </div>
             </div>
 
-            <section className="container py-2">
-                <SeoDetailsCard
-                    heading={seo.heading}
-                    metaTitle={seo.metaTitle}
-                    metaDescription={seo.metaDescription}
-                    canonicalPath={seo.canonicalPath}
-                />
-            
-                <div className="row g-4 align-items-start">
-                    <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
-                    <hr className="my-5" />
+            <section className="py-4 p-1">
+                <div className="container">
+                    <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
 
-                    <div className="col-lg-3 d-none d-lg-block">
-                        <ListingSidebar title="Filters" sections={sidebarSectionsWithLinks} />
-                    </div>
-                    <div className="col-lg-9">
-                        <h2 className="text-center fw-bold mb-4">Featured Properties in {regionName}</h2>
-                        <CityHotelList
+                    <div className="row g-4 align-items-start">
+                        <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
+                        <hr className="my-5" />
+
+                        <RegionHotelListingWithMap
+                            sidebarSections={sidebarSectionsWithLinks}
                             hotels={hotels}
                             totalCount={totalCount}
                             currentPage={currentPage}

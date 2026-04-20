@@ -9,6 +9,7 @@ import CountryBrandHotelList from '../hotel/CountryBrandHotelList';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { buildBrandSeo } from '@/lib/seo';
 import SeoDetailsCard from '@/components/common/SeoDetailsCard';
+import MobileHotelMapButton from '@/components/common/listing/MobileHotelMapButton';
 
 function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -81,11 +82,11 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
     const brandName = decodedBrandSegment;
     const countryName = capitalize(countrySlug);
     const formattedBrand = formatBrand(decodedBrandSegment);
-    const fullSlug = `${countrySlug}/${brandSegment}`;
+    const fullSlug = `${countrySlug}/${decodedBrandSegment}`;
 
     const cookieStore = await cookies();
-    const pageCookieName = getCountryBrandPageCookieName(countrySlug, brandSegment);
-    const pageIntentCookieName = getCountryBrandPageIntentCookieName(countrySlug, brandSegment);
+    const pageCookieName = getCountryBrandPageCookieName(countrySlug, decodedBrandSegment);
+    const pageIntentCookieName = getCountryBrandPageIntentCookieName(countrySlug, decodedBrandSegment);
     const currentPage = parsePageNumber(cookieStore.get(pageCookieName)?.value);
 
     let hotels = [];
@@ -143,7 +144,7 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
     const sidebarSections = buildListingSidebarSections(sidebarData, displayCountryName);
     const seo = buildBrandSeo({
         parentSlug: countrySlug,
-        brandSlug: brandSegment,
+        brandSlug: decodedBrandSegment,
         resolvedSlugData,
         pageType: 'countrybrand'
     });
@@ -158,13 +159,11 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
                             Sort
                         </button>
                         <MobileFilterDrawer sidebarSections={sidebarSections} />
-                        <button type="button" className="mobile-actions__link">
-                            Map
-                        </button>
+                        <MobileHotelMapButton label="Map" />
                     </div>
                 </div>
             </section>
-            <div className="py-2 py-lg-3">
+            <div className="py-2 py-lg-3 mx-2">
                 <div className="container">
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
@@ -176,7 +175,7 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
 
                             <li className="breadcrumb-item small-para-14-px">
                                 <Link
-                                    href={`/brand/${encodeURIComponent(brandSegment)}`}
+                                    href={`/brand/${encodeURIComponent(decodedBrandSegment)}`}
                                     className="text-dark text-decoration-none text-capitalize"
                                 >
                                     {formattedBrand}
@@ -184,7 +183,10 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px active text-capitalize">
-                                <Link href={`/${encodeURIComponent(countrySlug)}/${encodeURIComponent(brandSegment)}`} className="text-decoration-none">
+                                <Link
+                                    href={`/${encodeURIComponent(countrySlug)}/${encodeURIComponent(decodedBrandSegment)}`}
+                                    className="text-decoration-none"
+                                >
                                     {displayCountryName}
                                 </Link>
                             </li>
@@ -193,30 +195,27 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
                 </div>
             </div>
 
-            <section className="container py-2">
-                <SeoDetailsCard
-                    heading={seo.heading}
-                    metaTitle={seo.metaTitle}
-                    metaDescription={seo.metaDescription}
-                    canonicalPath={seo.canonicalPath}
-                />
-                <div className="row g-0 g-lg-4 align-items-start">
-                    <div className="col-12 order-1">
-                        <div id="country-brand-hotel-list">
-                            {hotels.length > 0 ? (
-                                <CountryBrandHotelList
-                                    hotels={hotels}
-                                    brand={brandSegment}
-                                    currentPage={currentPage}
-                                    hasMore={hasMore}
-                                    pageCookieName={pageCookieName}
-                                    pageIntentCookieName={pageIntentCookieName}
-                                />
-                            ) : (
-                                <div className="text-center py-5">
-                                    <p className="text-muted">No hotels available for this brand in {displayCountryName}.</p>
-                                </div>
-                            )}
+            <section className="py-4 p-1">
+                <div className="container">
+                    <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
+                    <div className="row g-0 g-lg-4 align-items-start">
+                        <div className="col-12 order-1">
+                            <div id="country-brand-hotel-list">
+                                {hotels.length > 0 ? (
+                                    <CountryBrandHotelList
+                                        hotels={hotels}
+                                        brand={decodedBrandSegment}
+                                        currentPage={currentPage}
+                                        hasMore={hasMore}
+                                        pageCookieName={pageCookieName}
+                                        pageIntentCookieName={pageIntentCookieName}
+                                    />
+                                ) : (
+                                    <div className="text-center py-5">
+                                        <p className="text-muted">No hotels available for this brand in {displayCountryName}.</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -224,4 +223,3 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
         </>
     );
 }
-

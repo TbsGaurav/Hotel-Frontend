@@ -197,10 +197,22 @@ export default function HotelDetails({ initialData }) {
 
     // Default image path
     const defaultImage = '/image/property-img.webp';
+    const normalizeImageUrl = (photo) => {
+        if (typeof photo !== 'string') return defaultImage;
+
+        const trimmed = photo.trim();
+        const normalized = trimmed.toLowerCase();
+
+        if (!trimmed || normalized === 'null' || normalized === 'undefined') return defaultImage;
+        if (trimmed.startsWith('//')) return `https:${trimmed}`;
+        if (trimmed.startsWith('/')) return trimmed;
+        if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+        return defaultImage;
+    };
+    const isExternalImageUrl = (url) => /^https?:\/\//i.test(String(url || ''));
     const isValidPhotoUrl = (url) => {
-        if (typeof url !== 'string') return false;
-        const normalized = url.trim().toLowerCase();
-        return normalized !== '' && normalized !== 'null' && normalized !== 'undefined';
+        return normalizeImageUrl(url) !== defaultImage;
     };
     const validHotelPhotos = hotelPhotos.filter((photo) => isValidPhotoUrl(photo?.photo));
     const mainPhoto = isValidPhotoUrl(hotelInfo?.mainPhoto) ? hotelInfo.mainPhoto : defaultImage;
@@ -227,9 +239,10 @@ export default function HotelDetails({ initialData }) {
 
     // Generate cache-busted URL
     const getImageUrl = (photo) => {
-        if (!photo) return defaultImage;
-        const sep = photo.includes('?') ? '&' : '?';
-        return timestamp ? `${photo}${sep}t=${timestamp}` : photo;
+        const normalizedUrl = normalizeImageUrl(photo);
+        if (normalizedUrl === defaultImage) return defaultImage;
+        const sep = normalizedUrl.includes('?') ? '&' : '?';
+        return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
     };
 
     const openPhotoModal = (index = 0) => {
@@ -457,186 +470,202 @@ export default function HotelDetails({ initialData }) {
             </div>
 
             {/* Hotel Header Info - Above Images */}
-            <section className="container py-3">
-                <div className="d-flex align-items-start flex-column flex-md-row mb-3 hotel-detail-header">
-                    {' '}
-                    <div className="me-auto">
-                        <div className="d-flex align-items-center mb-2">
-                            <h4 className="fw-600 mb-0 me-3 fs-5 fw-bold hotel-detail-title"> {hotelInfo.hotelName}</h4>
-                            <div className="text-warning d-flex align-items-center me-3">
-                                {[...Array(5)].map((_, i) => (
-                                    <MdOutlineStarPurple500 key={i} size={18} color={i < hotelInfo.stars ? '#f0831e' : '#ddd'} />
-                                ))}
-                            </div>
-                            <span
-                                className="text-white px-3 py-1 mb-2 d-inline-block"
-                                style={{
-                                    background: '#ff7a00',
-                                    borderRadius: '20px',
-                                    fontSize: '12px'
-                                }}
-                            >
-                                {hotelInfo.hotelType || 'Apartment Hotel'}
-                            </span>
-                        </div>
-                        <div className="hotel-detail-location mb-2">
-                            <p
-                                className="hotel-address-text mb-1"
-                                style={{ cursor: 'pointer' }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openMap(hotelInfo.latitude, hotelInfo.longitude);
-                                }}
-                            >
-                                {hotelInfo.address}
-                            </p>
-
-                            <div className="d-flex align-items-center gap-1 hotel-detail-map">
-                                <FaMapMarkerAlt />
-                                <p className="hotel-map-link mb-0">View on map and nearby hotels</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="hotel-detail-review mb-2">
+            <section className="py-4 p-1">
+                <div className="container">
+                    <div className="d-flex align-items-start flex-column flex-md-row mb-3 hotel-detail-header">
                         {' '}
-                        <div className="d-flex align-items-start mt-3 mt-md-0 me-3">
-                            <div
-                                className="d-flex flex-column align-items-center justify-content-center p-2"
-                                style={{
-                                    background: '#003580',
-                                    borderRadius: '10px 10px 10px 0px',
-                                    width: '40px',
-                                    height: '40px',
-                                    fontSize: '12px'
-                                }}
-                            >
-                                <span className="text-white  fs-9">{hotelInfo.reviewScore}</span>
+                        <div className="me-auto">
+                            <div className="d-flex align-items-center mb-2">
+                                <h4 className="fw-600 mb-0 me-3 fs-5 fw-bold hotel-detail-title"> {hotelInfo.hotelName}</h4>
+                                <div className="text-warning d-flex align-items-center me-3">
+                                    {[...Array(5)].map((_, i) => (
+                                        <MdOutlineStarPurple500 key={i} size={18} color={i < hotelInfo.stars ? '#f0831e' : '#ddd'} />
+                                    ))}
+                                </div>
+                                <span
+                                    className="text-white px-3 py-1 mb-2 d-inline-block"
+                                    style={{
+                                        background: '#ff7a00',
+                                        borderRadius: '20px',
+                                        fontSize: '12px'
+                                    }}
+                                >
+                                    {hotelInfo.hotelType || 'Apartment Hotel'}
+                                </span>
                             </div>
-                            <div className="ms-2 d-flex flex-column justify-content-center">
-                                <span className="fw-bold">{hotelInfo.ratingText}</span>
-                                <span className="text-muted small">{hotelInfo.reviewCount} verified reviews</span>
+                            <div className="hotel-detail-location mb-2">
+                                <p
+                                    className="hotel-address-text mb-1"
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openMap(hotelInfo.latitude, hotelInfo.longitude);
+                                    }}
+                                >
+                                    {hotelInfo.address}
+                                </p>
+
+                                <div className="d-flex align-items-center gap-1 hotel-detail-map">
+                                    <FaMapMarkerAlt />
+                                    <p className="hotel-map-link mb-0">View on map and nearby hotels</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="d-none d-md-flex align-items-center ms-auto hotel-detail-price-btn-desktop ">
-                        <Link
-                            href={hotelInfo.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="theme-button-blue d-flex align-items-center justify-content-center px-3"
-                            style={{ height: '48px', borderRadius: '6px' }}
-                        >
-                            See Rooms & Prices
-                        </Link>
+                        <div className="hotel-detail-review mb-2">
+                            {' '}
+                            <div className="d-flex align-items-start mt-3 mt-md-0 me-3">
+                                <div
+                                    className="d-flex flex-column align-items-center justify-content-center p-2"
+                                    style={{
+                                        background: '#003580',
+                                        borderRadius: '10px 10px 10px 0px',
+                                        width: '40px',
+                                        height: '40px',
+                                        fontSize: '12px'
+                                    }}
+                                >
+                                    <span className="text-white  fs-9">{hotelInfo.reviewScore}</span>
+                                </div>
+                                <div className="ms-2 d-flex flex-column justify-content-center">
+                                    <span className="fw-bold">{hotelInfo.ratingText}</span>
+                                    <span className="text-muted small">{hotelInfo.reviewCount} verified reviews</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="d-none d-md-flex align-items-center ms-auto hotel-detail-price-btn-desktop ">
+                            <Link
+                                href={hotelInfo.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="theme-button-blue d-flex align-items-center justify-content-center px-3"
+                                style={{ height: '48px', borderRadius: '6px' }}
+                            >
+                                See Rooms & Prices
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Image Gallery with Carousel */}
-            <section className="container py-3">
-                <div className="row g-2">
-                    {/* Main image with carousel */}
-                    <div className="col-12 col-lg-8">
-                        {' '}
-                        <div
-                            id="hotelCarousel"
-                            className="carousel slide rounded-4 overflow-hidden position-relative"
-                            data-bs-ride="carousel"
-                            style={{ height: '400px' }}
-                        >
-                            <div className="carousel-indicators">
-                                <button type="button" data-bs-target="#hotelCarousel" data-bs-slide-to="0" className="active"></button>
-                                {carouselPhotos.map((_, idx) => (
-                                    <button key={idx} type="button" data-bs-target="#hotelCarousel" data-bs-slide-to={idx + 1}></button>
-                                ))}
-                            </div>
-                            <div className="carousel-inner h-100">
-                                <div className="carousel-item active h-100">
-                                    <Image
-                                        fill
-                                        src={getImageUrl(mainPhoto)}
-                                        sizes="(max-width: 991px) 100vw, 66vw"
-                                        className="d-block w-100 h-100"
-                                        alt={hotelInfo.hotelName}
-                                        onError={handleImageError}
-                                    />
+            <section className="py-4 p-1">
+                <div className="container">
+                    <div className="row g-2">
+                        {/* Main image with carousel */}
+                        <div className="col-12 col-lg-8">
+                            {' '}
+                            <div
+                                id="hotelCarousel"
+                                className="carousel slide rounded-4 overflow-hidden position-relative"
+                                style={{ height: '400px' }}
+                            >
+                                <div className="carousel-indicators">
+                                    <button type="button" data-bs-target="#hotelCarousel" data-bs-slide-to="0" className="active"></button>
+                                    {carouselPhotos.map((_, idx) => (
+                                        <button key={idx} type="button" data-bs-target="#hotelCarousel" data-bs-slide-to={idx + 1}></button>
+                                    ))}
                                 </div>
-                                {carouselPhotos.map((photo, idx) => (
-                                    <div key={idx} className="carousel-item h-100">
+                                <div className="carousel-inner h-100">
+                                    <div className="carousel-item active h-100">
                                         <Image
                                             fill
-                                            src={getImageUrl(photo.photo)}
+                                            src={getImageUrl(mainPhoto)}
                                             sizes="(max-width: 991px) 100vw, 66vw"
                                             className="d-block w-100 h-100"
-                                            alt={`${hotelInfo.hotelName} photo ${idx + 1}`}
+                                            alt={hotelInfo.hotelName}
                                             onError={handleImageError}
+                                            unoptimized={isExternalImageUrl(getImageUrl(mainPhoto))}
                                         />
+                                    </div>
+                                    {carouselPhotos.map((photo, idx) => (
+                                        <div key={idx} className="carousel-item h-100">
+                                            <Image
+                                                fill
+                                                src={getImageUrl(photo.photo)}
+                                                sizes="(max-width: 991px) 100vw, 66vw"
+                                                className="d-block w-100 h-100"
+                                                alt={`${hotelInfo.hotelName} photo ${idx + 1}`}
+                                                onError={handleImageError}
+                                                unoptimized={isExternalImageUrl(getImageUrl(photo.photo))}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Carousel controls */}
+                                <button
+                                    className="carousel-control-prev"
+                                    type="button"
+                                    data-bs-target="#hotelCarousel"
+                                    data-bs-slide="prev"
+                                >
+                                    <span className="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+                                    <span className="visually-hidden">Previous</span>
+                                </button>
+                                <button
+                                    className="carousel-control-next"
+                                    type="button"
+                                    data-bs-target="#hotelCarousel"
+                                    data-bs-slide="next"
+                                >
+                                    <span className="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
+                                    <span className="visually-hidden">Next</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Side images grid */}
+                        <div className="col-lg-4 d-none d-lg-block hotel-detail-side-images">
+                            {' '}
+                            <div className="row g-2 h-100">
+                                {sidePreviewPhotos.map((photo, idx) => (
+                                    <div key={idx} className="col-12 mb-2">
+                                        <div
+                                            className="rounded-4 overflow-hidden position-relative photo-hover-container"
+                                            style={{ height: '190px', cursor: 'pointer' }}
+                                            onClick={() => openPhotoModal(idx + 1)}
+                                        >
+                                            <Image
+                                                src={getImageUrl(photo.photo)}
+                                                className="w-100 h-100"
+                                                alt="hotel"
+                                                fill
+                                                sizes="33vw"
+                                                unoptimized={isExternalImageUrl(getImageUrl(photo.photo))}
+                                                onError={handleImageError}
+                                            />
+
+                                            {/* ✅ ONLY ON LAST IMAGE */}
+                                            {allPhotos.length > 1 && idx === sidePreviewPhotos.length - 1 && (
+                                                <div className="side-view-photos-btn">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            openPhotoModal();
+                                                        }}
+                                                    >
+                                                        View all photos ({allPhotos.length})
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
-
-                            {/* Carousel controls */}
-                            <button className="carousel-control-prev" type="button" data-bs-target="#hotelCarousel" data-bs-slide="prev">
-                                <span className="carousel-control-prev-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
-                                <span className="visually-hidden">Previous</span>
-                            </button>
-                            <button className="carousel-control-next" type="button" data-bs-target="#hotelCarousel" data-bs-slide="next">
-                                <span className="carousel-control-next-icon bg-dark rounded-circle p-3" aria-hidden="true"></span>
-                                <span className="visually-hidden">Next</span>
-                            </button>
                         </div>
                     </div>
-
-                    {/* Side images grid */}
-                    <div className="col-lg-4 d-none d-lg-block hotel-detail-side-images">
+                    <div className="mt-3 d-block d-md-none hotel-detail-price-btn">
                         {' '}
-                        <div className="row g-2 h-100">
-                            {sidePreviewPhotos.map((photo, idx) => (
-                                <div key={idx} className="col-12 mb-2">
-                                    <div
-                                        className="rounded-4 overflow-hidden position-relative photo-hover-container"
-                                        style={{ height: '190px', cursor: 'pointer' }}
-                                        onClick={() => openPhotoModal(idx + 1)}
-                                    >
-                                        <Image
-                                            src={getImageUrl(photo.photo)}
-                                            className="w-100 h-100"
-                                            alt="hotel"
-                                            fill
-                                            sizes="33vw"
-                                        />
-
-                                        {/* ✅ ONLY ON LAST IMAGE */}
-                                        {allPhotos.length > 1 && idx === sidePreviewPhotos.length - 1 && (
-                                            <div className="side-view-photos-btn">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        openPhotoModal();
-                                                    }}
-                                                >
-                                                    View all photos ({allPhotos.length})
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        <Link
+                            href={hotelInfo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="theme-button-blue rounded d-flex align-items-center justify-content-center py-2 px-4"
+                        >
+                            See Rooms & Prices
+                        </Link>
                     </div>
                 </div>
-                <div className="mt-3 d-block d-md-none hotel-detail-price-btn">
-                    {' '}
-                    <Link
-                        href={hotelInfo.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="theme-button-blue rounded d-flex align-items-center justify-content-center py-2 px-4"
-                    >
-                        See Rooms & Prices
-                    </Link>
-                </div>
-
                 {/* View all photos button */}
                 {/* <div className="mt-2 d-none d-lg-block">
                     {' '}
@@ -651,115 +680,118 @@ export default function HotelDetails({ initialData }) {
             </section>
 
             {/* Tabs Section */}
-            <section className="container py-4">
-                {/* Tab Navigation */}
-                <div className="border-bottom mb-4">
-                    <ul className="nav nav-tabs custom-tabs border-bottom" role="tablist">
-                        <li className="nav-item">
-                            <button
-                                className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('overview')}
-                            >
-                                Overview
-                            </button>
-                        </li>
-                        <li className="nav-item">
-                            <button
-                                className={`nav-link ${activeTab === 'reviews' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('reviews')}
-                            >
-                                Traveller reviews
-                            </button>
-                        </li>
-                        <li className="nav-item">
-                            <button
-                                className={`nav-link ${activeTab === 'facilities' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('facilities')}
-                            >
-                                Facilities
-                            </button>
-                        </li>
-                        <li className="nav-item">
-                            <button
-                                className={`nav-link ${activeTab === 'policies' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('policies')}
-                            >
-                                Hotel Policies
-                            </button>
-                        </li>
-                        <li className="nav-item">
-                            <button
-                                className={`nav-link ${activeTab === 'askPrice' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('askPrice')}
-                            >
-                                Ask For Prices
-                            </button>
-                        </li>
-                        <li className="nav-item">
-                            <button
-                                className={`nav-link ${activeTab === 'writeReview' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('writeReview')}
-                            >
-                                Write Review
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-
-                <div className="row">
-                    <div className="col-lg-12">
-                        {activeTab === 'overview' && (
-                            <div className="tab-content">
-                                {/* Description */}
-                                <div className="mb-4">
-                                    <p
-                                        className="text-muted hotel-detail-description"
-                                        style={{ lineHeight: '1.8', whiteSpace: 'pre-line' }}
-                                    >
-                                        {' '}
-                                        {hotelInfo.description}
-                                    </p>
+            <section className="py-4 p-1">
+                <div className="container">
+                    {' '}
+                    {/* Tab Navigation */}
+                    <div className="border-bottom mb-4">
+                        <ul className="nav nav-tabs custom-tabs border-bottom" role="tablist">
+                            <li className="nav-item">
+                                <button
+                                    className={`nav-link ${activeTab === 'overview' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('overview')}
+                                >
+                                    Overview
+                                </button>
+                            </li>
+                            <li className="nav-item">
+                                <button
+                                    className={`nav-link ${activeTab === 'reviews' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('reviews')}
+                                >
+                                    Traveller reviews
+                                </button>
+                            </li>
+                            <li className="nav-item">
+                                <button
+                                    className={`nav-link ${activeTab === 'facilities' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('facilities')}
+                                >
+                                    Facilities
+                                </button>
+                            </li>
+                            <li className="nav-item">
+                                <button
+                                    className={`nav-link ${activeTab === 'policies' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('policies')}
+                                >
+                                    Hotel Policies
+                                </button>
+                            </li>
+                            <li className="nav-item">
+                                <button
+                                    className={`nav-link ${activeTab === 'askPrice' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('askPrice')}
+                                >
+                                    Ask For Prices
+                                </button>
+                            </li>
+                            <li className="nav-item">
+                                <button
+                                    className={`nav-link ${activeTab === 'writeReview' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('writeReview')}
+                                >
+                                    Write Review
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div className="row">
+                        <div className="col-lg-12">
+                            {activeTab === 'overview' && (
+                                <div className="tab-content">
+                                    {/* Description */}
+                                    <div className="mb-4">
+                                        <p
+                                            className="text-muted hotel-detail-description"
+                                            style={{ lineHeight: '1.8', whiteSpace: 'pre-line' }}
+                                        >
+                                            {' '}
+                                            {hotelInfo.description}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {activeTab === 'reviews' && (
-                            <div className="tab-content">
-                                <div className="mb-4">
-                                    {hotelReviews.length > 0 ? (
-                                        <div className="row">
-                                            {hotelReviews.map((review, idx) => (
-                                                <div key={idx} className="col-12 mb-4">
-                                                    <div className="border rounded-4 p-4 bg-white">
-                                                        <div className="d-flex">
-                                                            {/* Avatar */}
-                                                            <div
-                                                                className="rounded-circle d-flex align-items-center justify-content-center me-3"
-                                                                style={{
-                                                                    width: '50px',
-                                                                    height: '50px',
-                                                                    minWidth: '50px',
-                                                                    background: '#e6eef6',
-                                                                    color: '#5f7f9c',
-                                                                    fontWeight: '600',
-                                                                    fontSize: '18px',
-                                                                    lineHeight: '1',
-                                                                    flexShrink: 0
-                                                                }}
-                                                            >
-                                                                {review.travellerName ? review.travellerName.charAt(0).toUpperCase() : 'S'}
-                                                            </div>
+                            {activeTab === 'reviews' && (
+                                <div className="tab-content">
+                                    <div className="mb-4">
+                                        {hotelReviews.length > 0 ? (
+                                            <div className="row">
+                                                {hotelReviews.map((review, idx) => (
+                                                    <div key={idx} className="col-12 mb-4">
+                                                        <div className="border rounded-4 p-4 bg-white">
+                                                            <div className="d-flex">
+                                                                {/* Avatar */}
+                                                                <div
+                                                                    className="rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                                    style={{
+                                                                        width: '50px',
+                                                                        height: '50px',
+                                                                        minWidth: '50px',
+                                                                        background: '#e6eef6',
+                                                                        color: '#5f7f9c',
+                                                                        fontWeight: '600',
+                                                                        fontSize: '18px',
+                                                                        lineHeight: '1',
+                                                                        flexShrink: 0
+                                                                    }}
+                                                                >
+                                                                    {review.travellerName
+                                                                        ? review.travellerName.charAt(0).toUpperCase()
+                                                                        : 'S'}
+                                                                </div>
 
-                                                            {/* Reviewer Info */}
-                                                            <div style={{ minWidth: '180px' }}>
-                                                                <p className="mb-1 fw-bold">{review.travellerName || 'Guest'}</p>
-                                                                <p className="mb-0 text-muted small">{review?.reviewType}</p>
-                                                            </div>
+                                                                {/* Reviewer Info */}
+                                                                <div style={{ minWidth: '180px' }}>
+                                                                    <p className="mb-1 fw-bold">{review.travellerName || 'Guest'}</p>
+                                                                    <p className="mb-0 text-muted small">{review?.reviewType}</p>
+                                                                </div>
 
-                                                            {/* Review Content */}
-                                                            <div className="flex-grow-1">
-                                                                {/* Stars */}
-                                                                {/* <div className="mb-1">
+                                                                {/* Review Content */}
+                                                                <div className="flex-grow-1">
+                                                                    {/* Stars */}
+                                                                    {/* <div className="mb-1">
                                                                     {[...Array(5)].map((_, i) => (
                                                                         <MdOutlineStarPurple500
                                                                             key={i}
@@ -769,92 +801,92 @@ export default function HotelDetails({ initialData }) {
                                                                     ))}
                                                                 </div> */}
 
-                                                                {/* Review Title */}
-                                                                <h6 className="fw-bold mb-1">{review?.reviewTitle}</h6>
+                                                                    {/* Review Title */}
+                                                                    <h6 className="fw-bold mb-1">{review?.reviewTitle}</h6>
 
-                                                                {/* Review Text */}
-                                                                <p className="text-muted mb-0">{review.positive || review.negative}</p>
+                                                                    {/* Review Text */}
+                                                                    <p className="text-muted mb-0">{review.positive || review.negative}</p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="border rounded p-4 text-center">
-                                            <p className="text-muted mb-0">No reviews available yet.</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'facilities' && (
-                            <div className="tab-content">
-                                <div className="mb-4">
-                                    {hotelFacilities.length > 0 ? (
-                                        <div className="row">
-                                            {hotelFacilities.map((facilityGroup, idx) => (
-                                                <div key={idx} className="col-12 mb-3">
-                                                    <h6 className="fw-bold mb-2">{facilityGroup.facilityType}</h6>
-                                                    <p className="text-muted mb-0">
-                                                        {facilityGroup.facilities
-                                                            .split('|')
-                                                            .map((f, i) => f.trim())
-                                                            .join(', ')}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="col-12">
-                                            <div className="border rounded p-4 text-center">
-                                                <p className="text-muted mb-0">No facilities information available.</p>
+                                                ))}
                                             </div>
-                                        </div>
-                                    )}
+                                        ) : (
+                                            <div className="border rounded p-4 text-center">
+                                                <p className="text-muted mb-0">No reviews available yet.</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {activeTab === 'policies' && (
-                            <div className="tab-content">
-                                <div className="mb-4">
-                                    <div className="row g-2">
-                                        <div className="row mb-4">
-                                            <span className="fw-bold" style={{ fontSize: '18px' }}>
-                                                Check-in
-                                            </span>
-                                            <span className="text-muted">
-                                                From {hotelInfo.checkIn ? hotelInfo.checkIn.slice(0, 5) : '00:00'} to 23:59
-                                            </span>
-                                        </div>
-                                        <div className="row mb-4">
-                                            <span className="fw-bold" style={{ fontSize: '18px' }}>
-                                                Check-out
-                                            </span>
-                                            <span className="text-muted">
-                                                Until {hotelInfo.checkOut ? hotelInfo.checkOut.slice(0, 5) : '11:00'}
-                                            </span>
-                                        </div>
-                                        <div className="row mb-4">
-                                            <span className="fw-bold" style={{ fontSize: '18px' }}>
-                                                Cancellation & prepayment
-                                            </span>
-                                            <span className="text-muted">
-                                                {hotelInfo.cancellationPolicy ||
-                                                    'Cancellation and prepayment policies vary by room type. Please check your booking details before finalizing.'}
-                                            </span>
-                                        </div>
-                                        <div className="row mb-4">
-                                            <span className="fw-bold" style={{ fontSize: '18px' }}>
-                                                Accepted credit cards
-                                            </span>
-                                            <span className="text-muted">
-                                                {hotelInfo.acceptedCreditCards ||
-                                                    'The hotel reserves the right to pre-authorise credit cards prior to arrival.'}
-                                            </span>
-                                            {/* <div className="d-flex align-items-center flex-wrap gap-3 mt-3">
+                            {activeTab === 'facilities' && (
+                                <div className="tab-content">
+                                    <div className="mb-4">
+                                        {hotelFacilities.length > 0 ? (
+                                            <div className="row">
+                                                {hotelFacilities.map((facilityGroup, idx) => (
+                                                    <div key={idx} className="col-12 mb-3">
+                                                        <h6 className="fw-bold mb-2">{facilityGroup.facilityType}</h6>
+                                                        <p className="text-muted mb-0">
+                                                            {facilityGroup.facilities
+                                                                .split('|')
+                                                                .map((f, i) => f.trim())
+                                                                .join(', ')}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="col-12">
+                                                <div className="border rounded p-4 text-center">
+                                                    <p className="text-muted mb-0">No facilities information available.</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'policies' && (
+                                <div className="tab-content">
+                                    <div className="mb-4">
+                                        <div className="row g-2">
+                                            <div className="row mb-4">
+                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
+                                                    Check-in
+                                                </span>
+                                                <span className="text-muted">
+                                                    From {hotelInfo.checkIn ? hotelInfo.checkIn.slice(0, 5) : '00:00'} to 23:59
+                                                </span>
+                                            </div>
+                                            <div className="row mb-4">
+                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
+                                                    Check-out
+                                                </span>
+                                                <span className="text-muted">
+                                                    Until {hotelInfo.checkOut ? hotelInfo.checkOut.slice(0, 5) : '11:00'}
+                                                </span>
+                                            </div>
+                                            <div className="row mb-4">
+                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
+                                                    Cancellation & prepayment
+                                                </span>
+                                                <span className="text-muted">
+                                                    {hotelInfo.cancellationPolicy ||
+                                                        'Cancellation and prepayment policies vary by room type. Please check your booking details before finalizing.'}
+                                                </span>
+                                            </div>
+                                            <div className="row mb-4">
+                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
+                                                    Accepted credit cards
+                                                </span>
+                                                <span className="text-muted">
+                                                    {hotelInfo.acceptedCreditCards ||
+                                                        'The hotel reserves the right to pre-authorise credit cards prior to arrival.'}
+                                                </span>
+                                                {/* <div className="d-flex align-items-center flex-wrap gap-3 mt-3">
                                                 <SiAmericanexpress size={36} color="#2e77bc" />
                                                 <SiVisa size={36} color="#142688" />
                                                 <SiMastercard size={36} color="#eb001b" />
@@ -862,259 +894,261 @@ export default function HotelDetails({ initialData }) {
                                                 <SiJcb size={36} color="#0058a3" />
                                                 <SiWesternunion size={36} color="#ffd300" />
                                             </div> */}
-                                        </div>
-                                        <div className="row mb-4">
-                                            <span className="fw-bold" style={{ fontSize: '18px' }}>
-                                                The fine print
-                                            </span>
-                                            <span className="text-muted">{hotelInfo.hotelPolicy || 'No special policies listed.'}</span>
-                                        </div>
-                                        <div className="d-flex justify-content-start align-items-center mb-2 gap-4">
-                                            <span className="text-muted small">
-                                                Last updated: {formatLastUpdated(hotelInfo.lastUpdated)}
-                                            </span>
-                                            <button
-                                                type="button"
-                                                className="btn btn-link p-0 text-decoration-none"
-                                                style={{ color: '#0077c0' }}
-                                                onMouseOver={(e) => (e.currentTarget.style.color = '#d97706')}
-                                                onMouseOut={(e) => (e.currentTarget.style.color = '#0077c0')}
-                                                onClick={handlePolicyReload}
-                                            >
-                                                Reload
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'askPrice' && (
-                            <div className="tab-content">
-                                <h5 className="fw-bold mb-3">Setup a Price watch for {hotelInfo.hotelName}</h5>
-                                <p className="text-muted mb-2">
-                                    Each day we&apos;ll check prices and send you an email for your selected dates at {hotelInfo.hotelName}.
-                                </p>
-                                <p className="text-muted mb-4">
-                                    If you don&apos;t have specific dates but would like to check prices for say next weekend or say next
-                                    month we can check the price too.
-                                </p>
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        alert('Price watch setup!');
-                                    }}
-                                >
-                                    <div className="row g-3 align-items-end">
-                                        <div className="col-md-4">
-                                            <span className="mb-2">Enter your name</span>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                style={{ backgroundColor: '#f3f4f7', borderRadius: '16px', border: 'none' }}
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-md-4">
-                                            <span className="mb-2">Enter your email</span>
-                                            <input
-                                                type="email"
-                                                className="form-control"
-                                                style={{ backgroundColor: '#f3f4f7', borderRadius: '16px', border: 'none' }}
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-md-4">
-                                            <button type="submit" className="theme-button-orange rounded px-5 py-2">
-                                                Send Me Details
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                                <div className="mt-4">
-                                    <a
-                                        href="#"
-                                        className="small me-2"
-                                        style={{ color: '#f0831e' }}
-                                        onMouseOver={(e) => (e.target.style.color = '#0077c0')}
-                                        onMouseOut={(e) => (e.target.style.color = '#f0831e')}
-                                    >
-                                        Privacy
-                                    </a>
-                                    <span className="text-muted small">/</span>
-                                    <a
-                                        href="#"
-                                        className="small ms-2"
-                                        style={{ color: '#f0831e' }}
-                                        onMouseOver={(e) => (e.target.style.color = '#0077c0')}
-                                        onMouseOut={(e) => (e.target.style.color = '#f0831e')}
-                                    >
-                                        Terms
-                                    </a>
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'writeReview' && (
-                            <div className="tab-content">
-                                <div className="write-review-layout">
-                                    <div className="write-review-form-column">
-                                        <h5 className="fw-bold mb-4">Share your experience with other travellers.</h5>
-                                        <form onSubmit={handleSubmitReview}>
-                                            <div className="write-review-field-row">
-                                                <label className="write-review-label">Select Rating</label>
-                                                {renderReviewStars(overallReviewRating, setOverallReviewRating, 'overall')}
                                             </div>
-                                            <div className="write-review-field-row">
-                                                <label htmlFor="reviewFirstName" className="write-review-label">
-                                                    First Name
-                                                </label>
-                                                <div className="write-review-field-input">
-                                                    <input
-                                                        id="reviewFirstName"
-                                                        type="text"
-                                                        className={`form-control write-review-input ${reviewErrors.firstName ? 'is-invalid' : ''}`}
-                                                        value={reviewForm.firstName}
-                                                        onChange={(e) => handleReviewFieldChange('firstName', e.target.value)}
-                                                    />
-                                                    {reviewErrors.firstName && (
-                                                        <div className="invalid-feedback">{reviewErrors.firstName}</div>
-                                                    )}
-                                                </div>
+                                            <div className="row mb-4">
+                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
+                                                    The fine print
+                                                </span>
+                                                <span className="text-muted">{hotelInfo.hotelPolicy || 'No special policies listed.'}</span>
                                             </div>
-                                            <div className="write-review-field-row">
-                                                <label htmlFor="reviewLastName" className="write-review-label">
-                                                    Last Name
-                                                </label>
-                                                <div className="write-review-field-input">
-                                                    <input
-                                                        id="reviewLastName"
-                                                        type="text"
-                                                        className={`form-control write-review-input ${reviewErrors.lastName ? 'is-invalid' : ''}`}
-                                                        value={reviewForm.lastName}
-                                                        onChange={(e) => handleReviewFieldChange('lastName', e.target.value)}
-                                                    />
-                                                    {reviewErrors.lastName && (
-                                                        <div className="invalid-feedback">{reviewErrors.lastName}</div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="write-review-field-row">
-                                                <label htmlFor="reviewEmail" className="write-review-label">
-                                                    Email
-                                                </label>
-                                                <div className="write-review-field-input">
-                                                    <input
-                                                        id="reviewEmail"
-                                                        type="email"
-                                                        className={`form-control write-review-input ${reviewErrors.email ? 'is-invalid' : ''}`}
-                                                        value={reviewForm.email}
-                                                        onChange={(e) => handleReviewFieldChange('email', e.target.value)}
-                                                    />
-                                                    {reviewErrors.email && <div className="invalid-feedback">{reviewErrors.email}</div>}
-                                                </div>
-                                            </div>
-                                            <div className="write-review-field-row">
-                                                <label htmlFor="reviewTitle" className="write-review-label">
-                                                    Title of your review
-                                                </label>
-                                                <div className="write-review-field-input">
-                                                    <input
-                                                        id="reviewTitle"
-                                                        type="text"
-                                                        className={`form-control write-review-input ${reviewErrors.reviewTitle ? 'is-invalid' : ''}`}
-                                                        value={reviewForm.reviewTitle}
-                                                        onChange={(e) => handleReviewFieldChange('reviewTitle', e.target.value)}
-                                                    />
-                                                    {reviewErrors.reviewTitle && (
-                                                        <div className="invalid-feedback">{reviewErrors.reviewTitle}</div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="write-review-field-row write-review-field-row-textarea">
-                                                <label htmlFor="reviewText" className="write-review-label">
-                                                    Your review
-                                                </label>
-                                                <div className="write-review-field-input">
-                                                    <textarea
-                                                        id="reviewText"
-                                                        className={`form-control write-review-input write-review-textarea ${reviewErrors.reviewText ? 'is-invalid' : ''}`}
-                                                        rows="5"
-                                                        value={reviewForm.reviewText}
-                                                        onChange={(e) => handleReviewFieldChange('reviewText', e.target.value)}
-                                                    ></textarea>
-                                                    {reviewErrors.reviewText && (
-                                                        <div className="invalid-feedback">{reviewErrors.reviewText}</div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="write-review-field-row">
-                                                <label htmlFor="reviewTripType" className="write-review-label">
-                                                    What sort of trip was this?
-                                                </label>
-                                                <div className="write-review-field-input">
-                                                    <select
-                                                        id="reviewTripType"
-                                                        className={`form-select write-review-input write-review-select ${reviewErrors.tripType ? 'is-invalid' : ''}`}
-                                                        value={reviewForm.tripType}
-                                                        onChange={(e) => handleReviewFieldChange('tripType', e.target.value)}
-                                                    >
-                                                        <option value="select">Select</option>
-                                                        <option value="solo">Solo Traveller</option>
-                                                        <option value="couple">Couple</option>
-                                                        <option value="family">Family</option>
-                                                        <option value="business">Business</option>
-                                                        <option value="friends">Friends</option>
-                                                    </select>
-                                                    {reviewErrors.tripType && (
-                                                        <div className="invalid-feedback">{reviewErrors.tripType}</div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="write-review-submit-wrap">
+                                            <div className="d-flex justify-content-start align-items-center mb-2 gap-4">
+                                                <span className="text-muted small">
+                                                    Last updated: {formatLastUpdated(hotelInfo.lastUpdated)}
+                                                </span>
                                                 <button
-                                                    type="submit"
-                                                    className="theme-button-orange write-review-submit"
-                                                    disabled={isSubmitting}
+                                                    type="button"
+                                                    className="btn btn-link p-0 text-decoration-none"
+                                                    style={{ color: '#0077c0' }}
+                                                    onMouseOver={(e) => (e.currentTarget.style.color = '#d97706')}
+                                                    onMouseOut={(e) => (e.currentTarget.style.color = '#0077c0')}
+                                                    onClick={handlePolicyReload}
                                                 >
-                                                    {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                                                    Reload
                                                 </button>
                                             </div>
-                                        </form>
+                                        </div>
                                     </div>
+                                </div>
+                            )}
 
-                                    <div className="write-review-ratings-column">
-                                        <h5 className="fw-bold mb-4">Hotel Ratings (Click to select a rating)</h5>
-                                        <div className="write-review-rating-list">
-                                            <div className="write-review-rating-item">
-                                                <span className="write-review-rating-label">Service</span>
-                                                {renderReviewStars(
-                                                    categoryRatings.service,
-                                                    (value) => setCategoryRatings((prev) => ({ ...prev, service: value })),
-                                                    'service'
-                                                )}
+                            {activeTab === 'askPrice' && (
+                                <div className="tab-content">
+                                    <h5 className="fw-bold mb-3">Setup a Price watch for {hotelInfo.hotelName}</h5>
+                                    <p className="text-muted mb-2">
+                                        Each day we&apos;ll check prices and send you an email for your selected dates at{' '}
+                                        {hotelInfo.hotelName}.
+                                    </p>
+                                    <p className="text-muted mb-4">
+                                        If you don&apos;t have specific dates but would like to check prices for say next weekend or say
+                                        next month we can check the price too.
+                                    </p>
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            alert('Price watch setup!');
+                                        }}
+                                    >
+                                        <div className="row g-3 align-items-end">
+                                            <div className="col-md-4">
+                                                <span className="mb-2">Enter your name</span>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    style={{ backgroundColor: '#f3f4f7', borderRadius: '16px', border: 'none' }}
+                                                    required
+                                                />
                                             </div>
-                                            <div className="write-review-rating-item">
-                                                <span className="write-review-rating-label">Rooms</span>
-                                                {renderReviewStars(
-                                                    categoryRatings.rooms,
-                                                    (value) => setCategoryRatings((prev) => ({ ...prev, rooms: value })),
-                                                    'rooms'
-                                                )}
+                                            <div className="col-md-4">
+                                                <span className="mb-2">Enter your email</span>
+                                                <input
+                                                    type="email"
+                                                    className="form-control"
+                                                    style={{ backgroundColor: '#f3f4f7', borderRadius: '16px', border: 'none' }}
+                                                    required
+                                                />
                                             </div>
-                                            <div className="write-review-rating-item">
-                                                <span className="write-review-rating-label">Location</span>
-                                                {renderReviewStars(
-                                                    categoryRatings.location,
-                                                    (value) => setCategoryRatings((prev) => ({ ...prev, location: value })),
-                                                    'location'
-                                                )}
+                                            <div className="col-md-4">
+                                                <button type="submit" className="theme-button-orange rounded px-5 py-2">
+                                                    Send Me Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <div className="mt-4">
+                                        <a
+                                            href="#"
+                                            className="small me-2"
+                                            style={{ color: '#f0831e' }}
+                                            onMouseOver={(e) => (e.target.style.color = '#0077c0')}
+                                            onMouseOut={(e) => (e.target.style.color = '#f0831e')}
+                                        >
+                                            Privacy
+                                        </a>
+                                        <span className="text-muted small">/</span>
+                                        <a
+                                            href="#"
+                                            className="small ms-2"
+                                            style={{ color: '#f0831e' }}
+                                            onMouseOver={(e) => (e.target.style.color = '#0077c0')}
+                                            onMouseOut={(e) => (e.target.style.color = '#f0831e')}
+                                        >
+                                            Terms
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'writeReview' && (
+                                <div className="tab-content">
+                                    <div className="write-review-layout">
+                                        <div className="write-review-form-column">
+                                            <h5 className="fw-bold mb-4">Share your experience with other travellers.</h5>
+                                            <form onSubmit={handleSubmitReview}>
+                                                <div className="write-review-field-row">
+                                                    <label className="write-review-label">Select Rating</label>
+                                                    {renderReviewStars(overallReviewRating, setOverallReviewRating, 'overall')}
+                                                </div>
+                                                <div className="write-review-field-row">
+                                                    <label htmlFor="reviewFirstName" className="write-review-label">
+                                                        First Name
+                                                    </label>
+                                                    <div className="write-review-field-input">
+                                                        <input
+                                                            id="reviewFirstName"
+                                                            type="text"
+                                                            className={`form-control write-review-input ${reviewErrors.firstName ? 'is-invalid' : ''}`}
+                                                            value={reviewForm.firstName}
+                                                            onChange={(e) => handleReviewFieldChange('firstName', e.target.value)}
+                                                        />
+                                                        {reviewErrors.firstName && (
+                                                            <div className="invalid-feedback">{reviewErrors.firstName}</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="write-review-field-row">
+                                                    <label htmlFor="reviewLastName" className="write-review-label">
+                                                        Last Name
+                                                    </label>
+                                                    <div className="write-review-field-input">
+                                                        <input
+                                                            id="reviewLastName"
+                                                            type="text"
+                                                            className={`form-control write-review-input ${reviewErrors.lastName ? 'is-invalid' : ''}`}
+                                                            value={reviewForm.lastName}
+                                                            onChange={(e) => handleReviewFieldChange('lastName', e.target.value)}
+                                                        />
+                                                        {reviewErrors.lastName && (
+                                                            <div className="invalid-feedback">{reviewErrors.lastName}</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="write-review-field-row">
+                                                    <label htmlFor="reviewEmail" className="write-review-label">
+                                                        Email
+                                                    </label>
+                                                    <div className="write-review-field-input">
+                                                        <input
+                                                            id="reviewEmail"
+                                                            type="email"
+                                                            className={`form-control write-review-input ${reviewErrors.email ? 'is-invalid' : ''}`}
+                                                            value={reviewForm.email}
+                                                            onChange={(e) => handleReviewFieldChange('email', e.target.value)}
+                                                        />
+                                                        {reviewErrors.email && <div className="invalid-feedback">{reviewErrors.email}</div>}
+                                                    </div>
+                                                </div>
+                                                <div className="write-review-field-row">
+                                                    <label htmlFor="reviewTitle" className="write-review-label">
+                                                        Title of your review
+                                                    </label>
+                                                    <div className="write-review-field-input">
+                                                        <input
+                                                            id="reviewTitle"
+                                                            type="text"
+                                                            className={`form-control write-review-input ${reviewErrors.reviewTitle ? 'is-invalid' : ''}`}
+                                                            value={reviewForm.reviewTitle}
+                                                            onChange={(e) => handleReviewFieldChange('reviewTitle', e.target.value)}
+                                                        />
+                                                        {reviewErrors.reviewTitle && (
+                                                            <div className="invalid-feedback">{reviewErrors.reviewTitle}</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="write-review-field-row write-review-field-row-textarea">
+                                                    <label htmlFor="reviewText" className="write-review-label">
+                                                        Your review
+                                                    </label>
+                                                    <div className="write-review-field-input">
+                                                        <textarea
+                                                            id="reviewText"
+                                                            className={`form-control write-review-input write-review-textarea ${reviewErrors.reviewText ? 'is-invalid' : ''}`}
+                                                            rows="5"
+                                                            value={reviewForm.reviewText}
+                                                            onChange={(e) => handleReviewFieldChange('reviewText', e.target.value)}
+                                                        ></textarea>
+                                                        {reviewErrors.reviewText && (
+                                                            <div className="invalid-feedback">{reviewErrors.reviewText}</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="write-review-field-row">
+                                                    <label htmlFor="reviewTripType" className="write-review-label">
+                                                        What sort of trip was this?
+                                                    </label>
+                                                    <div className="write-review-field-input">
+                                                        <select
+                                                            id="reviewTripType"
+                                                            className={`form-select write-review-input write-review-select ${reviewErrors.tripType ? 'is-invalid' : ''}`}
+                                                            value={reviewForm.tripType}
+                                                            onChange={(e) => handleReviewFieldChange('tripType', e.target.value)}
+                                                        >
+                                                            <option value="select">Select</option>
+                                                            <option value="solo">Solo Traveller</option>
+                                                            <option value="couple">Couple</option>
+                                                            <option value="family">Family</option>
+                                                            <option value="business">Business</option>
+                                                            <option value="friends">Friends</option>
+                                                        </select>
+                                                        {reviewErrors.tripType && (
+                                                            <div className="invalid-feedback">{reviewErrors.tripType}</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="write-review-submit-wrap">
+                                                    <button
+                                                        type="submit"
+                                                        className="theme-button-orange write-review-submit"
+                                                        disabled={isSubmitting}
+                                                    >
+                                                        {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div className="write-review-ratings-column">
+                                            <h5 className="fw-bold mb-4">Hotel Ratings (Click to select a rating)</h5>
+                                            <div className="write-review-rating-list">
+                                                <div className="write-review-rating-item">
+                                                    <span className="write-review-rating-label">Service</span>
+                                                    {renderReviewStars(
+                                                        categoryRatings.service,
+                                                        (value) => setCategoryRatings((prev) => ({ ...prev, service: value })),
+                                                        'service'
+                                                    )}
+                                                </div>
+                                                <div className="write-review-rating-item">
+                                                    <span className="write-review-rating-label">Rooms</span>
+                                                    {renderReviewStars(
+                                                        categoryRatings.rooms,
+                                                        (value) => setCategoryRatings((prev) => ({ ...prev, rooms: value })),
+                                                        'rooms'
+                                                    )}
+                                                </div>
+                                                <div className="write-review-rating-item">
+                                                    <span className="write-review-rating-label">Location</span>
+                                                    {renderReviewStars(
+                                                        categoryRatings.location,
+                                                        (value) => setCategoryRatings((prev) => ({ ...prev, location: value })),
+                                                        'location'
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             </section>
@@ -1133,6 +1167,7 @@ export default function HotelDetails({ initialData }) {
                                     width={1400}
                                     height={900}
                                     sizes="(max-width: 767px) 94vw, 980px"
+                                    unoptimized={isExternalImageUrl(getImageUrl(allPhotos[currentPhotoIndex]))}
                                 />
                                 <button className="photo-modal-nav photo-modal-prev" onClick={prevPhoto}>
                                     <FaChevronLeft />
@@ -1159,6 +1194,7 @@ export default function HotelDetails({ initialData }) {
                                         onError={handleImageError}
                                         width={74}
                                         height={52}
+                                        unoptimized={isExternalImageUrl(getImageUrl(photo))}
                                     />
                                 ))}
                             </div>
@@ -1169,4 +1205,3 @@ export default function HotelDetails({ initialData }) {
         </>
     );
 }
-

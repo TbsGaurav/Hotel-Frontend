@@ -7,6 +7,8 @@ import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
+import HotelMapView from '@/components/common/listing/HotelMapView';
+import HotelListToolbar from '@/components/common/listing/HotelListToolbar';
 
 export default function CityHotelList({
     hotels,
@@ -17,9 +19,12 @@ export default function CityHotelList({
     citySlugPath,
     content,
     citySlug,
+    countryId = null,
     regionHotelsSource = [],
     pageIntentCookieName = '',
-    pageCookieName
+    pageCookieName,
+    mapVisible = false,
+    onMapVisibleChange = null
 }) {
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(hotels || []);
@@ -27,6 +32,8 @@ export default function CityHotelList({
     const [page, setPage] = useState(currentPage || 1);
     const [hasMore, setHasMore] = useState((hotels?.length || 0) < (totalCount || 0) || (hotels?.length || 0) === pageSize);
     const [currency, setCurrency] = useState(null);
+    const [viewMode, setViewMode] = useState('list');
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
     const [timestamp, setTimestamp] = useState('');
     const [failedImageKeys, setFailedImageKeys] = useState(() => new Set());
     const loadMoreTriggerRef = useRef(null);
@@ -74,6 +81,22 @@ export default function CityHotelList({
         }, 0);
 
         return () => window.clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        if (isMobileViewport && viewMode !== 'list') {
+            setViewMode('list');
+        }
+    }, [isMobileViewport, viewMode]);
+
+    useEffect(() => {
+        const syncViewport = () => {
+            setIsMobileViewport(window.innerWidth < 768);
+        };
+
+        syncViewport();
+        window.addEventListener('resize', syncViewport);
+        return () => window.removeEventListener('resize', syncViewport);
     }, []);
 
     useEffect(() => {
@@ -262,17 +285,21 @@ export default function CityHotelList({
                     setPage(resolvedPageNo);
                     setHasMore(
                         listGrew &&
-                        computeHasMore({
-                            loadedCount: mergedHotels.length,
-                            knownTotalCount: resolvedTotalCount,
-                            currentPageNumber: resolvedPageNo,
-                            currentPageSize: resolvedPageSize,
-                            lastBatchSize: normalizedHotels.length
-                        })
+                            computeHasMore({
+                                loadedCount: mergedHotels.length,
+                                knownTotalCount: resolvedTotalCount,
+                                currentPageNumber: resolvedPageNo,
+                                currentPageSize: resolvedPageSize,
+                                lastBatchSize: normalizedHotels.length
+                            })
                     );
 
                     if (pageCookieName) {
                         document.cookie = `${pageCookieName}=${resolvedPageNo}; path=/; SameSite=Lax`;
+                    }
+
+                    if (pageIntentCookieName) {
+                        document.cookie = `${pageIntentCookieName}=1; path=/; SameSite=Lax; Max-Age=20`;
                     }
                 })
                 .catch((error) => {
@@ -285,19 +312,6 @@ export default function CityHotelList({
             return;
         }
 
-        if (pageIntentCookieName) {
-            if (!pageCookieName) {
-                loadRequestInFlightRef.current = false;
-                setLoading(false);
-                return;
-            }
-
-            document.cookie = `${pageCookieName}=${nextPage}; path=/; SameSite=Lax`;
-            document.cookie = `${pageIntentCookieName}=1; path=/; SameSite=Lax; Max-Age=20`;
-            window.location.reload();
-            return;
-        }
-
         if (!citySlug) {
             setHasMore(false);
             setLoading(false);
@@ -305,7 +319,7 @@ export default function CityHotelList({
             return;
         }
 
-        getHotelList(citySlug, nextPage, pageSize)
+        getHotelList(citySlug, { countryId, pageNumber: nextPage, pageSize })
             .then((response) => {
                 const nextHotels = response?.hotels || [];
                 if (!nextHotels.length) {
@@ -327,6 +341,10 @@ export default function CityHotelList({
 
                 if (pageCookieName) {
                     document.cookie = `${pageCookieName}=${nextPage}; path=/; SameSite=Lax`;
+                }
+
+                if (pageIntentCookieName) {
+                    document.cookie = `${pageIntentCookieName}=1; path=/; SameSite=Lax; Max-Age=20`;
                 }
             })
             .catch((error) => {
@@ -373,11 +391,31 @@ export default function CityHotelList({
         window.open(url, '_blank', 'noopener,noreferrer');
     };
 
+    const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
+
     return (
         <div className="container p-0">
             {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
 
-            <div className="d-flex flex-column gap-3">
+            {!isMobileViewport ? (
+                <HotelListToolbar
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                    mapVisible={mapVisible}
+                    onMapToggle={() => {
+                        if (typeof onMapVisibleChange === 'function') {
+                            onMapVisibleChange(!mapVisible);
+                        } else {
+                            window.dispatchEvent(new CustomEvent('hotel-map-toggle'));
+                        }
+                    }}
+                    resultsCount={allHotels.length}
+                />
+            ) : null}
+
+            {mapVisible ? <HotelMapView hotels={allHotels} className="mb-4" allRates={allRates} /> : null}
+            <div className={`${effectiveViewMode === 'grid' ? 'row g-3 grid-view' : 'd-flex flex-column gap-3'}`}>
+                {' '}
                 {allHotels.map((hotel, index) => {
                     const hotelKey = getHotelKey(hotel, index);
                     const rate = getHotelRate(getBookingId(hotel));
@@ -397,137 +435,144 @@ export default function CityHotelList({
                     );
 
                     return (
-                        <div
-                            key={hotelKey}
-                            className="card border-0 rounded-4 p-3 p-md-4 hotel-list-card collection-hotel-card"
-                            style={{ boxShadow: '0 4px 18px rgba(0,0,0,0.08)' }}
-                            onClick={() => navigateToHotel(hotel.url)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault();
-                                    navigateToHotel(hotel.url);
-                                }
-                            }}
-                            role="link"
-                            tabIndex={0}
-                        >
-                            <div className="row g-3 collection-hotel-card-row">
-                                <div className="col-12 col-md-4 collection-hotel-image-col">
-                                    <div className="position-relative collection-hotel-image-wrap">
-                                        {imageBadges.length > 0 && (
-                                            <>
-                                                {imageBadges.map((badge, idx) => (
-                                                    <span
-                                                        key={idx}
-                                                        className="position-absolute text-white px-3 py-1"
-                                                        style={{
-                                                            top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                            left: '12px',
-                                                            background: '#28a745',
-                                                            borderRadius: '20px',
-                                                            fontSize: '12px',
-                                                            zIndex: 2
-                                                        }}
-                                                    >
-                                                        {badge}
-                                                    </span>
-                                                ))}
-                                            </>
-                                        )}
-
-                                        <Image
-                                            src={failedImageKeys.has(hotelKey) ? defaultImage : getImageUrl(hotel?.photo)}
-                                            unoptimized
-                                            width={400}
-                                            height={270}
-                                            className="d-block w-100 rounded-4 collection-hotel-image"
-                                            alt={hotel.hotelName}
-                                            onError={() => handleImageError(hotelKey)}
-                                            priority
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="col-12 col-md-8 collection-hotel-content-col">
-                                    <div className="text-decoration-none">
-                                        <div className="d-flex flex-column flex-md-row align-items-start justify-content-between mb-2 collection-hotel-header">
-                                            <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-2 mb-md-0 collection-hotel-title-row">
-                                                {/* <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row"> */}
-                                                <Link
-                                                    href={`${hotel.urlName}`}
-                                                    className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
-                                                    // className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    {hotel.hotelName}
-                                                </Link>
-                                                <div className="text-warning mt-1 mt-md-0 collection-hotel-stars">
-                                                    {[...Array(5)].map((_, i) => (
-                                                        <MdOutlineStarPurple500
-                                                            key={i}
-                                                            size={16}
-                                                            color={i < hotel.stars ? '#f0831e' : '#ddd'}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div className="d-flex align-items-center collection-hotel-review-row">
-                                                <div
-                                                    className="rating-box d-flex me-2 collection-hotel-rating-box"
-                                                    style={{ borderRadius: '10px 10px 10px 0px' }}
-                                                >
-                                                    <span className="m-auto">{hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}</span>
-                                                </div>
-
-                                                <div className="my-auto collection-hotel-review-copy">
-                                                    <p className="small-para-14-px font-weight-bold mb-1 collection-hotel-rating-text">
-                                                        {hotel.ratingText || getRatingText(hotel.reviewScore)}
-                                                    </p>
-
-                                                    <p className="para-12px mb-0 collection-hotel-review-count">
-                                                        {hotel.reviewCount
-                                                            ? `${hotel.reviewCount.toLocaleString('en-US')} verified reviews`
-                                                            : '0 verified reviews'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div
-                                            className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities"
-                                            style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}
-                                        >
-                                            {hotelFacilitiesText && (
+                        <div key={hotelKey} className={effectiveViewMode === 'grid' ? 'col-12 col-md-6' : ''}>
+                            <div
+                                className={`card border-0 rounded-4 hotel-list-card collection-hotel-card ${effectiveViewMode === 'grid' ? 'p-3 h-100 ' : 'p-3 p-md-4'}`}
+                                style={{
+                                    boxShadow: '0 4px 18px rgba(0,0,0,0.08)',
+                                    minHeight: effectiveViewMode === 'grid' && !isMobileViewport ? '620px' : undefined
+                                }}
+                                onClick={() => navigateToHotel(hotel.url)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        navigateToHotel(hotel.url);
+                                    }
+                                }}
+                                role="link"
+                                tabIndex={0}
+                            >
+                                <div className="row g-3 collection-hotel-card-row">
+                                    <div className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-4'} collection-hotel-image-col`}>
+                                        <div className="position-relative collection-hotel-image-wrap">
+                                            {imageBadges.length > 0 && (
                                                 <>
-                                                    {hotelFacilitiesText
-                                                        .split('|')
-                                                        .map((facility) => facility.trim())
-                                                        .filter(Boolean)
-                                                        .slice(0, 5)
-                                                        .map((facility, idx) => (
-                                                            <span
-                                                                key={idx}
-                                                                className="badge bg-light text-dark border me-1 mb-1"
-                                                                style={{
-                                                                    fontSize: '11px',
-                                                                    lineHeight: '1.2',
-                                                                    whiteSpace: 'nowrap',
-                                                                    maxWidth: '135px',
-                                                                    overflow: 'hidden',
-                                                                    textOverflow: 'ellipsis',
-                                                                    display: 'inline-block',
-                                                                    padding: '4px 8px'
-                                                                }}
-                                                                title={facility}
-                                                            >
-                                                                {facility}
-                                                            </span>
+                                                    {imageBadges.map((badge, idx) => (
+                                                        <span
+                                                            key={idx}
+                                                            className="position-absolute text-white px-3 py-1"
+                                                            style={{
+                                                                top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                left: '12px',
+                                                                background: '#28a745',
+                                                                borderRadius: '20px',
+                                                                fontSize: '12px',
+                                                                zIndex: 2
+                                                            }}
+                                                        >
+                                                            {badge}
+                                                        </span>
+                                                    ))}
+                                                </>
+                                            )}
+
+                                            <Image
+                                                src={failedImageKeys.has(hotelKey) ? defaultImage : getImageUrl(hotel?.photo)}
+                                                unoptimized
+                                                width={400}
+                                                height={270}
+                                                className={`d-block w-100 rounded-4 collection-hotel-image ${effectiveViewMode === 'grid' ? 'h-auto' : ''}`}
+                                                alt={hotel.hotelName}
+                                                onError={() => handleImageError(hotelKey)}
+                                                priority
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-8'} collection-hotel-content-col`}
+                                    >
+                                        <div className="text-decoration-none">
+                                            <div className="d-flex flex-column flex-md-row align-items-start justify-content-between mb-2 collection-hotel-header">
+                                                <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-2 mb-md-0 collection-hotel-title-row">
+                                                    {/* <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row"> */}
+                                                    <Link
+                                                        href={`${hotel.urlName}`}
+                                                        className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
+                                                        // className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        {hotel.hotelName}
+                                                    </Link>
+                                                    <div className="text-warning mt-1 mt-md-0 collection-hotel-stars">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <MdOutlineStarPurple500
+                                                                key={i}
+                                                                size={16}
+                                                                color={i < hotel.stars ? '#f0831e' : '#ddd'}
+                                                            />
                                                         ))}
-                                                    {hotelFacilitiesText
-                                                        .split('|')
-                                                        .map((facility) => facility.trim())
-                                                        .filter(Boolean).length > 5 && (
+                                                    </div>
+                                                </div>
+
+                                                <div className="d-flex align-items-center collection-hotel-review-row">
+                                                    <div
+                                                        className="rating-box d-flex me-2 collection-hotel-rating-box"
+                                                        style={{ borderRadius: '10px 10px 10px 0px' }}
+                                                    >
+                                                        <span className="m-auto">
+                                                            {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="my-auto collection-hotel-review-copy">
+                                                        <p className="small-para-14-px font-weight-bold mb-1 collection-hotel-rating-text">
+                                                            {hotel.ratingText || getRatingText(hotel.reviewScore)}
+                                                        </p>
+
+                                                        <p className="para-12px mb-0 collection-hotel-review-count">
+                                                            {hotel.reviewCount
+                                                                ? `${hotel.reviewCount.toLocaleString('en-US')} verified reviews`
+                                                                : '0 verified reviews'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities"
+                                                style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}
+                                            >
+                                                {hotelFacilitiesText && (
+                                                    <>
+                                                        {hotelFacilitiesText
+                                                            .split('|')
+                                                            .map((facility) => facility.trim())
+                                                            .filter(Boolean)
+                                                            .slice(0, 5)
+                                                            .map((facility, idx) => (
+                                                                <span
+                                                                    key={idx}
+                                                                    className="badge bg-light text-dark border me-1 mb-1"
+                                                                    style={{
+                                                                        fontSize: '11px',
+                                                                        lineHeight: '1.2',
+                                                                        whiteSpace: 'nowrap',
+                                                                        maxWidth: '135px',
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis',
+                                                                        display: 'inline-block',
+                                                                        padding: '4px 8px'
+                                                                    }}
+                                                                    title={facility}
+                                                                >
+                                                                    {facility}
+                                                                </span>
+                                                            ))}
+                                                        {hotelFacilitiesText
+                                                            .split('|')
+                                                            .map((facility) => facility.trim())
+                                                            .filter(Boolean).length > 5 && (
                                                             <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
                                                                 +
                                                                 {hotelFacilitiesText
@@ -537,101 +582,105 @@ export default function CityHotelList({
                                                                 more
                                                             </span>
                                                         )}
-                                                </>
-                                            )}
-                                        </div>
-
-                                        {(hotel.hotelAddress || hotel.address) && (
-                                            <p
-                                                className="small-para-14-px mb-2 hotel-address-link collection-hotel-address"
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    openMap(hotel.latitude, hotel.longitude);
-                                                }}
-                                            >
-                                                <FaMapMarkerAlt className="me-1 hotel-address-icon" />
-                                                {hotel.hotelAddress || hotel.address}
-                                            </p>
-                                        )}
-
-                                        {hotel.distanceFromAirport && (
-                                            <p className="small-para-14-px text-black mb-3">
-                                                <i className="fa-solid fa-plane-up me-1"></i>
-                                                {hotel.distanceFromAirport}
-                                            </p>
-                                        )}
-
-                                        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-meta-row">
-                                            <div className="mb-2 mb-md-0 collection-hotel-meta-copy">
-                                                <p className="para text-primary mb-0 collection-hotel-pay-later">
-                                                    <i className="fa-solid fa-circle-info me-2"></i>
-                                                    Book Now Pay Later!
-                                                </p>
-
-                                                {infoBadges.length > 0 ? (
-                                                    <div className="mb-2 collection-hotel-badges">
-                                                        {infoBadges.map((badge, idx) => (
-                                                            <p key={idx} className="para-12px mb-1 text-theme-green">
-                                                                <span className="me-2 text-theme-green" style={{ fontSize: '13px' }}>
-                                                                    <i className="fa-solid fa-check me-1"></i>
-                                                                    {badge}
-                                                                </span>
-                                                            </p>
-                                                        ))}
-                                                    </div>
-                                                ) : null}
+                                                    </>
+                                                )}
                                             </div>
 
-                                            {(() => {
-                                                if (!rate?.price) return null;
+                                            {(hotel.hotelAddress || hotel.address) && (
+                                                <p
+                                                    className="small-para-14-px mb-2 hotel-address-link collection-hotel-address"
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openMap(hotel.latitude, hotel.longitude);
+                                                    }}
+                                                >
+                                                    <FaMapMarkerAlt className="me-1 hotel-address-icon" />
+                                                    {hotel.hotelAddress || hotel.address}
+                                                </p>
+                                            )}
 
-                                                const dealInfo = rate?.deal_info || {};
-                                                const originalPrice = dealInfo?.public_price;
-                                                const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
+                                            {hotel.distanceFromAirport && (
+                                                <p className="small-para-14-px text-black mb-3">
+                                                    <i className="fa-solid fa-plane-up me-1"></i>
+                                                    {hotel.distanceFromAirport}
+                                                </p>
+                                            )}
 
-                                                return (
-                                                    // <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
-                                                    <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
-                                                        <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
-                                                            1 night, 2 adults
-                                                        </p>
+                                            <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-meta-row">
+                                                <div className="mb-2 mb-md-0 collection-hotel-meta-copy">
+                                                    <p className="para text-primary mb-0 collection-hotel-pay-later">
+                                                        <i className="fa-solid fa-circle-info me-2"></i>
+                                                        Book Now Pay Later!
+                                                    </p>
 
-                                                        {formattedOriginal && originalPrice > rate.price.total && (
-                                                            <p
-                                                                className="para-12px mb-0 text-end collection-hotel-original-price"
-                                                                style={{ color: 'red', textDecoration: 'line-through' }}
-                                                            >
-                                                                {formattedOriginal}
-                                                            </p>
-                                                        )}
-
-                                                        <div className="d-flex align-items-baseline justify-content-end collection-hotel-current-price-row">
-                                                            <span
-                                                                className="text-theme-orange fw-bold collection-hotel-current-price"
-                                                                style={{ fontSize: '24px' }}
-                                                            >
-                                                                {rate.price.book}
-                                                            </span>
+                                                    {infoBadges.length > 0 ? (
+                                                        <div className="mb-2 collection-hotel-badges">
+                                                            {infoBadges.map((badge, idx) => (
+                                                                <p key={idx} className="para-12px mb-1 text-theme-green">
+                                                                    <span className="me-2 text-theme-green" style={{ fontSize: '13px' }}>
+                                                                        <i className="fa-solid fa-check me-1"></i>
+                                                                        {badge}
+                                                                    </span>
+                                                                </p>
+                                                            ))}
                                                         </div>
-                                                        <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
-                                                            Includes taxes and charges
-                                                        </p>
-                                                    </div>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col">
-                                            <Link
-                                                className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
-                                                href={`${hotel.url}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                onClick={(e) => e.stopPropagation()}
+                                                    ) : null}
+                                                </div>
+
+                                                {(() => {
+                                                    if (!rate?.price) return null;
+
+                                                    const dealInfo = rate?.deal_info || {};
+                                                    const originalPrice = dealInfo?.public_price;
+                                                    const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
+
+                                                    return (
+                                                        // <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
+                                                        <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
+                                                            <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                                1 night, 2 adults
+                                                            </p>
+
+                                                            {formattedOriginal && originalPrice > rate.price.total && (
+                                                                <p
+                                                                    className="para-12px mb-0 text-end collection-hotel-original-price"
+                                                                    style={{ color: 'red', textDecoration: 'line-through' }}
+                                                                >
+                                                                    {formattedOriginal}
+                                                                </p>
+                                                            )}
+
+                                                            <div className="d-flex align-items-baseline justify-content-end collection-hotel-current-price-row">
+                                                                <span
+                                                                    className="text-theme-orange fw-bold collection-hotel-current-price"
+                                                                    style={{ fontSize: '24px' }}
+                                                                >
+                                                                    {rate.price.book}
+                                                                </span>
+                                                            </div>
+                                                            <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                                Includes taxes and charges
+                                                            </p>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                            <div
+                                                className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col"
+                                                style={effectiveViewMode === 'grid' ? { paddingTop: '6px' } : undefined}
                                             >
-                                                <span>See Availability</span>
-                                                <i className="fa-solid fa-arrow-right ms-2"></i>
-                                            </Link>
+                                                <Link
+                                                    className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
+                                                    href={`${hotel.url}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <span>See Availability</span>
+                                                    <i className="fa-solid fa-arrow-right ms-2"></i>
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

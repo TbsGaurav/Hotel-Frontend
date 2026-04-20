@@ -20,6 +20,28 @@ function normalizeEntityType(value) {
         .replace(/[^a-z]/g, '');
 }
 
+function decodeUntilStable(value = '', maxPasses = 3) {
+    let current = String(value || '');
+
+    for (let pass = 0; pass < maxPasses; pass++) {
+        if (!/%[0-9A-Fa-f]{2}/.test(current)) {
+            break;
+        }
+
+        try {
+            const decoded = decodeURIComponent(current);
+            if (decoded === current) {
+                break;
+            }
+            current = decoded;
+        } catch {
+            break;
+        }
+    }
+
+    return current;
+}
+
 export async function generateMetadata({ params }) {
     const { slug } = await params;
     const slugArray = slug || [];
@@ -28,7 +50,7 @@ export async function generateMetadata({ params }) {
     if (slugArray.length === 1) {
         const result = await resolveSlug(fullSlug);
         const data = result?.status === 'success' ? result.data || {} : {};
-    
+
         const entityType = normalizeEntityType(data?.entityType ?? data?.EntityType);
 
         if (entityType === 'country') {
@@ -49,8 +71,8 @@ export async function generateMetadata({ params }) {
             });
 
             return {
-                title: seo.metaTitle,
-                description: seo.metaDescription,
+                title: decodeUntilStable(seo.metaTitle),
+                description: decodeUntilStable(seo.metaDescription),
                 alternates: {
                     canonical: seo.canonicalUrl
                 }
@@ -58,29 +80,19 @@ export async function generateMetadata({ params }) {
         }
 
         if (entityType === 'city') {
-            let pageResponse = {};
-
-            try {
-                pageResponse = await getHotelList(slugArray[0], 1, 1);
-            } catch (error) {
-                console.error('Error generating city metadata:', error);
-            }
-
             const seo = buildCitySeo({
                 citySlug: slugArray[0],
-                resolvedSlugData: data,
-                firstHotel: pageResponse?.hotels?.[0] || {}
+                resolvedSlugData: data
             });
 
             return {
-                title: seo.metaTitle,
-                description: seo.metaDescription,
+                title: decodeUntilStable(seo.metaTitle),
+                description: decodeUntilStable(seo.metaDescription),
                 alternates: {
                     canonical: seo.canonicalUrl
                 }
             };
         }
-
     }
 
     if (slugArray.length !== 2) {
@@ -104,8 +116,8 @@ export async function generateMetadata({ params }) {
         });
 
         return {
-            title: seo.metaTitle,
-            description: seo.metaDescription,
+            title: decodeUntilStable(seo.metaTitle),
+            description: decodeUntilStable(seo.metaDescription),
             alternates: {
                 canonical: seo.canonicalUrl
             }
@@ -121,8 +133,8 @@ export async function generateMetadata({ params }) {
         });
 
         return {
-            title: seo.metaTitle,
-            description: seo.metaDescription,
+            title: decodeUntilStable(seo.metaTitle),
+            description: decodeUntilStable(seo.metaDescription),
             alternates: {
                 canonical: seo.canonicalUrl
             }
@@ -144,7 +156,6 @@ export default async function DynamicPage({ params, searchParams }) {
     if (result?.status === 'success') {
         const data = result.data;
         const entityType = normalizeEntityType(data?.entityType ?? data?.EntityType);
-
         // COUNTRY PAGE
         if (slugArray.length === 1 && entityType === 'country') {
             return <CountryDetails country={slugArray[0]} resolvedSlugData={data} />;
@@ -179,7 +190,7 @@ export default async function DynamicPage({ params, searchParams }) {
         }
 
         if (slugArray.length === 1 && entityType === 'city') {
-            return <CityDetails city={slugArray[0]} params={params} />;
+            return <CityDetails city={slugArray[0]} params={params} resolvedSlugData={data} />;
         }
 
         if (slugArray.length === 2 && entityType === 'citybrand') {
