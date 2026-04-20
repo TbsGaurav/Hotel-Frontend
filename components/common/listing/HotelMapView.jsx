@@ -107,6 +107,9 @@ export default function HotelMapView({
 
         const safeTitle = title.replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const safeAddress = address.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const safeHotelUrl = String(url || '')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'");
 
         // Generate star HTML
         let starsHtml = '';
@@ -133,9 +136,17 @@ export default function HotelMapView({
         `;
         }
 
+        const openHotelScript = safeHotelUrl
+            ? `window.open('${safeHotelUrl}', '_blank', 'noopener,noreferrer')`
+            : '';
+
         return `
-        <div class="info-window-container">
-            <button class="custom-info-window-close" onclick="this.closest('.info-window-container').parentElement.parentElement.parentElement.querySelector('button[title=\\'Close\\']').click()">×</button>
+        <div class="info-window-container"
+             role="button"
+             tabindex="0"
+             onclick="${openHotelScript}"
+             onkeydown="if((event.key==='Enter'||event.key===' ') && '${safeHotelUrl}') { event.preventDefault(); ${openHotelScript}; }">
+            <button class="custom-info-window-close" onclick="event.stopPropagation(); this.closest('.info-window-container').parentElement.parentElement.parentElement.querySelector('button[title=\\'Close\\']').click()">&times;</button>
             <div class="info-window-grid">
                 <img src="${getImageUrl(hotel?.photo)}" 
                      class="info-window-image"
@@ -144,18 +155,10 @@ export default function HotelMapView({
                 <div class="info-window-details">
                     <div class="info-window-title">${safeTitle}</div>
                     <div class="info-window-stars">${starsHtml}</div>
-                    <div class="info-window-address" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${hotel.latitude},${hotel.longitude}', '_blank')">
+                    <div class="info-window-address" onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=${hotel.latitude},${hotel.longitude}', '_blank')">
                         <span>${safeAddress.substring(0, 60)}${safeAddress.length > 60 ? '...' : ''}</span>
                     </div>
                     ${priceHtml}
-                    <div>
-                        <a href="${url}" 
-                           target="_blank" 
-                           rel="noopener noreferrer"
-                           class="info-window-book-btn">
-                            Book Now
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -262,3 +265,4 @@ export default function HotelMapView({
         </div>
     );
 }
+
