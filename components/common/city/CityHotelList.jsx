@@ -414,7 +414,8 @@ export default function CityHotelList({
             ) : null}
 
             {mapVisible ? <HotelMapView hotels={allHotels} className="mb-4" allRates={allRates} /> : null}
-            <div className={effectiveViewMode === 'grid' ? 'row g-3' : 'd-flex flex-column gap-3'}>
+            <div className={`${effectiveViewMode === 'grid' ? 'row g-3 grid-view' : 'd-flex flex-column gap-3'}`}>
+                {' '}
                 {allHotels.map((hotel, index) => {
                     const hotelKey = getHotelKey(hotel, index);
                     const rate = getHotelRate(getBookingId(hotel));

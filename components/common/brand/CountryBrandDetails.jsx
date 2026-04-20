@@ -163,7 +163,7 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
                     </div>
                 </div>
             </section>
-            <div className="py-2 py-lg-3">
+            <div className="py-2 py-lg-3 mx-2">
                 <div className="container">
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
@@ -195,29 +195,27 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
                 </div>
             </div>
 
-            <section className="container py-2">
-                <SeoDetailsCard
-                    metaTitle={seo.metaTitle}
-                    metaDescription={seo.metaDescription}
-                    canonicalPath={seo.canonicalPath}
-                />
-                <div className="row g-0 g-lg-4 align-items-start">
-                    <div className="col-12 order-1">
-                        <div id="country-brand-hotel-list">
-                            {hotels.length > 0 ? (
-                                <CountryBrandHotelList
-                                    hotels={hotels}
-                                    brand={decodedBrandSegment}
-                                    currentPage={currentPage}
-                                    hasMore={hasMore}
-                                    pageCookieName={pageCookieName}
-                                    pageIntentCookieName={pageIntentCookieName}
-                                />
-                            ) : (
-                                <div className="text-center py-5">
-                                    <p className="text-muted">No hotels available for this brand in {displayCountryName}.</p>
-                                </div>
-                            )}
+            <section className="py-4 p-1">
+                <div className="container">
+                    <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
+                    <div className="row g-0 g-lg-4 align-items-start">
+                        <div className="col-12 order-1">
+                            <div id="country-brand-hotel-list">
+                                {hotels.length > 0 ? (
+                                    <CountryBrandHotelList
+                                        hotels={hotels}
+                                        brand={decodedBrandSegment}
+                                        currentPage={currentPage}
+                                        hasMore={hasMore}
+                                        pageCookieName={pageCookieName}
+                                        pageIntentCookieName={pageIntentCookieName}
+                                    />
+                                ) : (
+                                    <div className="text-center py-5">
+                                        <p className="text-muted">No hotels available for this brand in {displayCountryName}.</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -225,4 +223,3 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
         </>
     );
 }
-

@@ -426,7 +426,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
                                 {isHotelMapVisible ? <HotelMapView hotels={allHotels} className="mb-2" /> : null}
 
-                                <div className={effectiveViewMode === 'grid' ? 'row g-3' : 'd-flex flex-column gap-3'}>
+                                <div className={`${effectiveViewMode === 'grid' ? 'row g-3 grid-view' : 'd-flex flex-column gap-3'}`}>
                                     {allHotels.map((hotel, index) => {
                                         const hotelKey = getHotelKey(hotel, index);
                                         return (

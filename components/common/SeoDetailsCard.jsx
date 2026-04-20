@@ -1,6 +1,8 @@
-export default function SeoDetailsCard({ metaTitle, metaDescription, canonicalPath }) {
+export default function SeoDetailsCard({ metaTitle, metaDescription, canonicalPath, className = '' }) {
+    const wrapperClassName = `mb-4  ${className}`.trim();
+
     return (
-        <div className="mx-2 mx-md-0 mb-4 p-3 p-md-4 ">
+        <div className={wrapperClassName}>
             <div className="row g-3 align-items-start">
                 <div className="col-12 col-lg-8 pe-lg-4">
                     <h1 className="fs-3 fw-semibold mb-3 text-dark text-break">{metaTitle}</h1>

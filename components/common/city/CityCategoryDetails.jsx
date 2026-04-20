@@ -36,6 +36,15 @@ function getCategoryDisplayName(item = {}) {
     return String(item?.categoryName || item?.categoryTitle || item?.name || '').trim();
 }
 
+function normalizeOptionalText(value = '') {
+    if (value === null || value === undefined) return '';
+    const normalized = String(value).trim();
+    if (!normalized) return '';
+
+    const lowercase = normalized.toLowerCase();
+    return lowercase === 'null' || lowercase === 'undefined' ? '' : normalized;
+}
+
 export default function CityCategoryDetails({
     citySlug = '',
     categorySlug = '',
@@ -163,7 +172,9 @@ export default function CityCategoryDetails({
     const [cityUrl, setCityUrl] = useState(initialData?.cityUrl || '');
     const [regionUrl, setRegionUrl] = useState(initialData?.regionUrl || '');
     const [locationInfo, setLocationInfo] = useState(initialData?.locationInfo || {});
-    const [pageDescription, setPageDescription] = useState(initialData?.metaDescription || initialData?.content || '');
+    const [pageDescription, setPageDescription] = useState(
+        normalizeOptionalText(initialData?.metaDescription) || normalizeOptionalText(initialData?.content)
+    );
 
     const slugKey = useMemo(() => `${toSlug(citySlug)}|${toSlug(categorySlug)}`, [citySlug, categorySlug]);
 
@@ -321,7 +332,7 @@ export default function CityCategoryDetails({
                 const resolvedCountryName = String(
                     responseLocationInfo?.countryName || firstHotel?.countryName || firstHotel?.country || ''
                 ).trim();
-                const resolvedDescription = String(responseLocationInfo?.metaDescription).trim();
+                const resolvedDescription = normalizeOptionalText(responseLocationInfo?.metaDescription);
                 const resolvedCountryUrl =
                     String(responseLocationInfo?.countryUrl || firstHotel?.countryUrlName || firstHotel?.countryUrl || '').trim() ||
                     (resolvedCountryName ? toSlug(resolvedCountryName) : '');
@@ -529,7 +540,7 @@ export default function CityCategoryDetails({
         cityName: pageTitle,
         countryName
     });
-    const metaDescription = pageDescription || seo.metaDescription || '';
+    const metaDescription = normalizeOptionalText(pageDescription) || normalizeOptionalText(seo.metaDescription);
 
     useEffect(() => {
         if (typeof document === 'undefined') return undefined;

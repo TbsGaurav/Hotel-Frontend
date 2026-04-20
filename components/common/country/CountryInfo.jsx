@@ -19,12 +19,14 @@ export default function CountryIntro({ countryName, seo = {} }) {
                     </div>
                 </div>
             </div>
-            <section className="container py-3">
-                <SeoDetailsCard
-                    metaTitle={seo?.metaTitle || ` ${countryName}`}
-                    metaDescription={seo?.metaDescription || ''}
-                    canonicalPath={seo?.canonicalPath || `/${countryName}`}
-                />
+            <section className="py-4 p-2">
+                <div className="container">
+                    <SeoDetailsCard
+                        metaTitle={seo?.metaTitle || ` ${countryName}`}
+                        metaDescription={seo?.metaDescription || ''}
+                        canonicalPath={seo?.canonicalPath || `/${countryName}`}
+                    />
+                </div>
             </section>
         </>
     );

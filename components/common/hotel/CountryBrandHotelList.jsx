@@ -321,7 +321,7 @@ export default function CountryBrandHotelList({
 
             {isMapVisible ? <HotelMapView hotels={allHotels} className="mb-4" /> : null}
 
-            <div className="d-flex flex-column gap-3">
+            <div className={`${effectiveViewMode === 'grid' ? 'row g-3 grid-view' : 'd-flex flex-column gap-3'}`}>
                 {hotelsByViewMode.map((city) => (
                     <div key={city.cityName} className="d-flex flex-column gap-3">
                         {effectiveViewMode !== 'grid' ? (

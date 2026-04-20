@@ -136,7 +136,7 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
                     </div>
                 </div>
             </section>
-            <div className="py-2 py-lg-3">
+            <div className="py-2 py-lg-3 mx-2">
                 <div className="container">
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
@@ -178,14 +178,9 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
                     </nav>
                 </div>
             </div>
-            
 
             <section className="container py-2">
-                <SeoDetailsCard
-                    metaTitle={seo.metaTitle}
-                    metaDescription={seo.metaDescription}
-                    canonicalPath={seo.canonicalPath}
-                />
+                <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
                 {hotels.length > 0 ? (
                     <CityBrandHotelListingWithMap
                         sidebarSections={sidebarSections}
@@ -207,4 +202,3 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
         </>
     );
 }
-
