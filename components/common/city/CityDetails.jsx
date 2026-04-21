@@ -153,7 +153,7 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
                 <div className="container">
                     <div className="breadcrumb-wrapper">
                         <nav aria-label="breadcrumb" className="mb-0"> */}
-            <div className="py-3">
+            <div className="py-3 mx-2">
                 <div className="container">
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
@@ -189,23 +189,26 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
                 </div>
             </div>
 
-            <section className="container py-2 ">
-                <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
-                {/* <h2 className="mb-3">Hotel Accommodation in {cityName}</h2> */}
+            {/* <section className="container py-2 mx-1"> */}
+            <section className="py-4 p-1">
+                <div className="container">
+                    <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
+                    {/* <h2 className="mb-3">Hotel Accommodation in {cityName}</h2> */}
 
-                <CityHotelListingWithMap
-                    sidebarSections={sidebarSections}
-                    hotels={hotels}
-                    totalCount={totalCount}
-                    currentPage={currentPage}
-                    pageSize={PAGE_SIZE}
-                    pageCookieName={pageCookieName}
-                    pageIntentCookieName={pageIntentCookieName}
-                    citySlug={citySlug}
-                    citySlugPath={citySlugPath}
-                    countryId={resolvedCountryId}
-                    content={content}
-                />
+                    <CityHotelListingWithMap
+                        sidebarSections={sidebarSections}
+                        hotels={hotels}
+                        totalCount={totalCount}
+                        currentPage={currentPage}
+                        pageSize={PAGE_SIZE}
+                        pageCookieName={pageCookieName}
+                        pageIntentCookieName={pageIntentCookieName}
+                        citySlug={citySlug}
+                        citySlugPath={citySlugPath}
+                        countryId={resolvedCountryId}
+                        content={content}
+                    />
+                </div>
             </section>
         </>
     );

@@ -218,7 +218,7 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                     </div>
                 </div>
             </section>
-            <div className="py-2 py-lg-3">
+            <div className="py-2 py-lg-3 mx-2">
                 <div className="container">
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
@@ -244,29 +244,27 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                 </div>
             </div>
 
-            <section className="container py-2">
-                <SeoDetailsCard
-                    metaTitle={seo.metaTitle}
-                    metaDescription={seo.metaDescription}
-                    canonicalPath={seo.canonicalPath}
-                />
-            
-                <div className="row g-4 align-items-start">
-                    <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
-                    <hr className="my-5" />
+            <section className="py-4 p-1">
+                <div className="container">
+                    <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
 
-                    <RegionHotelListingWithMap
-                        sidebarSections={sidebarSectionsWithLinks}
-                        hotels={hotels}
-                        totalCount={totalCount}
-                        currentPage={currentPage}
-                        pageSize={REGION_PAGE_SIZE}
-                        citySlug={urlName}
-                        pageCookieName={regionPageCookieName}
-                        pageIntentCookieName={pageIntentCookieName}
-                        regionHotelsSource={fallbackRegionHotels}
-                        content={description}
-                    />
+                    <div className="row g-4 align-items-start">
+                        <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
+                        <hr className="my-5" />
+
+                        <RegionHotelListingWithMap
+                            sidebarSections={sidebarSectionsWithLinks}
+                            hotels={hotels}
+                            totalCount={totalCount}
+                            currentPage={currentPage}
+                            pageSize={REGION_PAGE_SIZE}
+                            citySlug={urlName}
+                            pageCookieName={regionPageCookieName}
+                            pageIntentCookieName={pageIntentCookieName}
+                            regionHotelsSource={fallbackRegionHotels}
+                            content={description}
+                        />
+                    </div>
                 </div>
             </section>
         </>

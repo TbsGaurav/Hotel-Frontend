@@ -36,6 +36,15 @@ function getCategoryDisplayName(item = {}) {
     return String(item?.categoryName || item?.categoryTitle || item?.name || '').trim();
 }
 
+function normalizeOptionalText(value = '') {
+    if (value === null || value === undefined) return '';
+    const normalized = String(value).trim();
+    if (!normalized) return '';
+
+    const lowercase = normalized.toLowerCase();
+    return lowercase === 'null' || lowercase === 'undefined' ? '' : normalized;
+}
+
 export default function CityCategoryDetails({
     citySlug = '',
     categorySlug = '',
@@ -163,7 +172,9 @@ export default function CityCategoryDetails({
     const [cityUrl, setCityUrl] = useState(initialData?.cityUrl || '');
     const [regionUrl, setRegionUrl] = useState(initialData?.regionUrl || '');
     const [locationInfo, setLocationInfo] = useState(initialData?.locationInfo || {});
-    const [pageDescription, setPageDescription] = useState(initialData?.metaDescription || initialData?.content || '');
+    const [pageDescription, setPageDescription] = useState(
+        normalizeOptionalText(initialData?.metaDescription) || normalizeOptionalText(initialData?.content)
+    );
 
     const slugKey = useMemo(() => `${toSlug(citySlug)}|${toSlug(categorySlug)}`, [citySlug, categorySlug]);
 
@@ -321,7 +332,7 @@ export default function CityCategoryDetails({
                 const resolvedCountryName = String(
                     responseLocationInfo?.countryName || firstHotel?.countryName || firstHotel?.country || ''
                 ).trim();
-                const resolvedDescription = String(responseLocationInfo?.metaDescription).trim();
+                const resolvedDescription = normalizeOptionalText(responseLocationInfo?.metaDescription);
                 const resolvedCountryUrl =
                     String(responseLocationInfo?.countryUrl || firstHotel?.countryUrlName || firstHotel?.countryUrl || '').trim() ||
                     (resolvedCountryName ? toSlug(resolvedCountryName) : '');
@@ -501,11 +512,7 @@ export default function CityCategoryDetails({
                         Sort
                     </button>
                     <MobileFilterDrawer sidebarSections={sidebarSections} />
-                    <button
-                        type="button"
-                        className="mobile-actions__link"
-                        onClick={() => setIsHotelMapVisible((prev) => !prev)}
-                    >
+                    <button type="button" className="mobile-actions__link" onClick={() => setIsHotelMapVisible((prev) => !prev)}>
                         Map
                     </button>
                 </div>
@@ -515,14 +522,6 @@ export default function CityCategoryDetails({
 
     const sidebar = (
         <div className="position-sticky" style={{ top: '16px' }}>
-            <button
-                type="button"
-                className={`${isHotelMapVisible ? 'theme-button-blue' : 'theme-button-orange'} rounded-2 w-100 mb-3 d-flex align-items-center justify-content-center gap-2 py-2`}
-                onClick={() => setIsHotelMapVisible((prev) => !prev)}
-            >
-                <FaMapMarkerAlt />
-                <span>Hotel Map</span>
-            </button>
             <ListingSidebar
                 title="Filters"
                 sections={sidebarSections}
@@ -541,7 +540,7 @@ export default function CityCategoryDetails({
         cityName: pageTitle,
         countryName
     });
-    const metaDescription = pageDescription || seo.metaDescription || '';
+    const metaDescription = normalizeOptionalText(pageDescription) || normalizeOptionalText(seo.metaDescription);
 
     useEffect(() => {
         if (typeof document === 'undefined') return undefined;
@@ -587,13 +586,7 @@ export default function CityCategoryDetails({
         };
     }, [metaDescription, pageTitle, seo.canonicalUrl]);
 
-    const topContent = (
-        <SeoDetailsCard
-            metaTitle={pageTitle}
-            metaDescription={metaDescription}
-            canonicalPath={seo.canonicalPath}
-        />
-    );
+    const topContent = <SeoDetailsCard metaTitle={pageTitle} metaDescription={metaDescription} canonicalPath={seo.canonicalPath} />;
 
     if (loading) {
         return (
@@ -647,6 +640,7 @@ export default function CityCategoryDetails({
                         pageCookieName={pageCookieName}
                         pageIntentCookieName={pageIntentCookieName}
                         mapVisible={isHotelMapVisible}
+                        onMapVisibleChange={setIsHotelMapVisible}
                     />
                 ) : (
                     <div className="text-center py-5">

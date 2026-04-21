@@ -8,7 +8,7 @@ import { FaMapMarkerAlt } from 'react-icons/fa';
 import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 import HotelMapView from '@/components/common/listing/HotelMapView';
-import ViewModeToggle from '@/components/common/listing/ViewModeToggle';
+import HotelListToolbar from '@/components/common/listing/HotelListToolbar';
 
 export default function CityHotelList({
     hotels,
@@ -23,7 +23,8 @@ export default function CityHotelList({
     regionHotelsSource = [],
     pageIntentCookieName = '',
     pageCookieName,
-    mapVisible = false
+    mapVisible = false,
+    onMapVisibleChange = null
 }) {
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(hotels || []);
@@ -397,13 +398,24 @@ export default function CityHotelList({
             {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
 
             {!isMobileViewport ? (
-                <div className="d-flex justify-content-end mb-3">
-                    <ViewModeToggle viewMode={viewMode} onChange={setViewMode} />
-                </div>
+                <HotelListToolbar
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                    mapVisible={mapVisible}
+                    onMapToggle={() => {
+                        if (typeof onMapVisibleChange === 'function') {
+                            onMapVisibleChange(!mapVisible);
+                        } else {
+                            window.dispatchEvent(new CustomEvent('hotel-map-toggle'));
+                        }
+                    }}
+                    resultsCount={allHotels.length}
+                />
             ) : null}
 
             {mapVisible ? <HotelMapView hotels={allHotels} className="mb-4" allRates={allRates} /> : null}
-            <div className={effectiveViewMode === 'grid' ? 'row g-3' : 'd-flex flex-column gap-3'}>
+            <div className={`${effectiveViewMode === 'grid' ? 'row g-3 grid-view' : 'd-flex flex-column gap-3'}`}>
+                {' '}
                 {allHotels.map((hotel, index) => {
                     const hotelKey = getHotelKey(hotel, index);
                     const rate = getHotelRate(getBookingId(hotel));
@@ -448,15 +460,23 @@ export default function CityHotelList({
                                                     {imageBadges.map((badge, idx) => (
                                                         <span
                                                             key={idx}
-                                                            className="position-absolute text-white px-3 py-1"
-                                                            style={{
-                                                                top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                left: '12px',
-                                                                background: '#28a745',
-                                                                borderRadius: '20px',
-                                                                fontSize: '12px',
-                                                                zIndex: 2
-                                                            }}
+                                                            className={
+                                                                isMobileViewport
+                                                                    ? 'image-ribbon'
+                                                                    : 'position-absolute text-white px-3 py-1'
+                                                            }
+                                                            style={
+                                                                isMobileViewport
+                                                                    ? { top: `${10 + idx * 24}px` }
+                                                                    : {
+                                                                          top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                          left: '12px',
+                                                                          background: '#28a745',
+                                                                          borderRadius: '20px',
+                                                                          fontSize: '12px',
+                                                                          zIndex: 2
+                                                                      }
+                                                            }
                                                         >
                                                             {badge}
                                                         </span>
@@ -487,7 +507,6 @@ export default function CityHotelList({
                                                     <Link
                                                         href={`${hotel.urlName}`}
                                                         className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
-                                                        // className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title"
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
                                                         {hotel.hotelName}
