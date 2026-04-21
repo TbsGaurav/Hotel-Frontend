@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -10,11 +11,17 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
     const [cities, setCities] = useState(initialCities);
     const [activeLetter, setActiveLetter] = useState('Top Cities');
     const [loading, setLoading] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+
     const ITEM_TYPE = {
         City: 0,
         Region: 1,
         HotelBrand: 2,
         HotelType: 3
+    };
+
+    const handleToggle = () => {
+        setIsOpen(prev => !prev); // ✅ toggle open/close
     };
 
     const fetchCitiesByAlphabet = async (letter) => {
@@ -23,10 +30,14 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
             setLoading(true);
 
             const endpoint =
-                letter === 'Top Cities' ? `/countries/${countryName}` : `/countries/${countryName}?alphabet=${letter.toLowerCase()}`;
+                letter === 'Top Cities'
+                    ? `/countries/${countryName}`
+                    : `/countries/${countryName}?alphabet=${letter.toLowerCase()}`;
+
             const json = await fetchClient(endpoint);
 
-            const cityData = json?.data?.countryData?.filter((item) => Number(item.type) === ITEM_TYPE.City) || [];
+            const cityData =
+                json?.data?.countryData?.filter((item) => Number(item.type) === ITEM_TYPE.City) || [];
 
             setCities(cityData);
         } catch (error) {
@@ -42,11 +53,10 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
             <div className="accordion-item border-0">
                 <h2 className="accordion-header" id="headingCities">
                     <button
-                        className="accordion-button collapsed"
+                        className={`accordion-button ${isOpen ? '' : 'collapsed'}`}
                         type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapseCities"
-                        aria-expanded="false"
+                        onClick={handleToggle} // ✅ FIXED
+                        aria-expanded={isOpen}
                         aria-controls="collapseCities"
                         style={{
                             background: '#f5f6f7',
@@ -55,25 +65,26 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                             fontSize: '16px'
                         }}
                     >
-                        <span className="fs-5 fw-semibold">All Cities in {countryName}</span>
+                        <span className="fs-5 fw-semibold">
+                            All Cities in {countryName}
+                        </span>
                     </button>
                 </h2>
 
                 <div
                     id="collapseCities"
-                    className="accordion-collapse collapse"
+                    className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`}
                     aria-labelledby="headingCities"
-                    data-bs-parent={`#${parentId}`}
                 >
-                    <div
-                        className="accordion-body accordion-main">
+                    <div className="accordion-body accordion-main">
                         {/* Alphabet Filter */}
                         <div className="d-flex flex-wrap gap-2 mb-4 mt-2">
                             {ALPHABETS.map((letter) => (
                                 <button
                                     key={letter}
                                     onClick={() => fetchCitiesByAlphabet(letter)}
-                                    className={`btn btn-sm ${activeLetter === letter ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                    className={`btn btn-sm ${activeLetter === letter ? 'btn-primary' : 'btn-outline-secondary'
+                                        }`}
                                 >
                                     {letter}
                                 </button>
@@ -88,11 +99,15 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                                 {cities.map((city) => (
                                     <div key={city.id} className="col-6 col-md-4 col-lg-3 country-list">
                                         {city.urlName ? (
-                                            <Link href={`${city.urlName}`} className="text-decoration-none text-dark" prefetch={false}>
+                                            <Link
+                                                href={`${city.urlName}`}
+                                                className="text-decoration-none text-dark"
+                                                prefetch={false}
+                                            >
                                                 {city.itemName}
                                             </Link>
                                         ) : (
-                                            <span className="text-dark "> {city.itemName}</span>
+                                            <span className="text-dark">{city.itemName}</span>
                                         )}
                                     </div>
                                 ))}

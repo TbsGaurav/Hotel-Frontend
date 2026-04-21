@@ -1166,12 +1166,18 @@ input[type='range']:active::-webkit-slider-thumb {
     font-size: 18px;
 }
 .rating-box {
-    background-color: #003b95;
-    border-radius: 10px 10px 10px 0px;
-    height: 40px;
-    width: 40px;
     color: #fff;
+    background-color: #003b95;
+    border-radius: 10px 10px 10px 0;
+    width: 40px !important;
+    height: 40px;
     font-size: 12px;
+    text-align: center;
+    line-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 .font-weight-bold {
     font-weight: 700 !important;
