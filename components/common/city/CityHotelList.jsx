@@ -285,13 +285,13 @@ export default function CityHotelList({
                     setPage(resolvedPageNo);
                     setHasMore(
                         listGrew &&
-                            computeHasMore({
-                                loadedCount: mergedHotels.length,
-                                knownTotalCount: resolvedTotalCount,
-                                currentPageNumber: resolvedPageNo,
-                                currentPageSize: resolvedPageSize,
-                                lastBatchSize: normalizedHotels.length
-                            })
+                        computeHasMore({
+                            loadedCount: mergedHotels.length,
+                            knownTotalCount: resolvedTotalCount,
+                            currentPageNumber: resolvedPageNo,
+                            currentPageSize: resolvedPageSize,
+                            lastBatchSize: normalizedHotels.length
+                        })
                     );
 
                     if (pageCookieName) {
@@ -469,13 +469,13 @@ export default function CityHotelList({
                                                                 isMobileViewport
                                                                     ? { top: `${10 + idx * 24}px` }
                                                                     : {
-                                                                          top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                          left: '12px',
-                                                                          background: '#28a745',
-                                                                          borderRadius: '20px',
-                                                                          fontSize: '12px',
-                                                                          zIndex: 2
-                                                                      }
+                                                                        top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                        left: '12px',
+                                                                        background: '#28a745',
+                                                                        borderRadius: '20px',
+                                                                        fontSize: '12px',
+                                                                        zIndex: 2
+                                                                    }
                                                             }
                                                         >
                                                             {badge}
@@ -522,9 +522,9 @@ export default function CityHotelList({
                                                     </div>
                                                 </div>
 
-                                                <div className="d-flex align-items-center collection-hotel-review-row">
+                                                <div className="d-flex collection-hotel-review-row">
                                                     <div
-                                                        className="rating-box d-flex me-2 collection-hotel-rating-box"
+                                                        className="rating-box me-2 collection-hotel-rating-box"
                                                         style={{ borderRadius: '10px 10px 10px 0px' }}
                                                     >
                                                         <span className="m-auto">
@@ -580,15 +580,15 @@ export default function CityHotelList({
                                                             .split('|')
                                                             .map((facility) => facility.trim())
                                                             .filter(Boolean).length > 5 && (
-                                                            <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
-                                                                +
-                                                                {hotelFacilitiesText
-                                                                    .split('|')
-                                                                    .map((facility) => facility.trim())
-                                                                    .filter(Boolean).length - 5}{' '}
-                                                                more
-                                                            </span>
-                                                        )}
+                                                                <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
+                                                                    +
+                                                                    {hotelFacilitiesText
+                                                                        .split('|')
+                                                                        .map((facility) => facility.trim())
+                                                                        .filter(Boolean).length - 5}{' '}
+                                                                    more
+                                                                </span>
+                                                            )}
                                                     </>
                                                 )}
                                             </div>
