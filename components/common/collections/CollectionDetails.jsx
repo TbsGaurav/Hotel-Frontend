@@ -65,11 +65,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const [viewMode, setViewMode] = useState('list');
     const [isMobileViewport, setIsMobileViewport] = useState(false);
 
-    const openMap = (lat, lng) => {
-        if (!lat || !lng) return;
-        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
-    };
-
     const navigateToHotel = (url) => {
         if (!url) return;
         window.open(url, '_blank', 'noopener,noreferrer');
@@ -606,26 +601,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         )}
                                                                     </div>
 
-                                                                    {/* <p
-                                                        className="small-para-14-px mb-2 hotel-address-link collection-hotel-address"
-                                                        style={{ cursor: 'pointer' }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            openMap(hotel.latitude, hotel.longitude);
-                                                        }}
-                                                    >
-                                                        <FaMapMarkerAlt className="me-1 hotel-address-icon" />
-                                                        {hotel.hotelAddress || hotel.address}
-                                                    </p> */}
                                                                     {(hotel.hotelAddress || hotel.address) && (
-                                                                        <p
-                                                                            className="small-para-14-px mb-2 hotel-address-link collection-hotel-address"
-                                                                            style={{ cursor: 'pointer' }}
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                openMap(hotel.latitude, hotel.longitude);
-                                                                            }}
-                                                                        >
+                                                                        <p className="small-para-14-px mb-2 hotel-address-link collection-hotel-address">
                                                                             <FaMapMarkerAlt className="me-1 hotel-address-icon" />
                                                                             {hotel.hotelAddress || hotel.address}
                                                                         </p>
