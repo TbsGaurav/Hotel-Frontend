@@ -422,9 +422,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                             <span>
                                                 {Array.isArray(basic) && basic.length > 0
                                                     ? basic
-                                                          .map((item) => item.cityName || item.regionName || item.countryName)
-                                                          .filter(Boolean)
-                                                          .join(', ')
+                                                        .map((item) => item.cityName || item.regionName || item.countryName)
+                                                        .filter(Boolean)
+                                                        .join(', ')
                                                     : basic?.cityName || basic?.districtName || basic?.regionName || basic?.countryName}
                                             </span>
                                         </div>
@@ -504,16 +504,16 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                                 isMobileViewport
                                                                                                     ? { top: `${10 + idx * 24}px` }
                                                                                                     : {
-                                                                                                          top:
-                                                                                                              idx === 0
-                                                                                                                  ? '12px'
-                                                                                                                  : `${12 + idx * 30}px`,
-                                                                                                          left: '12px',
-                                                                                                          background: '#28a745',
-                                                                                                          borderRadius: '20px',
-                                                                                                          fontSize: '12px',
-                                                                                                          zIndex: 2
-                                                                                                      }
+                                                                                                        top:
+                                                                                                            idx === 0
+                                                                                                                ? '12px'
+                                                                                                                : `${12 + idx * 30}px`,
+                                                                                                        left: '12px',
+                                                                                                        background: '#28a745',
+                                                                                                        borderRadius: '20px',
+                                                                                                        fontSize: '12px',
+                                                                                                        zIndex: 2
+                                                                                                    }
                                                                                             }
                                                                                         >
                                                                                             {badge}
@@ -564,9 +564,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                             </div>
                                                                         </div>
 
-                                                                        <div className="d-flex align-items-center collection-hotel-review-row">
+                                                                        <div className="d-flex collection-hotel-review-row">
                                                                             <div
-                                                                                className="rating-box d-flex me-2 collection-hotel-rating-box"
+                                                                                className="rating-box me-2 collection-hotel-rating-box"
                                                                                 style={{ borderRadius: '10px 10px 10px 0px' }}
                                                                             >
                                                                                 <span className="m-auto">
@@ -576,7 +576,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
                                                                             <div className="my-auto collection-hotel-review-copy">
                                                                                 <p className="small-para-14-px font-weight-bold mb-1 collection-hotel-rating-text">
-                                                                                    {hotel.ratingText}
+                                                                                    {hotel.ratingText || getRatingText(hotel.reviewScore)}
                                                                                 </p>
 
                                                                                 <p className="para-12px mb-0 collection-hotel-review-count">
