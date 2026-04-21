@@ -155,7 +155,7 @@ export default function HotelMapView({
                 <div class="info-window-details">
                     <div class="info-window-title">${safeTitle}</div>
                     <div class="info-window-stars">${starsHtml}</div>
-                    <div class="info-window-address" onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=${hotel.latitude},${hotel.longitude}', '_blank')">
+                    <div class="info-window-address">
                         <span>${safeAddress.substring(0, 60)}${safeAddress.length > 60 ? '...' : ''}</span>
                     </div>
                     ${priceHtml}
