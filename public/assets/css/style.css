@@ -1828,13 +1828,39 @@ input[type='range']:active::-webkit-slider-thumb {
         height: 100%;
         aspect-ratio: 4 / 5;
         overflow: hidden;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
         width: 100%;
     }
+    /* .collection-hotel-image-wrap {
+        height: 100%;
+        aspect-ratio: 4 / 5;
+        overflow: hidden;
+        border-radius: 8px !important;
+        width: 100%;
+    } */
     .collection-hotel-image {
         object-fit: cover;
         width: 100%;
         height: 100%;
+        border-radius: 10px !important;
+    }
+
+    .image-ribbon {
+        position: absolute;
+        left: 0;
+        top: 10px;
+        background: #28a745;
+        color: #fff;
+        font-size: 9px;
+        font-weight: 500;
+        padding: 7px 7px;
+        border-radius: 0 6px 6px 0;
+        z-index: 2;
+        max-width: calc(100% - 10px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: clip;
+        line-height: 1.2;
     }
     .collection-hotel-header {
         margin-bottom: 8px !important;

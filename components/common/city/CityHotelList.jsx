@@ -460,15 +460,23 @@ export default function CityHotelList({
                                                     {imageBadges.map((badge, idx) => (
                                                         <span
                                                             key={idx}
-                                                            className="position-absolute text-white px-3 py-1"
-                                                            style={{
-                                                                top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                left: '12px',
-                                                                background: '#28a745',
-                                                                borderRadius: '20px',
-                                                                fontSize: '12px',
-                                                                zIndex: 2
-                                                            }}
+                                                            className={
+                                                                isMobileViewport
+                                                                    ? 'image-ribbon'
+                                                                    : 'position-absolute text-white px-3 py-1'
+                                                            }
+                                                            style={
+                                                                isMobileViewport
+                                                                    ? { top: `${10 + idx * 24}px` }
+                                                                    : {
+                                                                          top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                          left: '12px',
+                                                                          background: '#28a745',
+                                                                          borderRadius: '20px',
+                                                                          fontSize: '12px',
+                                                                          zIndex: 2
+                                                                      }
+                                                            }
                                                         >
                                                             {badge}
                                                         </span>
@@ -499,7 +507,6 @@ export default function CityHotelList({
                                                     <Link
                                                         href={`${hotel.urlName}`}
                                                         className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
-                                                        // className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title"
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
                                                         {hotel.hotelName}
