@@ -378,15 +378,23 @@ export default function CountryBrandHotelList({
                                                                 {imageBadges.map((badge, idx) => (
                                                                     <span
                                                                         key={idx}
-                                                                        className="position-absolute text-white px-3 py-1"
-                                                                        style={{
-                                                                            top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                            left: '12px',
-                                                                            background: '#28a745',
-                                                                            borderRadius: '20px',
-                                                                            fontSize: '12px',
-                                                                            zIndex: 2
-                                                                        }}
+                                                                        className={
+                                                                            isMobileViewport
+                                                                                ? 'image-ribbon'
+                                                                                : 'position-absolute text-white px-3 py-1'
+                                                                        }
+                                                                        style={
+                                                                            isMobileViewport
+                                                                                ? { top: `${10 + idx * 24}px` }
+                                                                                : {
+                                                                                      top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                                      left: '12px',
+                                                                                      background: '#28a745',
+                                                                                      borderRadius: '20px',
+                                                                                      fontSize: '12px',
+                                                                                      zIndex: 2
+                                                                                  }
+                                                                        }
                                                                     >
                                                                         {badge}
                                                                     </span>
