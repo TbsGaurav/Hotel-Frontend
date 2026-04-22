@@ -34,17 +34,19 @@ export default function AdminHeader() {
     };
 
     const handleLogout = async () => {
-        try {
-            const token = localStorage.getItem('adminToken');
-            if (token) {
-                await adminlogoutApi(token);
-            }
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('adminRole');
-            router.push(ADMIN_ROUTES.login);
-        } catch (error) {
-            console.error('Logout error:', error);
+        const token = localStorage.getItem('adminToken');
+        
+        // Log out from API in the background or try-catch
+        if (token) {
+            adminlogoutApi(token).catch(error => {
+                console.error('Logout API error:', error);
+            });
         }
+
+        // Always clear storage and redirect
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminRole');
+        router.push(ADMIN_ROUTES.login);
     };
 
     const handleClearCache = async () => {

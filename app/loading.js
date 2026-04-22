@@ -10,20 +10,7 @@ function BarsLoader() {
 
 export default function Loader() {
     return (
-        <div
-            style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'rgba(255,255,255,0.7)',
-                zIndex: 999,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}
-        >
+        <div className="loader">
             <BarsLoader />
         </div>
     );

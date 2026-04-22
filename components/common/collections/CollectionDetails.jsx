@@ -65,11 +65,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const [viewMode, setViewMode] = useState('list');
     const [isMobileViewport, setIsMobileViewport] = useState(false);
 
-    const openMap = (lat, lng) => {
-        if (!lat || !lng) return;
-        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
-    };
-
     const navigateToHotel = (url) => {
         if (!url) return;
         window.open(url, '_blank', 'noopener,noreferrer');
@@ -275,7 +270,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return () => observer.disconnect();
     }, [hasMore, loading, page, collectionId, pageSize, currency, totalCount, allHotels.length]);
-
+    
     useEffect(() => {
         const timer = window.setTimeout(() => {
             setTimestamp(Date.now().toString());
@@ -300,15 +295,24 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         }
     }, [isMobileViewport, viewMode]);
 
-    const CountryName = Array.isArray(basic) && basic.length > 0 ? basic[0].countryName : basic?.countryName;
+    const CountryName = Array.isArray(basic) && basic.length > 0 ? basic[0].countryName : basic?.countryName; 
     const RegionName = Array.isArray(basic) && basic.length > 0 ? basic[0].regionName : basic?.regionName;
     const CityName = Array.isArray(basic) && basic.length > 0 ? basic[0].cityName : basic?.cityName;
     const CollectionName = Array.isArray(basic) && basic.length > 0 ? basic[0].name : basic?.name;
 
     const CountryUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].countryUrl : basic?.countryUrl;
     const RegionUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].regionUrl : basic?.regionUrl;
-    const CityUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].cityUrl : basic?.cityUrl;
     const CollectionUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].slug : basic?.slug;
+    const slugParts = CollectionUrl?.replace(/^\/+/, '').split('/').filter(Boolean) || [];
+    const hasCity = slugParts.length > 1;
+
+     const slugCity = hasCity ? slugParts[0] : null;   
+     const formattedCity = slugCity
+    ? slugCity
+        .split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ')
+    : null;
     const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
 
     return (
@@ -340,36 +344,53 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                             <nav aria-label="breadcrumb" className="mb-0">
                                 <ol className="breadcrumb mb-0">
                                     <li className="breadcrumb-item small-para-14-px">
-                                        <Link href="/destinations" className="text-dark text-decoration-none">
+                                        <Link href="/" className="text-dark text-decoration-none">
                                             Home
                                         </Link>
                                     </li>
-                                    {CountryName && CountryUrl && (
-                                        <li className="breadcrumb-item small-para-14-px">
-                                            <Link href={`/${CountryUrl}`} className="text-dark text-decoration-none">
-                                                {CountryName}
+                                    {!hasCity ? (
+                                        <li className="breadcrumb-item small-para-14-px active">
+                                            <Link href={`/${CollectionUrl?.replace(/^\//, '')}`} className="text-decoration-none">
+                                                {CollectionName}
                                             </Link>
                                         </li>
+                                    ) : (
+                                        <>
+                                            {CountryName && (
+                                                <li className="breadcrumb-item small-para-14-px">
+                                                    <Link
+                                                        href={`/${CountryUrl?.replace(/^\//, '')}`}
+                                                        className="text-dark text-decoration-none"
+                                                    >
+                                                        {CountryName}
+                                                    </Link>
+                                                </li>
+                                            )}
+                                            {RegionName && (
+                                                <li className="breadcrumb-item small-para-14-px">
+                                                    <Link
+                                                        href={`/${RegionUrl?.replace(/^\//, '')}`}
+                                                        className="text-dark text-decoration-none"
+                                                    >
+                                                        {RegionName}
+                                                    </Link>
+                                                </li>
+                                            )}
+                                            <li className="breadcrumb-item small-para-14-px">
+                                                <Link href={`/${slugCity}`} className="text-dark text-decoration-none">
+                                                    {formattedCity}
+                                                </Link>
+                                            </li>
+                                            <li className="breadcrumb-item small-para-14-px active">
+                                                <Link
+                                                    href={`/${CollectionUrl?.replace(/^\//, '')}`}
+                                                    className="text-decoration-none"
+                                                >
+                                                    {CollectionName}
+                                                </Link>
+                                            </li>
+                                        </>
                                     )}
-                                    {RegionName && RegionUrl && (
-                                        <li className="breadcrumb-item small-para-14-px">
-                                            <Link href={`${RegionUrl}`} className="text-dark text-decoration-none">
-                                                {RegionName}
-                                            </Link>
-                                        </li>
-                                    )}
-                                    {CityName && CityUrl && (
-                                        <li className="breadcrumb-item small-para-14-px">
-                                            <Link href={`${CityUrl}`} className="text-dark text-decoration-none">
-                                                {CityName}
-                                            </Link>
-                                        </li>
-                                    )}
-                                    <li className="breadcrumb-item small-para-14-px active">
-                                        <Link href={`/${CollectionUrl}`} className="text-decoration-none">
-                                            {CollectionName}
-                                        </Link>
-                                    </li>
                                 </ol>
                             </nav>
                         </div>
@@ -396,9 +417,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                             <span>
                                                 {Array.isArray(basic) && basic.length > 0
                                                     ? basic
-                                                          .map((item) => item.cityName || item.regionName || item.countryName)
-                                                          .filter(Boolean)
-                                                          .join(', ')
+                                                        .map((item) => item.cityName || item.regionName || item.countryName)
+                                                        .filter(Boolean)
+                                                        .join(', ')
                                                     : basic?.cityName || basic?.districtName || basic?.regionName || basic?.countryName}
                                             </span>
                                         </div>
@@ -478,16 +499,16 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                                 isMobileViewport
                                                                                                     ? { top: `${10 + idx * 24}px` }
                                                                                                     : {
-                                                                                                          top:
-                                                                                                              idx === 0
-                                                                                                                  ? '12px'
-                                                                                                                  : `${12 + idx * 30}px`,
-                                                                                                          left: '12px',
-                                                                                                          background: '#28a745',
-                                                                                                          borderRadius: '20px',
-                                                                                                          fontSize: '12px',
-                                                                                                          zIndex: 2
-                                                                                                      }
+                                                                                                        top:
+                                                                                                            idx === 0
+                                                                                                                ? '12px'
+                                                                                                                : `${12 + idx * 30}px`,
+                                                                                                        left: '12px',
+                                                                                                        background: '#28a745',
+                                                                                                        borderRadius: '20px',
+                                                                                                        fontSize: '12px',
+                                                                                                        zIndex: 2
+                                                                                                    }
                                                                                             }
                                                                                         >
                                                                                             {badge}
@@ -538,9 +559,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                             </div>
                                                                         </div>
 
-                                                                        <div className="d-flex align-items-center collection-hotel-review-row">
+                                                                        <div className="d-flex collection-hotel-review-row">
                                                                             <div
-                                                                                className="rating-box d-flex me-2 collection-hotel-rating-box"
+                                                                                className="rating-box me-2 collection-hotel-rating-box"
                                                                                 style={{ borderRadius: '10px 10px 10px 0px' }}
                                                                             >
                                                                                 <span className="m-auto">
@@ -550,7 +571,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
                                                                             <div className="my-auto collection-hotel-review-copy">
                                                                                 <p className="small-para-14-px font-weight-bold mb-1 collection-hotel-rating-text">
-                                                                                    {hotel.ratingText}
+                                                                                    {hotel.ratingText || getRatingText(hotel.reviewScore)}
                                                                                 </p>
 
                                                                                 <p className="para-12px mb-0 collection-hotel-review-count">
@@ -606,26 +627,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         )}
                                                                     </div>
 
-                                                                    {/* <p
-                                                        className="small-para-14-px mb-2 hotel-address-link collection-hotel-address"
-                                                        style={{ cursor: 'pointer' }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            openMap(hotel.latitude, hotel.longitude);
-                                                        }}
-                                                    >
-                                                        <FaMapMarkerAlt className="me-1 hotel-address-icon" />
-                                                        {hotel.hotelAddress || hotel.address}
-                                                    </p> */}
                                                                     {(hotel.hotelAddress || hotel.address) && (
-                                                                        <p
-                                                                            className="small-para-14-px mb-2 hotel-address-link collection-hotel-address"
-                                                                            style={{ cursor: 'pointer' }}
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                openMap(hotel.latitude, hotel.longitude);
-                                                                            }}
-                                                                        >
+                                                                        <p className="small-para-14-px mb-2 hotel-address-link collection-hotel-address">
                                                                             <FaMapMarkerAlt className="me-1 hotel-address-icon" />
                                                                             {hotel.hotelAddress || hotel.address}
                                                                         </p>

@@ -285,13 +285,13 @@ export default function CityHotelList({
                     setPage(resolvedPageNo);
                     setHasMore(
                         listGrew &&
-                            computeHasMore({
-                                loadedCount: mergedHotels.length,
-                                knownTotalCount: resolvedTotalCount,
-                                currentPageNumber: resolvedPageNo,
-                                currentPageSize: resolvedPageSize,
-                                lastBatchSize: normalizedHotels.length
-                            })
+                        computeHasMore({
+                            loadedCount: mergedHotels.length,
+                            knownTotalCount: resolvedTotalCount,
+                            currentPageNumber: resolvedPageNo,
+                            currentPageSize: resolvedPageSize,
+                            lastBatchSize: normalizedHotels.length
+                        })
                     );
 
                     if (pageCookieName) {
@@ -381,11 +381,6 @@ export default function CityHotelList({
         );
     }
 
-    const openMap = (lat, lng) => {
-        if (!lat || !lng) return;
-        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
-    };
-
     const navigateToHotel = (url) => {
         if (!url) return;
         window.open(url, '_blank', 'noopener,noreferrer');
@@ -469,13 +464,13 @@ export default function CityHotelList({
                                                                 isMobileViewport
                                                                     ? { top: `${10 + idx * 24}px` }
                                                                     : {
-                                                                          top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                          left: '12px',
-                                                                          background: '#28a745',
-                                                                          borderRadius: '20px',
-                                                                          fontSize: '12px',
-                                                                          zIndex: 2
-                                                                      }
+                                                                        top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                        left: '12px',
+                                                                        background: '#28a745',
+                                                                        borderRadius: '20px',
+                                                                        fontSize: '12px',
+                                                                        zIndex: 2
+                                                                    }
                                                             }
                                                         >
                                                             {badge}
@@ -522,9 +517,9 @@ export default function CityHotelList({
                                                     </div>
                                                 </div>
 
-                                                <div className="d-flex align-items-center collection-hotel-review-row">
+                                                <div className="d-flex collection-hotel-review-row">
                                                     <div
-                                                        className="rating-box d-flex me-2 collection-hotel-rating-box"
+                                                        className="rating-box me-2 collection-hotel-rating-box"
                                                         style={{ borderRadius: '10px 10px 10px 0px' }}
                                                     >
                                                         <span className="m-auto">
@@ -580,28 +575,21 @@ export default function CityHotelList({
                                                             .split('|')
                                                             .map((facility) => facility.trim())
                                                             .filter(Boolean).length > 5 && (
-                                                            <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
-                                                                +
-                                                                {hotelFacilitiesText
-                                                                    .split('|')
-                                                                    .map((facility) => facility.trim())
-                                                                    .filter(Boolean).length - 5}{' '}
-                                                                more
-                                                            </span>
-                                                        )}
+                                                                <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
+                                                                    +
+                                                                    {hotelFacilitiesText
+                                                                        .split('|')
+                                                                        .map((facility) => facility.trim())
+                                                                        .filter(Boolean).length - 5}{' '}
+                                                                    more
+                                                                </span>
+                                                            )}
                                                     </>
                                                 )}
                                             </div>
 
                                             {(hotel.hotelAddress || hotel.address) && (
-                                                <p
-                                                    className="small-para-14-px mb-2 hotel-address-link collection-hotel-address"
-                                                    style={{ cursor: 'pointer' }}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        openMap(hotel.latitude, hotel.longitude);
-                                                    }}
-                                                >
+                                                <p className="small-para-14-px mb-2 hotel-address-link collection-hotel-address">
                                                     <FaMapMarkerAlt className="me-1 hotel-address-icon" />
                                                     {hotel.hotelAddress || hotel.address}
                                                 </p>

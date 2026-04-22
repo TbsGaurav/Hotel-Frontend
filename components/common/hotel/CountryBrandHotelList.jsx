@@ -13,6 +13,7 @@ import HotelListToolbar from '@/components/common/listing/HotelListToolbar';
 export default function CountryBrandHotelList({
     hotels = [],
     brand,
+    countrySlug = '',
     hotelRates = [],
     currentPage = 1,
     hasMore = false,
@@ -32,6 +33,7 @@ export default function CountryBrandHotelList({
     const [failedImageKeys, setFailedImageKeys] = useState(() => new Set());
     const [isMapVisible, setIsMapVisible] = useState(false);
     const loadMoreTriggerRef = useRef(null);
+    const normalizedCountrySlug = String(countrySlug || '').replace(/^\/+|\/+$/g, '');
     const normalizedBrand = String(brand || '').replace(/^\/+|\/+$/g, '');
 
     useEffect(() => {
@@ -178,19 +180,10 @@ export default function CountryBrandHotelList({
         return result;
     };
 
-    const getCountryBrandSlug = () => {
-        const pathParts = window.location.pathname.split('/').filter(Boolean);
-        if (pathParts.length >= 2) {
-            return `${pathParts[0]}/${pathParts[1]}`;
-        }
-        return null;
-    };
-
     const fetchMoreHotels = () => {
         if (!localHasMore || loadingMore) return;
 
-        const brandSlug = getCountryBrandSlug();
-        if (!brandSlug) {
+        if (!normalizedCountrySlug || !normalizedBrand) {
             setLocalHasMore(false);
             return;
         }
@@ -198,8 +191,9 @@ export default function CountryBrandHotelList({
         setLoadingMore(true);
         const nextPage = page + 1;
         const pageSize = 10;
+        const countryBrandSlug = `${normalizedCountrySlug}/${normalizedBrand}`;
 
-        getHotelList(brandSlug, nextPage, pageSize)
+        getHotelList(countryBrandSlug, { pageNumber: nextPage, pageSize })
             .then((response) => {
                 const nextHotels = response?.hotels || [];
                 if (!nextHotels.length) {
@@ -293,11 +287,6 @@ export default function CountryBrandHotelList({
         })}`;
     };
 
-    const openMap = (lat, lng) => {
-        if (!lat || !lng) return;
-        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
-    };
-
     const navigateToHotel = (url) => {
         if (!url) return;
         window.open(url, '_blank', 'noopener,noreferrer');
@@ -345,9 +334,9 @@ export default function CountryBrandHotelList({
                                 );
                                 const facilities = hotel.hotelFacilities
                                     ? hotel.hotelFacilities
-                                          .split('|')
-                                          .map((facility) => facility.trim())
-                                          .filter(Boolean)
+                                        .split('|')
+                                        .map((facility) => facility.trim())
+                                        .filter(Boolean)
                                     : [];
 
                                 return (
@@ -387,13 +376,13 @@ export default function CountryBrandHotelList({
                                                                             isMobileViewport
                                                                                 ? { top: `${10 + idx * 24}px` }
                                                                                 : {
-                                                                                      top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                                      left: '12px',
-                                                                                      background: '#28a745',
-                                                                                      borderRadius: '20px',
-                                                                                      fontSize: '12px',
-                                                                                      zIndex: 2
-                                                                                  }
+                                                                                    top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                                    left: '12px',
+                                                                                    background: '#28a745',
+                                                                                    borderRadius: '20px',
+                                                                                    fontSize: '12px',
+                                                                                    zIndex: 2
+                                                                                }
                                                                         }
                                                                     >
                                                                         {badge}
@@ -439,9 +428,9 @@ export default function CountryBrandHotelList({
                                                                 </div>
                                                             </div>
 
-                                                            <div className="d-flex align-items-center collection-hotel-review-row">
+                                                            <div className="d-flex collection-hotel-review-row">
                                                                 <div
-                                                                    className="rating-box d-flex me-2 collection-hotel-rating-box"
+                                                                    className="rating-box me-2 collection-hotel-rating-box"
                                                                     style={{ borderRadius: '10px 10px 10px 0px' }}
                                                                 >
                                                                     <span className="m-auto">
@@ -504,14 +493,7 @@ export default function CountryBrandHotelList({
                                                         </div>
 
                                                         {(hotel.hotelAddress || hotel.address) && (
-                                                            <p
-                                                                className="small-para-14-px mb-2 hotel-address-link collection-hotel-address"
-                                                                style={{ cursor: 'pointer' }}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    openMap(hotel.latitude, hotel.longitude);
-                                                                }}
-                                                            >
+                                                            <p className="small-para-14-px mb-2 hotel-address-link collection-hotel-address">
                                                                 <FaMapMarkerAlt className="me-1 hotel-address-icon" />
                                                                 {hotel.hotelAddress || hotel.address}
                                                             </p>

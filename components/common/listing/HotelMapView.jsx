@@ -155,7 +155,7 @@ export default function HotelMapView({
                 <div class="info-window-details">
                     <div class="info-window-title">${safeTitle}</div>
                     <div class="info-window-stars">${starsHtml}</div>
-                    <div class="info-window-address" onclick="event.stopPropagation(); window.open('https://www.google.com/maps/search/?api=1&query=${hotel.latitude},${hotel.longitude}', '_blank')">
+                    <div class="info-window-address">
                         <span>${safeAddress.substring(0, 60)}${safeAddress.length > 60 ? '...' : ''}</span>
                     </div>
                     ${priceHtml}
@@ -190,7 +190,8 @@ export default function HotelMapView({
 
                 if (!infoWindowRef.current) {
                     infoWindowRef.current = new maps.InfoWindow({
-                        maxWidth: 340
+                        maxWidth: 340,
+                        pixelOffset: new maps.Size(0, -8)
                     });
                 }
 
@@ -220,6 +221,7 @@ export default function HotelMapView({
                         position: pos,
                         map: mapRef.current,
                         title,
+                        anchorPoint: new maps.Point(0, -56),
                         icon: {
                             url: iconUrl,
                             scaledSize: new maps.Size(40, 56),
