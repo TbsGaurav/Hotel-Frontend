@@ -10,27 +10,31 @@ export default async function BrandsPage() {
         <>
             <HeroSection variant="common" />
 
-            <div className="breadcrumb-section">
+            <div className="py-3 mx-2">
                 <div className="container">
-                    <div className="d-flex align-items-center small accordion-main">
-                        <Link href="/brands" className="text-dark text-decoration-none">
-                            All Brands
-                        </Link>
-                    </div>
+                    <nav aria-label="breadcrumb" className="mb-0">
+                        <ol className="breadcrumb mb-0">
+                            <li className="breadcrumb-item small-para-14-px">
+                                <Link href="/brands" className="text-dark text-decoration-none">
+                                    All Brands
+                                </Link>
+                            </li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
 
-            <section className="container py-3 ">
+            <section className="py-4 p-1">
+                <div className="container">
                     <div className="row align-items-start">
                         <div className="col-lg-6">
                             <h3 className="fw-bold mb-4 accordion-main">All Brand List</h3>
                         </div>
                     </div>
-               
+
                     <BrandDropdown initialBrands={initialBrands} parentId="countryAccordion" />
-               
+                </div>
             </section>
         </>
     );
 }
-

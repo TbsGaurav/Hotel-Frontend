@@ -114,7 +114,7 @@ export default function CurationTab({
         <>
             <h6>Hotel List</h6>
 
-            <div className="mb-2" style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'white' }}>
+            <div className="mb-2 search-hotel">
                 <input
                     type="text"
                     className="form-control"
@@ -128,7 +128,7 @@ export default function CurationTab({
                 Selected: {selectedHotels.length}/{effectiveMaxHotels}
             </div>
 
-            <div className="border rounded p-3" style={{ maxHeight: '550px', overflowY: 'auto' }} onScroll={handleScroll}>
+            <div className="border rounded p-3 search-hotel-y" onScroll={handleScroll}>
                 {visibleHotels.map((hotel) => {
                     const isExcluded = excludedHotels.some((h) => h.id === hotel.id);
                     const pinIndex = pinnedHotels.findIndex((h) => h.id === hotel.id);

@@ -13,6 +13,7 @@ import HotelListToolbar from '@/components/common/listing/HotelListToolbar';
 export default function CountryBrandHotelList({
     hotels = [],
     brand,
+    countrySlug = '',
     hotelRates = [],
     currentPage = 1,
     hasMore = false,
@@ -32,6 +33,7 @@ export default function CountryBrandHotelList({
     const [failedImageKeys, setFailedImageKeys] = useState(() => new Set());
     const [isMapVisible, setIsMapVisible] = useState(false);
     const loadMoreTriggerRef = useRef(null);
+    const normalizedCountrySlug = String(countrySlug || '').replace(/^\/+|\/+$/g, '');
     const normalizedBrand = String(brand || '').replace(/^\/+|\/+$/g, '');
 
     useEffect(() => {
@@ -178,19 +180,10 @@ export default function CountryBrandHotelList({
         return result;
     };
 
-    const getCountryBrandSlug = () => {
-        const pathParts = window.location.pathname.split('/').filter(Boolean);
-        if (pathParts.length >= 2) {
-            return `${pathParts[0]}/${pathParts[1]}`;
-        }
-        return null;
-    };
-
     const fetchMoreHotels = () => {
         if (!localHasMore || loadingMore) return;
 
-        const brandSlug = getCountryBrandSlug();
-        if (!brandSlug) {
+        if (!normalizedCountrySlug || !normalizedBrand) {
             setLocalHasMore(false);
             return;
         }
@@ -198,8 +191,9 @@ export default function CountryBrandHotelList({
         setLoadingMore(true);
         const nextPage = page + 1;
         const pageSize = 10;
+        const countryBrandSlug = `${normalizedCountrySlug}/${normalizedBrand}`;
 
-        getHotelList(brandSlug, nextPage, pageSize)
+        getHotelList(countryBrandSlug, { pageNumber: nextPage, pageSize })
             .then((response) => {
                 const nextHotels = response?.hotels || [];
                 if (!nextHotels.length) {
