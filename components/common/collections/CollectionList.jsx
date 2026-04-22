@@ -301,9 +301,7 @@ export default function CollectionList({ initialCollections, initialCountries })
 
                         {showCountryDropdown && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 select-btn">
                                 {filteredCountries.length === 0 ? (
                                     <div className="p-2 text-muted">No countries found</div>
                                 ) : (
@@ -360,9 +358,7 @@ export default function CollectionList({ initialCollections, initialCountries })
 
                         {showRegionDropdown && selectedCountry && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 select-btn">
                                 {filteredRegions.length === 0 ? (
                                     <div className="p-2 text-muted">No regions found</div>
                                 ) : (
@@ -413,9 +409,7 @@ export default function CollectionList({ initialCollections, initialCountries })
 
                         {showCityDropdown && selectedCountry && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 select-btn">
                                 {filteredCities.length === 0 ? (
                                     <div className="p-2 text-muted">No cities found</div>
                                 ) : (

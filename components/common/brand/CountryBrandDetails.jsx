@@ -205,6 +205,7 @@ export default async function CountryBrandDetails({ params, resolvedSlugData = {
                                     <CountryBrandHotelList
                                         hotels={hotels}
                                         brand={decodedBrandSegment}
+                                        countrySlug={countrySlug}
                                         currentPage={currentPage}
                                         hasMore={hasMore}
                                         pageCookieName={pageCookieName}

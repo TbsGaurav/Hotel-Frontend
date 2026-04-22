@@ -45,29 +45,39 @@ export default async function BrandPage({ params }) {
         <>
             <HeroSection variant="common" />
 
-            <div className="breadcrumb-section">
+            <div className="py-3 mx-2">
                 <div className="container">
-                    <div className="d-flex align-items-center small">
-                        <Link href="/brands" className="text-dark text-decoration-none">
-                            All Brands
-                        </Link>
+                    <nav aria-label="breadcrumb" className="mb-0">
+                        <ol className="breadcrumb mb-0">
+                            <li className="breadcrumb-item small-para-14-px">
+                                <Link href="/brands" className="text-dark text-decoration-none">
+                                    All Brands
+                                </Link>
 
-                        <span className="mx-2 text-muted">•</span>
+                                <span className="mx-2 text-muted">•</span>
 
-                        <span className="text-primary">{brandName}</span>
-                    </div>
+                                <span className="text-primary">{brandName}</span>
+                            </li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
-            <section className="container py-4">
-                <section className="container py-5">
+            <section className="py-4 p-1">
+                <div className="container">
                     <div className="row align-items-start">
                         <div className="col-lg-6">
                             <h3 className="fw-bold mb-4">{brandName}</h3>
                         </div>
                     </div>
-                </section>
-                <div className="row">
-                    <Dropdown id="brand-countries" title={`${brandName} `} items={items} parentId="brandAccordion" defaultOpen={true} />
+                </div>
+                <div className="container">
+                    <Dropdown
+                        id="brand-countries"
+                        title={`${brandName}`}
+                        items={items}
+                        parentId="brandAccordion"
+                        defaultOpen={true}
+                    />
                 </div>
             </section>
         </>

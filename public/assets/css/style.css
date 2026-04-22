@@ -3514,3 +3514,18 @@ input[type='range']:active::-webkit-slider-thumb {
     font-size: 16px;
     align-items: center;
 }
+.select-btn{
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+.search-hotel{
+    position:sticky;
+    top: 0;
+    z-index: 10;
+    background-color:white;
+}
+.search-hotel-y{
+    max-height:550px;
+    overflow-y:auto;
+}
