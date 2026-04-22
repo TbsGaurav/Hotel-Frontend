@@ -190,7 +190,8 @@ export default function HotelMapView({
 
                 if (!infoWindowRef.current) {
                     infoWindowRef.current = new maps.InfoWindow({
-                        maxWidth: 340
+                        maxWidth: 340,
+                        pixelOffset: new maps.Size(0, -8)
                     });
                 }
 
@@ -220,6 +221,7 @@ export default function HotelMapView({
                         position: pos,
                         map: mapRef.current,
                         title,
+                        anchorPoint: new maps.Point(0, -56),
                         icon: {
                             url: iconUrl,
                             scaledSize: new maps.Size(40, 56),

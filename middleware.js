@@ -9,23 +9,36 @@ export function middleware(request) {
     }
 
     const lowercasePathname = pathname.toLowerCase();
+    const isAdminPath = pathname.startsWith('/admin');
     const hasHtmExtension = lowercasePathname.endsWith('.htm');
     
-    // 2. REDIRECT: If URL is not lowercase OR missing .htm
-    // This forces the browser URL to be lowercase and end with .htm
+    // 2. ADMIN Logic: No .htm, enforce lowercase
+    if (isAdminPath) {
+        // If it has .htm, redirect to clean path
+        if (hasHtmExtension) {
+            const cleanAdminPath = pathname.slice(0, -4);
+            return NextResponse.redirect(new URL(cleanAdminPath.toLowerCase() + search, request.url), 301);
+        }
+        // If has uppercase, redirect to lowercase
+        if (/[A-Z]/.test(pathname)) {
+            return NextResponse.redirect(new URL(lowercasePathname + search, request.url), 301);
+        }
+        return NextResponse.next();
+    }
+
+    // 3. PUBLIC Logic: Force lowercase AND .htm
     if (/[A-Z]/.test(pathname) || !hasHtmExtension) {
         let targetPathname = lowercasePathname;
         if (!hasHtmExtension && !targetPathname.includes('.')) {
             targetPathname += '.htm';
         }
         
-        // If we actually changed something, redirect
         if (targetPathname !== pathname) {
             return NextResponse.redirect(new URL(targetPathname + search, request.url), 301);
         }
     }
 
-    // 3. REWRITE: If we have .htm, internally rewrite to the clean path for Next.js folder matching
+    // 4. REWRITE: If we have .htm (public routes), internally rewrite to clean path
     if (hasHtmExtension) {
         const cleanPathname = pathname.slice(0, -4);
         return NextResponse.rewrite(new URL(cleanPathname + search, request.url));

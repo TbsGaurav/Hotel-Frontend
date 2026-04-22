@@ -18,7 +18,8 @@ const purgecss = require('@fullhuman/postcss-purgecss')({
         /^info-window-/,
         /^custom-info-window-/,
         /^gm-style/,
-        /^gm-ui-/
+        /^gm-ui-/,
+        /^alert-/
     ]
 });
 module.exports = {

@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 
 export default function Footer() {
     return (
@@ -51,27 +51,27 @@ export default function Footer() {
                         <div className="col-12 col-md-6 col-lg-2 mx-auto mt-3">
                             <h5 className="mb-3 text-white footer-heading">About</h5>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Our Story
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Press Centre
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Partners & Fund Raising
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Terms & Conditions
                                 </a>
                             </p>
                             <p className="small-para-14-px footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Privacy
                                 </a>
                             </p>
@@ -80,32 +80,32 @@ export default function Footer() {
                         <div className="col-12 col-md-6 col-lg-2 mx-auto mt-3">
                             <h5 className="mb-3 text-white footer-heading">International Sites</h5>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Getaroom Australia
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Getaroom United Kingdom
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Getaroom India
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Getaroom Tonight.com
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Getaroom New Zealand
                                 </a>
                             </p>
                             <p className="small-para-14-px footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     IWantThatFlight.com.au
                                 </a>
                             </p>
@@ -114,22 +114,22 @@ export default function Footer() {
                         <div className="col-12 col-md-6 col-lg-2 mx-auto mt-3">
                             <h5 className="mb-3 text-white footer-heading">Menu</h5>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Top Travel Destinations
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Hotel Brands & Chains
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Hotel Travel Blog
                                 </a>
                             </p>
                             <p className="small-para-14-px footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Rental Cars
                                 </a>
                             </p>
@@ -138,22 +138,22 @@ export default function Footer() {
                         <div className="col-12 col-md-6 col-lg-2 mx-auto mt-3">
                             <h5 className="mb-3 text-white footer-heading">Customer Help</h5>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     My Reservations
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Help & FAQs
                                 </a>
                             </p>
                             <p className="small-para-14-px pb-2 mb-2 footer-link-border-bottom footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Contact
                                 </a>
                             </p>
                             <p className="small-para-14-px footer-links">
-                                <a href="#" className="text-white" style={{ textDecoration: 'none' }}>
+                                <a href="#" className="text-white">
                                     Website Feedback
                                 </a>
                             </p>

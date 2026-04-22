@@ -1,17 +1,18 @@
-
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { fetchClient } from '@/lib/api/public/fetchClient';
 
 const ALPHABETS = ['Top Cities', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
+const DROPDOWN_TOGGLE_EVENT = 'shared-dropdown-toggle';
 
 export default function CityDropdown({ countryName, initialCities = [], parentId }) {
     const [cities, setCities] = useState(initialCities);
     const [activeLetter, setActiveLetter] = useState('Top Cities');
     const [loading, setLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const instanceIdRef = useRef(`city-dropdown-${Math.random().toString(36).slice(2, 10)}`);
 
     const ITEM_TYPE = {
         City: 0,
@@ -21,8 +22,38 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
     };
 
     const handleToggle = () => {
-        setIsOpen(prev => !prev); // ✅ toggle open/close
+        setIsOpen((prev) => !prev);
     };
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        window.dispatchEvent(
+            new CustomEvent(DROPDOWN_TOGGLE_EVENT, {
+                detail: {
+                    parentId,
+                    activeId: instanceIdRef.current
+                }
+            })
+        );
+    }, [isOpen, parentId]);
+
+    useEffect(() => {
+        const handleSharedToggle = (event) => {
+            const detail = event?.detail || {};
+
+            if (!detail.parentId || detail.parentId !== parentId) return;
+            if (detail.activeId === instanceIdRef.current) return;
+
+            setIsOpen(false);
+        };
+
+        window.addEventListener(DROPDOWN_TOGGLE_EVENT, handleSharedToggle);
+
+        return () => {
+            window.removeEventListener(DROPDOWN_TOGGLE_EVENT, handleSharedToggle);
+        };
+    }, [parentId]);
 
     const fetchCitiesByAlphabet = async (letter) => {
         try {
@@ -55,7 +86,7 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                     <button
                         className={`accordion-button ${isOpen ? '' : 'collapsed'}`}
                         type="button"
-                        onClick={handleToggle} // ✅ FIXED
+                        onClick={handleToggle}
                         aria-expanded={isOpen}
                         aria-controls="collapseCities"
                         style={{
@@ -65,9 +96,7 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                             fontSize: '16px'
                         }}
                     >
-                        <span className="fs-5 fw-semibold">
-                            All Cities in {countryName}
-                        </span>
+                        <span className="fs-5 fw-semibold">All Cities in {countryName}</span>
                     </button>
                 </h2>
 
@@ -77,23 +106,20 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                     aria-labelledby="headingCities"
                 >
                     <div className="accordion-body accordion-main">
-                        {/* Alphabet Filter */}
                         <div className="d-flex flex-wrap gap-2 mb-4 mt-2">
                             {ALPHABETS.map((letter) => (
                                 <button
                                     key={letter}
                                     onClick={() => fetchCitiesByAlphabet(letter)}
-                                    className={`btn btn-sm ${activeLetter === letter ? 'btn-primary' : 'btn-outline-secondary'
-                                        }`}
+                                    className={`btn btn-sm ${activeLetter === letter ? 'btn-primary' : 'btn-outline-secondary'}`}
                                 >
                                     {letter}
                                 </button>
                             ))}
                         </div>
 
-                        {/* City List */}
                         {loading ? (
-                            <p className="mb-0">Loading cities…</p>
+                            <p className="mb-0">Loading cities...</p>
                         ) : (
                             <div className="row">
                                 {cities.map((city) => (

@@ -10,10 +10,10 @@ export default function BrandDropdown({ parentId, initialBrands }) {
     const [brands, setBrands] = useState(initialBrands || []);
     const [activeLetter, setActiveLetter] = useState('All');
     const [loading, setLoading] = useState(false);
-    const [isOpen, setIsOpen] = useState(false); // ✅ NEW
+    const [isOpen, setIsOpen] = useState(false); 
 
     const handleToggle = () => {
-        setIsOpen(prev => !prev); // ✅ toggle
+        setIsOpen(prev => !prev); 
     };
 
     const fetchBrands = async (letter) => {

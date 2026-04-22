@@ -2,8 +2,10 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+
+const DROPDOWN_TOGGLE_EVENT = 'shared-dropdown-toggle';
 
 export default function Dropdown({
     id,
@@ -18,8 +20,38 @@ export default function Dropdown({
     const collapseId = `collapse-${id}`;
 
     const handleToggle = () => {
-        setIsOpen(prev => !prev);
+        setIsOpen((prev) => !prev);
     };
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        window.dispatchEvent(
+            new CustomEvent(DROPDOWN_TOGGLE_EVENT, {
+                detail: {
+                    parentId,
+                    activeId: id
+                }
+            })
+        );
+    }, [id, isOpen, parentId]);
+
+    useEffect(() => {
+        const handleSharedToggle = (event) => {
+            const detail = event?.detail || {};
+
+            if (!detail.parentId || detail.parentId !== parentId) return;
+            if (detail.activeId === id) return;
+
+            setIsOpen(false);
+        };
+
+        window.addEventListener(DROPDOWN_TOGGLE_EVENT, handleSharedToggle);
+
+        return () => {
+            window.removeEventListener(DROPDOWN_TOGGLE_EVENT, handleSharedToggle);
+        };
+    }, [id, parentId]);
 
     return (
         <div className="accordion mb-4 accordion-top" id={parentId}>
