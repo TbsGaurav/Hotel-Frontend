@@ -430,10 +430,7 @@ export default function CountryBrandHotelList({
                                                             </div>
 
                                                             <div className="d-flex collection-hotel-review-row">
-                                                                <div
-                                                                    className="rating-box me-2 collection-hotel-rating-box"
-                                                                    style={{ borderRadius: '10px 10px 10px 0px' }}
-                                                                >
+                                                                <div className="rating-box me-2 collection-hotel-rating-box border-radius">
                                                                     <span className="m-auto">
                                                                         {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
                                                                     </span>
@@ -453,10 +450,7 @@ export default function CountryBrandHotelList({
                                                             </div>
                                                         </div>
 
-                                                        <div
-                                                            className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities"
-                                                            style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}
-                                                        >
+                                                        <div className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities overflow">
                                                             {hotel.hotelFacilities && (
                                                                 <>
                                                                     {hotel.hotelFacilities
@@ -465,27 +459,14 @@ export default function CountryBrandHotelList({
                                                                         .map((facility, idx) => (
                                                                             <span
                                                                                 key={idx}
-                                                                                className="badge bg-light text-dark border me-1 mb-1"
-                                                                                style={{
-                                                                                    fontSize: '11px',
-                                                                                    lineHeight: '1.2',
-                                                                                    whiteSpace: 'nowrap',
-                                                                                    maxWidth: '135px',
-                                                                                    overflow: 'hidden',
-                                                                                    textOverflow: 'ellipsis',
-                                                                                    display: 'inline-block',
-                                                                                    padding: '4px 8px'
-                                                                                }}
+                                                                                className="badge bg-light text-dark border me-1 mb-1 ellips"
                                                                                 title={facility.trim()}
                                                                             >
                                                                                 {facility.trim()}
                                                                             </span>
                                                                         ))}
                                                                     {hotel.hotelFacilities.split('|').length > 5 && (
-                                                                        <span
-                                                                            className="rating"
-                                                                            style={{ fontSize: '11px', lineHeight: '1.2' }}
-                                                                        >
+                                                                        <span className="rating star-rating">
                                                                             +{hotel.hotelFacilities.split('|').length - 5} more
                                                                         </span>
                                                                     )}
