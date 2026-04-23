@@ -396,13 +396,26 @@ export default function CollectionList({ initialCollections, initialCountries })
                                     setCitySearch(selectedCityObj.name);
                                 }
                             }}
-                            onChange={(e) => {
+                            onChange={async (e) => {
                                 const value = e.target.value;
                                 setCitySearch(value);
                                 setShowCityDropdown(true);
 
                                 if (selectedCity) {
                                     setSelectedCity('');
+                                }
+                                if (!selectedCountry) return;
+
+                                try {
+                                    const res = await getCitiesByCountryOrRegion({
+                                        countryId: selectedCountry,
+                                        regionId: selectedRegion || null,
+                                        searchTerm: value
+                                    });
+
+                                    setCities(res?.data || []);
+                                } catch {
+                                    setCities([]);
                                 }
                             }}
                         />

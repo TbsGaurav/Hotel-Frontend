@@ -14,6 +14,7 @@ export default function Header() {
     const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
     const [isLanguageOpen, setIsLanguageOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isMenuClosing, setIsMenuClosing] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -41,12 +42,12 @@ export default function Header() {
     useEffect(() => {
         if (!isMounted) return;
 
-        document.body.classList.toggle('offcanvas-backdrop-active', isMenuOpen);
+        document.body.classList.toggle('offcanvas-backdrop-active', isMenuOpen || isMenuClosing);
 
         return () => {
             document.body.classList.remove('offcanvas-backdrop-active');
         };
-    }, [isMounted, isMenuOpen]);
+    }, [isMounted, isMenuOpen, isMenuClosing]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -67,7 +68,11 @@ export default function Header() {
     }, []);
 
     const handleCloseOffcanvas = () => {
-        setIsMenuOpen(false);
+        setIsMenuClosing(true);
+        setTimeout(() => {
+            setIsMenuOpen(false);
+            setIsMenuClosing(false);
+        }, 300);
     };
 
     const changeCurrency = (cur) => {
@@ -173,18 +178,18 @@ export default function Header() {
                                 {isMounted && (
                                     <>
                                         <div
-                                            className={`offcanvas-backdrop fade ${isMenuOpen ? 'show' : ''}`}
+                                            className={`offcanvas-backdrop fade ${isMenuOpen && !isMenuClosing ? 'show' : ''}`}
                                             onClick={handleCloseOffcanvas}
-                                            style={{ display: isMenuOpen ? 'block' : 'none' }}
+                                            style={{ display: isMenuOpen || isMenuClosing ? 'block' : 'none' }}
                                         />
                                         <div
-                                            className={`offcanvas offcanvas-end ${isMenuOpen ? 'show' : ''}`}
+                                            className={`offcanvas offcanvas-end ${isMenuOpen ? 'show' : ''} ${isMenuClosing ? 'hiding' : ''}`}
                                             tabIndex="-1"
                                             id="offcanvasExample"
                                             aria-labelledby="offcanvasExampleLabel"
                                             aria-modal={isMenuOpen ? 'true' : undefined}
                                             role={isMenuOpen ? 'dialog' : undefined}
-                                            style={{ visibility: isMenuOpen ? 'visible' : 'hidden' }}
+                                            style={{ visibility: isMenuOpen || isMenuClosing ? 'visible' : 'hidden' }}
                                         >
                                             <div className="offcanvas-header">
                                                 <h5 className="offcanvas-title" id="offcanvasExampleLabel">
