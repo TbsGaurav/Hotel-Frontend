@@ -285,13 +285,13 @@ export default function CityHotelList({
                     setPage(resolvedPageNo);
                     setHasMore(
                         listGrew &&
-                        computeHasMore({
-                            loadedCount: mergedHotels.length,
-                            knownTotalCount: resolvedTotalCount,
-                            currentPageNumber: resolvedPageNo,
-                            currentPageSize: resolvedPageSize,
-                            lastBatchSize: normalizedHotels.length
-                        })
+                            computeHasMore({
+                                loadedCount: mergedHotels.length,
+                                knownTotalCount: resolvedTotalCount,
+                                currentPageNumber: resolvedPageNo,
+                                currentPageSize: resolvedPageSize,
+                                lastBatchSize: normalizedHotels.length
+                            })
                     );
 
                     if (pageCookieName) {
@@ -456,21 +456,19 @@ export default function CityHotelList({
                                                         <span
                                                             key={idx}
                                                             className={
-                                                                isMobileViewport
-                                                                    ? 'image-ribbon'
-                                                                    : 'position-absolute text-white px-3 py-1'
+                                                                isMobileViewport ? 'image-ribbon' : 'position-absolute text-white px-3 py-1'
                                                             }
                                                             style={
                                                                 isMobileViewport
                                                                     ? { top: `${10 + idx * 24}px` }
                                                                     : {
-                                                                        top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                        left: '12px',
-                                                                        background: '#28a745',
-                                                                        borderRadius: '20px',
-                                                                        fontSize: '12px',
-                                                                        zIndex: 2
-                                                                    }
+                                                                          top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                          left: '12px',
+                                                                          background: '#28a745',
+                                                                          borderRadius: '20px',
+                                                                          fontSize: '12px',
+                                                                          zIndex: 2
+                                                                      }
                                                             }
                                                         >
                                                             {badge}
@@ -503,6 +501,7 @@ export default function CityHotelList({
                                                         href={`${hotel.urlName}`}
                                                         className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
                                                         onClick={(e) => e.stopPropagation()}
+                                                        style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                                                     >
                                                         {hotel.hotelName}
                                                     </Link>
@@ -518,10 +517,7 @@ export default function CityHotelList({
                                                 </div>
 
                                                 <div className="d-flex collection-hotel-review-row">
-                                                    <div
-                                                        className="rating-box me-2 collection-hotel-rating-box"
-                                                        style={{ borderRadius: '10px 10px 10px 0px' }}
-                                                    >
+                                                    <div className="rating-box me-2 collection-hotel-rating-box border-radius">
                                                         <span className="m-auto">
                                                             {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
                                                         </span>
@@ -541,10 +537,7 @@ export default function CityHotelList({
                                                 </div>
                                             </div>
 
-                                            <div
-                                                className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities"
-                                                style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}
-                                            >
+                                            <div className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities overflow">
                                                 {hotelFacilitiesText && (
                                                     <>
                                                         {hotelFacilitiesText
@@ -555,17 +548,7 @@ export default function CityHotelList({
                                                             .map((facility, idx) => (
                                                                 <span
                                                                     key={idx}
-                                                                    className="badge bg-light text-dark border me-1 mb-1"
-                                                                    style={{
-                                                                        fontSize: '11px',
-                                                                        lineHeight: '1.2',
-                                                                        whiteSpace: 'nowrap',
-                                                                        maxWidth: '135px',
-                                                                        overflow: 'hidden',
-                                                                        textOverflow: 'ellipsis',
-                                                                        display: 'inline-block',
-                                                                        padding: '4px 8px'
-                                                                    }}
+                                                                    className="badge bg-light text-dark border me-1 mb-1 ellips"
                                                                     title={facility}
                                                                 >
                                                                     {facility}
@@ -575,15 +558,15 @@ export default function CityHotelList({
                                                             .split('|')
                                                             .map((facility) => facility.trim())
                                                             .filter(Boolean).length > 5 && (
-                                                                <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
-                                                                    +
-                                                                    {hotelFacilitiesText
-                                                                        .split('|')
-                                                                        .map((facility) => facility.trim())
-                                                                        .filter(Boolean).length - 5}{' '}
-                                                                    more
-                                                                </span>
-                                                            )}
+                                                            <span className="rating star-rating">
+                                                                +
+                                                                {hotelFacilitiesText
+                                                                    .split('|')
+                                                                    .map((facility) => facility.trim())
+                                                                    .filter(Boolean).length - 5}{' '}
+                                                                more
+                                                            </span>
+                                                        )}
                                                     </>
                                                 )}
                                             </div>

@@ -270,7 +270,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return () => observer.disconnect();
     }, [hasMore, loading, page, collectionId, pageSize, currency, totalCount, allHotels.length]);
-    
+
     useEffect(() => {
         const timer = window.setTimeout(() => {
             setTimestamp(Date.now().toString());
@@ -295,7 +295,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         }
     }, [isMobileViewport, viewMode]);
 
-    const CountryName = Array.isArray(basic) && basic.length > 0 ? basic[0].countryName : basic?.countryName; 
+    const CountryName = Array.isArray(basic) && basic.length > 0 ? basic[0].countryName : basic?.countryName;
     const RegionName = Array.isArray(basic) && basic.length > 0 ? basic[0].regionName : basic?.regionName;
     const CityName = Array.isArray(basic) && basic.length > 0 ? basic[0].cityName : basic?.cityName;
     const CollectionName = Array.isArray(basic) && basic.length > 0 ? basic[0].name : basic?.name;
@@ -306,13 +306,13 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const slugParts = CollectionUrl?.replace(/^\/+/, '').split('/').filter(Boolean) || [];
     const hasCity = slugParts.length > 1;
 
-     const slugCity = hasCity ? slugParts[0] : null;   
-     const formattedCity = slugCity
-    ? slugCity
-        .split('-')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ')
-    : null;
+    const slugCity = hasCity ? slugParts[0] : null;
+    const formattedCity = slugCity
+        ? slugCity
+              .split('-')
+              .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(' ')
+        : null;
     const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
 
     return (
@@ -382,10 +382,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                 </Link>
                                             </li>
                                             <li className="breadcrumb-item small-para-14-px active">
-                                                <Link
-                                                    href={`/${CollectionUrl?.replace(/^\//, '')}`}
-                                                    className="text-decoration-none"
-                                                >
+                                                <Link href={`/${CollectionUrl?.replace(/^\//, '')}`} className="text-decoration-none">
                                                     {CollectionName}
                                                 </Link>
                                             </li>
@@ -417,9 +414,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                             <span>
                                                 {Array.isArray(basic) && basic.length > 0
                                                     ? basic
-                                                        .map((item) => item.cityName || item.regionName || item.countryName)
-                                                        .filter(Boolean)
-                                                        .join(', ')
+                                                          .map((item) => item.cityName || item.regionName || item.countryName)
+                                                          .filter(Boolean)
+                                                          .join(', ')
                                                     : basic?.cityName || basic?.districtName || basic?.regionName || basic?.countryName}
                                             </span>
                                         </div>
@@ -499,16 +496,16 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                                 isMobileViewport
                                                                                                     ? { top: `${10 + idx * 24}px` }
                                                                                                     : {
-                                                                                                        top:
-                                                                                                            idx === 0
-                                                                                                                ? '12px'
-                                                                                                                : `${12 + idx * 30}px`,
-                                                                                                        left: '12px',
-                                                                                                        background: '#28a745',
-                                                                                                        borderRadius: '20px',
-                                                                                                        fontSize: '12px',
-                                                                                                        zIndex: 2
-                                                                                                    }
+                                                                                                          top:
+                                                                                                              idx === 0
+                                                                                                                  ? '12px'
+                                                                                                                  : `${12 + idx * 30}px`,
+                                                                                                          left: '12px',
+                                                                                                          background: '#28a745',
+                                                                                                          borderRadius: '20px',
+                                                                                                          fontSize: '12px',
+                                                                                                          zIndex: 2
+                                                                                                      }
                                                                                             }
                                                                                         >
                                                                                             {badge}
@@ -545,6 +542,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                 href={`${hotel.urlName}`}
                                                                                 className="font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title"
                                                                                 onClick={(e) => e.stopPropagation()}
+                                                                                style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                                                                             >
                                                                                 {hotel.hotelName}
                                                                             </Link>
@@ -560,10 +558,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         </div>
 
                                                                         <div className="d-flex collection-hotel-review-row">
-                                                                            <div
-                                                                                className="rating-box me-2 collection-hotel-rating-box"
-                                                                                style={{ borderRadius: '10px 10px 10px 0px' }}
-                                                                            >
+                                                                            <div className="rating-box me-2 collection-hotel-rating-box border-radius">
                                                                                 <span className="m-auto">
                                                                                     {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
                                                                                 </span>
@@ -583,14 +578,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         </div>
                                                                     </div>
 
-                                                                    <div
-                                                                        className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities"
-                                                                        style={{
-                                                                            overflow: 'hidden',
-                                                                            columnGap: '4px',
-                                                                            whiteSpace: 'nowrap'
-                                                                        }}
-                                                                    >
+                                                                    <div className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities overflow">
                                                                         {hotel.hotelFacilities && (
                                                                             <>
                                                                                 {hotel.hotelFacilities
@@ -599,27 +587,14 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                     .map((facility, idx) => (
                                                                                         <span
                                                                                             key={idx}
-                                                                                            className="badge bg-light text-dark border me-1 mb-1"
-                                                                                            style={{
-                                                                                                fontSize: '11px',
-                                                                                                lineHeight: '1.2',
-                                                                                                whiteSpace: 'nowrap',
-                                                                                                maxWidth: '135px',
-                                                                                                overflow: 'hidden',
-                                                                                                textOverflow: 'ellipsis',
-                                                                                                display: 'inline-block',
-                                                                                                padding: '4px 8px'
-                                                                                            }}
+                                                                                            className="badge bg-light text-dark border me-1 mb-1 ellips"
                                                                                             title={facility.trim()}
                                                                                         >
                                                                                             {facility.trim()}
                                                                                         </span>
                                                                                     ))}
                                                                                 {hotel.hotelFacilities.split('|').length > 5 && (
-                                                                                    <span
-                                                                                        className="rating"
-                                                                                        style={{ fontSize: '11px', lineHeight: '1.2' }}
-                                                                                    >
+                                                                                    <span className="rating star-rating">
                                                                                         +{hotel.hotelFacilities.split('|').length - 5} more
                                                                                     </span>
                                                                                 )}
@@ -704,10 +679,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                 );
 
                                                                                 return (
-                                                                                    <div
-                                                                                        className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block"
-                                                                                        style={{ overflow: 'visible', minHeight: '98px' }}
-                                                                                    >
+                                                                                    <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block hotel-price">
                                                                                         <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                                             1 night, 2 adults
                                                                                         </p>

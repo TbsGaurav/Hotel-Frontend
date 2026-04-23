@@ -483,13 +483,7 @@ export default function HotelDetails({ initialData }) {
                                     ))}
                                 </div>
                                 <span
-                                    className="text-white px-3 py-1 mb-2 d-inline-block"
-                                    style={{
-                                        background: '#ff7a00',
-                                        borderRadius: '20px',
-                                        fontSize: '12px'
-                                    }}
-                                >
+                                    className="text-white px-3 py-1 mb-2 d-inline-block orange-bg">
                                     {hotelInfo.hotelType || 'Apartment Hotel'}
                                 </span>
                             </div>
@@ -515,15 +509,7 @@ export default function HotelDetails({ initialData }) {
                             {' '}
                             <div className="d-flex align-items-start mt-3 mt-md-0 me-3">
                                 <div
-                                    className="d-flex flex-column align-items-center justify-content-center p-2"
-                                    style={{
-                                        background: '#003580',
-                                        borderRadius: '10px 10px 10px 0px',
-                                        width: '40px',
-                                        height: '40px',
-                                        fontSize: '12px'
-                                    }}
-                                >
+                                    className="d-flex flex-column align-items-center justify-content-center p-2 blue-bg">
                                     <span className="text-white  fs-9">{hotelInfo.reviewScore}</span>
                                 </div>
                                 <div className="ms-2 d-flex flex-column justify-content-center">
@@ -764,19 +750,7 @@ export default function HotelDetails({ initialData }) {
                                                             <div className="d-flex">
                                                                 {/* Avatar */}
                                                                 <div
-                                                                    className="rounded-circle d-flex align-items-center justify-content-center me-3"
-                                                                    style={{
-                                                                        width: '50px',
-                                                                        height: '50px',
-                                                                        minWidth: '50px',
-                                                                        background: '#e6eef6',
-                                                                        color: '#5f7f9c',
-                                                                        fontWeight: '600',
-                                                                        fontSize: '18px',
-                                                                        lineHeight: '1',
-                                                                        flexShrink: 0
-                                                                    }}
-                                                                >
+                                                                    className="rounded-circle d-flex align-items-center justify-content-center me-3 circle">
                                                                     {review.travellerName
                                                                         ? review.travellerName.charAt(0).toUpperCase()
                                                                         : 'S'}
@@ -854,7 +828,7 @@ export default function HotelDetails({ initialData }) {
                                     <div className="mb-4">
                                         <div className="row g-2">
                                             <div className="row mb-4">
-                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
+                                                <span className="fw-bold font-size-18">
                                                     Check-in
                                                 </span>
                                                 <span className="text-muted">
@@ -862,7 +836,7 @@ export default function HotelDetails({ initialData }) {
                                                 </span>
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
+                                                <span className="fw-bold font-size-18">
                                                     Check-out
                                                 </span>
                                                 <span className="text-muted">
@@ -870,7 +844,7 @@ export default function HotelDetails({ initialData }) {
                                                 </span>
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
+                                                <span className="fw-bold font-size-18">
                                                     Cancellation & prepayment
                                                 </span>
                                                 <span className="text-muted">
@@ -879,7 +853,7 @@ export default function HotelDetails({ initialData }) {
                                                 </span>
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
+                                                <span className="fw-bold font-size-18">
                                                     Accepted credit cards
                                                 </span>
                                                 <span className="text-muted">
@@ -896,7 +870,7 @@ export default function HotelDetails({ initialData }) {
                                             </div> */}
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
+                                                <span className="fw-bold font-size-18">
                                                     The fine print
                                                 </span>
                                                 <span className="text-muted">{hotelInfo.hotelPolicy || 'No special policies listed.'}</span>

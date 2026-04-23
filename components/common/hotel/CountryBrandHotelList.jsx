@@ -334,9 +334,9 @@ export default function CountryBrandHotelList({
                                 );
                                 const facilities = hotel.hotelFacilities
                                     ? hotel.hotelFacilities
-                                        .split('|')
-                                        .map((facility) => facility.trim())
-                                        .filter(Boolean)
+                                          .split('|')
+                                          .map((facility) => facility.trim())
+                                          .filter(Boolean)
                                     : [];
 
                                 return (
@@ -376,13 +376,13 @@ export default function CountryBrandHotelList({
                                                                             isMobileViewport
                                                                                 ? { top: `${10 + idx * 24}px` }
                                                                                 : {
-                                                                                    top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                                    left: '12px',
-                                                                                    background: '#28a745',
-                                                                                    borderRadius: '20px',
-                                                                                    fontSize: '12px',
-                                                                                    zIndex: 2
-                                                                                }
+                                                                                      top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                                      left: '12px',
+                                                                                      background: '#28a745',
+                                                                                      borderRadius: '20px',
+                                                                                      fontSize: '12px',
+                                                                                      zIndex: 2
+                                                                                  }
                                                                         }
                                                                     >
                                                                         {badge}
@@ -414,6 +414,7 @@ export default function CountryBrandHotelList({
                                                                     href={`${hotel.urlName}`}
                                                                     className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
                                                                     onClick={(e) => e.stopPropagation()}
+                                                                    style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                                                                 >
                                                                     {hotel.hotelName}
                                                                 </Link>
