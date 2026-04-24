@@ -296,6 +296,61 @@ export default function CountryBrandHotelList({
     const hotelsByViewMode =
         effectiveViewMode === 'grid' ? [{ cityName: 'all-hotels', cityUrlName: '', hotels: allHotels }] : groupedHotels;
 
+    if (!allHotels.length) {
+        return (
+            <div className="container py-5">
+                <div
+                    className="mx-auto text-center rounded-4 shadow-sm border-0 overflow-hidden"
+                    style={{
+                        maxWidth: '760px',
+                        background: 'linear-gradient(135deg, #fff7ef 0%, #ffffff 45%, #f4f8fc 100%)',
+                        border: '1px solid rgba(240, 131, 30, 0.12)'
+                    }}
+                >
+                    <div
+                        style={{
+                            padding: '32px 24px',
+                            background:
+                                'radial-gradient(circle at top, rgba(240, 131, 30, 0.16) 0%, rgba(240, 131, 30, 0.04) 28%, transparent 55%)'
+                        }}
+                    >
+                        <div
+                            className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                            style={{
+                                width: '72px',
+                                height: '72px',
+                                background: '#f0831e',
+                                color: '#fff',
+                                boxShadow: '0 12px 28px rgba(240, 131, 30, 0.28)'
+                            }}
+                        >
+                            <FaHotel size={30} />
+                        </div>
+
+                        <h3 className="fw-bold mb-2" style={{ color: '#1d2b3a' }}>
+                            No hotels found
+                        </h3>
+                        <p className="text-muted mb-4" style={{ maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 }}>
+                            We couldn’t find any hotels for this destination right now. Try changing your filters, checking nearby areas, or
+                            searching again with different dates.
+                        </p>
+
+                        <div className="d-flex flex-wrap justify-content-center gap-3" style={{ color: '#5f6b7a', fontSize: '14px' }}>
+                            <div className="d-flex align-items-center gap-2">
+                                <span
+                                    className="rounded-circle d-inline-flex align-items-center justify-content-center"
+                                    style={{ width: '34px', height: '34px', background: '#fff1e3', color: '#f0831e' }}
+                                >
+                                    <FaHotel size={14} />
+                                </span>
+                                <span>Try a different destination</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="container">
             {!isMobileViewport ? (
@@ -430,10 +485,7 @@ export default function CountryBrandHotelList({
                                                             </div>
 
                                                             <div className="d-flex collection-hotel-review-row">
-                                                                <div
-                                                                    className="rating-box me-2 collection-hotel-rating-box"
-                                                                    style={{ borderRadius: '10px 10px 10px 0px' }}
-                                                                >
+                                                                <div className="rating-box me-2 collection-hotel-rating-box border-radius">
                                                                     <span className="m-auto">
                                                                         {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
                                                                     </span>
@@ -453,10 +505,7 @@ export default function CountryBrandHotelList({
                                                             </div>
                                                         </div>
 
-                                                        <div
-                                                            className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities"
-                                                            style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}
-                                                        >
+                                                        <div className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities overflow">
                                                             {hotel.hotelFacilities && (
                                                                 <>
                                                                     {hotel.hotelFacilities
@@ -465,27 +514,14 @@ export default function CountryBrandHotelList({
                                                                         .map((facility, idx) => (
                                                                             <span
                                                                                 key={idx}
-                                                                                className="badge bg-light text-dark border me-1 mb-1"
-                                                                                style={{
-                                                                                    fontSize: '11px',
-                                                                                    lineHeight: '1.2',
-                                                                                    whiteSpace: 'nowrap',
-                                                                                    maxWidth: '135px',
-                                                                                    overflow: 'hidden',
-                                                                                    textOverflow: 'ellipsis',
-                                                                                    display: 'inline-block',
-                                                                                    padding: '4px 8px'
-                                                                                }}
+                                                                                className="badge bg-light text-dark border me-1 mb-1 ellips"
                                                                                 title={facility.trim()}
                                                                             >
                                                                                 {facility.trim()}
                                                                             </span>
                                                                         ))}
                                                                     {hotel.hotelFacilities.split('|').length > 5 && (
-                                                                        <span
-                                                                            className="rating"
-                                                                            style={{ fontSize: '11px', lineHeight: '1.2' }}
-                                                                        >
+                                                                        <span className="rating star-rating">
                                                                             +{hotel.hotelFacilities.split('|').length - 5} more
                                                                         </span>
                                                                     )}

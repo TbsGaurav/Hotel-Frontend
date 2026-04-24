@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AppLink from '@/components/common/AppLink';
-import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
+import ListingSidebar, { getVisibleSidebarSections } from '@/components/common/sidebar/ListingSidebar';
 import CityHotelList from './CityHotelList';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import SeoDetailsCard from '@/components/common/SeoDetailsCard';
@@ -520,7 +520,8 @@ export default function CityCategoryDetails({
         </section>
     );
 
-    const sidebar = (
+    const hasSidebar = useMemo(() => getVisibleSidebarSections(sidebarSections).length > 0, [sidebarSections]);
+    const sidebar = hasSidebar ? (
         <div className="position-sticky" style={{ top: '16px' }}>
             <ListingSidebar
                 title="Filters"
@@ -531,7 +532,7 @@ export default function CityCategoryDetails({
                 }}
             />
         </div>
-    );
+    ) : null;
 
     const pageTitle = categoryName || formatCityName(categorySlug);
     const seo = buildCategorySeo({

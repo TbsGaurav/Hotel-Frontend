@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { FaMapMarkerAlt } from 'react-icons/fa';
-import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
+import ListingSidebar, { getVisibleSidebarSections } from '@/components/common/sidebar/ListingSidebar';
 import CityHotelList from '@/components/common/city/CityHotelList';
 
 export default function RegionHotelListingWithMap({
@@ -18,6 +18,7 @@ export default function RegionHotelListingWithMap({
     content = ''
 }) {
     const [isHotelMapVisible, setIsHotelMapVisible] = useState(false);
+    const hasSidebar = getVisibleSidebarSections(sidebarSections).length > 0;
 
     useEffect(() => {
         const handler = () => setIsHotelMapVisible((prev) => !prev);
@@ -27,13 +28,15 @@ export default function RegionHotelListingWithMap({
 
     return (
         <div className="row g-4 align-items-start">
-            <div className="col-lg-3 d-none d-lg-block">
-                <div className="position-sticky" style={{ top: '16px' }}>
-                    <ListingSidebar title="Filters" sections={sidebarSections} />
+            {hasSidebar ? (
+                <div className="col-lg-3 d-none d-lg-block">
+                    <div className="position-sticky" style={{ top: '16px' }}>
+                        <ListingSidebar title="Filters" sections={sidebarSections} />
+                    </div>
                 </div>
-            </div>
+            ) : null}
 
-            <div className="col-lg-9">
+            <div className={hasSidebar ? 'col-lg-9' : 'col-12'}>
                 <CityHotelList
                     hotels={hotels}
                     totalCount={totalCount}
