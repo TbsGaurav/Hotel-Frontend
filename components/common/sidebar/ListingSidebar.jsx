@@ -285,7 +285,7 @@ export default function ListingSidebar({ title = 'Filters', topContent = null, s
             <div>
                 {visibleSections.map((section) => (
                     <SectionBlock
-                        key={section.displayTitle || section.title}
+                        key={section.sectionId || section.displayTitle || section.title}
                         title={section.displayTitle || section.title}
                         items={section.items}
                         maxVisible={section.maxVisible ?? 5}

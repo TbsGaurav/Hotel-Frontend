@@ -11,6 +11,7 @@ import CityDetails from '@/components/common/city/CityDetails';
 import CityCategoryRouteApp from '@/components/common/city/CityCategoryRouteApp';
 import HotelDetailsWrapper from '@/components/common/hotel/HotelDetailsWrapper';
 import CityBrandDetails from '@/components/common/brand/CityBrandDetails';
+import CityHotelsByBrandDetails from '@/components/common/brand/CityHotelsByBrandDetails';
 import { buildBrandSeo, buildCountrySeo, buildCitySeo, buildRegionSeo } from '@/lib/seo';
 
 function normalizeEntityType(value) {
@@ -46,6 +47,30 @@ export async function generateMetadata({ params }) {
     const { slug } = await params;
     const slugArray = slug || [];
     const fullSlug = `/${slugArray.join('/')}`;
+
+    if (slugArray.length === 2) {
+        const result = await resolveSlug(fullSlug);
+        const data = result?.status === 'success' ? result.data || {} : {};
+        const entityType = normalizeEntityType(data?.entityType ?? data?.EntityType);
+
+        if (entityType === 'brandcity') {
+            const citySlug = String(slugArray[0] || '').trim();
+            const cityName = decodeUntilStable(data?.entityName || citySlug || '')
+                .split('-')
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+
+            const title = cityName ? `Hotel Brands in ${cityName}` : 'Hotel Brands';
+
+            return {
+                title,
+                description: title,
+                alternates: {
+                    canonical: `/${citySlug}/${String(slugArray[1] || '').trim()}.htm`
+                }
+            };
+        }
+    }
 
     if (slugArray.length === 1) {
         const result = await resolveSlug(fullSlug);
@@ -195,6 +220,10 @@ export default async function DynamicPage({ params, searchParams }) {
 
         if (slugArray.length === 2 && entityType === 'citybrand') {
             return <CityBrandDetails city={slugArray[0]} params={params} resolvedSlugData={data} />;
+        }
+
+        if (slugArray.length === 2 && entityType === 'brandcity') {
+            return <CityHotelsByBrandDetails citySlug={slugArray[0]} />;
         }
     }
 

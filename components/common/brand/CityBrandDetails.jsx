@@ -2,7 +2,6 @@ import AppLink from '@/components/common/AppLink';
 import { cookies } from 'next/headers';
 import HeroSection from '@/components/sections/HeroSection';
 import { getHotelList } from '@/lib/api/public/hotelapi';
-import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { getSidebarData } from '@/lib/api/sidebarapi';
 import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
