@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { FaMapMarkerAlt } from 'react-icons/fa';
-import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
+import ListingSidebar, { getVisibleSidebarSections } from '@/components/common/sidebar/ListingSidebar';
 import CityHotelList from '@/components/common/city/CityHotelList';
 
 export default function CityBrandHotelListingWithMap({
@@ -17,6 +17,7 @@ export default function CityBrandHotelListingWithMap({
     pageIntentCookieName = ''
 }) {
     const [isHotelMapVisible, setIsHotelMapVisible] = useState(false);
+    const hasSidebar = getVisibleSidebarSections(sidebarSections).length > 0;
 
     useEffect(() => {
         const handler = () => setIsHotelMapVisible((prev) => !prev);
@@ -26,13 +27,15 @@ export default function CityBrandHotelListingWithMap({
 
     return (
         <div className="row g-0 g-lg-4 align-items-start">
-            <div className="col-lg-3 d-none d-lg-block order-lg-1">
-                <div className="position-sticky" style={{ top: '16px' }}>
-                    <ListingSidebar title="Filters" sections={sidebarSections} />
+            {hasSidebar ? (
+                <div className="col-lg-3 d-none d-lg-block order-lg-1">
+                    <div className="position-sticky" style={{ top: '16px' }}>
+                        <ListingSidebar title="Filters" sections={sidebarSections} />
+                    </div>
                 </div>
-            </div>
+            ) : null}
 
-            <div className="col-12 col-lg-9 order-1 order-lg-2">
+            <div className={hasSidebar ? 'col-12 col-lg-9 order-1 order-lg-2' : 'col-12'}>
                 <CityHotelList
                     hotels={hotels}
                     totalCount={totalCount}

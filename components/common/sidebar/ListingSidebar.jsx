@@ -11,6 +11,26 @@ function normalizeLabel(item) {
     return String(item?.categoryName ?? item?.name ?? item?.label ?? '').trim();
 }
 
+export function getVisibleSidebarSections(sections = []) {
+    const normalizedSections = Array.isArray(sections) ? sections : [];
+
+    return normalizedSections.filter((section) => {
+        if (section?.alwaysShow) return true;
+
+        const items = Array.isArray(section?.items) ? section.items : [];
+        const seen = new Set();
+
+        for (const item of items) {
+            const label = normalizeLabel(item).toLowerCase();
+            if (!label || seen.has(label)) continue;
+            seen.add(label);
+            return true;
+        }
+
+        return false;
+    });
+}
+
 function normalizeKey(item, label) {
     if (item?.collectionId) {
         return `collection-${item.collectionId}`;
@@ -62,7 +82,10 @@ function normalizeHref(item, label, context = {}) {
         return raw;
     }
 
-    const baseUrl = `${String(raw).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+    const baseUrl = `${String(raw)
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')}`;
 
     if (context.regionId && context.countrySlug) {
         const searchParams = new URLSearchParams();
@@ -75,10 +98,7 @@ function normalizeHref(item, label, context = {}) {
 }
 
 function LinkRow({ label, href, isActive = false, onClick = null, item = null, context = {} }) {
-    const className = [
-        'sidebar-filter-link d-flex align-items-start gap-2 w-100 text-start',
-        isActive ? 'active fw-semibold' : ''
-    ]
+    const className = ['sidebar-filter-link d-flex align-items-start gap-2 w-100 text-start', isActive ? 'active' : '']
         .filter(Boolean)
         .join(' ');
 
@@ -106,7 +126,7 @@ function LinkRow({ label, href, isActive = false, onClick = null, item = null, c
     };
 
     return (
-        <li className="sidebar-filter-item">
+        <li className="para-12px mb-2">
             <Link
                 href={href}
                 className={className}
@@ -128,12 +148,10 @@ function LinkRow({ label, href, isActive = false, onClick = null, item = null, c
                 style={
                     isActive
                         ? {
-                            background: 'rgba(240, 131, 30, 0.12)',
-                            color: '#c55f00',
-                            borderRadius: '10px',
-                            padding: '8px 10px'
-                        }
-                        : { padding: '8px 10px' }
+                              color: '#0077C0',
+                              fontWeight: '400 !important'
+                          }
+                        : { padding: '0px 0px' }
                 }
             >
                 <span className="sidebar-filter-text">{label}</span>
@@ -141,7 +159,6 @@ function LinkRow({ label, href, isActive = false, onClick = null, item = null, c
         </li>
     );
 }
-
 export function PriceRangeBlock() {
     return (
         <div className="px-3 pt-3 pb-3 border-bottom">
@@ -149,7 +166,7 @@ export function PriceRangeBlock() {
                 Price Range
             </h6>
             <p className="small text-muted mb-2">AUD 100 to AUD 600</p>
-            <div className="position-relative" style={{ height: '6px', background: '#d9dee7', borderRadius: '999px' }}>
+            <div className="position-relative min-height-6">
                 <div
                     style={{
                         position: 'absolute',
@@ -188,7 +205,6 @@ export function PriceRangeBlock() {
         </div>
     );
 }
-
 function SectionBlock({ title, items = [], maxVisible = 5, emptyText = 'No items available', context = {} }) {
     const [showMore, setShowMore] = useState(false);
 
@@ -211,9 +227,9 @@ function SectionBlock({ title, items = [], maxVisible = 5, emptyText = 'No items
                 <h4 className="sidebar-section-title mb-0">{title}</h4>
             </div>
 
-            <div className="px-3 pb-3">
+            <div className="px-3 pb-3 pt-2">
                 {visibleItems.length > 0 ? (
-                    <ul className="sidebar-filter-list mb-0">
+                    <ul className="sidebar-filter-list ps-3 mb-0">
                         {visibleItems.map((item) => {
                             const label = normalizeLabel(item);
                             const key = normalizeKey(item, label);
@@ -240,10 +256,10 @@ function SectionBlock({ title, items = [], maxVisible = 5, emptyText = 'No items
                 {hasMore && (
                     <button
                         type="button"
-                        className="btn btn-link text-decoration-none p-0 mt-1 sidebar-show-more"
+                        className="btn btn-link text-decoration-none p-0 mt-1 sidebar-show-more ps-3"
                         onClick={() => setShowMore((prev) => !prev)}
                     >
-                        {showMore ? 'show less' : '+show more'}
+                        {showMore ? 'show less' : '+ show more'}
                     </button>
                 )}
             </div>
@@ -251,30 +267,23 @@ function SectionBlock({ title, items = [], maxVisible = 5, emptyText = 'No items
     );
 }
 
-export default function ListingSidebar({
-    title = 'Filters',
-    topContent = null,
-    sections = [],
-    regionContext = {}
-}) {
+export default function ListingSidebar({ title = 'Filters', topContent = null, sections = [], regionContext = {} }) {
+    const visibleSections = useMemo(() => getVisibleSidebarSections(sections), [sections]);
+
+    if (visibleSections.length === 0 && !topContent) {
+        return null;
+    }
+
     return (
-        <aside
-            className="bg-white rounded-4 overflow-hidden"
-            style={{
-                boxShadow: '0 2px 14px rgba(15, 23, 42, 0.08)',
-                border: '1px solid #eceff3'
-            }}
-        >
+        <aside className="bg-white rounded-4 overflow-hidden shadow">
             <div className="px-3 py-3 border-bottom">
-                <div className="fw-bold" style={{ fontSize: '17px', color: '#111827' }}>
-                    {title}
-                </div>
+                <div className="fw-bold font-size-17">{title}</div>
             </div>
 
             {topContent}
 
             <div>
-                {sections.map((section) => (
+                {visibleSections.map((section) => (
                     <SectionBlock
                         key={section.displayTitle || section.title}
                         title={section.displayTitle || section.title}

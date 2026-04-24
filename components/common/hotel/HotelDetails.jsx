@@ -470,22 +470,23 @@ export default function HotelDetails({ initialData }) {
             </div>
 
             {/* Hotel Header Info - Above Images */}
-            <section className="py-4 p-1">
+            <section className="py-3 p-1">
                 <div className="container">
-                    <div className="d-flex align-items-start flex-column flex-md-row mb-3 hotel-detail-header">
+                    <div className="d-flex align-items-start flex-column flex-md-row hotel-detail-header">
                         {' '}
                         <div className="me-auto">
-                            <div className="d-flex align-items-center mb-2">
+                            <div className="d-flex mb-2 vertical-align-top block-display">
                                 <h4 className="fw-600 mb-0 me-3 fs-5 fw-bold hotel-detail-title"> {hotelInfo.hotelName}</h4>
-                                <div className="text-warning d-flex align-items-center me-3">
-                                    {[...Array(5)].map((_, i) => (
-                                        <MdOutlineStarPurple500 key={i} size={18} color={i < hotelInfo.stars ? '#f0831e' : '#ddd'} />
-                                    ))}
+                                <div className="d-flex gap-1 mt-2">
+                                    <div className="text-warning d-flex me-3">
+                                        {[...Array(5)].map((_, i) => (
+                                            <MdOutlineStarPurple500 key={i} size={18} color={i < hotelInfo.stars ? '#f0831e' : '#ddd'} />
+                                        ))}
+                                    </div>
+                                    <span className="text-white px-3 py-1 mb-2 d-inline-block orange-bg me-3">
+                                        {hotelInfo.hotelType || 'Apartment Hotel'}
+                                    </span>
                                 </div>
-                                <span
-                                    className="text-white px-3 py-1 mb-2 d-inline-block orange-bg">
-                                    {hotelInfo.hotelType || 'Apartment Hotel'}
-                                </span>
                             </div>
                             <div className="hotel-detail-location mb-2">
                                 <p
@@ -508,8 +509,7 @@ export default function HotelDetails({ initialData }) {
                         <div className="hotel-detail-review mb-2">
                             {' '}
                             <div className="d-flex align-items-start mt-3 mt-md-0 me-3">
-                                <div
-                                    className="d-flex flex-column align-items-center justify-content-center p-2 blue-bg">
+                                <div className="rating-box me-2 collection-hotel-rating-box border-radius">
                                     <span className="text-white  fs-9">{hotelInfo.reviewScore}</span>
                                 </div>
                                 <div className="ms-2 d-flex flex-column justify-content-center">
@@ -524,7 +524,7 @@ export default function HotelDetails({ initialData }) {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="theme-button-blue d-flex align-items-center justify-content-center px-3"
-                                style={{ height: '48px', borderRadius: '6px' }}
+                                style={{ borderRadius: '6px' }}
                             >
                                 See Rooms & Prices
                             </Link>
@@ -534,7 +534,7 @@ export default function HotelDetails({ initialData }) {
             </section>
 
             {/* Image Gallery with Carousel */}
-            <section className="py-4 p-1">
+            <section className="py-3 p-1">
                 <div className="container">
                     <div className="row g-2">
                         {/* Main image with carousel */}
@@ -749,8 +749,7 @@ export default function HotelDetails({ initialData }) {
                                                         <div className="border rounded-4 p-4 bg-white">
                                                             <div className="d-flex">
                                                                 {/* Avatar */}
-                                                                <div
-                                                                    className="rounded-circle d-flex align-items-center justify-content-center me-3 circle">
+                                                                <div className="rounded-circle d-flex align-items-center justify-content-center me-3 circle">
                                                                     {review.travellerName
                                                                         ? review.travellerName.charAt(0).toUpperCase()
                                                                         : 'S'}
@@ -828,34 +827,26 @@ export default function HotelDetails({ initialData }) {
                                     <div className="mb-4">
                                         <div className="row g-2">
                                             <div className="row mb-4">
-                                                <span className="fw-bold font-size-18">
-                                                    Check-in
-                                                </span>
+                                                <span className="fw-bold font-size-18">Check-in</span>
                                                 <span className="text-muted">
                                                     From {hotelInfo.checkIn ? hotelInfo.checkIn.slice(0, 5) : '00:00'} to 23:59
                                                 </span>
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold font-size-18">
-                                                    Check-out
-                                                </span>
+                                                <span className="fw-bold font-size-18">Check-out</span>
                                                 <span className="text-muted">
                                                     Until {hotelInfo.checkOut ? hotelInfo.checkOut.slice(0, 5) : '11:00'}
                                                 </span>
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold font-size-18">
-                                                    Cancellation & prepayment
-                                                </span>
+                                                <span className="fw-bold font-size-18">Cancellation & prepayment</span>
                                                 <span className="text-muted">
                                                     {hotelInfo.cancellationPolicy ||
                                                         'Cancellation and prepayment policies vary by room type. Please check your booking details before finalizing.'}
                                                 </span>
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold font-size-18">
-                                                    Accepted credit cards
-                                                </span>
+                                                <span className="fw-bold font-size-18">Accepted credit cards</span>
                                                 <span className="text-muted">
                                                     {hotelInfo.acceptedCreditCards ||
                                                         'The hotel reserves the right to pre-authorise credit cards prior to arrival.'}
@@ -870,9 +861,7 @@ export default function HotelDetails({ initialData }) {
                                             </div> */}
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold font-size-18">
-                                                    The fine print
-                                                </span>
+                                                <span className="fw-bold font-size-18">The fine print</span>
                                                 <span className="text-muted">{hotelInfo.hotelPolicy || 'No special policies listed.'}</span>
                                             </div>
                                             <div className="d-flex justify-content-start align-items-center mb-2 gap-4">
