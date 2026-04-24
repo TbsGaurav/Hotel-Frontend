@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { buildCategoryListingPath } from '@/lib/api/public/cityCategoryapi';
+import AppLink from '../AppLink';
 
 function normalizeLabel(item) {
     if (item?.collectionName) {
@@ -107,7 +107,7 @@ function LinkRow({ label, href, isActive = false, onClick = null, item = null, c
 
     return (
         <li className="sidebar-filter-item">
-            <Link
+            <AppLink
                 href={href}
                 className={className}
                 onMouseDown={storeSelectionContext}
@@ -137,7 +137,7 @@ function LinkRow({ label, href, isActive = false, onClick = null, item = null, c
                 }
             >
                 <span className="sidebar-filter-text">{label}</span>
-            </Link>
+            </AppLink>
         </li>
     );
 }

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaCamera, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { SiAmericanexpress, SiVisa, SiMastercard, SiDinersclub, SiJcb, SiWesternunion } from 'react-icons/si';
@@ -292,9 +292,9 @@ export default function HotelDetails({ initialData }) {
                 <HeroSection variant="common" />
                 <div className="container py-5 text-center">
                     <h3>{error || 'Hotel not found'}</h3>
-                    <Link href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
+                    <AppLink href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
                         Back to Home
-                    </Link>
+                    </AppLink>
                 </div>
             </>
         );
@@ -401,9 +401,9 @@ export default function HotelDetails({ initialData }) {
                 <HeroSection variant="common" />
                 <div className="container py-5 text-center">
                     <h3>{error || 'Hotel not found'}</h3>
-                    <Link href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
+                    <AppLink href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
                         Back to Home
-                    </Link>
+                    </AppLink>
                 </div>
             </>
         );
@@ -430,39 +430,39 @@ export default function HotelDetails({ initialData }) {
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href="/destinations" className="text-dark text-decoration-none">
+                                <AppLink href="/destinations" className="text-dark text-decoration-none">
                                     All Countries
-                                </Link>
+                                </AppLink>
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href={`/${hotelInfo.countryUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
+                                <AppLink href={`/${hotelInfo.countryUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
                                     {hotelInfo.country}
-                                </Link>
+                                </AppLink>
                             </li>
 
                             {hotelInfo.region && (
                                 <li className="breadcrumb-item small-para-14-px">
-                                    <Link href={`${hotelInfo.regionUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
+                                    <AppLink href={`${hotelInfo.regionUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
                                         {hotelInfo.region}
-                                    </Link>
+                                    </AppLink>
                                 </li>
                             )}
 
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href={`${hotelInfo.cityUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
+                                <AppLink href={`${hotelInfo.cityUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
                                     {hotelInfo.city}
-                                </Link>
+                                </AppLink>
                             </li>
 
                             {/* ✅ Clickable active */}
                             <li className="breadcrumb-item small-para-14-px active">
-                                <Link
+                                <AppLink
                                     href={`${hotelInfo.cityUrl?.toLowerCase()}/${toSlug(hotelInfo.hotelName)}`}
                                     className="text-decoration-none"
                                 >
                                     {hotelInfo.hotelName}
-                                </Link>
+                                </AppLink>
                             </li>
                         </ol>
                     </nav>
@@ -519,7 +519,7 @@ export default function HotelDetails({ initialData }) {
                             </div>
                         </div>
                         <div className="d-none d-md-flex align-items-center ms-auto hotel-detail-price-btn-desktop ">
-                            <Link
+                            <AppLink
                                 href={hotelInfo.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -527,7 +527,7 @@ export default function HotelDetails({ initialData }) {
                                 style={{ height: '48px', borderRadius: '6px' }}
                             >
                                 See Rooms & Prices
-                            </Link>
+                            </AppLink>
                         </div>
                     </div>
                 </div>
@@ -642,14 +642,14 @@ export default function HotelDetails({ initialData }) {
                     </div>
                     <div className="mt-3 d-block d-md-none hotel-detail-price-btn">
                         {' '}
-                        <Link
+                        <AppLink
                             href={hotelInfo.url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="theme-button-blue rounded d-flex align-items-center justify-content-center py-2 px-4"
                         >
                             See Rooms & Prices
-                        </Link>
+                        </AppLink>
                     </div>
                 </div>
                 {/* View all photos button */}

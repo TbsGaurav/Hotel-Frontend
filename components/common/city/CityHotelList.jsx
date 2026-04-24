@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import Image from 'next/image';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
@@ -497,14 +497,14 @@ export default function CityHotelList({
                                             <div className="d-flex flex-column flex-md-row align-items-start justify-content-between mb-2 collection-hotel-header">
                                                 <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-2 mb-md-0 collection-hotel-title-row">
                                                     {/* <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row"> */}
-                                                    <Link
+                                                    <AppLink
                                                         href={`${hotel.urlName}`}
                                                         className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
                                                         onClick={(e) => e.stopPropagation()}
                                                         style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                                                     >
                                                         {hotel.hotelName}
-                                                    </Link>
+                                                    </AppLink>
                                                     <div className="text-warning mt-1 mt-md-0 collection-hotel-stars">
                                                         {[...Array(5)].map((_, i) => (
                                                             <MdOutlineStarPurple500
@@ -648,7 +648,7 @@ export default function CityHotelList({
                                                 className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col"
                                                 style={effectiveViewMode === 'grid' ? { paddingTop: '6px' } : undefined}
                                             >
-                                                <Link
+                                                <AppLink
                                                     className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
                                                     href={`${hotel.url}`}
                                                     target="_blank"
@@ -657,7 +657,7 @@ export default function CityHotelList({
                                                 >
                                                     <span>See Availability</span>
                                                     <i className="fa-solid fa-arrow-right ms-2"></i>
-                                                </Link>
+                                                </AppLink>
                                             </div>
                                         </div>
                                     </div>

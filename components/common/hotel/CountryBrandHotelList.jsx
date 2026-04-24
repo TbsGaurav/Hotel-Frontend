@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
@@ -314,11 +314,11 @@ export default function CountryBrandHotelList({
                 {hotelsByViewMode.map((city) => (
                     <div key={city.cityName} className="d-flex flex-column gap-3">
                         {effectiveViewMode !== 'grid' ? (
-                            <Link href={getCityBrandPath(city.cityUrlName)} className="text-decoration-none">
+                            <AppLink href={getCityBrandPath(city.cityUrlName)} className="text-decoration-none">
                                 <h5 className="text-warning city-hover">
                                     {formattedBrand} {city.cityName}
                                 </h5>
-                            </Link>
+                            </AppLink>
                         ) : null}
 
                         <div className={effectiveViewMode === 'grid' ? 'row g-3' : 'd-flex flex-column gap-3'}>
@@ -410,14 +410,14 @@ export default function CountryBrandHotelList({
                                                     <div className="text-decoration-none">
                                                         <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-header">
                                                             <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-2 mb-md-0 collection-hotel-title-row">
-                                                                <Link
+                                                                <AppLink
                                                                     href={`${hotel.urlName}`}
                                                                     className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
                                                                     onClick={(e) => e.stopPropagation()}
                                                                     style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                                                                 >
                                                                     {hotel.hotelName}
-                                                                </Link>
+                                                                </AppLink>
                                                                 <div className="text-warning mt-1 mt-md-0 collection-hotel-stars">
                                                                     {[...Array(5)].map((_, i) => (
                                                                         <MdOutlineStarPurple500
@@ -583,7 +583,7 @@ export default function CountryBrandHotelList({
                                                             className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col"
                                                             style={effectiveViewMode === 'grid' ? { paddingTop: '6px' } : undefined}
                                                         >
-                                                            <Link
+                                                            <AppLink
                                                                 className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
                                                                 href={`${hotel.url}`}
                                                                 target="_blank"
@@ -592,7 +592,7 @@ export default function CountryBrandHotelList({
                                                             >
                                                                 <span>See Availability</span>
                                                                 <i className="fa-solid fa-arrow-right ms-2"></i>
-                                                            </Link>
+                                                            </AppLink>
                                                         </div>
                                                     </div>
                                                 </div>

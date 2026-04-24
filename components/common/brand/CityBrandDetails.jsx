@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { cookies } from 'next/headers';
 import HeroSection from '@/components/sections/HeroSection';
 import { getHotelList } from '@/lib/api/public/hotelapi';
@@ -141,38 +141,38 @@ export default async function CityBrandDetails({ params, resolvedSlugData = {} }
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href="/brands" className="text-dark text-decoration-none">
+                                <AppLink href="/brands" className="text-dark text-decoration-none">
                                     All Brands
-                                </Link>
+                                </AppLink>
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link
+                                <AppLink
                                     href={`/brand/${encodeURIComponent(decodedBrandSegment)}`}
                                     className="text-dark text-decoration-none text-capitalize"
                                 >
                                     {formattedBrand}
-                                </Link>
+                                </AppLink>
                             </li>
 
                             {countrySlug && (
                                 <li className="breadcrumb-item small-para-14-px">
-                                    <Link
+                                    <AppLink
                                         href={`/${encodeURIComponent(countrySlug)}/${encodeURIComponent(decodedBrandSegment)}`}
                                         className="text-dark text-decoration-none text-capitalize"
                                     >
                                         {formattedBrand} {countrySlug}
-                                    </Link>
+                                    </AppLink>
                                 </li>
                             )}
 
                             <li className="breadcrumb-item small-para-14-px active text-capitalize">
-                                <Link
+                                <AppLink
                                     href={`/${encodeURIComponent(citySlug)}/${encodeURIComponent(decodedBrandSegment)}`}
                                     className="text-decoration-none"
                                 >
                                     {formattedBrand} {cityName}
-                                </Link>
+                                </AppLink>
                             </li>
                         </ol>
                     </nav>
