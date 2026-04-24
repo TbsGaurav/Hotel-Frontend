@@ -97,7 +97,7 @@ export default function Dropdown({
                                         {item.count != null && (
                                             <div className="property-count">
                                                 <Link href={item.href} className="text-decoration-none property-link" prefetch={false}>
-                                                    ({item.count} properties)
+                                                    ({item.count} {Number(item.count) === 1 ? 'property' : 'properties'})
                                                 </Link>
                                             </div>
                                         )}
