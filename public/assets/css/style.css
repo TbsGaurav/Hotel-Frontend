@@ -3009,6 +3009,9 @@ input[type='range']:active::-webkit-slider-thumb {
         padding-top: 0;
         margin: 0px 5px 0px 5px;
     }
+    .block-display {
+        display: block !important;
+    }
 }
 @media screen and (max-width: 500px) {
     .custom-input-group-textbox,
@@ -3140,7 +3143,6 @@ input[type='range']:active::-webkit-slider-thumb {
     padding: 5px 10px;
     font-size: 16px;
     align-items: center;
-
 }
 .country-list a {
     display: flex;
@@ -3536,9 +3538,11 @@ input[type='range']:active::-webkit-slider-thumb {
     overflow-y: auto;
 }
 .orange-bg {
+    text-align: center;
     background: #ff7a00;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 13px;
 }
 .blue-bg {
     background: #003580;
@@ -3589,4 +3593,17 @@ input[type='range']:active::-webkit-slider-thumb {
 }
 .vertical-align-top {
     align-items: flex-start;
+}
+.shadow {
+    box-shadow: 0 2px 14px rgba(15, 23, 42, 0.08);
+    border: 1px solid #eceff3;
+}
+.font-size-17 {
+    font-size: 17px;
+    color: #111827;
+}
+.min-height-6 {
+    height: 6px;
+    background: #d9dee7;
+    border-radius: 999px;
 }

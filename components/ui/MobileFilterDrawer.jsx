@@ -2,10 +2,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
+import ListingSidebar, { getVisibleSidebarSections } from '@/components/common/sidebar/ListingSidebar';
 
 export default function MobileFilterDrawer({ sidebarSections, triggerClass = 'mobile-actions__link' }) {
     const [open, setOpen] = useState(false);
+    const hasFilters = getVisibleSidebarSections(sidebarSections).length > 0;
 
     useEffect(() => {
         if (open) {
@@ -18,6 +19,10 @@ export default function MobileFilterDrawer({ sidebarSections, triggerClass = 'mo
             document.body.style.overflow = '';
         };
     }, [open]);
+
+    if (!hasFilters) {
+        return null;
+    }
 
     return (
         <>
