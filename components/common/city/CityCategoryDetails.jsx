@@ -10,7 +10,6 @@ import SeoDetailsCard from '@/components/common/SeoDetailsCard';
 import { getSidebarData } from '@/lib/api/sidebarapi';
 import ListingLayout from '@/components/common/listing/ListingLayout';
 import { buildCategorySeo } from '@/lib/seo';
-import { FaMapMarkerAlt } from 'react-icons/fa';
 import {
     buildCategoryListingPath,
     buildCategorySidebarSections,
