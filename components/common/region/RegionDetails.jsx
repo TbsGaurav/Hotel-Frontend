@@ -248,23 +248,21 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                 <div className="container">
                     <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
 
-                    <div className="row g-4 align-items-start">
-                        <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
-                        <hr className="my-5" />
+                    <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
+                    <hr className="my-5" />
 
-                        <RegionHotelListingWithMap
-                            sidebarSections={sidebarSectionsWithLinks}
-                            hotels={hotels}
-                            totalCount={totalCount}
-                            currentPage={currentPage}
-                            pageSize={REGION_PAGE_SIZE}
-                            citySlug={urlName}
-                            pageCookieName={regionPageCookieName}
-                            pageIntentCookieName={pageIntentCookieName}
-                            regionHotelsSource={fallbackRegionHotels}
-                            content={description}
-                        />
-                    </div>
+                    <RegionHotelListingWithMap
+                        sidebarSections={sidebarSectionsWithLinks}
+                        hotels={hotels}
+                        totalCount={totalCount}
+                        currentPage={currentPage}
+                        pageSize={REGION_PAGE_SIZE}
+                        citySlug={urlName}
+                        pageCookieName={regionPageCookieName}
+                        pageIntentCookieName={pageIntentCookieName}
+                        regionHotelsSource={fallbackRegionHotels}
+                        content={description}
+                    />
                 </div>
             </section>
         </>

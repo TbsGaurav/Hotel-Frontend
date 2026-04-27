@@ -24,7 +24,10 @@ export default function CityHotelList({
     pageIntentCookieName = '',
     pageCookieName,
     mapVisible = false,
-    onMapVisibleChange = null
+    onMapVisibleChange = null,
+    viewMode: controlledViewMode = 'list',
+    onViewModeChange = null,
+    showToolbar = true
 }) {
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(hotels || []);
@@ -32,7 +35,7 @@ export default function CityHotelList({
     const [page, setPage] = useState(currentPage || 1);
     const [hasMore, setHasMore] = useState((hotels?.length || 0) < (totalCount || 0) || (hotels?.length || 0) === pageSize);
     const [currency, setCurrency] = useState(null);
-    const [viewMode, setViewMode] = useState('list');
+    const [uncontrolledViewMode, setUncontrolledViewMode] = useState('list');
     const [isMobileViewport, setIsMobileViewport] = useState(false);
     const [timestamp, setTimestamp] = useState('');
     const [failedImageKeys, setFailedImageKeys] = useState(() => new Set());
@@ -82,12 +85,6 @@ export default function CityHotelList({
 
         return () => window.clearTimeout(timer);
     }, []);
-
-    useEffect(() => {
-        if (isMobileViewport && viewMode !== 'list') {
-            setViewMode('list');
-        }
-    }, [isMobileViewport, viewMode]);
 
     useEffect(() => {
         const syncViewport = () => {
@@ -434,15 +431,18 @@ export default function CityHotelList({
         window.open(url, '_blank', 'noopener,noreferrer');
     };
 
-    const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
+    const isControlled = typeof onViewModeChange === 'function';
+    const activeViewMode = isControlled ? controlledViewMode : uncontrolledViewMode;
+    const setViewMode = isControlled ? onViewModeChange : setUncontrolledViewMode;
+    const effectiveViewMode = isMobileViewport ? 'list' : activeViewMode;
 
     return (
-        <div className="container p-0">
+        <div className="p-0">
             {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
 
-            {!isMobileViewport ? (
+            {showToolbar && !isMobileViewport ? (
                 <HotelListToolbar
-                    viewMode={viewMode}
+                    viewMode={activeViewMode}
                     onViewModeChange={setViewMode}
                     mapVisible={mapVisible}
                     onMapToggle={() => {
@@ -453,6 +453,7 @@ export default function CityHotelList({
                         }
                     }}
                     resultsCount={allHotels.length}
+                    className="mb-2"
                 />
             ) : null}
 

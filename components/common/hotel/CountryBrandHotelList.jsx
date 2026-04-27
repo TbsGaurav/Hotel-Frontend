@@ -293,8 +293,9 @@ export default function CountryBrandHotelList({
     };
 
     const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
-    const hotelsByViewMode =
-        effectiveViewMode === 'grid' ? [{ cityName: 'all-hotels', cityUrlName: '', hotels: allHotels }] : groupedHotels;
+    const hotelsByViewMode = groupedHotels;
+    const renderGroups =
+        effectiveViewMode === 'grid' ? [{ cityName: '', cityUrlName: '', hotels: allHotels }] : hotelsByViewMode;
 
     if (!allHotels.length) {
         return (
@@ -352,7 +353,7 @@ export default function CountryBrandHotelList({
         );
     }
     return (
-        <div className="container">
+        <div className="p-0">
             {!isMobileViewport ? (
                 <HotelListToolbar
                     viewMode={viewMode}
@@ -360,17 +361,18 @@ export default function CountryBrandHotelList({
                     mapVisible={isMapVisible}
                     onMapToggle={() => setIsMapVisible(!isMapVisible)}
                     resultsCount={allHotels.length}
+                    className="mb-2"
                 />
             ) : null}
 
             {isMapVisible ? <HotelMapView hotels={allHotels} className="mb-4" /> : null}
 
-            <div className={`${effectiveViewMode === 'grid' ? 'row g-3 grid-view' : 'd-flex flex-column gap-3'}`}>
-                {hotelsByViewMode.map((city) => (
-                    <div key={city.cityName} className="d-flex flex-column gap-3">
+            <div className="d-flex flex-column gap-3">
+                {renderGroups.map((city, cityIndex) => (
+                    <div key={city.cityName || `city-${cityIndex}`} className="d-flex flex-column gap-3">
                         {effectiveViewMode !== 'grid' ? (
                             <AppLink href={getCityBrandPath(city.cityUrlName)} className="text-decoration-none">
-                                <h5 className="text-warning city-hover">
+                                <h5 className="city-hover mb-0">
                                     {formattedBrand} {city.cityName}
                                 </h5>
                             </AppLink>
@@ -394,10 +396,21 @@ export default function CountryBrandHotelList({
                                           .filter(Boolean)
                                     : [];
 
+                                const gridColClass = effectiveViewMode === 'grid' ? 'col-12 col-md-6' : '';
+
                                 return (
-                                    <div key={hotelKey} className={effectiveViewMode === 'grid' ? 'col-12 col-md-6' : ''}>
+                                    <div key={hotelKey} className={gridColClass}>
+                                        {effectiveViewMode === 'grid' && hotel?.cityName ? (
+                                            <AppLink href={getCityBrandPath(hotel.cityUrlName)} className="text-decoration-none">
+                                                <h6 className="text-warning city-hover mb-2">
+                                                    {formattedBrand} {hotel.cityName}
+                                                </h6>
+                                            </AppLink>
+                                        ) : null}
                                         <div
-                                            className={`card border-0 rounded-4 hotel-list-card collection-hotel-card ${effectiveViewMode === 'grid' ? 'p-3 h-100' : 'p-3 p-md-4'}`}
+                                            className={`card border-0 rounded-4 hotel-list-card collection-hotel-card ${
+                                                effectiveViewMode === 'grid' ? 'p-3 d-flex flex-column flex-grow-1' : 'p-3 p-md-4'
+                                            }`}
                                             style={{
                                                 boxShadow: '0 4px 18px rgba(0,0,0,0.08)',
                                                 minHeight: effectiveViewMode === 'grid' && !isMobileViewport ? '620px' : undefined

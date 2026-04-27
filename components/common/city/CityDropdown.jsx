@@ -61,14 +61,11 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
             setLoading(true);
 
             const endpoint =
-                letter === 'Top Cities'
-                    ? `/countries/${countryName}`
-                    : `/countries/${countryName}?alphabet=${letter.toLowerCase()}`;
+                letter === 'Top Cities' ? `/countries/${countryName}` : `/countries/${countryName}?alphabet=${letter.toLowerCase()}`;
 
             const json = await fetchClient(endpoint);
 
-            const cityData =
-                json?.data?.countryData?.filter((item) => Number(item.type) === ITEM_TYPE.City) || [];
+            const cityData = json?.data?.countryData?.filter((item) => Number(item.type) === ITEM_TYPE.City) || [];
 
             setCities(cityData);
         } catch (error) {
@@ -100,11 +97,7 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                     </button>
                 </h2>
 
-                <div
-                    id="collapseCities"
-                    className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`}
-                    aria-labelledby="headingCities"
-                >
+                <div id="collapseCities" className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`} aria-labelledby="headingCities">
                     <div className="accordion-body accordion-main">
                         <div className="d-flex flex-wrap gap-2 mb-4 mt-2">
                             {ALPHABETS.map((letter) => (
@@ -120,6 +113,8 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
 
                         {loading ? (
                             <p className="mb-0">Loading cities...</p>
+                        ) : cities.length === 0 ? (
+                            <p className="text-muted">No cities available</p>
                         ) : (
                             <div className="row">
                                 {cities.map((city) => (

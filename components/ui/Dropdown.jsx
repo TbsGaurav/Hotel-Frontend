@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,13 +6,11 @@ import AppLink from '../common/AppLink';
 
 const DROPDOWN_TOGGLE_EVENT = 'shared-dropdown-toggle';
 
-export default function Dropdown({
-    id,
-    title,
-    items = [],
-    parentId,
-    defaultOpen = false
-}) {
+export default function Dropdown({ id, title, items = [], parentId, defaultOpen = false }) {
+    if (!items || items.length === 0) {
+        return null; 
+    }
+
     const [isOpen, setIsOpen] = useState(defaultOpen);
 
     const headingId = `heading-${id}`;
@@ -75,11 +71,7 @@ export default function Dropdown({
                     </button>
                 </h2>
 
-                <div
-                    id={collapseId}
-                    className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`}
-                    aria-labelledby={headingId}
-                >
+                <div id={collapseId} className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`} aria-labelledby={headingId}>
                     <div className="accordion-body accordion-main">
                         <div className="row">
                             {items.length === 0 ? (

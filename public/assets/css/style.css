@@ -1713,7 +1713,45 @@ input[type='range']:active::-webkit-slider-thumb {
     color: #adb5bd;
     flex: 0 0 auto;
 }
-/* swiper indicator */
+
+.curation-hotel-row .hotel-row-info {
+    white-space: normal;
+    overflow: visible;
+    flex-wrap: wrap;
+}
+
+.curation-hotel-row .hotel-name {
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+@media (max-width: 575.98px) {
+    .curation-hotel-row .hotel-row-info {
+        display: block;
+    }
+
+    .curation-hotel-row .hotel-name {
+        display: block;
+    }
+
+    .curation-hotel-row .hotel-separator {
+        display: none;
+    }
+
+    .curation-hotel-row .hotel-stars,
+    .curation-hotel-row .hotel-address,
+    .curation-hotel-row .hotel-score {
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    .curation-hotel-actions {
+        flex-basis: 100%;
+        margin-left: 0 !important;
+        padding-left: 26px;
+        justify-content: flex-end;
+    }
+}
 .image-swiper {
     position: relative;
     border-radius: 14px;
@@ -2373,6 +2411,7 @@ input[type='range']:active::-webkit-slider-thumb {
 .city-hover {
     cursor: pointer;
     transition: color 0.3s ease;
+    color:#f0831e !important;
 }
 
 .city-hover:hover {

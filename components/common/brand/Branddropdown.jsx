@@ -10,10 +10,10 @@ export default function BrandDropdown({ parentId, initialBrands }) {
     const [brands, setBrands] = useState(initialBrands || []);
     const [activeLetter, setActiveLetter] = useState('All');
     const [loading, setLoading] = useState(false);
-    const [isOpen, setIsOpen] = useState(false); 
+    const [isOpen, setIsOpen] = useState(false);
 
     const handleToggle = () => {
-        setIsOpen(prev => !prev); 
+        setIsOpen((prev) => !prev);
     };
 
     const fetchBrands = async (letter) => {
@@ -21,10 +21,7 @@ export default function BrandDropdown({ parentId, initialBrands }) {
             setActiveLetter(letter);
             setLoading(true);
 
-            const data =
-                letter === 'All'
-                    ? await getBrandList()
-                    : await getBrandList(letter);
+            const data = letter === 'All' ? await getBrandList() : await getBrandList(letter);
 
             setBrands(data);
         } catch (error) {
@@ -56,11 +53,7 @@ export default function BrandDropdown({ parentId, initialBrands }) {
                     </button>
                 </h2>
 
-                <div
-                    id="collapseBrands"
-                    className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`}
-                    aria-labelledby="headingBrands"
-                >
+                <div id="collapseBrands" className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`} aria-labelledby="headingBrands">
                     <div className="accordion-body accordion-main">
                         {/* Alphabet Filter */}
                         <div className="d-flex flex-wrap gap-2 mb-4 mt-2">
@@ -68,10 +61,7 @@ export default function BrandDropdown({ parentId, initialBrands }) {
                                 <button
                                     key={letter}
                                     onClick={() => fetchBrands(letter)}
-                                    className={`btn btn-sm ${activeLetter === letter
-                                        ? 'btn-primary'
-                                        : 'btn-outline-secondary'
-                                        }`}
+                                    className={`btn btn-sm ${activeLetter === letter ? 'btn-primary' : 'btn-outline-secondary'}`}
                                 >
                                     {letter}
                                 </button>
@@ -81,13 +71,12 @@ export default function BrandDropdown({ parentId, initialBrands }) {
                         {/* Brand List */}
                         {loading ? (
                             <p>Loading brands...</p>
+                        ) : brands.length === 0 ? (
+                            <p className="text-muted">No brands available</p>
                         ) : (
                             <div className="row">
                                 {brands.map((brand) => (
-                                    <div
-                                        key={brand.brandId}
-                                        className="col-6 col-md-4 col-lg-3 country-list"
-                                    >
+                                    <div key={brand.brandId} className="col-6 col-md-4 col-lg-3 country-list">
                                         {brand.urlName ? (
                                             <AppLink
                                                 href={`/brand/${brand.urlName}`}
@@ -96,9 +85,7 @@ export default function BrandDropdown({ parentId, initialBrands }) {
                                                 {brand.name}
                                             </AppLink>
                                         ) : (
-                                            <span className="text-dark fw-semibold">
-                                                {brand.name}
-                                            </span>
+                                            <span className="text-dark fw-semibold">{brand.name}</span>
                                         )}
                                     </div>
                                 ))}
