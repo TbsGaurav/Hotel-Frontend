@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import AppLink from '../common/AppLink';
 
 export default function PriceMatchSection() {
     const logos = [
@@ -41,7 +42,7 @@ export default function PriceMatchSection() {
                         <div key={rowIndex} className="row justify-content-center align-items-center g-4 mb-4">
                             {row.map((logo, logoIndex) => (
                                 <div key={`${rowIndex}-${logoIndex}`} className="col-6 col-md-3 col-lg text-center">
-                                    <a href={logo.url} className="brand-logo-wrap">
+                                    <AppLink href={logo.url} className="brand-logo-wrap">
                                         <Image
                                             src={logo.img}
                                             alt="brand logo"
@@ -49,7 +50,7 @@ export default function PriceMatchSection() {
                                             sizes="(max-width: 767px) 0px, (max-width: 991px) 25vw, 12vw"
                                             className="brand-logo"
                                         />
-                                    </a>
+                                    </AppLink>
                                 </div>
                             ))}
                         </div>
@@ -61,7 +62,7 @@ export default function PriceMatchSection() {
                         <div key={rowIndex} className="price-match-logos-row">
                             {row.map((logo, logoIndex) => (
                                 <div key={`${rowIndex}-${logoIndex}`} className="price-match-logo-cell">
-                                    <a href={logo.url} className="price-match-logo-wrap">
+                                    <AppLink href={logo.url} className="price-match-logo-wrap">
                                         <Image
                                             src={logo.img}
                                             alt="brand logo"
@@ -69,7 +70,7 @@ export default function PriceMatchSection() {
                                             sizes="(max-width: 575px) 106px, 110px"
                                             className="price-match-logo"
                                         />
-                                    </a>
+                                    </AppLink>
                                 </div>
                             ))}
                         </div>

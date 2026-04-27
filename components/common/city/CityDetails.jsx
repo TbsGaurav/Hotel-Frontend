@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { cookies } from 'next/headers';
 import HeroSection from '@/components/sections/HeroSection';
 import CityHotelListingWithMap from './CityHotelListingWithMap';
@@ -158,31 +158,31 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href="/destinations" className="text-dark text-decoration-none">
+                                <AppLink href="/destinations" className="text-dark text-decoration-none">
                                     All Countries
-                                </Link>
+                                </AppLink>
                             </li>
 
                             {countryName && (
                                 <li className="breadcrumb-item small-para-14-px">
-                                    <Link href={`/${toSlug(countryUrl)}`} className="text-dark text-decoration-none">
+                                    <AppLink href={`/${toSlug(countryUrl)}`} className="text-dark text-decoration-none">
                                         {countryName}
-                                    </Link>
+                                    </AppLink>
                                 </li>
                             )}
 
                             {regionName && (
                                 <li className="breadcrumb-item small-para-14-px">
-                                    <Link href={`${toSlug(regionUrl)}`} className="text-dark text-decoration-none">
+                                    <AppLink href={`${toSlug(regionUrl)}`} className="text-dark text-decoration-none">
                                         {regionName}
-                                    </Link>
+                                    </AppLink>
                                 </li>
                             )}
 
                             <li className="breadcrumb-item small-para-14-px active">
-                                <Link href={`/${citySlugPath}`} className="text-decoration-none">
+                                <AppLink href={`/${citySlugPath}`} className="text-decoration-none">
                                     {cityName}
-                                </Link>
+                                </AppLink>
                             </li>
                         </ol>
                     </nav>

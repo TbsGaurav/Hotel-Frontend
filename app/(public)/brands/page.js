@@ -1,7 +1,7 @@
 import BrandDropdown from '@/components/common/brand/Branddropdown';
 import HeroSection from '@/components/sections/HeroSection';
 import { getBrandList } from '@/lib/api/public/brandapi';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 
 export default async function BrandsPage() {
     const initialBrands = await getBrandList();
@@ -15,9 +15,9 @@ export default async function BrandsPage() {
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href="/brands" className="text-dark text-decoration-none">
+                                <AppLink href="/brands" className="text-dark text-decoration-none">
                                     All Brands
-                                </Link>
+                                </AppLink>
                             </li>
                         </ol>
                     </nav>

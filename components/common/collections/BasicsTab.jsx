@@ -432,9 +432,7 @@ export default function BasicsTab({
 
                         {showGeoDropdown && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 dropdown-height">
                                 {countries
                                     .filter((c) => c.name.toLowerCase().includes(geoSearch.toLowerCase()))
                                     .map((node) => (
@@ -502,9 +500,7 @@ export default function BasicsTab({
 
                         {showRegionDropdown && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 dropdown-height">
                                 {regions
                                     .filter((r) => r.name.toLowerCase().includes(regionSearch.toLowerCase()))
                                     .map((region) => (
@@ -597,9 +593,7 @@ export default function BasicsTab({
 
                         {showCityDropdown && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 dropdown-height">
                                 {cities
                                     .filter((c) => c.name.toLowerCase().includes(citySearch.toLowerCase()))
                                     .map((city) => (
@@ -654,9 +648,7 @@ export default function BasicsTab({
 
                         {showDistrictDropdown && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 dropdown-height">
                                 {districts
                                     .filter((d) => d.name.toLowerCase().includes(districtSearch.toLowerCase()))
                                     .map((district) => (

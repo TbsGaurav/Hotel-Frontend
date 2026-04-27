@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 
 export default function Error({ error, reset }) {
     console.error(error);
@@ -58,12 +58,12 @@ export default function Error({ error, reset }) {
                             Try Again
                         </button>
 
-                        <Link
+                        <AppLink
                             href="/"
                             className="btn btn-outline-secondary rounded-2 px-4 py-2 d-inline-flex align-items-center justify-content-center"
                         >
                             Go Home
-                        </Link>
+                        </AppLink>
                     </div>
 
                     <div className="mt-4 pt-3 border-top">

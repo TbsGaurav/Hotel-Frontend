@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { cookies } from 'next/headers';
 import HeroSection from '@/components/sections/HeroSection';
 import Dropdown from '@/components/ui/Dropdown';
@@ -223,21 +223,21 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href="/destinations" className="text-dark text-decoration-none">
+                                <AppLink href="/destinations" className="text-dark text-decoration-none">
                                     All Countries
-                                </Link>
+                                </AppLink>
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href={`/${countrySlug}`} className="text-dark text-decoration-none">
+                                <AppLink href={`/${toSlug(countrySlug)}`} className="text-dark text-decoration-none">
                                     {countryName}
-                                </Link>
+                                </AppLink>
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px active text-capitalize">
-                                <Link href={`/${countrySlug}/${regionSlug}`} className="text-decoration-none">
+                                <AppLink href={`/${toSlug(countrySlug)}/${toSlug(regionSlug)}`} className="text-decoration-none">
                                     {regionName}
-                                </Link>
+                                </AppLink>
                             </li>
                         </ol>
                     </nav>

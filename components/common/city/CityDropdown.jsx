@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { fetchClient } from '@/lib/api/public/fetchClient';
 
 const ALPHABETS = ['Top Cities', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
@@ -125,13 +125,13 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                                 {cities.map((city) => (
                                     <div key={city.id} className="col-6 col-md-4 col-lg-3 country-list">
                                         {city.urlName ? (
-                                            <Link
+                                            <AppLink
                                                 href={`${city.urlName}`}
                                                 className="text-decoration-none text-dark"
                                                 prefetch={false}
                                             >
                                                 {city.itemName}
-                                            </Link>
+                                            </AppLink>
                                         ) : (
                                             <span className="text-dark">{city.itemName}</span>
                                         )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
 import HeroSection from '@/components/sections/HeroSection';
@@ -315,6 +315,61 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         : null;
     const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
 
+    if (!allHotels.length) {
+        return (
+            <div className="container py-5">
+                <div
+                    className="mx-auto text-center rounded-4 shadow-sm border-0 overflow-hidden"
+                    style={{
+                        maxWidth: '760px',
+                        background: 'linear-gradient(135deg, #fff7ef 0%, #ffffff 45%, #f4f8fc 100%)',
+                        border: '1px solid rgba(240, 131, 30, 0.12)'
+                    }}
+                >
+                    <div
+                        style={{
+                            padding: '32px 24px',
+                            background:
+                                'radial-gradient(circle at top, rgba(240, 131, 30, 0.16) 0%, rgba(240, 131, 30, 0.04) 28%, transparent 55%)'
+                        }}
+                    >
+                        <div
+                            className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                            style={{
+                                width: '72px',
+                                height: '72px',
+                                background: '#f0831e',
+                                color: '#fff',
+                                boxShadow: '0 12px 28px rgba(240, 131, 30, 0.28)'
+                            }}
+                        >
+                            <FaHotel size={30} />
+                        </div>
+
+                        <h3 className="fw-bold mb-2" style={{ color: '#1d2b3a' }}>
+                            No hotels found
+                        </h3>
+                        <p className="text-muted mb-4" style={{ maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 }}>
+                            We couldn’t find any hotels for this destination right now. Try changing your filters, checking nearby areas, or
+                            searching again with different dates.
+                        </p>
+
+                        <div className="d-flex flex-wrap justify-content-center gap-3" style={{ color: '#5f6b7a', fontSize: '14px' }}>
+                            <div className="d-flex align-items-center gap-2">
+                                <span
+                                    className="rounded-circle d-inline-flex align-items-center justify-content-center"
+                                    style={{ width: '34px', height: '34px', background: '#fff1e3', color: '#f0831e' }}
+                                >
+                                    <FaHotel size={14} />
+                                </span>
+                                <span>Try a different destination</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     return (
         <>
             <HeroSection variant="common" />
@@ -322,18 +377,18 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
             {!collection ? (
                 <div className="container py-5 text-center">
                     <h3>Collection not found</h3>
-                    <Link href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
+                    <AppLink href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
                         Back to Home
-                    </Link>
+                    </AppLink>
                 </div>
             ) : (
                 <>
                     {/* <div className="py-2">
                         <div className="container">
                             <div className="d-flex align-items-center small">
-                                <Link href="/" className="text-dark text-decoration-none">
+                                <AppLink href="/" className="text-dark text-decoration-none">
                                     Home
-                                </Link>
+                                </AppLink>
                                 <span className="mx-2 text-muted">•</span>
                                 <span className="fw-semibold text-decoration-none text-primary">{basic[0]?.name}</span>
                             </div>
@@ -344,47 +399,47 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                             <nav aria-label="breadcrumb" className="mb-0">
                                 <ol className="breadcrumb mb-0">
                                     <li className="breadcrumb-item small-para-14-px">
-                                        <Link href="/" className="text-dark text-decoration-none">
+                                        <AppLink href="/" className="text-dark text-decoration-none">
                                             Home
-                                        </Link>
+                                        </AppLink>
                                     </li>
                                     {!hasCity ? (
                                         <li className="breadcrumb-item small-para-14-px active">
-                                            <Link href={`/${CollectionUrl?.replace(/^\//, '')}`} className="text-decoration-none">
+                                            <AppLink href={`/${CollectionUrl?.replace(/^\//, '')}`} className="text-decoration-none">
                                                 {CollectionName}
-                                            </Link>
+                                            </AppLink>
                                         </li>
                                     ) : (
                                         <>
                                             {CountryName && (
                                                 <li className="breadcrumb-item small-para-14-px">
-                                                    <Link
+                                                    <AppLink
                                                         href={`/${CountryUrl?.replace(/^\//, '')}`}
                                                         className="text-dark text-decoration-none"
                                                     >
                                                         {CountryName}
-                                                    </Link>
+                                                    </AppLink>
                                                 </li>
                                             )}
                                             {RegionName && (
                                                 <li className="breadcrumb-item small-para-14-px">
-                                                    <Link
+                                                    <AppLink
                                                         href={`/${RegionUrl?.replace(/^\//, '')}`}
                                                         className="text-dark text-decoration-none"
                                                     >
                                                         {RegionName}
-                                                    </Link>
+                                                    </AppLink>
                                                 </li>
                                             )}
                                             <li className="breadcrumb-item small-para-14-px">
-                                                <Link href={`/${slugCity}`} className="text-dark text-decoration-none">
+                                                <AppLink href={`/${slugCity}`} className="text-dark text-decoration-none">
                                                     {formattedCity}
-                                                </Link>
+                                                </AppLink>
                                             </li>
                                             <li className="breadcrumb-item small-para-14-px active">
-                                                <Link href={`/${CollectionUrl?.replace(/^\//, '')}`} className="text-decoration-none">
+                                                <AppLink href={`/${CollectionUrl?.replace(/^\//, '')}`} className="text-decoration-none">
                                                     {CollectionName}
-                                                </Link>
+                                                </AppLink>
                                             </li>
                                         </>
                                     )}
@@ -538,14 +593,14 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                 <div className="text-decoration-none">
                                                                     <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-header">
                                                                         <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row">
-                                                                            <Link
+                                                                            <AppLink
                                                                                 href={`${hotel.urlName}`}
                                                                                 className="font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title"
                                                                                 onClick={(e) => e.stopPropagation()}
                                                                                 style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                                                                             >
                                                                                 {hotel.hotelName}
-                                                                            </Link>
+                                                                            </AppLink>
                                                                             <div className="text-warning collection-hotel-stars">
                                                                                 {[...Array(5)].map((_, i) => (
                                                                                     <MdOutlineStarPurple500
@@ -729,7 +784,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                             effectiveViewMode === 'grid' ? { paddingTop: '6px' } : undefined
                                                                         }
                                                                     >
-                                                                        <Link
+                                                                        <AppLink
                                                                             className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
                                                                             href={`${hotel.url}`}
                                                                             target="_blank"
@@ -738,7 +793,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         >
                                                                             <span>See Availability</span>
                                                                             <i className="fa-solid fa-arrow-right ms-2"></i>
-                                                                        </Link>
+                                                                        </AppLink>
                                                                     </div>
                                                                 </div>
                                                             </div>

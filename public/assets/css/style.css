@@ -4,16 +4,10 @@ html,
 body {
     overflow-x: hidden;
 }
-html,
-body,
-* {
-    scrollbar-width: thin;
-    scrollbar-color: #f0831e transparent;
-}
 /* width */
 ::-webkit-scrollbar {
-    width: 2px;
-    height: 2px;
+    width: 3px;
+    height: 3px;
 }
 /* Track */
 ::-webkit-scrollbar-track {
@@ -168,11 +162,12 @@ a {
     padding: 13px 25px;
     font-size: 14px;
     display: inline-block;
-    line-height: 20px;
+    line-height: 16px;
     font-weight: 400;
     color: #fff;
     border: none !important;
     transition: all 0.5s;
+    text-align: center;
 }
 .theme-button-blue:hover {
     background-color: #f0831e;
@@ -2993,6 +2988,9 @@ input[type='range']:active::-webkit-slider-thumb {
         max-width: 100% !important;
         padding: 10px;
     }
+    .block-display {
+        display: block !important;
+    }
 }
 @media (max-width: 320px) {
     .property-grid-title {
@@ -3010,6 +3008,9 @@ input[type='range']:active::-webkit-slider-thumb {
         margin-top: 0;
         padding-top: 0;
         margin: 0px 5px 0px 5px;
+    }
+    .block-display {
+        display: block !important;
     }
 }
 @media screen and (max-width: 500px) {
@@ -3142,7 +3143,6 @@ input[type='range']:active::-webkit-slider-thumb {
     padding: 5px 10px;
     font-size: 16px;
     align-items: center;
-    word-break: break-all;
 }
 .country-list a {
     display: flex;
@@ -3538,9 +3538,11 @@ input[type='range']:active::-webkit-slider-thumb {
     overflow-y: auto;
 }
 .orange-bg {
+    text-align: center;
     background: #ff7a00;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 13px;
 }
 .blue-bg {
     background: #003580;
@@ -3588,4 +3590,24 @@ input[type='range']:active::-webkit-slider-thumb {
 }
 .border-radius {
     border-radius: 10px 10px 10px 0px;
+}
+.dropdown-height{
+    max-height:200px;
+    overflow-Y:auto; 
+    z-index: 1000;
+}.vertical-align-top {
+    align-items: flex-start;
+}
+.shadow {
+    box-shadow: 0 2px 14px rgba(15, 23, 42, 0.08);
+    border: 1px solid #eceff3;
+}
+.font-size-17 {
+    font-size: 17px;
+    color: #111827;
+}
+.min-height-6 {
+    height: 6px;
+    background: #d9dee7;
+    border-radius: 999px;
 }

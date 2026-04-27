@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
+import AppLink from '@/components/common/AppLink';
+import ListingSidebar, { getVisibleSidebarSections } from '@/components/common/sidebar/ListingSidebar';
 import CityHotelList from './CityHotelList';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import SeoDetailsCard from '@/components/common/SeoDetailsCard';
@@ -471,31 +471,31 @@ export default function CityCategoryDetails({
     const breadcrumb = (
         <div className="container">
             <div className="d-flex align-items-center small flex-wrap">
-                <Link href="/destinations" className="text-dark text-decoration-none">
+                <AppLink href="/destinations" className="text-dark text-decoration-none">
                     All countries
-                </Link>
+                </AppLink>
                 {countryBreadcrumbLabel && countryBreadcrumbHref && (
                     <>
                         <span className="mx-2 text-muted">&bull;</span>
-                        <Link href={countryBreadcrumbHref} className="text-dark text-decoration-none">
+                        <AppLink href={countryBreadcrumbHref} className="text-dark text-decoration-none">
                             {countryBreadcrumbLabel}
-                        </Link>
+                        </AppLink>
                     </>
                 )}
                 {regionBreadcrumbLabel && regionBreadcrumbHref && (
                     <>
                         <span className="mx-2 text-muted">&bull;</span>
-                        <Link href={regionBreadcrumbHref} className="text-dark text-decoration-none">
+                        <AppLink href={regionBreadcrumbHref} className="text-dark text-decoration-none">
                             {regionBreadcrumbLabel}
-                        </Link>
+                        </AppLink>
                     </>
                 )}
                 {!isRegionContext && cityBreadcrumbLabel && cityBreadcrumbHref && (
                     <>
                         <span className="mx-2 text-muted">&bull;</span>
-                        <Link href={cityBreadcrumbHref} className="text-dark text-decoration-none">
+                        <AppLink href={cityBreadcrumbHref} className="text-dark text-decoration-none">
                             {cityBreadcrumbLabel}
-                        </Link>
+                        </AppLink>
                     </>
                 )}
                 <span className="mx-2 text-muted">&bull;</span>
@@ -520,7 +520,8 @@ export default function CityCategoryDetails({
         </section>
     );
 
-    const sidebar = (
+    const hasSidebar = useMemo(() => getVisibleSidebarSections(sidebarSections).length > 0, [sidebarSections]);
+    const sidebar = hasSidebar ? (
         <div className="position-sticky" style={{ top: '16px' }}>
             <ListingSidebar
                 title="Filters"
@@ -531,7 +532,7 @@ export default function CityCategoryDetails({
                 }}
             />
         </div>
-    );
+    ) : null;
 
     const pageTitle = categoryName || formatCityName(categorySlug);
     const seo = buildCategorySeo({
