@@ -2,12 +2,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { addMonths, format } from 'date-fns';
-import 'react-datepicker/dist/react-datepicker.css';
-import '../../public/assets/css/DatePicker.css';
 import { globalSearchapi } from '@/lib/api/public/globalsearchapi';
 import { useRouter } from 'next/navigation';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import Image from 'next/image';
+import SearchSummaryBar from '@/components/mobile-search/SearchSummaryBar';
 
 const DatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
 
@@ -15,6 +14,7 @@ export default function HeroSection({ variant = 'home' }) {
     const [checkInDate, setCheckInDate] = useState(null);
     const [checkOutDate, setCheckOutDate] = useState(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [mobileCalendarPickerMode, setMobileCalendarPickerMode] = useState(null);
     const [tempCheckInDate, setTempCheckInDate] = useState(null);
     const [tempCheckOutDate, setTempCheckOutDate] = useState(null);
     const [guests, setGuests] = useState(2);
@@ -28,7 +28,9 @@ export default function HeroSection({ variant = 'home' }) {
     const [show, setShow] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showRoomsDropdown, setShowRoomsDropdown] = useState(false);
+    const [showMobileRoomsPanel, setShowMobileRoomsPanel] = useState(false);
     const datePickerRef = useRef(null);
+    const ignoreDatePickerCloseRef = useRef(false);
     const debounceRef = useRef(null);
     const router = useRouter();
 
@@ -39,22 +41,21 @@ export default function HeroSection({ variant = 'home' }) {
         setTempCheckInDate(now);
         setTempCheckOutDate(now);
     }, []);
-
     // Handle click outside to close
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (
-                datePickerRef.current &&
-                !datePickerRef.current.contains(event.target) &&
-                !event.target.closest('.react-datepicker') &&
-                !event.target.closest('.date-range-picker-popup')
-            ) {
-                setShowDatePicker(false);
-            }
-        }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    // useEffect(() => {
+    //     function handleClickOutside(event) {
+    //         if (
+    //             datePickerRef.current &&
+    //             !datePickerRef.current.contains(event.target) &&
+    //             !event.target.closest('.react-datepicker') &&
+    //             !event.target.closest('.date-range-picker-popup')
+    //         ) {
+    //             setShowDatePicker(false);
+    //         }
+    //     }
+    //     document.addEventListener('mousedown', handleClickOutside);
+    //     return () => document.removeEventListener('mousedown', handleClickOutside);
+    // }, []);
     useEffect(() => {
         if (isSelectingRef.current) {
             isSelectingRef.current = false;
@@ -107,6 +108,7 @@ export default function HeroSection({ variant = 'home' }) {
 
     const handleDateChange = (dates) => {
         const [start, end] = dates;
+        setMobileCalendarPickerMode(null);
         setTempCheckInDate(start);
         setTempCheckOutDate(end);
     };
@@ -118,9 +120,31 @@ export default function HeroSection({ variant = 'home' }) {
 
     const handleOpenDatePicker = () => {
         const now = new Date();
+        setMobileCalendarPickerMode(null);
+        setShowMobileRoomsPanel(false);
         setTempCheckInDate(checkInDate || now);
         setTempCheckOutDate(checkOutDate || now);
         setShowDatePicker(true);
+    };
+
+    const handleToggleMobileDatePicker = () => {
+        if (showDatePicker) {
+            setMobileCalendarPickerMode(null);
+            setShowDatePicker(false);
+            return;
+        }
+        handleOpenDatePicker();
+    };
+
+    const handleToggleMobileRoomsPanel = () => {
+        setShowMobileRoomsPanel((prev) => {
+            const next = !prev;
+            if (next) {
+                setMobileCalendarPickerMode(null);
+                setShowDatePicker(false);
+            }
+            return next;
+        });
     };
 
     const updateChildrenCount = (nextCount) => {
@@ -168,8 +192,10 @@ export default function HeroSection({ variant = 'home' }) {
         setQuery(item.displayText);
         setShow(false);
     };
-    const handleSearchSubmit = (e) => {
+    const handleSearchSubmit = (e, overrides = {}) => {
         e.preventDefault();
+        const nextGuests = overrides.guests ?? guests;
+        const nextRooms = overrides.rooms ?? rooms;
 
         const params = new URLSearchParams({
             destination: selectedLocation?.displayText || query,
@@ -177,8 +203,8 @@ export default function HeroSection({ variant = 'home' }) {
             destinationId: selectedLocation?.id || '',
             checkIn: checkInDate.toISOString(),
             checkOut: checkOutDate.toISOString(),
-            guests: guests.toString(),
-            rooms: rooms.toString(),
+            guests: nextGuests.toString(),
+            rooms: nextRooms.toString(),
             children: childrenCount.toString(),
             childrenAges: childrenAges.join(',')
         });
@@ -207,9 +233,11 @@ export default function HeroSection({ variant = 'home' }) {
 
     useEffect(() => {
         function handleDatePickerOutsideClick(event) {
+            if (!showDatePicker || ignoreDatePickerCloseRef.current) return;
             if (
                 datePickerRef.current &&
                 !datePickerRef.current.contains(event.target) &&
+                !event.target.closest('.mobile-date-picker-field') &&
                 !event.target.closest('.react-datepicker') &&
                 !event.target.closest('.date-range-picker-popup')
             ) {
@@ -219,7 +247,7 @@ export default function HeroSection({ variant = 'home' }) {
 
         document.addEventListener('mousedown', handleDatePickerOutsideClick);
         return () => document.removeEventListener('mousedown', handleDatePickerOutsideClick);
-    }, []);
+    }, [showDatePicker]);
 
     useEffect(() => {
         function handleFilterOutsideClick(event) {
@@ -293,8 +321,8 @@ export default function HeroSection({ variant = 'home' }) {
         ? 'country-hero d-flex flex-column justify-content-between'
         : 'hero py-5 px-2 px-md-4 px-lg-5 d-flex flex-column justify-content-between';
     const heroShellClassName = isCountryVariant
-        ? 'container p-2 hero-search-shell country-hero-search-shell'
-        : 'container p-4 hero-form hero-search-shell main-hero-search-shell';
+        ? 'container p-2 hero-search-shell country-hero-search-shell d-none d-md-block'
+        : 'container p-4 hero-form hero-search-shell main-hero-search-shell d-none d-md-block';
     const heroSearchRowClassName = isCountryVariant
         ? 'row hero-search-row main-hero-search-row'
         : 'row hero-search-row main-hero-search-row';
@@ -307,6 +335,7 @@ export default function HeroSection({ variant = 'home' }) {
               padding: '20px 0'
           }
         : undefined;
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     return (
         <section className={sectionClassName}>
@@ -362,6 +391,297 @@ export default function HeroSection({ variant = 'home' }) {
                 )}
                 {!isCountryVariant && <div className="space-100px"></div>}
 
+                <div className="d-block d-md-none w-100 mb-2">
+                    <SearchSummaryBar>
+                        <form onSubmit={(e) => {
+                            setGuests(tempGuests);
+                            setRooms(tempRooms);
+                            handleSearchSubmit(e, { guests: tempGuests, rooms: tempRooms });
+                        }}>
+                            <div className="d-flex flex-column gap-3">
+                                {/* Destination */}
+                                <div className="position-relative" ref={searchRef}>
+                                    <label className="form-label fw-semibold mb-1 d-flex align-items-center gap-1 mobile-modal-label">
+                                        <svg width="14" height="14" fill="none" stroke="#1d4db3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                        {isCountryVariant ? 'Destination or Hotel Name' : 'Hotel Name'}
+                                    </label>
+                                    <div className="input-group rounded-3 overflow-hidden mobile-search-input-group">
+                                        <span className="input-group-text bg-white border-0 pe-0"><i className="fa-solid fa-magnifying-glass mobile-search-icon"></i></span>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Type city/ZipCode"
+                                            value={query}
+                                            onChange={(e) => {
+                                                isSelectingRef.current = false;
+                                                setQuery(e.target.value);
+                                            }}
+                                            className="form-control border-0 mobile-search-input"
+                                        />
+                                    </div>
+                                    {show && (
+                                        <div className="list-group position-absolute mt-1 w-100 shadow rounded-3 overflow-hidden mobile-search-results">
+                                            {loading && (
+                                                <div className="list-group-item py-2 text-center border-0">
+                                                    <span className="spinner-border spinner-border-sm mobile-spinner" />
+                                                </div>
+                                            )}
+                                            {!loading && results.map((item) => (
+                                                <button
+                                                    key={item.id}
+                                                    type="button"
+                                                    className="list-group-item list-group-item-action d-flex justify-content-between border-0 py-2"
+                                                    onClick={() => handleSelect(item)}
+                                                >
+                                                    <span className="text-truncate">{item.displayText}</span>
+                                                    <small className="text-muted ms-2 flex-shrink-0">{item.type}</small>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Dates */}
+                                <div ref={datePickerRef} className="position-relative mobile-date-picker-field">
+                                    <label className="form-label fw-semibold mb-1 d-flex align-items-center gap-1 mobile-modal-label">
+                                        <svg width="14" height="14" fill="none" stroke="#1d4db3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        Check-In and Check-Out
+                                    </label>
+                                    <div 
+                                        className="d-flex align-items-center rounded-4 px-3 mobile-calendar-input" 
+                                        onClick={handleToggleMobileDatePicker}
+                                    >
+                                        <i className="fa-regular fa-calendar me-2 mobile-calendar-icon"></i>
+                                        <span>{checkInDate ? formatDate(checkInDate) : ''} - {checkOutDate ? formatDate(checkOutDate) : ''}</span>
+                                    </div>
+                                    {showDatePicker && (
+                                        <div className="date-range-picker-popup mobile-date-range-picker-popup mt-2">
+                                            <div className="calendar-container">
+                                                <DatePicker
+                                                    selected={tempCheckInDate}
+                                                    onChange={handleDateChange}
+                                                    startDate={tempCheckInDate}
+                                                    endDate={tempCheckOutDate}
+                                                    selectsRange
+                                                    inline
+                                                    monthsShown={2}
+                                                    minDate={new Date()}
+                                                    dateFormat="MM/dd/yyyy"
+                                                    showPopperArrow={false}
+                                                    calendarClassName={`custom-date-range-calendar${mobileCalendarPickerMode ? ' mobile-calendar-picking' : ''}`}
+                                                    renderCustomHeader={({
+                                                        date,
+                                                        decreaseMonth,
+                                                        increaseMonth,
+                                                        changeMonth,
+                                                        changeYear,
+                                                        prevMonthButtonDisabled,
+                                                        nextMonthButtonDisabled,
+                                                        customHeaderCount
+                                                    }) => {
+                                                        const headerYear = date.getFullYear();
+                                                        const today = new Date();
+                                                        const currentYear = today.getFullYear();
+                                                        const currentMonth = today.getMonth();
+                                                        const yearStart = Math.max(currentYear, headerYear - 5);
+                                                        const yearOptions = Array.from({ length: 12 }, (_, index) => yearStart + index);
+                                                        const availableMonths =
+                                                            headerYear === currentYear
+                                                                ? monthNames.map((month, index) => ({ month, index })).filter(({ index }) => index >= currentMonth)
+                                                                : monthNames.map((month, index) => ({ month, index }));
+                                                        const isPrimaryHeader = customHeaderCount === 0;
+
+                                                        return (
+                                                            <div className={`mobile-calendar-header${!isPrimaryHeader ? ' mobile-calendar-secondary-header' : ''}`}>
+                                                                <div className="custom-header-wrapper">
+                                                                    {isPrimaryHeader && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                if (mobileCalendarPickerMode) {
+                                                                                    changeYear(Math.max(currentYear, headerYear - (mobileCalendarPickerMode === 'year' ? 12 : 1)));
+                                                                                    return;
+                                                                                }
+                                                                                decreaseMonth();
+                                                                            }}
+                                                                            disabled={
+                                                                                mobileCalendarPickerMode
+                                                                                    ? headerYear <= currentYear
+                                                                                    : prevMonthButtonDisabled
+                                                                            }
+                                                                            className="nav-button prev-month"
+                                                                            aria-label={mobileCalendarPickerMode === 'month' ? 'Previous year' : 'Previous month'}
+                                                                        >
+                                                                            &lsaquo;
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        type="button"
+                                                                        className={isPrimaryHeader ? 'mobile-calendar-title' : 'mobile-calendar-title mobile-calendar-title-static'}
+                                                                        onClick={() => {
+                                                                            if (!isPrimaryHeader) return;
+                                                                            setMobileCalendarPickerMode((mode) => {
+                                                                                if (!mode) return 'month';
+                                                                                if (mode === 'month') return 'year';
+                                                                                return 'month';
+                                                                            });
+                                                                        }}
+                                                                    >
+                                                                        {mobileCalendarPickerMode && isPrimaryHeader ? headerYear : format(date, 'MMM yyyy')}
+                                                                    </button>
+                                                                    {isPrimaryHeader && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                if (mobileCalendarPickerMode) {
+                                                                                    changeYear(headerYear + (mobileCalendarPickerMode === 'year' ? 12 : 1));
+                                                                                    return;
+                                                                                }
+                                                                                increaseMonth();
+                                                                            }}
+                                                                            disabled={!mobileCalendarPickerMode && nextMonthButtonDisabled}
+                                                                            className="nav-button next-month"
+                                                                            aria-label={mobileCalendarPickerMode === 'month' ? 'Next year' : 'Next month'}
+                                                                        >
+                                                                            &rsaquo;
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+
+                                                                {isPrimaryHeader && mobileCalendarPickerMode === 'month' && (
+                                                                    <div className="mobile-calendar-picker-grid">
+                                                                        <div className="mobile-month-grid">
+                                                                            {availableMonths.map(({ month, index }) => (
+                                                                                <button
+                                                                                    key={month}
+                                                                                    type="button"
+                                                                                    className={`mobile-picker-option${index === date.getMonth() ? ' active' : ''}`}
+                                                                                    onClick={() => {
+                                                                                        changeMonth(index);
+                                                                                        setMobileCalendarPickerMode(null);
+                                                                                    }}
+                                                                                >
+                                                                                    {month}
+                                                                                </button>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+
+                                                                {isPrimaryHeader && mobileCalendarPickerMode === 'year' && (
+                                                                    <div className="mobile-calendar-picker-grid">
+                                                                        <div className="mobile-year-grid">
+                                                                            {yearOptions.map((year) => (
+                                                                                <button
+                                                                                    key={year}
+                                                                                    type="button"
+                                                                                    className={`mobile-picker-option${year === headerYear ? ' active' : ''}`}
+                                                                                    onClick={() => {
+                                                                                        changeYear(year);
+                                                                                        setMobileCalendarPickerMode('month');
+                                                                                    }}
+                                                                                >
+                                                                                    {year}
+                                                                                </button>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    }}
+                                                />
+                                                <div className="selected-range-footer">
+                                                    <span>{formatDate(tempCheckInDate)} - {formatDate(tempCheckOutDate)}</span>
+                                                    <div className="footer-buttons">
+                                                        <button type="button" className="cancel-button" onClick={() => setShowDatePicker(false)}>Cancel</button>
+                                                        <button type="button" className="apply-button" onClick={() => {
+                                                            setCheckInDate(tempCheckInDate);
+                                                            setCheckOutDate(tempCheckOutDate);
+                                                            setShowDatePicker(false);
+                                                        }}>Apply</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Rooms & Guests */}
+                                <div>
+                                    <label className="form-label fw-semibold mb-2 d-flex align-items-center gap-1 mobile-modal-label">
+                                        <svg width="14" height="14" fill="none" stroke="#1d4db3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                        Rooms & Guests
+                                    </label>
+                                    <button
+                                        type="button"
+                                        className="d-flex align-items-center justify-content-between w-100 rounded-4 px-3 mobile-rooms-toggle"
+                                        onClick={handleToggleMobileRoomsPanel}
+                                        aria-expanded={showMobileRoomsPanel}
+                                    >
+                                        <span className="d-flex align-items-center min-w-0">
+                                            <i className="fa-regular fa-user me-2 mobile-calendar-icon"></i>
+                                            <span className="text-truncate">
+                                                {tempGuests} adults &middot; {childrenCount} children &middot; {tempRooms} room{tempRooms === 1 ? '' : 's'}
+                                            </span>
+                                        </span>
+                                        <i className={`fa-solid fa-chevron-${showMobileRoomsPanel ? 'up' : 'down'} ms-2 flex-shrink-0`}></i>
+                                    </button>
+                                    {showMobileRoomsPanel && (
+                                        <div className="p-3 rounded-4 mobile-rooms-box mt-2">
+                                            <div className="mb-3">
+                                                <label className="form-label custom-form-label mb-1">Rooms</label>
+                                                <select className="form-select" value={tempRooms} onChange={(e) => updateTempRooms(Number(e.target.value))}>
+                                                    {Array.from({ length: 10 }, (_, i) => i + 1).map((value) => <option key={value} value={value}>{value}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="form-label custom-form-label mb-1">Guests</label>
+                                                <select className="form-select" value={tempGuests} onChange={(e) => updateTempGuests(Number(e.target.value))}>
+                                                    {Array.from({ length: 10 }, (_, i) => i + 1).map((value) => <option key={value} value={value}>{value}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="form-label custom-form-label mb-1">Children</label>
+                                                <select className="form-select" value={childrenCount} onChange={(e) => updateChildrenCount(Number(e.target.value))}>
+                                                    {Array.from({ length: 11 }, (_, i) => i).map((value) => <option key={value} value={value}>{value}</option>)}
+                                                </select>
+                                            </div>
+                                            {childrenCount > 0 && (
+                                                <div>
+                                                    <p className="custom-form-label mb-2">Children Age</p>
+                                                    <div className="row g-2">
+                                                        {childrenAges.map((age, index) => (
+                                                            <div key={index} className="col-4">
+                                                                <select
+                                                                    className="form-select form-select-sm"
+                                                                    value={age}
+                                                                    onChange={(e) => handleAgeChange(index, e.target.value)}
+                                                                >
+                                                                    {[...Array(18)].map((_, i) => (
+                                                                        <option key={i} value={i}>{i}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Search Button */}
+                                <button 
+                                    type="submit"
+                                    className="btn btn-lg w-100 fw-bold shadow mt-2 border-0 rounded-3 mobile-search-submit"
+                                >
+                                    See Deals Now
+                                </button>
+                            </div>
+                        </form>
+                    </SearchSummaryBar>
+                </div>
+
                 <div className={heroShellClassName}>
                     <form action="#" onSubmit={handleSearchSubmit}>
                         <div className={heroSearchRowClassName} style={isCountryVariant ? { gap: '11px 0' } : undefined}>
@@ -391,14 +711,12 @@ export default function HeroSection({ variant = 'home' }) {
                                 </div>
 
                                 {show && (
-                                    <div className="list-group position-absolute mt-1 w-100" style={{ zIndex: 1050 }}>
-                                        {loading && (
+                                    <div className="list-group position-absolute mt-1 w-100 hero-search-results-dropdown">
+                                        {loading ? (
                                             <div className="list-group-item py-2 text-center">
                                                 <span className="spinner-border spinner-border-sm" />
                                             </div>
-                                        )}
-
-                                        {!loading &&
+                                        ) : (
                                             results.map((item) => (
                                                 <button
                                                     key={item.id}
@@ -409,7 +727,8 @@ export default function HeroSection({ variant = 'home' }) {
                                                     <span className="text-truncate">{item.displayText}</span>
                                                     <small className="text-muted">{item.type}</small>
                                                 </button>
-                                            ))}
+                                            ))
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -419,7 +738,7 @@ export default function HeroSection({ variant = 'home' }) {
                                     Check-In and Check-Out
                                 </label>
                                 <div className="date-picker-wrapper">
-                                    <div className="main-date-picker" onClick={handleOpenDatePicker} style={{ cursor: 'pointer' }}>
+                                    <div className="main-date-picker" onClick={handleOpenDatePicker}>
                                         <div className="date-range-input-content">
                                             <div className="date-range-labels">
                                                 <div className="check-in-out-label">
@@ -435,7 +754,6 @@ export default function HeroSection({ variant = 'home' }) {
                                                         e.stopPropagation();
                                                         handleOpenDatePicker();
                                                     }}
-                                                    style={{ cursor: 'pointer' }}
                                                 ></span>
                                             </div>
                                         </div>
@@ -547,7 +865,6 @@ export default function HeroSection({ variant = 'home' }) {
                                 <div
                                     className={`dropdown-menu language-switcher-menu-item${showRoomsDropdown ? ' show' : ''}`}
                                     aria-labelledby="dropdownMenuButton"
-                                    style={{ display: showRoomsDropdown ? 'block' : 'none' }}
                                 >
                                     <div className="py-3 px-4 d-none d-md-block">
                                         <div className="mb-3">
@@ -695,11 +1012,10 @@ export default function HeroSection({ variant = 'home' }) {
                             <div className="col-3 col-md-1 col-lg-1 mb-0 mb-lg-0 hero-search-col filter-search-col">
                                 <label className="custom-form-label text-white form-label-maring-bottom">Filter</label>
                                 <div
-                                    className={`filter-button d-flex${showFilters ? ' active' : ''}`}
+                                    className={`filter-button d-flex cursor-pointer${showFilters ? ' active' : ''}`}
                                     id="filterButton"
                                     ref={filterButtonRef}
                                     onClick={() => setShowFilters((prev) => !prev)}
-                                    style={{ cursor: 'pointer' }}
                                 >
                                     <Image src="/image/filter.webp" className="m-auto" alt="" width={24} height={24} />
                                 </div>
@@ -724,51 +1040,34 @@ export default function HeroSection({ variant = 'home' }) {
                                             </p>
                                             <div
                                                 id="price-slider-track"
-                                                className="slider-track position-relative"
-                                                style={{ height: '6px', background: '#e0e0e0', borderRadius: '3px' }}
+                                                className="slider-track position-relative price-slider-track"
                                             >
                                                 <div
-                                                    className="slider-selected"
+                                                    className="slider-selected price-slider-selected"
                                                     style={{
-                                                        position: 'absolute',
-                                                        height: '100%',
-                                                        background: '#f0831e',
                                                         left: `${valueToPercent(priceRange.min)}%`,
                                                         width: `${valueToPercent(priceRange.max) - valueToPercent(priceRange.min)}%`
                                                     }}
                                                 />
                                             </div>
                                             <div
-                                                className="position-relative"
-                                                style={{ height: '20px', marginTop: '-13px' }}
+                                                className="position-relative price-slider-handle-wrapper"
                                                 onMouseUp={handleSliderMouseUp}
                                             >
                                                 <div
                                                     onMouseDown={() => handleSliderMouseDown('min')}
+                                                    className="price-slider-handle"
                                                     style={{
-                                                        position: 'absolute',
-                                                        left: `${valueToPercent(priceRange.min)}%`,
-                                                        width: '20px',
-                                                        height: '20px',
-                                                        background: '#f0831e',
-                                                        borderRadius: '50%',
-                                                        transform: 'translateX(-50%)',
-                                                        cursor: 'pointer'
+                                                        left: `${valueToPercent(priceRange.min)}%`
                                                     }}
                                                     title={`AUD ${priceRange.min}`}
                                                     tabIndex={0}
                                                 />
                                                 <div
                                                     onMouseDown={() => handleSliderMouseDown('max')}
+                                                    className="price-slider-handle"
                                                     style={{
-                                                        position: 'absolute',
-                                                        left: `${valueToPercent(priceRange.max)}%`,
-                                                        width: '20px',
-                                                        height: '20px',
-                                                        background: '#f0831e',
-                                                        borderRadius: '50%',
-                                                        transform: 'translateX(-50%)',
-                                                        cursor: 'pointer'
+                                                        left: `${valueToPercent(priceRange.max)}%`
                                                     }}
                                                     title={`AUD ${priceRange.max}`}
                                                     tabIndex={0}
