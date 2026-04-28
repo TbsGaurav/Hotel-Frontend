@@ -125,10 +125,9 @@ export default function PreviewTab({
                 <div className="d-flex gap-2">
                     <button
                         type="button"
-                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
+                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center btn-min-width-100"
                         onClick={() => handleAction('draft')}
                         disabled={submittingType !== null}
-                        style={{ minWidth: '100px' }}
                     >
                         {submittingType === 'draft' ? (
                             <>
@@ -142,10 +141,9 @@ export default function PreviewTab({
 
                     <button
                         type="button"
-                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
+                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center btn-min-width-120"
                         onClick={() => handleAction('publish')}
                         disabled={submittingType !== null}
-                        style={{ minWidth: '120px' }}
                     >
                         {submittingType === 'publish' ? (
                             <>

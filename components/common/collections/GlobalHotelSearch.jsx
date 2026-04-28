@@ -98,7 +98,7 @@ export default function GlobalHotelSearch({ selectedHotels = [], hotelList = [],
 
             <div className="position-relative">
                 {searchText.trim().length >= MIN_CHARS && (
-                    <div className="border rounded bg-white mt-2 shadow-sm" style={{ maxHeight: '260px', overflowY: 'auto' }}>
+                    <div className="border rounded bg-white mt-2 shadow-sm max-height-260 overflow-y-auto">
                         {loading ? (
                             <div className="p-3 text-muted">Searching...</div>
                         ) : error ? (
@@ -113,7 +113,7 @@ export default function GlobalHotelSearch({ selectedHotels = [], hotelList = [],
                                 return (
                                     <div key={hotel.id} className="border-bottom p-3">
                                         <div className="d-flex justify-content-between gap-3 align-items-center">
-                                            <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                            <div className="flex-grow-1 min-width-0">
                                                 <HotelRowInfo
                                                     name={hotel.name}
                                                     stars={hotel.stars}
