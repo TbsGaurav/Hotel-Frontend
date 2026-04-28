@@ -139,32 +139,36 @@ export default function CurationTab({
                     return (
                         <div
                             key={hotel.id}
-                            className={`d-flex align-items-center border-bottom py-2 ${
+                            className={`curation-hotel-row d-flex flex-wrap gap-2 align-items-start align-items-sm-center border-bottom py-2 ${
                                 isNewlyAdded ? 'border-start border-danger border-3 ps-2' : ''
                             }`}
                         >
-                            <input
-                                type="checkbox"
-                                className="form-check-input me-2"
-                                checked={isSelected || isPinned}
-                                disabled={isExcluded || (!isSelected && selectedHotels.length >= effectiveMaxHotels)}
-                                onChange={(e) => handleCheckboxChange(hotel.id, e.target.checked)}
-                            />
-
-                            <div className="flex-grow-1 d-flex align-items-center gap-2" style={{ minWidth: 0 }}>
-                                {isPinned && <span className="text-warning fw-bold">* </span>}
-                                <HotelRowInfo
-                                    name={hotel.name}
-                                    stars={hotel.stars}
-                                    address={hotel.address || ''}
-                                    reviewScore={hotel.reviewScore}
+                            <div className="d-flex align-items-start align-items-sm-center gap-2 flex-grow-1" style={{ minWidth: 0 }}>
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input mt-1 mt-sm-0"
+                                    checked={isSelected || isPinned}
+                                    disabled={isExcluded || (!isSelected && selectedHotels.length >= effectiveMaxHotels)}
+                                    onChange={(e) => handleCheckboxChange(hotel.id, e.target.checked)}
                                 />
-                                {isNewlyAdded && <span className="badge bg-danger">New</span>}
-                                {isExcluded && <span className="text-danger">(Excluded)</span>}
+
+                                <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                    <div className="d-flex align-items-center gap-2" style={{ minWidth: 0 }}>
+                                        {isPinned && <span className="text-warning fw-bold">*</span>}
+                                        <HotelRowInfo
+                                            name={hotel.name}
+                                            stars={hotel.stars}
+                                            address={hotel.address || ''}
+                                            reviewScore={hotel.reviewScore}
+                                        />
+                                        {isNewlyAdded && <span className="badge bg-danger">New</span>}
+                                        {isExcluded && <span className="text-danger">(Excluded)</span>}
+                                    </div>
+                                </div>
                             </div>
 
                             {!isExcluded && (
-                                <div className="d-flex align-items-center gap-1">
+                                <div className="curation-hotel-actions d-flex align-items-center gap-1 ms-auto">
                                     {!isPinned ? (
                                         <button
                                             className="btn btn-sm btn-outline-primary"

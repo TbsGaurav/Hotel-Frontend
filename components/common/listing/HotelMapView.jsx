@@ -45,7 +45,6 @@ export default function HotelMapView({
     const infoWindowRef = useRef(null);
 
     const [error, setError] = useState('');
-    const [failedImageKeys, setFailedImageKeys] = useState(() => new Set());
 
     const defaultImage = '/image/property-img.webp';
 
@@ -107,7 +106,18 @@ export default function HotelMapView({
 
         const safeTitle = title.replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const safeAddress = address.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const safeHotelUrl = String(url || '')
+        const appendMapOpened = (url) => {
+            if (!url) return url;
+
+            if (url.includes('#map_opened')) return url;
+
+            if (url.includes('#')) {
+                return url.split('#')[0] + '#map_opened';
+            }
+
+            return `${url}#map_opened`;
+        };
+        const safeHotelUrl = String(appendMapOpened(url) || '')
             .replace(/\\/g, '\\\\')
             .replace(/'/g, "\\'");
 
@@ -128,17 +138,19 @@ export default function HotelMapView({
 
             priceHtml = `
             <div class="info-window-price-section">
-                ${formattedOriginal && originalPrice > rate.price.total ? `
+                ${
+                    formattedOriginal && originalPrice > rate.price.total
+                        ? `
                     <div class="info-window-original-price">${formattedOriginal}</div>
-                ` : ''}
+                `
+                        : ''
+                }
                 <div class="info-window-current-price">${rate.price.book}</div>
             </div>
         `;
         }
 
-        const openHotelScript = safeHotelUrl
-            ? `window.open('${safeHotelUrl}', '_blank', 'noopener,noreferrer')`
-            : '';
+        const openHotelScript = safeHotelUrl ? `window.open('${safeHotelUrl}', '_blank', 'noopener,noreferrer')` : '';
 
         return `
         <div class="info-window-container"
@@ -216,7 +228,6 @@ export default function HotelMapView({
                     const svgString = renderToStaticMarkup(<MapPinIcon number={number} color={color} />);
                     const iconUrl = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svgString);
 
-
                     const marker = new maps.Marker({
                         position: pos,
                         map: mapRef.current,
@@ -267,4 +278,3 @@ export default function HotelMapView({
         </div>
     );
 }
-

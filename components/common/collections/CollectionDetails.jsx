@@ -297,7 +297,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
     const CountryName = Array.isArray(basic) && basic.length > 0 ? basic[0].countryName : basic?.countryName;
     const RegionName = Array.isArray(basic) && basic.length > 0 ? basic[0].regionName : basic?.regionName;
-    const CityName = Array.isArray(basic) && basic.length > 0 ? basic[0].cityName : basic?.cityName;
     const CollectionName = Array.isArray(basic) && basic.length > 0 ? basic[0].name : basic?.name;
 
     const CountryUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].countryUrl : basic?.countryUrl;
