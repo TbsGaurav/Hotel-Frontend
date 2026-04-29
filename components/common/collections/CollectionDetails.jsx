@@ -80,6 +80,18 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         initCurrency();
     }, []);
 
+    useEffect(() => {
+        const handler = (event) => {
+            const nextCurrency = event?.detail?.currency;
+            if (nextCurrency) {
+                setCurrency(nextCurrency);
+            }
+        };
+
+        window.addEventListener('currencychange', handler);
+        return () => window.removeEventListener('currencychange', handler);
+    }, []);
+
     const fetchRatesForHotels = async (hotelsToRate, selectedCurrency) => {
         const bookingIds = hotelsToRate.map(getBookingId).filter(Boolean);
 

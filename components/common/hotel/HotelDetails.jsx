@@ -278,6 +278,18 @@ export default function HotelDetails({ initialData, initialRate = null, initialR
     }, []);
 
     useEffect(() => {
+        const handler = (event) => {
+            const nextCurrency = event?.detail?.currency;
+            if (nextCurrency) {
+                setCurrency(nextCurrency);
+            }
+        };
+
+        window.addEventListener('currencychange', handler);
+        return () => window.removeEventListener('currencychange', handler);
+    }, []);
+
+    useEffect(() => {
         const bookingId = Number.isInteger(Number(hotelInfo?.bookingId)) ? Number(hotelInfo.bookingId) : null;
 
         if (!currency || !bookingId) {
