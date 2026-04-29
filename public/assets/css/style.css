@@ -3758,6 +3758,10 @@ input[type='range']:active::-webkit-slider-thumb {
     min-width: 0;
 }
 
+.min-vh-60 {
+    min-height: 60vh;
+}
+
 .dropdown-option-pointer {
     cursor: pointer;
 }

@@ -38,7 +38,7 @@ export default function AdminTopNav() {
                         </li>
 
                         <li className="nav-item">
-                            <Link className="nav-link text-white px-4 py-3" href="#">
+                            <Link className="nav-link text-white px-4 py-3" href={ADMIN_ROUTES.settings}>
                                 Settings
                             </Link>
                         </li>
