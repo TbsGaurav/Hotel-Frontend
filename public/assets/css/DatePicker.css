@@ -458,7 +458,249 @@
 /* Remove internal calendar borders */
  .react-datepicker {
     border: none !important;
-} 
+}
 
+/* Mobile search modal custom styles */
+.mobile-search-panel {
+    max-width: 480px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #d8e1ee;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
 
+.mobile-search-panel form > .d-flex {
+    gap: 12px !important;
+}
 
+.mobile-modal-label {
+    margin-bottom: 5px !important;
+    font-size: 12px;
+    line-height: 1.2;
+    color: #2f5f9f;
+    letter-spacing: 0.01em;
+}
+
+.mobile-search-input-group {
+    min-height: 44px;
+    border: 1px solid #d8e1ee;
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-search-input-group:focus-within,
+.mobile-calendar-input:focus,
+.mobile-calendar-input:active,
+.mobile-rooms-toggle:focus,
+.mobile-rooms-toggle:active {
+    border-color: #86a8d8;
+    box-shadow: 0 0 0 3px rgba(47, 95, 159, 0.08);
+}
+
+.mobile-search-icon,
+.mobile-calendar-icon {
+    color: #2f5f9f;
+}
+
+.mobile-search-input {
+    font-size: 15px;
+    height: 44px;
+    color: #1f2937;
+}
+
+.mobile-search-input::placeholder {
+    color: #6b7280;
+}
+
+.mobile-search-results {
+    z-index: 1060;
+    border: 1px solid #d8e1ee;
+}
+
+.mobile-spinner {
+    color: #003b95;
+}
+
+.mobile-calendar-input {
+    cursor: pointer;
+    font-size: 15px;
+    height: 44px;
+    background: #fff;
+    border: 1px solid #d8e1ee;
+    color: #1f2937;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-date-range-picker-popup {
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: 315px;
+    margin: 8px auto 0;
+    overflow: hidden;
+    border-color: #d8e1ee;
+}
+
+.mobile-date-range-picker-popup .react-datepicker {
+    background: #fff !important;
+}
+
+.mobile-date-range-picker-popup .react-datepicker__header {
+    background: #f8fafc !important;
+}
+
+.mobile-date-range-picker-popup .react-datepicker__current-month {
+    display: block !important;
+    color: #111827 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    padding-bottom: 5px;
+}
+
+.mobile-date-range-picker-popup .react-datepicker__day--disabled {
+    visibility: visible;
+    color: #c7d0dd !important;
+    background: transparent !important;
+    pointer-events: none;
+}
+
+.mobile-date-range-picker-popup .react-datepicker__month-container:first-child {
+    border-bottom: 1px solid #e6edf5 !important;
+    padding-bottom: 6px;
+}
+
+.mobile-date-range-picker-popup .selected-range-footer {
+    background: #f8fafc;
+}
+
+.mobile-date-range-picker-popup .mobile-calendar-header {
+    width: 100%;
+}
+
+.mobile-date-range-picker-popup .custom-header-wrapper {
+    min-height: 36px;
+    background: #f8fafc;
+}
+
+.mobile-calendar-title,
+.mobile-picker-option {
+    border: 0;
+    background: transparent;
+    color: #111827;
+    font-weight: 600;
+}
+
+.mobile-calendar-title {
+    padding: 4px 12px;
+    font-size: 14px;
+}
+
+.mobile-calendar-title-static {
+    pointer-events: none;
+}
+
+.mobile-month-grid,
+.mobile-year-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 4px 10px 12px;
+}
+
+.mobile-picker-option {
+    min-height: 34px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.mobile-picker-option.active,
+.mobile-picker-option:hover,
+.mobile-calendar-title:hover {
+    background: #2f5f9f;
+    color: #fff;
+}
+
+.mobile-calendar-picking .react-datepicker__day-names,
+.mobile-calendar-picking .react-datepicker__month {
+    display: none !important;
+}
+
+.mobile-calendar-picking .mobile-calendar-secondary-header {
+    display: none;
+}
+
+.mobile-rooms-box {
+    background: #fff;
+    border: 1px solid #d8e1ee;
+}
+
+.mobile-rooms-toggle {
+    cursor: pointer;
+    font-size: 15px;
+    height: 44px;
+    background: #fff;
+    border: 1px solid #d8e1ee;
+    color: #1f2937;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-rooms-toggle:focus {
+    outline: none;
+}
+
+.mobile-search-submit {
+    background: #2f5f9f;
+    color: #fff;
+    font-size: 15px;
+    height: 48px;
+    letter-spacing: 0.01em;
+}
+
+.mobile-search-submit:hover,
+.mobile-search-submit:focus {
+    color: #fff;
+    background: #274f86;
+}
+
+.hero-search-results-dropdown {
+    z-index: 1060;
+}
+
+.main-date-picker {
+    cursor: pointer;
+}
+
+.date-range-icon {
+    cursor: pointer;
+}
+
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+.price-slider-track {
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+}
+
+.price-slider-selected {
+    position: absolute;
+    height: 100%;
+    background: #f0831e;
+}
+
+.price-slider-handle-wrapper {
+    height: 20px;
+    margin-top: -13px;
+}
+
+.price-slider-handle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #f0831e;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    cursor: pointer;
+}

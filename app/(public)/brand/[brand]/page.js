@@ -41,6 +41,8 @@ export default async function BrandPage({ params }) {
         href: `/${country.toLowerCase().replace(/\s+/g, '-')}/${brand}`
     }));
 
+    const hasBrandData = Array.isArray(brandData) && brandData.length > 0;
+
     return (
         <>
             <HeroSection variant="common" />
@@ -71,13 +73,19 @@ export default async function BrandPage({ params }) {
                     </div>
                 </div>
                 <div className="container">
-                    <Dropdown
-                        id="brand-countries"
-                        title={`${brandName}`}
-                        items={items}
-                        parentId="brandAccordion"
-                        defaultOpen={true}
-                    />
+                    {hasBrandData ? (
+                        <Dropdown
+                            id="brand-countries"
+                            title={`${brandName}`}
+                            items={items}
+                            parentId="brandAccordion"
+                            defaultOpen={true}
+                        />
+                    ) : (
+                        <div className="text-center py-5">
+                            <p className="text-muted mb-0">No data available for this brand.</p>
+                        </div>
+                    )}
                 </div>
             </section>
         </>

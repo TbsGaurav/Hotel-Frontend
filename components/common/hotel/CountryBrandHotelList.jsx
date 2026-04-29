@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import AppLink from '@/components/common/AppLink';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
-import { FaMapMarkerAlt } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
 import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 import Image from 'next/image';
@@ -23,6 +23,7 @@ export default function CountryBrandHotelList({
     const defaultImage = '/image/property-img.webp';
     const [loadingMore, setLoadingMore] = useState(false);
     const [timestamp, setTimestamp] = useState('');
+
     const [currency, setCurrency] = useState(null);
     const [viewMode, setViewMode] = useState('list');
     const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -51,7 +52,6 @@ export default function CountryBrandHotelList({
         window.addEventListener('hotel-map-toggle', handler);
         return () => window.removeEventListener('hotel-map-toggle', handler);
     }, []);
-
     useEffect(() => {
         const timer = window.setTimeout(() => {
             setTimestamp(Date.now().toString());
@@ -144,8 +144,13 @@ export default function CountryBrandHotelList({
 
     const getImageUrl = (photo) => {
         if (!photo) return defaultImage;
-        const sep = photo.includes('?') ? '&' : '?';
-        return timestamp ? `${photo}${sep}t=${timestamp}` : photo;
+
+        const normalized = String(photo || '').trim();
+        if (!normalized || normalized === defaultImage) return defaultImage;
+
+        if (normalized.startsWith('//')) return `https:${normalized}`;
+        if (normalized.startsWith('/')) return normalized;
+        return normalized;
     };
 
     const getHotelRate = (bookingId) => allRates.find((rate) => String(rate?.id) === String(bookingId));
@@ -238,14 +243,6 @@ export default function CountryBrandHotelList({
         return () => observer.disconnect();
     }, [localHasMore, loadingMore, page, pageCookieName, pageIntentCookieName]);
 
-    if (!allHotels.length) {
-        return (
-            <div className="text-center py-5">
-                <p className="text-muted">No hotels available.</p>
-            </div>
-        );
-    }
-
     const groupedHotels = Object.values(
         allHotels.reduce((acc, hotel) => {
             const key = hotel.cityName;
@@ -294,8 +291,7 @@ export default function CountryBrandHotelList({
 
     const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
     const hotelsByViewMode = groupedHotels;
-    const renderGroups =
-        effectiveViewMode === 'grid' ? [{ cityName: '', cityUrlName: '', hotels: allHotels }] : hotelsByViewMode;
+    const renderGroups = effectiveViewMode === 'grid' ? [{ cityName: '', cityUrlName: '', hotels: allHotels }] : hotelsByViewMode;
 
     if (!allHotels.length) {
         return (
@@ -335,7 +331,6 @@ export default function CountryBrandHotelList({
                             We couldn’t find any hotels for this destination right now. Try changing your filters, checking nearby areas, or
                             searching again with different dates.
                         </p>
-
                         <div className="d-flex flex-wrap justify-content-center gap-3" style={{ color: '#5f6b7a', fontSize: '14px' }}>
                             <div className="d-flex align-items-center gap-2">
                                 <span
@@ -352,6 +347,7 @@ export default function CountryBrandHotelList({
             </div>
         );
     }
+
     return (
         <div className="p-0">
             {!isMobileViewport ? (
@@ -370,7 +366,7 @@ export default function CountryBrandHotelList({
             <div className="d-flex flex-column gap-3">
                 {renderGroups.map((city, cityIndex) => (
                     <div key={city.cityName || `city-${cityIndex}`} className="d-flex flex-column gap-3">
-                        {effectiveViewMode !== 'grid' ? (
+                        {effectiveViewMode !== 'grid' && city.cityName ? (
                             <AppLink href={getCityBrandPath(city.cityUrlName)} className="text-decoration-none">
                                 <h5 className="city-hover mb-0">
                                     {formattedBrand} {city.cityName}
@@ -389,13 +385,6 @@ export default function CountryBrandHotelList({
                                 const infoBadges = badges.filter(
                                     (badge) => badge.toLowerCase().includes('free cancellation') || badge.toLowerCase().includes('pay at')
                                 );
-                                const facilities = hotel.hotelFacilities
-                                    ? hotel.hotelFacilities
-                                          .split('|')
-                                          .map((facility) => facility.trim())
-                                          .filter(Boolean)
-                                    : [];
-
                                 const gridColClass = effectiveViewMode === 'grid' ? 'col-12 col-md-6' : '';
 
                                 return (
@@ -429,7 +418,14 @@ export default function CountryBrandHotelList({
                                                 <div
                                                     className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-4'} collection-hotel-image-col`}
                                                 >
-                                                    <div className="position-relative collection-hotel-image-wrap">
+                                                    <div
+                                                        className="position-relative collection-hotel-image-wrap rounded-4 overflow-hidden"
+                                                        style={{
+                                                            backgroundImage: `url(${defaultImage})`,
+                                                            backgroundSize: 'cover',
+                                                            backgroundPosition: 'center'
+                                                        }}
+                                                    >
                                                         {imageBadges.length > 0 && (
                                                             <>
                                                                 {imageBadges.map((badge, idx) => (

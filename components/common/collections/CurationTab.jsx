@@ -23,7 +23,8 @@ export default function CurationTab({
     setSelectedHotels,
     newlyAddedHotels = [],
     onAddGlobalHotel,
-    onLoadMoreHotels
+    onLoadMoreHotels,
+    isEdit = false
 }) {
     const [reasonModal, setReasonModal] = useState(false);
     const [selectedHotel, setSelectedHotel] = useState(null);
@@ -35,10 +36,10 @@ export default function CurationTab({
     const sortedHotels = [...pinnedHotels, ...hotelList.filter((hotel) => !pinnedHotels.some((p) => p.id === hotel.id))];
     const visibleHotels = normalizedSearch
         ? sortedHotels.filter((hotel) => {
-              const name = String(hotel?.name || '').toLowerCase();
-              const address = String(hotel?.address || '').toLowerCase();
-              return name.includes(normalizedSearch) || address.includes(normalizedSearch);
-          })
+            const name = String(hotel?.name || '').toLowerCase();
+            const address = String(hotel?.address || '').toLowerCase();
+            return name.includes(normalizedSearch) || address.includes(normalizedSearch);
+        })
         : sortedHotels;
 
     const handleCheckboxChange = (hotelId, checked) => {
@@ -73,6 +74,11 @@ export default function CurationTab({
     };
 
     const handlePin = (hotel) => {
+        if (!hotel.id) {
+            toast.error('Cannot pin hotel: Invalid hotel ID');
+            return;
+        }
+
         setPinnedHotels((prev) => {
             if (prev.some((h) => h.id === hotel.id)) return prev;
 
@@ -129,7 +135,7 @@ export default function CurationTab({
             </div>
 
             <div className="border rounded p-3 search-hotel-y" onScroll={handleScroll}>
-                {visibleHotels.map((hotel) => {
+                {visibleHotels.map((hotel, index) => {
                     const isExcluded = excludedHotels.some((h) => h.id === hotel.id);
                     const pinIndex = pinnedHotels.findIndex((h) => h.id === hotel.id);
                     const isPinned = pinIndex !== -1;
@@ -138,12 +144,11 @@ export default function CurationTab({
 
                     return (
                         <div
-                            key={hotel.id}
-                            className={`curation-hotel-row d-flex flex-wrap gap-2 align-items-start align-items-sm-center border-bottom py-2 ${
-                                isNewlyAdded ? 'border-start border-danger border-3 ps-2' : ''
-                            }`}
+                            key={`${hotel.id}-${index}`}
+                            className={`curation-hotel-row d-flex flex-wrap gap-2 align-items-start align-items-sm-center border-bottom py-2 ${isNewlyAdded ? 'border-start border-danger border-3 ps-2' : ''
+                                }`}
                         >
-                            <div className="d-flex align-items-start align-items-sm-center gap-2 flex-grow-1" style={{ minWidth: 0 }}>
+                            <div className="d-flex align-items-start align-items-sm-center gap-2 flex-grow-1 min-width-0">
                                 <input
                                     type="checkbox"
                                     className="form-check-input mt-1 mt-sm-0"
@@ -152,8 +157,8 @@ export default function CurationTab({
                                     onChange={(e) => handleCheckboxChange(hotel.id, e.target.checked)}
                                 />
 
-                                <div className="flex-grow-1" style={{ minWidth: 0 }}>
-                                    <div className="d-flex align-items-center gap-2" style={{ minWidth: 0 }}>
+                                <div className="flex-grow-1 min-width-0">
+                                    <div className="d-flex align-items-center gap-2 min-width-0">
                                         {isPinned && <span className="text-warning fw-bold">*</span>}
                                         <HotelRowInfo
                                             name={hotel.name}
@@ -203,19 +208,19 @@ export default function CurationTab({
                 })}
 
                 {loadingMoreHotels && (
-                    <div className="py-3 text-center text-muted">
+                    <div key="loading-more" className="py-3 text-center text-muted">
                         Loading more hotels...
                     </div>
                 )}
 
                 {!loadingMoreHotels && !hasMoreHotels && visibleHotels.length > 0 && !normalizedSearch && (
-                    <div className="py-3 text-center text-muted">
+                    <div key="end-of-list" className="py-3 text-center text-muted">
                         You have reached the end of the hotel list.
                     </div>
                 )}
 
                 {normalizedSearch && visibleHotels.length === 0 && (
-                    <div className="py-3 text-center text-muted">
+                    <div key="no-results" className="py-3 text-center text-muted">
                         No hotels match &quot;{hotelSearch}&quot;.
                     </div>
                 )}
@@ -229,7 +234,7 @@ export default function CurationTab({
             />
 
             {reasonModal && (
-                <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.5)' }}>
+                <div className="modal d-block modal-overlay-bg">
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -259,15 +264,17 @@ export default function CurationTab({
                 </div>
             )}
 
-            <div className="d-flex justify-content-between mt-3">
-                <button className="btn btn-outline-secondary" onClick={onBack}>
-                    Back
-                </button>
+            {!isEdit && (
+                <div className="d-flex justify-content-between mt-3">
+                    <button className="btn btn-outline-secondary" onClick={onBack}>
+                        Back
+                    </button>
 
-                <button className="theme-button-orange rounded-1" onClick={onNext} disabled={loading}>
-                    Next
-                </button>
-            </div>
+                    <button className="theme-button-orange rounded-1" onClick={onNext} disabled={loading}>
+                        Next
+                    </button>
+                </div>
+            )}
         </>
     );
 }

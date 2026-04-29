@@ -38,6 +38,7 @@ export default function CityHotelList({
     const [uncontrolledViewMode, setUncontrolledViewMode] = useState('list');
     const [isMobileViewport, setIsMobileViewport] = useState(false);
     const [timestamp, setTimestamp] = useState('');
+
     const [failedImageKeys, setFailedImageKeys] = useState(() => new Set());
     const loadMoreTriggerRef = useRef(null);
     const loadRequestInFlightRef = useRef(false);
@@ -203,10 +204,7 @@ export default function CityHotelList({
     };
 
     const getImageUrl = (photo) => {
-        const normalizedUrl = normalizeImageUrl(photo);
-        if (normalizedUrl === defaultImage) return defaultImage;
-        const sep = normalizedUrl.includes('?') ? '&' : '?';
-        return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
+        return normalizeImageUrl(photo);
     };
 
     const getHotelRate = (bookingId) => allRates.find((rate) => String(rate?.id) === String(bookingId));
@@ -498,7 +496,14 @@ export default function CityHotelList({
                             >
                                 <div className="row g-3 collection-hotel-card-row">
                                     <div className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-4'} collection-hotel-image-col`}>
-                                        <div className="position-relative collection-hotel-image-wrap">
+                                        <div
+                                            className="position-relative collection-hotel-image-wrap rounded-4 overflow-hidden"
+                                            style={{
+                                                backgroundImage: `url(${defaultImage})`,
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center'
+                                            }}
+                                        >
                                             {imageBadges.length > 0 && (
                                                 <>
                                                     {imageBadges.map((badge, idx) => (
@@ -656,14 +661,29 @@ export default function CityHotelList({
                                                 </div>
 
                                                 {(() => {
-                                                    if (!rate?.price) return null;
+                                                    if (!rate?.price) {
+                                                        return (
+                                                            <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
+                                                                <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                                    1 night, 2 adults
+                                                                </p>
+                                                                <div className="d-flex align-items-baseline justify-content-end collection-hotel-current-price-row">
+                                                                    <span
+                                                                        className="text-theme-orange fw-bold collection-hotel-current-price"
+                                                                        style={{ fontSize: '16px' }}
+                                                                    >
+                                                                        Check Price
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
 
                                                     const dealInfo = rate?.deal_info || {};
                                                     const originalPrice = dealInfo?.public_price;
                                                     const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
 
                                                     return (
-                                                        // <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
                                                         <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
                                                             <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                 1 night, 2 adults

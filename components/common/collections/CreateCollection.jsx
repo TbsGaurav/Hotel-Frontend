@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { fetchClient } from '@/lib/api/public/fetchClient';
 import {
     getCitiesByCountryOrRegion,
     getHotelsByCity,
@@ -48,13 +49,15 @@ const getSlugParts = (slug = '') => {
     };
 };
 
-const mergeHotelsById = (existingHotels = [], nextHotels = []) => {
+const mergeHotelsById = (...hotelArrays) => {
     const hotelMap = new Map();
 
-    [...existingHotels, ...nextHotels].forEach((hotel) => {
-        if (hotel?.id && !hotelMap.has(hotel.id)) {
-            hotelMap.set(hotel.id, hotel);
-        }
+    hotelArrays.forEach((hotels = []) => {
+        hotels.forEach((hotel) => {
+            if (hotel?.id && !hotelMap.has(hotel.id)) {
+                hotelMap.set(hotel.id, hotel);
+            }
+        });
     });
 
     return Array.from(hotelMap.values());
@@ -78,6 +81,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
     const [selectedCities, setSelectedCities] = useState([]);
     const [slugCityId, setSlugCityId] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [savingAction, setSavingAction] = useState(null); // null, 'draft', or 'publish'
     const [countries, setCountries] = useState([]);
 
     const [initialBasicData, setInitialBasicData] = useState(null);
@@ -124,6 +128,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedHotels, setSelectedHotels] = useState([]);
     const hasInitializedCurationSelectionRef = useRef(false);
+    const includedHotelIdsInitializedRef = useRef(false);
     const [hotelPagination, setHotelPagination] = useState({
         pageNumber: 1,
         pageSize: 20,
@@ -203,15 +208,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             }));
         }
     }, [selectedCities, formData.geoNodeName]);
-
-    // Update selected hotels when hotel list loads and we have included IDs
-    useEffect(() => {
-        if (hotelList.length > 0 && includedHotelIds.length > 0) {
-            // Filter included IDs to only those that exist in the current hotel list
-            const validIncludedIds = includedHotelIds.filter((id) => hotelList.some((hotel) => hotel.id === id));
-            setSelectedHotels(validIncludedIds);
-        }
-    }, [hotelList, includedHotelIds]);
 
     // ---------------- TAB NAV ----------------
     const goNext = () => {
@@ -315,9 +311,37 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
 
         const normalizedResults = results.map(normalizeGlobalHotel).filter((hotel) => hotel?.id);
 
+        // Merge in manually-added hotels (from includedHotelIds) that aren't in the results
+        // These are hotels that were manually added to the collection curation
+        // and may not match the geo-node query
+        const manualHotels = await Promise.all(
+            (includedHotelIds || []).map(async (hotelId) => {
+                // Check if already in results or hotelList
+                const inResults = normalizedResults.some((h) => String(h.id) === String(hotelId));
+                const inHotelList = hotelList.some((h) => String(h.id) === String(hotelId));
+                if (inResults || inHotelList) return null;
+
+                // Try to fetch the hotel directly
+                try {
+                    const response = await fetchClient(`/hotels/${hotelId}`, {
+                        method: 'GET'
+                    });
+                    const hotelData = response?.data || response;
+                    if (hotelData) {
+                        return normalizeGlobalHotel(hotelData);
+                    }
+                } catch (error) {
+                    console.error(`Failed to fetch hotel ${hotelId}:`, error);
+                }
+                return null;
+            })
+        );
+
+        const validManualHotels = manualHotels.filter((h) => h?.id);
+
         setHotelList((prev) => {
-            const baseHotels = append ? prev : newlyAddedHotels;
-            return mergeHotelsById(baseHotels, normalizedResults);
+            const baseHotels = append ? prev : mergeHotelsById(prev, newlyAddedHotels);
+            return mergeHotelsById(baseHotels, normalizedResults, validManualHotels);
         });
 
         const resolvedPageSize = pagination.pageSize ?? 20;
@@ -337,15 +361,11 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                 pagination.hasNextPage ??
                 (resolvedTotalPages ? resolvedPageNumber < resolvedTotalPages : normalizedResults.length === resolvedPageSize)
         });
-        // setPinnedHotels(results);
-
-        // if (type === 'pinned') setPinnedOptions(results);
-        // else setExcludeOptions(results);
     };
 
     // ---------------- LOAD HOTELS ON CURATION TAB MOUNT ----------------
     useEffect(() => {
-        if (activeTab !== 'Curation') return;
+        if (activeTab !== 'Curation' && !collectionId) return;
 
         const fetchInitialHotels = async () => {
             setHotelPagination({
@@ -361,10 +381,17 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         fetchInitialHotels();
     }, [activeTab, selectedGeoNode, collectionId, formData.sourceId, formData.geoNodeType]);
 
+    // ---------------- AUTO-SELECT HOTELS ON CURATION TAB MOUNT ----------------
     useEffect(() => {
-        if (activeTab !== 'Curation') return;
+        if (activeTab !== 'Curation' && !collectionId) return;
         if (hasInitializedCurationSelectionRef.current) return;
         if (!hotelList.length) return;
+
+        // Don't auto-select if includedHotelIds was already populated (from existing collection)
+        if (includedHotelIdsInitializedRef.current && includedHotelIds.length > 0) {
+            hasInitializedCurationSelectionRef.current = true;
+            return;
+        }
 
         const effectiveMaxHotels = Number(formData.maxHotels) || 20;
 
@@ -373,6 +400,18 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         setSelectedHotels(initialSelection);
         hasInitializedCurationSelectionRef.current = true;
     }, [activeTab, hotelList, includedHotelIds, formData.maxHotels]);
+
+    // ---------------- RE-FILTER SELECTED HOTELS WHEN HOTEL LIST UPDATES ----------------
+    useEffect(() => {
+        // When editing a collection, ensure selectedHotels only contains hotels that are actually in hotelList
+        if (collectionId && hotelList.length > 0) {
+            setSelectedHotels((prev) => {
+                const filtered = prev.filter((id) => hotelList.some((hotel) => String(hotel.id) === String(id)));
+                // If the filtered list is different from the previous, return it; otherwise keep the previous to avoid unnecessary re-renders
+                return filtered.length !== prev.length ? filtered : prev;
+            });
+        }
+    }, [collectionId, hotelList]);
 
     const handleLoadMoreHotels = async () => {
         if (hotelLoadMoreLockRef.current || hotelLoadingMore || !hotelPagination.hasNextPage) return;
@@ -695,6 +734,13 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         }
     }, [activeTab]);
 
+    useEffect(() => {
+        if (collectionId && activeTab !== 'Basics') {
+            setActiveTab('Basics');
+        }
+    }, [collectionId]);
+
+
     const handleStatusUpdate = async (action) => {
         if (!collectionId) {
             toast.error('Collection ID not available');
@@ -735,21 +781,28 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             setLoading(true);
 
             // Include only checked hotels
-            const includePayload = selectedHotels.map((hotelId) => ({
-                HotelID: hotelId
-            }));
+            const includePayload = selectedHotels
+                .filter(hotelId => hotelId && hotelId !== null && hotelId !== undefined)
+                .map((hotelId) => ({
+                    HotelID: hotelId
+                }));
 
-            const pinnedPayload = pinnedHotels.map((hotel, index) => ({
-                HotelID: hotel.id,
-                Position: index + 1,
-                PinType: 'FIXED'
-            }));
+            const pinnedPayload = pinnedHotels
+                .filter(hotel => hotel.id && hotel.id !== null && hotel.id !== undefined)
+                .map((hotel, index) => ({
+                    HotelID: hotel.id,
+                    Position: index + 1,
+                    PinType: 'FIXED'
+                }));
 
-            const excludePayload = excludedHotels.map((hotel) => ({
-                HotelID: hotel.id,
-                ChainID: null,
-                Reason: hotel.reason
-            }));
+
+            const excludePayload = excludedHotels
+                .filter(hotel => hotel.id && hotel.id !== null && hotel.id !== undefined)
+                .map((hotel) => ({
+                    HotelID: hotel.id,
+                    ChainID: null,
+                    Reason: hotel.reason
+                }));
 
             const payload = {
                 collectionId,
@@ -821,6 +874,17 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
 
             const { basicCollection, collectionContent, collectionRules, collectionCuration } = data;
 
+            // Helper to safely get hotel ID from various possible field names and normalize type
+            const getHotelId = (hotel) => {
+                const raw = hotel?.id ?? hotel?.hotelID ?? hotel?.hotelId ?? hotel?.ID ?? null;
+                if (raw === null || raw === undefined) return null;
+                // Convert numeric strings to number for consistent type
+                if (typeof raw === 'string' && raw.trim() !== '' && !isNaN(Number(raw))) {
+                    return Number(raw);
+                }
+                return raw;
+            };
+
             // ---------------- BASICS ----------------
             const basic = Array.isArray(basicCollection) ? basicCollection[0] || {} : basicCollection || {};
             const {
@@ -850,22 +914,22 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             const mappedCities =
                 cities && cities.length > 0
                     ? cities.map((city) => ({
-                          cityId: city.cityId,
-                          name: city.cityName
-                      }))
+                        cityId: city.cityId,
+                        name: city.cityName
+                    }))
                     : parsedSourceIds.length > 0
-                      ? parsedSourceIds.map((id, index) => ({
+                        ? parsedSourceIds.map((id, index) => ({
                             cityId: id,
                             name: parsedCityNames[index] || ''
                         }))
-                      : cityId
-                        ? [
-                              {
-                                  cityId,
-                                  name: cityName || ''
-                              }
-                          ]
-                        : [];
+                        : cityId
+                            ? [
+                                {
+                                    cityId,
+                                    name: cityName || ''
+                                }
+                            ]
+                            : [];
             const slugParts = getSlugParts(basicCollection?.slug || '');
             const matchedSlugCity = mappedCities.find((city) => slugifyText(city.name) === slugParts.namespace);
 
@@ -959,29 +1023,30 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             const included = collectionCuration?.[0]?.includedHotels || []; // Get included hotels
 
             const formattedPinned = pinned.map((hotel) => ({
-                id: hotel.hotelID,
-                name: hotel.hotelName,
-                position: hotel.position,
-                pinType: hotel.pinType
+                id: getHotelId(hotel),
+                name: hotel?.hotelName ?? hotel?.name ?? '',
+                position: hotel?.position ?? null,
+                pinType: hotel?.pinType ?? null
             }));
 
             const formattedExcluded = excluded.map((hotel) => ({
-                id: hotel.hotelID,
-                name: hotel.hotelName,
-                reason: hotel.reason
+                id: getHotelId(hotel),
+                name: hotel?.hotelName ?? hotel?.name ?? '',
+                reason: hotel?.reason ?? ''
             }));
 
-            const includedIds = included.map((hotel) => hotel.hotelID);
+            const includedIds = included.map((hotel) => getHotelId(hotel)).filter(id => id != null);
 
             setPinnedHotels(formattedPinned);
             setExcludedHotels(formattedExcluded);
             setIncludedHotelIds(includedIds);
             setNewlyAddedHotels([]);
+            includedHotelIdsInitializedRef.current = true;
 
             // Important: Set selectedHotels after hotelList is loaded
             // We'll need to wait for hotelList to be populated
             if (hotelList.length > 0) {
-                setSelectedHotels(includedIds.filter((id) => hotelList.some((hotel) => hotel.id === id)));
+                setSelectedHotels(includedIds.filter((id) => hotelList.some((hotel) => String(hotel.id) === String(id))));
             } else {
                 // If hotelList isn't loaded yet, just store the IDs and they'll be applied when hotelList loads
                 setSelectedHotels(includedIds);
@@ -992,6 +1057,7 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
                 pinned: formattedPinned,
                 excluded: formattedExcluded
             });
+
         } catch (error) {
             console.error('Failed to fetch collection:', error);
             toast.error('Failed to fetch collection');
@@ -1088,15 +1154,25 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         return currentPinned !== initialPinned || currentExcluded !== initialExcluded || currentSelected !== initialSelected;
     };
 
-    const normalizeGlobalHotel = (hotel) => ({
-        id: hotel?.id ?? hotel?.hotelID ?? hotel?.hotelId ?? hotel?.ID ?? null,
-        name: hotel?.name ?? hotel?.hotelName ?? hotel?.Name ?? '',
-        cityId: hotel?.cityId ?? hotel?.cityID ?? hotel?.CityID ?? null,
-        cityName: hotel?.cityName ?? hotel?.city ?? hotel?.CityName ?? '',
-        address: hotel?.address ?? hotel?.Address ?? '',
-        stars: hotel?.stars ?? hotel?.Stars ?? null,
-        reviewScore: hotel?.reviewScore ?? hotel?.ReviewScore ?? null
-    });
+    const normalizeGlobalHotel = (hotel) => {
+        const normalizeId = (value) => {
+            if (value === null || value === undefined) return null;
+            if (typeof value === 'string' && value.trim() !== '' && !isNaN(Number(value))) {
+                return Number(value);
+            }
+            return value;
+        };
+
+        return {
+            id: normalizeId(hotel?.id ?? hotel?.hotelID ?? hotel?.hotelId ?? hotel?.ID ?? null),
+            name: hotel?.name ?? hotel?.hotelName ?? hotel?.Name ?? '',
+            cityId: normalizeId(hotel?.cityId ?? hotel?.cityID ?? hotel?.CityID ?? null),
+            cityName: hotel?.cityName ?? hotel?.city ?? hotel?.CityName ?? '',
+            address: hotel?.address ?? hotel?.Address ?? '',
+            stars: hotel?.stars ?? hotel?.Stars ?? null,
+            reviewScore: hotel?.reviewScore ?? hotel?.ReviewScore ?? null
+        };
+    };
 
     const handleAddGlobalHotel = (hotel) => {
         const normalizedHotel = normalizeGlobalHotel(hotel);
@@ -1127,13 +1203,6 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
         setNewlyAddedHotels((prev) => (prev.some((item) => item.id === normalizedHotel.id) ? prev : [...prev, normalizedHotel]));
     };
 
-    // if (loading && collectionId) {
-    //     return (
-    //         <div className="d-flex justify-content-center align-items-center" style={{ height: '60vh' }}>
-    //             <div className="spinner-border text-primary" role="status" />
-    //         </div>
-    //     );
-    // }
     function BarsLoader() {
         return (
             <div className="bars-loader">
@@ -1143,175 +1212,466 @@ export default function CreateCollection({ collectionId: propCollectionId }) {
             </div>
         );
     }
+
+    const handleUpdateCollection = async (action) => {
+        setSavingAction(action);
+
+        try {
+            // 1. Update Basics
+            let geoNodeType = null;
+            let sourceId = null;
+
+            if (formData.districtId) {
+                geoNodeType = 'District';
+                sourceId = formData.districtId;
+            } else if (formData.cityId) {
+                geoNodeType = 'City';
+                sourceId = formData.cityId;
+            } else if (formData.regionId) {
+                geoNodeType = 'Region';
+                sourceId = formData.regionId;
+            } else if (formData.countryId) {
+                geoNodeType = 'Country';
+                sourceId = formData.countryId;
+            }
+
+            const selectedCityIds = selectedCities.map((city) => city.cityId);
+            const sourceIds = selectedCityIds.length > 0 ? selectedCityIds : sourceId ? [sourceId] : [];
+            const selectedSlugCity = selectedCities.find((city) => city.cityId === slugCityId) || null;
+
+            const collectionObject = {
+                SourceId: sourceIds,
+                GeoNodeType: geoNodeType,
+                Name: formData.name,
+                Slug: formData.slug,
+                Type: formData.mode.toLowerCase(),
+                Template: formData.template || null,
+                Status: formData.status,
+                MaxHotels: formData.maxHotels ? Number(formData.maxHotels) : null,
+                DefaultSort: formData.defaultSort || 'StarRating DESC',
+                UrlCityId: selectedSlugCity?.cityId ?? null
+            };
+            const collectionJson = JSON.stringify(collectionObject);
+
+            // Update basics
+            const basicsPayload = {
+                collectionId: collectionId,
+                collectionJson,
+                changedBy: formData.changedBy
+            };
+
+            await upsertCollection(basicsPayload);
+
+            // 2. Update Content
+            const contentPayload = {
+                collectionId: collectionId,
+                header: contentData.header,
+                metaTitle: contentData.metaTitle,
+                metaDescription: contentData.metaDescription,
+                introShortCopy: contentData.introShortCopy,
+                introLongCopy: contentData.introLongCopy,
+                heroImageUrl: contentData.heroImageUrl,
+                badge: contentData.badge,
+                faQsJson: JSON.stringify(contentData.faqs),
+                userId: 1
+            };
+
+            await saveContent(collectionId, contentPayload);
+
+            // 3. Update Rules
+            if (rules && rules.length > 0) {
+                const rulesPayload = rules.map((rule) => ({
+                    RuleID: rule.RuleID ?? null,
+                    Field: rule.Field,
+                    Operator: rule.Operator,
+                    Value: rule.Value,
+                    LogicalGroup: 'AND'
+                }));
+
+                await saveRule({
+                    collectionId,
+                    rulesJson: JSON.stringify(rulesPayload)
+                });
+            }
+
+            const includePayload = selectedHotels
+                .filter(hotelId => hotelId && hotelId !== null && hotelId !== undefined)
+                .map((hotelId) => ({
+                    HotelID: hotelId
+                }));
+
+            const pinnedPayload = pinnedHotels
+                .filter(hotel => hotel.id && hotel.id !== null && hotel.id !== undefined)
+                .map((hotel, index) => ({
+                    HotelID: hotel.id,
+                    Position: index + 1,
+                    PinType: 'FIXED'
+                }));
+
+            const excludePayload = excludedHotels
+                .filter(hotel => hotel.id && hotel.id !== null && hotel.id !== undefined)
+                .map((hotel) => ({
+                    HotelID: hotel.id,
+                    ChainID: null,
+                    Reason: hotel.reason
+                }));
+
+            const curationPayload = {
+                collectionId,
+                includeJson: JSON.stringify(includePayload),
+                pinnedJson: JSON.stringify(pinnedPayload),
+                excludeJson: JSON.stringify(excludePayload)
+            };
+
+            await saveCuration(curationPayload);
+
+            if (action === 'publish') {
+                await updateCollectionStatus(collectionId, action);
+            }
+
+            toast.success(action === 'publish' ? 'Collection published successfully!' : 'Collection saved as draft!');
+            router.push(ADMIN_ROUTES.collections);
+
+        } catch (error) {
+            console.error('Update failed:', error);
+            toast.error(error?.message || 'Failed to update collection');
+        } finally {
+            setSavingAction(null);
+        }
+    };
+
     // ---------------- RENDER ----------------
     return (
         <div className="card shadow-sm position-relative">
-            <ul className="nav collection-tabs mb-4 gap-2">
-                {tabOrder.map((tab) => {
-                    return (
-                        <li className="nav-item" key={tab}>
-                            <button
-                                type="button"
-                                className={`nav-link px-4 py-2 ${activeTab === tab ? 'active' : ''}`}
-                                onClick={() => setActiveTab(tab)}
-                            >
-                                {tab}
-                            </button>
-                        </li>
-                    );
-                })}
-            </ul>
+            {!collectionId ? (
+                <ul className="nav collection-tabs mb-4 gap-2">
+                    {tabOrder.map((tab) => {
+                        return (
+                            <li className="nav-item" key={tab}>
+                                <button
+                                    type="button"
+                                    className={`nav-link px-4 py-2 ${activeTab === tab ? 'active' : ''}`}
+                                    onClick={() => setActiveTab(tab)}
+                                >
+                                    {tab}
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ul>
+            ) : (
+                <></>
+            )}
             <div className="card-header">
                 <h5>Collections</h5>
             </div>
 
             {loading && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        background: 'rgba(255,255,255,0.7)',
-                        zIndex: 999,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
-                >
+                <div className="loading-overlay">
                     <BarsLoader />
                 </div>
             )}
             <div className="card-body">
-                {activeTab === 'Basics' && (
-                    <BasicsTab
-                        formData={formData}
-                        setFormData={setFormData}
-                        selectedCities={selectedCities}
-                        setSelectedCities={setSelectedCities}
-                        slugCityId={slugCityId}
-                        setSlugCityId={setSlugCityId}
-                        onNext={handleSaveBasics}
-                        onBack={goBack}
-                        loading={loading}
-                        countries={countries}
-                        geoSearch={geoSearch}
-                        setGeoSearch={setGeoSearch}
-                        showGeoDropdown={showGeoDropdown}
-                        setShowGeoDropdown={setShowGeoDropdown}
-                        selectedGeoNode={selectedGeoNode}
-                        setSelectedGeoNode={setSelectedGeoNode}
-                        locationNames={locationNames}
-                        isEdit={!!collectionId}
-                    />
-                )}
+                {!collectionId ? (
+                    <>
+                        {activeTab === 'Basics' && (
+                            <BasicsTab
+                                formData={formData}
+                                setFormData={setFormData}
+                                selectedCities={selectedCities}
+                                setSelectedCities={setSelectedCities}
+                                slugCityId={slugCityId}
+                                setSlugCityId={setSlugCityId}
+                                onNext={handleSaveBasics}
+                                onBack={goBack}
+                                loading={loading}
+                                countries={countries}
+                                geoSearch={geoSearch}
+                                setGeoSearch={setGeoSearch}
+                                showGeoDropdown={showGeoDropdown}
+                                setShowGeoDropdown={setShowGeoDropdown}
+                                selectedGeoNode={selectedGeoNode}
+                                setSelectedGeoNode={setSelectedGeoNode}
+                                locationNames={locationNames}
+                            />
+                        )}
 
-                {activeTab === 'Content' && (
-                    <ContentTab
-                        data={contentData}
-                        setData={setContentData}
-                        onBack={handleBasicBack}
-                        onNext={handleSaveContent}
-                        loading={loading}
-                    />
-                )}
+                        {activeTab === 'Content' && (
+                            <ContentTab
+                                data={contentData}
+                                setData={setContentData}
+                                onBack={handleBasicBack}
+                                onNext={handleSaveContent}
+                                loading={loading}
+                            />
+                        )}
 
-                {activeTab === 'Rules' && (
-                    <RulesTab
-                        rules={rules}
-                        ruleField={ruleField}
-                        setRuleField={setRuleField}
-                        ruleOperator={ruleOperator}
-                        setRuleOperator={setRuleOperator}
-                        ruleValue={ruleValue}
-                        setRuleValue={setRuleValue}
-                        formData={formData}
-                        setFormData={setFormData}
-                        selectedCities={selectedCities}
-                        addRule={addRule}
-                        removeRule={removeRule}
-                        onNext={handleSaveRules}
-                        onBack={handleContentBack}
-                        loading={loading}
-                    />
-                )}
+                        {activeTab === 'Rules' && (
+                            <RulesTab
+                                rules={rules}
+                                ruleField={ruleField}
+                                setRuleField={setRuleField}
+                                ruleOperator={ruleOperator}
+                                setRuleOperator={setRuleOperator}
+                                ruleValue={ruleValue}
+                                setRuleValue={setRuleValue}
+                                formData={formData}
+                                setFormData={setFormData}
+                                selectedCities={selectedCities}
+                                addRule={addRule}
+                                removeRule={removeRule}
+                                onNext={handleSaveRules}
+                                onBack={handleContentBack}
+                                loading={loading}
+                            />
+                        )}
 
-                {activeTab === 'Curation' && (
-                    <CurationTab
-                        hotelList={hotelList}
-                        setFormData={setFormData}
-                        selectedCity={selectedCity}
-                        setSelectedCity={setSelectedCity}
-                        pinnedHotels={pinnedHotels}
-                        setPinnedHotels={setPinnedHotels}
-                        excludedHotels={excludedHotels}
-                        setExcludedHotels={setExcludedHotels}
-                        hotelSearch={hotelSearch}
-                        setHotelSearch={setHotelSearch}
-                        excludeSearch={excludeSearch}
-                        setExcludeSearch={setExcludeSearch}
-                        excludeReason={excludeReason}
-                        setExcludeReason={setExcludeReason}
-                        pinnedOptions={pinnedOptions}
-                        excludeOptions={excludeOptions}
-                        selectedPinnedHotel={selectedPinnedHotel}
-                        setSelectedPinnedHotel={setSelectedPinnedHotel}
-                        setSelectedExcludeHotel={setSelectedExcludeHotel}
-                        showPinnedDropdown={showPinnedDropdown}
-                        setShowPinnedDropdown={setShowPinnedDropdown}
-                        showExcludeDropdown={showExcludeDropdown}
-                        setShowExcludeDropdown={setShowExcludeDropdown}
-                        geoSearch={geoSearch}
-                        setGeoSearch={setGeoSearch}
-                        showGeoDropdown={showGeoDropdown}
-                        setShowGeoDropdown={setShowGeoDropdown}
-                        selectedGeoNode={selectedGeoNode}
-                        setSelectedGeoNode={setSelectedGeoNode}
-                        citySearch={citySearch}
-                        setCitySearch={setCitySearch}
-                        cityOptions={cityOptions}
-                        showCityDropdown={showCityDropdown}
-                        setShowCityDropdown={setShowCityDropdown}
-                        selectedCityObj={selectedCityObj}
-                        setSelectedCityObj={setSelectedCityObj}
-                        addPinnedHotel={addPinnedHotel}
-                        addExcludedHotel={addExcludedHotel}
-                        moveHotel={moveHotel}
-                        onNext={handleSaveCuration}
-                        onBack={handleRulesBack}
-                        setCityOptions={setCityOptions}
-                        loading={loading}
-                        countries={countries}
-                        cities={cities}
-                        excludeError={excludeError}
-                        setExcludeError={setExcludeError}
-                        maxHotels={formData.maxHotels}
-                        selectedHotels={selectedHotels}
-                        setSelectedHotels={setSelectedHotels}
-                        includedHotelIds={includedHotelIds}
-                        newlyAddedHotels={newlyAddedHotels}
-                        setNewlyAddedHotels={setNewlyAddedHotels}
-                        onAddGlobalHotel={handleAddGlobalHotel}
-                        onLoadMoreHotels={handleLoadMoreHotels}
-                        hasMoreHotels={hotelPagination.hasNextPage}
-                        loadingMoreHotels={hotelLoadingMore}
-                    />
-                )}
+                        {activeTab === 'Curation' && (
+                            <CurationTab
+                                hotelList={hotelList}
+                                setFormData={setFormData}
+                                selectedCity={selectedCity}
+                                setSelectedCity={setSelectedCity}
+                                pinnedHotels={pinnedHotels}
+                                setPinnedHotels={setPinnedHotels}
+                                excludedHotels={excludedHotels}
+                                setExcludedHotels={setExcludedHotels}
+                                hotelSearch={hotelSearch}
+                                setHotelSearch={setHotelSearch}
+                                excludeSearch={excludeSearch}
+                                setExcludeSearch={setExcludeSearch}
+                                excludeReason={excludeReason}
+                                setExcludeReason={setExcludeReason}
+                                pinnedOptions={pinnedOptions}
+                                excludeOptions={excludeOptions}
+                                selectedPinnedHotel={selectedPinnedHotel}
+                                setSelectedPinnedHotel={setSelectedPinnedHotel}
+                                setSelectedExcludeHotel={setSelectedExcludeHotel}
+                                showPinnedDropdown={showPinnedDropdown}
+                                setShowPinnedDropdown={setShowPinnedDropdown}
+                                showExcludeDropdown={showExcludeDropdown}
+                                setShowExcludeDropdown={setShowExcludeDropdown}
+                                geoSearch={geoSearch}
+                                setGeoSearch={setGeoSearch}
+                                showGeoDropdown={showGeoDropdown}
+                                setShowGeoDropdown={setShowGeoDropdown}
+                                selectedGeoNode={selectedGeoNode}
+                                setSelectedGeoNode={setSelectedGeoNode}
+                                citySearch={citySearch}
+                                setCitySearch={setCitySearch}
+                                cityOptions={cityOptions}
+                                showCityDropdown={showCityDropdown}
+                                setShowCityDropdown={setShowCityDropdown}
+                                selectedCityObj={selectedCityObj}
+                                setSelectedCityObj={setSelectedCityObj}
+                                addPinnedHotel={addPinnedHotel}
+                                addExcludedHotel={addExcludedHotel}
+                                moveHotel={moveHotel}
+                                onNext={handleSaveCuration}
+                                onBack={handleRulesBack}
+                                setCityOptions={setCityOptions}
+                                loading={loading}
+                                countries={countries}
+                                cities={cities}
+                                excludeError={excludeError}
+                                setExcludeError={setExcludeError}
+                                maxHotels={formData.maxHotels}
+                                selectedHotels={selectedHotels}
+                                setSelectedHotels={setSelectedHotels}
+                                includedHotelIds={includedHotelIds}
+                                newlyAddedHotels={newlyAddedHotels}
+                                setNewlyAddedHotels={setNewlyAddedHotels}
+                                onAddGlobalHotel={handleAddGlobalHotel}
+                                onLoadMoreHotels={handleLoadMoreHotels}
+                                hasMoreHotels={hotelPagination.hasNextPage}
+                                loadingMoreHotels={hotelLoadingMore}
+                            />
+                        )}
 
-                {activeTab === 'Preview' && (
-                    <PreviewTab
-                        formData={formData}
-                        rules={rules}
-                        pinnedHotels={pinnedHotels}
-                        excludedHotels={excludedHotels}
-                        onBack={handlePreviewBack}
-                        onSubmit={handleStatusUpdate}
-                        loading={loading}
-                        locationNames={locationNames}
-                        selectedCities={selectedCities}
-                        slugCityId={slugCityId}
-                    />
+                        {activeTab === 'Preview' && (
+                            <PreviewTab
+                                formData={formData}
+                                rules={rules}
+                                pinnedHotels={pinnedHotels}
+                                excludedHotels={excludedHotels}
+                                onBack={handlePreviewBack}
+                                onSubmit={handleStatusUpdate}
+                                loading={loading}
+                                locationNames={locationNames}
+                                selectedCities={selectedCities}
+                                slugCityId={slugCityId}
+                            />
+                        )}
+                    </>
+                ) : (
+                    <>
+                        {/* Basics Section */}
+                        <div className="mb-5">
+                            <h6 className="border-bottom pb-2 mb-3">Basic Information</h6>
+                            <BasicsTab
+                                formData={formData}
+                                setFormData={setFormData}
+                                selectedCities={selectedCities}
+                                setSelectedCities={setSelectedCities}
+                                slugCityId={slugCityId}
+                                setSlugCityId={setSlugCityId}
+                                onNext={() => { }}
+                                onBack={() => { }}
+                                loading={loading}
+                                countries={countries}
+                                geoSearch={geoSearch}
+                                setGeoSearch={setGeoSearch}
+                                showGeoDropdown={showGeoDropdown}
+                                setShowGeoDropdown={setShowGeoDropdown}
+                                selectedGeoNode={selectedGeoNode}
+                                setSelectedGeoNode={setSelectedGeoNode}
+                                locationNames={locationNames}
+                                isEdit={true}
+                            />
+                        </div>
+
+                        {/* Content Section */}
+                        <div className="mb-5">
+                            <h6 className="border-bottom pb-2 mb-3">Content</h6>
+                            <ContentTab
+                                data={contentData}
+                                setData={setContentData}
+                                onBack={() => { }}
+                                onNext={() => { }}
+                                loading={loading}
+                                isEdit={true}
+                            />
+                        </div>
+
+                        {/* Rules Section */}
+                        <div className="mb-5">
+                            <h6 className="border-bottom pb-2 mb-3">Rules</h6>
+                            <RulesTab
+                                rules={rules}
+                                ruleField={ruleField}
+                                setRuleField={setRuleField}
+                                ruleOperator={ruleOperator}
+                                setRuleOperator={setRuleOperator}
+                                ruleValue={ruleValue}
+                                setRuleValue={setRuleValue}
+                                formData={formData}
+                                setFormData={setFormData}
+                                selectedCities={selectedCities}
+                                addRule={addRule}
+                                removeRule={removeRule}
+                                onNext={() => { }}
+                                onBack={() => { }}
+                                loading={loading}
+                                isEdit={true}
+                            />
+                        </div>
+
+                        {/* Curation Section */}
+                        <div className="mb-5">
+                            <h6 className="border-bottom pb-2 mb-3">Curation</h6>
+                            <CurationTab
+                                hotelList={hotelList}
+                                setFormData={setFormData}
+                                selectedCity={selectedCity}
+                                setSelectedCity={setSelectedCity}
+                                pinnedHotels={pinnedHotels}
+                                setPinnedHotels={setPinnedHotels}
+                                excludedHotels={excludedHotels}
+                                setExcludedHotels={setExcludedHotels}
+                                hotelSearch={hotelSearch}
+                                setHotelSearch={setHotelSearch}
+                                excludeSearch={excludeSearch}
+                                setExcludeSearch={setExcludeSearch}
+                                excludeReason={excludeReason}
+                                setExcludeReason={setExcludeReason}
+                                pinnedOptions={pinnedOptions}
+                                excludeOptions={excludeOptions}
+                                selectedPinnedHotel={selectedPinnedHotel}
+                                setSelectedPinnedHotel={setSelectedPinnedHotel}
+                                setSelectedExcludeHotel={setSelectedExcludeHotel}
+                                showPinnedDropdown={showPinnedDropdown}
+                                setShowPinnedDropdown={setShowPinnedDropdown}
+                                showExcludeDropdown={showExcludeDropdown}
+                                setShowExcludeDropdown={setShowExcludeDropdown}
+                                geoSearch={geoSearch}
+                                setGeoSearch={setGeoSearch}
+                                showGeoDropdown={showGeoDropdown}
+                                setShowGeoDropdown={setShowGeoDropdown}
+                                selectedGeoNode={selectedGeoNode}
+                                setSelectedGeoNode={setSelectedGeoNode}
+                                citySearch={citySearch}
+                                setCitySearch={setCitySearch}
+                                cityOptions={cityOptions}
+                                showCityDropdown={showCityDropdown}
+                                setShowCityDropdown={setShowCityDropdown}
+                                selectedCityObj={selectedCityObj}
+                                setSelectedCityObj={setSelectedCityObj}
+                                addPinnedHotel={addPinnedHotel}
+                                addExcludedHotel={addExcludedHotel}
+                                moveHotel={moveHotel}
+                                onNext={() => { }}
+                                onBack={() => { }}
+                                setCityOptions={setCityOptions}
+                                loading={loading}
+                                countries={countries}
+                                cities={cities}
+                                excludeError={excludeError}
+                                setExcludeError={setExcludeError}
+                                maxHotels={formData.maxHotels}
+                                selectedHotels={selectedHotels}
+                                setSelectedHotels={setSelectedHotels}
+                                includedHotelIds={includedHotelIds}
+                                newlyAddedHotels={newlyAddedHotels}
+                                setNewlyAddedHotels={setNewlyAddedHotels}
+                                onAddGlobalHotel={handleAddGlobalHotel}
+                                onLoadMoreHotels={handleLoadMoreHotels}
+                                hasMoreHotels={hotelPagination.hasNextPage}
+                                loadingMoreHotels={hotelLoadingMore}
+                                isEdit={true}
+                            />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="d-flex justify-content-between mt-4 pt-3 border-top">
+                            <button type="button" className="btn btn-outline-secondary" onClick={() => router.push(ADMIN_ROUTES.collections)}>
+                                Cancel
+                            </button>
+
+                            <div className="d-flex gap-2">
+                                <button
+                                    type="button"
+                                    className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center btn-min-width-100"
+                                    onClick={() => handleUpdateCollection('draft')}
+                                    disabled={savingAction !== null}
+                                >
+                                    {savingAction === 'draft' ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        'Save as Draft'
+                                    )}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center btn-min-width-120"
+                                    onClick={() => handleUpdateCollection('publish')}
+                                    disabled={savingAction !== null}
+                                >
+                                    {savingAction === 'publish' ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" />
+                                            Publishing...
+                                        </>
+                                    ) : (
+                                        'Publish'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </>
                 )}
             </div>
         </div>

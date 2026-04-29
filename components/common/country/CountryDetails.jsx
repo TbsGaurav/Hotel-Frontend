@@ -73,6 +73,7 @@ export default async function CountryDetails({ country, resolvedSlugData = {} })
                     hotelBrands={hotelBrands}
                     hotelTypes={hotelTypes}
                     countryName={countryName}
+                    countrySlug={country}
                     data={data}
                 />
             </section>
