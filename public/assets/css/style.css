@@ -2728,7 +2728,7 @@ input[type='range']:active::-webkit-slider-thumb {
     .hotel-detail-review > div:first-child {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 6px;
     }
 
     .hotel-detail-price-btn {
@@ -2736,6 +2736,13 @@ input[type='range']:active::-webkit-slider-thumb {
         text-align: center;
         justify-content: center;
         font-weight: 600;
+    }
+
+    .hotel-detail-price-summary-mobile {
+        width: 100%;
+        margin-top: 6px;
+        justify-content: flex-start;
+        align-self: flex-start;
     }
     .container {
         padding-left: 5px !important;
@@ -2767,7 +2774,7 @@ input[type='range']:active::-webkit-slider-thumb {
 }
 @media (max-width: 767.98px) {
     #hotelCarousel {
-        height: 220px !important;
+        height: 100% !important;
     }
 
     #hotelCarousel img {
@@ -2836,11 +2843,11 @@ input[type='range']:active::-webkit-slider-thumb {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(240, 131, 30, 0.14);
-    color: #f0831e;
-    border: 1px solid rgba(240, 131, 30, 0.22);
+    background: rgba(0, 113, 194, 0.12);
+    color: #0071c2;
+    border: 1px solid rgba(0, 113, 194, 0.22);
     flex: 0 0 auto;
-    box-shadow: 0 10px 22px rgba(240, 131, 30, 0.12);
+    box-shadow: 0 10px 22px rgba(0, 113, 194, 0.12);
 }
 
 .trust-block__icon i {
@@ -2853,7 +2860,7 @@ input[type='range']:active::-webkit-slider-thumb {
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(500px 220px at 20% 0%, rgba(240, 131, 30, 0.16) 0%, rgba(240, 131, 30, 0) 65%),
+        radial-gradient(520px 240px at 20% 0%, rgba(0, 113, 194, 0.14) 0%, rgba(0, 113, 194, 0) 65%),
         radial-gradient(420px 240px at 95% 20%, rgba(0, 113, 194, 0.08) 0%, rgba(0, 113, 194, 0) 70%);
     opacity: 0.9;
 }
@@ -2874,7 +2881,7 @@ input[type='range']:active::-webkit-slider-thumb {
 .trust-block .trust-item:hover {
     transform: translateY(-1px);
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-    border-color: rgba(240, 131, 30, 0.28) !important;
+    border-color: rgba(0, 113, 194, 0.32) !important;
 }
 
 /* Trust item check */
@@ -2893,6 +2900,63 @@ input[type='range']:active::-webkit-slider-thumb {
 
 .trust-block .badge {
     white-space: nowrap;
+}
+
+/* Mobile outer spacing */
+/* Mobile and Tablet refinements */
+@media (max-width: 767.98px) {
+    .trust-block {
+        margin-left: 0;
+        margin-right: 0;
+        padding: 1.25rem !important;
+    }
+
+    .trust-block__icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        flex: 0 0 32px; /* Ensure it doesn't shrink or grow */
+    }
+
+    .trust-block__icon i {
+        font-size: 14px;
+    }
+
+    .trust-item {
+        padding: 0.75rem !important;
+        gap: 0.5rem !important;
+    }
+
+    .trust-item .fw-bold {
+        font-size: 13px;
+        line-height: 1.2;
+    }
+}
+
+/* Extra small mobile refinements */
+@media (max-width: 480.98px) {
+    .trust-block {
+        padding: 1rem !important;
+    }
+
+    .trust-item {
+        padding: 0.5rem !important;
+        gap: 0.4rem !important;
+    }
+
+    .trust-item .fw-bold {
+        font-size: 11px;
+    }
+
+    .trust-block__icon {
+        width: 28px;
+        height: 28px;
+        flex: 0 0 28px;
+    }
+
+    .trust-block__icon i {
+        font-size: 12px;
+    }
 }
 .custom-tabs .nav-link {
     border: none;
