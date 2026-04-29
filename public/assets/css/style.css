@@ -55,16 +55,15 @@ a {
     border-radius: 10px !important;
     border: none !important;
     padding: 0px !important;
-    max-height: 280px !important;
+    max-height: 340px !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
 }
 /* Rooms & Guests dropdown sizing */
 .main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item {
-    width: 300px;
+    width: 270px;
+    min-width: 94%;
     max-width: 92vw;
-    min-width: 0;
-    left: 0;
     right: auto;
 }
 /* Ensure dropdown anchors under Rooms & Guests */
@@ -97,12 +96,12 @@ a {
     font-size: 18px;
 }
 .main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .custom-input-select-children-dd {
-    width: 72px !important;
+    width: 100% !important;
+    border-radius: 0px !important;
 }
 .main-hero-search-row .rooms-search-col .dropdown-menu.language-switcher-menu-item .row.g-2 {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px 10px;
+    display: flex;
+    gap: 8px 0px;
     justify-items: start;
     align-items: start;
     justify-content: start;
@@ -732,7 +731,33 @@ a:hover.custom-form-label {
     padding-left: 6px !important;
 }
 
+.form-select {
+    background-position: right 5px center !important;
+    background-repeat: no-repeat;
+    background-size: 10px 12px !important;
+    padding: .375rem 2.25rem .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
 .rooms-guest-dd {
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+    color: #616d82 !important;
+    text-align: justify !important;
+    background-color: #fff !important;
+    border: none !important;
+    border-radius: 3px !important;
+    width: 100% !important;
+    height: 60px !important;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.5em !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+.rooms-guest-dd-tt {
     background-color: #fff !important;
     border-radius: 3px !important;
     overflow: hidden !important;
@@ -744,7 +769,7 @@ a:hover.custom-form-label {
     line-height: 1.5em !important;
     color: #616d82 !important;
     /* padding: 10px 20px !important; */
-    padding: 8px 12px !important; /* 👈 tighter */
+    padding: 8px 1px !important; /* 👈 tighter */
 
     width: 100% !important;
     text-align: justify !important;
@@ -756,7 +781,7 @@ a:hover.custom-form-label {
     border: 0px #616d82 solid !important;
     border-bottom: solid 1px #616d82 !important;
     border-radius: 0px !important;
-    width: 150px !important;
+    width: 100% !important;
 }
 
 .custom-input-select-children-dd.form-select {

@@ -16,16 +16,6 @@
 }
 
 @media (max-width: 768px) {
-    /* .date-range-picker-popup {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        max-width: 100%;
-        margin-top: 8px;
-        border-radius: 8px;
-        transform: none;
-    } */
     .calendar-container {
         width: 100%;
     }
@@ -33,14 +23,13 @@
     .react-datepicker {
         width: 100% !important;
        padding-bottom: 0 !important;
-
     }
 
     .react-datepicker__month-container {
-            width: 200px !important;
-    border: none !important;
-
-       
+        width: 100% !important;
+        display: block !important;
+        vertical-align: top !important;
+        border: none !important;
     }
 }
 
@@ -467,6 +456,7 @@
     background: #fff;
     border: 1px solid #d8e1ee;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    overflow: visible;
 }
 
 .mobile-search-panel form > .d-flex {
@@ -486,6 +476,7 @@
     border: 1px solid #d8e1ee;
     background: #fff;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    overflow: visible;
 }
 
 .mobile-search-input-group:focus-within,
@@ -531,18 +522,68 @@
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.mobile-date-range-picker-popup {
-    position: static;
-    transform: none;
+.mobile-date-picker-field,
+.mobile-rooms-field {
     width: 100%;
-    max-width: 315px;
-    margin: 8px auto 0;
+}
+
+.mobile-date-range-picker-popup {
+    position: fixed !important;
+    top: 14%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(95vw, 680px);
+    max-width: 680px;
+    max-height: calc(100vh - 28px);
+    box-sizing: border-box;
+    margin: 0;
     overflow: hidden;
-    border-color: #d8e1ee;
+    border: 1px solid #d8e1ee;
+    background: #fff;
+    z-index: 1060;
 }
 
 .mobile-date-range-picker-popup .react-datepicker {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 140px) !important;
+    overflow: visible !important;
     background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.mobile-date-range-picker-popup .react-datepicker__month-container {
+    width: 100% !important;
+    display: block !important;
+    vertical-align: top !important;
+    padding: 0 !important;
+}
+
+.mobile-date-range-picker-popup .react-datepicker__month {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.mobile-date-range-picker-popup .selected-range-footer {
+    position: sticky;
+    bottom: 0;
+    background: #f8fafc;
+    z-index: 2;
+}
+
+.mobile-date-range-picker-popup .footer-buttons {
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.mobile-date-range-picker-popup .apply-button {
+    min-width: 96px;
+}
+
+.mobile-date-range-picker-popup .react-datepicker__month {
+    margin: 0 !important;
 }
 
 .mobile-date-range-picker-popup .react-datepicker__header {
@@ -630,8 +671,53 @@
 }
 
 .mobile-rooms-box {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    max-height: 70vh;
+    overflow-y: auto;
+    margin: 0;
+    z-index: 1060;
     background: #fff;
     border: 1px solid #d8e1ee;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+}
+
+.mobile-rooms-box .mb-3 {
+    margin-bottom: 0.6rem;
+}
+
+.mobile-rooms-box .form-label {
+    margin-bottom: 0.35rem;
+}
+
+.mobile-rooms-box .row.g-2 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 -0.25rem;
+}
+
+.mobile-rooms-box .col-4 {
+    flex: 1 1 calc(33.333% - 0.5rem);
+    max-width: calc(33.333% - 0.5rem);
+    padding: 0 0.25rem;
+}
+
+.mobile-rooms-box .form-select.form-select-sm {
+    min-height: 38px;
+}
+
+.mobile-rooms-box .d-flex.justify-content-end {
+    padding-top: 0.6rem;
+    border-top: 1px solid #e6edf5;
 }
 
 .mobile-rooms-toggle {

@@ -29,6 +29,7 @@ export default function HeroSection({ variant = 'home' }) {
     const [loading, setLoading] = useState(false);
     const [showRoomsDropdown, setShowRoomsDropdown] = useState(false);
     const [showMobileRoomsPanel, setShowMobileRoomsPanel] = useState(false);
+    const [isMobileView, setIsMobileView] = useState(false);
     const datePickerRef = useRef(null);
     const ignoreDatePickerCloseRef = useRef(false);
     const debounceRef = useRef(null);
@@ -40,6 +41,16 @@ export default function HeroSection({ variant = 'home' }) {
         setCheckOutDate(now);
         setTempCheckInDate(now);
         setTempCheckOutDate(now);
+    }, []);
+
+    useEffect(() => {
+        function handleResize() {
+            setIsMobileView(window.innerWidth <= 768);
+        }
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
     // Handle click outside to close
     // useEffect(() => {
@@ -454,7 +465,7 @@ export default function HeroSection({ variant = 'home' }) {
                                         <span>{checkInDate ? formatDate(checkInDate) : ''} - {checkOutDate ? formatDate(checkOutDate) : ''}</span>
                                     </div>
                                     {showDatePicker && (
-                                        <div className="date-range-picker-popup mobile-date-range-picker-popup mt-2">
+                                        <div className="date-range-picker-popup mobile-date-range-picker-popup">
                                             <div className="calendar-container">
                                                 <DatePicker
                                                     selected={tempCheckInDate}
@@ -464,6 +475,7 @@ export default function HeroSection({ variant = 'home' }) {
                                                     selectsRange
                                                     inline
                                                     monthsShown={2}
+                                                    monthsPerRow={1}
                                                     minDate={new Date()}
                                                     dateFormat="MM/dd/yyyy"
                                                     showPopperArrow={false}
@@ -607,7 +619,7 @@ export default function HeroSection({ variant = 'home' }) {
                                 </div>
 
                                 {/* Rooms & Guests */}
-                                <div>
+                                <div className="position-relative mobile-rooms-field">
                                     <label className="form-label fw-semibold mb-2 d-flex align-items-center gap-1 mobile-modal-label">
                                         <svg width="14" height="14" fill="none" stroke="#1d4db3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                                         Rooms & Guests
@@ -627,7 +639,7 @@ export default function HeroSection({ variant = 'home' }) {
                                         <i className={`fa-solid fa-chevron-${showMobileRoomsPanel ? 'up' : 'down'} ms-2 flex-shrink-0`}></i>
                                     </button>
                                     {showMobileRoomsPanel && (
-                                        <div className="p-3 rounded-4 mobile-rooms-box mt-2">
+                                        <div className="p-3 rounded-4 mobile-rooms-box">
                                             <div className="mb-3">
                                                 <label className="form-label custom-form-label mb-1">Rooms</label>
                                                 <select className="form-select" value={tempRooms} onChange={(e) => updateTempRooms(Number(e.target.value))}>
@@ -666,6 +678,26 @@ export default function HeroSection({ variant = 'home' }) {
                                                     </div>
                                                 </div>
                                             )}
+                                            <div className="d-flex justify-content-end gap-2 pt-3">
+                                                <button
+                                                    type="button"
+                                                    className="cancel-button"
+                                                    onClick={() => setShowMobileRoomsPanel(false)}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="apply-button"
+                                                    onClick={() => {
+                                                        setGuests(tempGuests);
+                                                        setRooms(tempRooms);
+                                                        setShowMobileRoomsPanel(false);
+                                                    }}
+                                                >
+                                                    Apply
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -868,14 +900,14 @@ export default function HeroSection({ variant = 'home' }) {
                                 >
                                     <div className="py-3 px-4 d-none d-md-block">
                                         <div className="mb-3">
-                                            <label htmlFor="guest" className="form-label custom-form-label">
-                                                Guests
+                                            <label htmlFor="rooms" className="form-label custom-form-label">
+                                                Rooms
                                             </label>
                                             <select
                                                 className="form-select custom-input-select-rooms-guest-dd"
-                                                id="guest"
-                                                value={tempGuests}
-                                                onChange={(e) => setTempGuests(Number(e.target.value))}
+                                                id="rooms"
+                                                value={tempRooms}
+                                                onChange={(e) => setTempRooms(Number(e.target.value))}
                                             >
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -885,14 +917,14 @@ export default function HeroSection({ variant = 'home' }) {
                                             </select>
                                         </div>
                                         <div className="mb-3">
-                                            <label htmlFor="rooms" className="form-label custom-form-label">
-                                                Rooms
+                                            <label htmlFor="guest" className="form-label custom-form-label">
+                                                Guests
                                             </label>
                                             <select
                                                 className="form-select custom-input-select-rooms-guest-dd"
-                                                id="rooms"
-                                                value={tempRooms}
-                                                onChange={(e) => setTempRooms(Number(e.target.value))}
+                                                id="guest"
+                                                value={tempGuests}
+                                                onChange={(e) => setTempGuests(Number(e.target.value))}
                                             >
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -922,11 +954,11 @@ export default function HeroSection({ variant = 'home' }) {
                                                     {childrenAges.map((age, index) => (
                                                         <div key={index} className="col-4">
                                                             <select
-                                                                className="dropdown-toggle rooms-guest-dd form-select custom-input-select-children-dd"
+                                                                className="dropdown-toggle rooms-guest-dd-tt form-select custom-input-select-children-dd"
                                                                 value={age}
                                                                 onChange={(e) => handleAgeChange(index, e.target.value)}
                                                             >
-                                                                {[...Array(18)].map((_, i) => (
+                                                                {[...Array(28)].map((_, i) => (
                                                                     <option key={i} value={i}>
                                                                         {i}
                                                                     </option>
