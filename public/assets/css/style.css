@@ -2868,11 +2868,11 @@ input[type='range']:active::-webkit-slider-thumb {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 113, 194, 0.12);
-    color: #0071c2;
-    border: 1px solid rgba(0, 113, 194, 0.22);
+    background: #003b95;
+    color: #fff;
+    border: 1px solid #003b95;
     flex: 0 0 auto;
-    box-shadow: 0 10px 22px rgba(0, 113, 194, 0.12);
+    box-shadow: 0 10px 22px rgba(0, 59, 149, 0.12);
 }
 
 .trust-block__icon i {
@@ -2906,7 +2906,12 @@ input[type='range']:active::-webkit-slider-thumb {
 .trust-block .trust-item:hover {
     transform: translateY(-1px);
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-    border-color: rgba(0, 113, 194, 0.32) !important;
+    border-color: rgba(0, 59, 149, 0.32) !important;
+}
+
+.hotel-detail-map,
+.hotel-detail-map svg {
+    color: #003b95;
 }
 
 /* Trust item check */
@@ -3845,6 +3850,10 @@ input[type='range']:active::-webkit-slider-thumb {
 /* Common utility classes */
 .min-width-0 {
     min-width: 0;
+}
+
+.min-vh-60 {
+    min-height: 60vh;
 }
 
 .dropdown-option-pointer {

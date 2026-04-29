@@ -54,7 +54,7 @@ export default function CityBrandHotelListingWithMap({
                 {hasSidebar ? (
                     <div className="col-lg-3 d-none d-lg-block order-lg-1">
                         <div className="position-sticky" style={{ top: '16px' }}>
-                            <ListingSidebar title="Filters" sections={sidebarSections} />
+                            <ListingSidebar title="Filters" sections={sidebarSections} regionContext={{ citySlug: String(citySlug || '').split('/')[0] }} />
                         </div>
                     </div>
                 ) : null}

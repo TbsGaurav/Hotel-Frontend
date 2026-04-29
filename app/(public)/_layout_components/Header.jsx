@@ -80,7 +80,7 @@ export default function Header() {
         localStorage.removeItem("currency");
         setCurrency(cur);
         setIsCurrencyOpen(false);
-        window.location.reload();
+        window.dispatchEvent(new CustomEvent('currencychange', { detail: { currency: cur } }));
     };
 
     return (

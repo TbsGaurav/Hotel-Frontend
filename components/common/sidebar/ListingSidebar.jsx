@@ -82,19 +82,36 @@ function normalizeHref(item, label, context = {}) {
         return raw;
     }
 
-    const baseUrl = `${String(raw)
-        .trim()
+    const normalizedRaw = String(raw).trim();
+
+    if (normalizedRaw.includes('/')) {
+        const path = `/${normalizedRaw.replace(/^\/+/, '')}`;
+
+        if (context.regionId && context.countrySlug) {
+            const searchParams = new URLSearchParams();
+            searchParams.set('regionId', String(context.regionId));
+            searchParams.set('country', context.countrySlug);
+            return `${path}?${searchParams.toString()}`;
+        }
+
+        return path;
+    }
+
+    const baseUrl = `${normalizedRaw
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')}`;
+
+    const citySlug = String(context.citySlug || '').trim().replace(/^\/+|\/+$/g, '');
+    const prefixPath = citySlug ? `/${citySlug}/${baseUrl}` : `/${baseUrl}`;
 
     if (context.regionId && context.countrySlug) {
         const searchParams = new URLSearchParams();
         searchParams.set('regionId', String(context.regionId));
         searchParams.set('country', context.countrySlug);
-        return `${baseUrl}?${searchParams.toString()}`;
+        return `${prefixPath}?${searchParams.toString()}`;
     }
 
-    return baseUrl;
+    return prefixPath;
 }
 
 function LinkRow({ label, href, isActive = false, onClick = null, item = null, context = {} }) {
