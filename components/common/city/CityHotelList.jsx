@@ -661,14 +661,29 @@ export default function CityHotelList({
                                                 </div>
 
                                                 {(() => {
-                                                    if (!rate?.price) return null;
+                                                    if (!rate?.price) {
+                                                        return (
+                                                            <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
+                                                                <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                                    1 night, 2 adults
+                                                                </p>
+                                                                <div className="d-flex align-items-baseline justify-content-end collection-hotel-current-price-row">
+                                                                    <span
+                                                                        className="text-theme-orange fw-bold collection-hotel-current-price"
+                                                                        style={{ fontSize: '16px' }}
+                                                                    >
+                                                                        Check Price
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
 
                                                     const dealInfo = rate?.deal_info || {};
                                                     const originalPrice = dealInfo?.public_price;
                                                     const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
 
                                                     return (
-                                                        // <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
                                                         <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
                                                             <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                 1 night, 2 adults

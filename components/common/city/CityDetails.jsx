@@ -62,15 +62,23 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
     let regionName = '';
     let regionUrl = '';
     let firstHotel = null;
-    let resolvedCountryId = null;
+
+    const cookieCountryIdRaw = cookieStore.get('countryId')?.value ?? cookieStore.get('countryid')?.value ?? null;
+    const cookieCountryId = Number(cookieCountryIdRaw);
+    let resolvedCountryId = Number.isInteger(cookieCountryId) && cookieCountryId > 0 ? cookieCountryId : null;
 
     if (citySlug) {
         try {
             for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
-                const pageResponse =
-                    pageNumber === 1
-                        ? await getHotelList(citySlug, { pageNumber, pageSize: PAGE_SIZE })
-                        : await getHotelList(citySlug, { countryId: resolvedCountryId, pageNumber, pageSize: PAGE_SIZE });
+                let pageResponse = await getHotelList(citySlug, { countryId: resolvedCountryId, pageNumber, pageSize: PAGE_SIZE });
+
+                if (pageNumber === 1 && (resolvedCountryId === null || resolvedCountryId === undefined)) {
+                    const responseCountryId = Number(pageResponse?.countryId);
+                    if (Number.isInteger(responseCountryId) && responseCountryId > 0) {
+                        resolvedCountryId = responseCountryId;
+                        pageResponse = await getHotelList(citySlug, { countryId: resolvedCountryId, pageNumber, pageSize: PAGE_SIZE });
+                    }
+                }
                 const nextHotels = pageResponse?.hotels || [];
 
                 if (!nextHotels.length) {
@@ -80,7 +88,7 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
                 if (pageNumber === 1) {
                     totalCount = pageResponse?.totalCount || nextHotels.length;
                     content = nextHotels[0]?.content || '';
-                    resolvedCountryId = pageResponse?.countryId ?? null;
+                    resolvedCountryId = resolvedCountryId ?? (pageResponse?.countryId ?? null);
 
                     // Extract IDs from API response (not from first hotel)
                     const apiCityId = pageResponse?.cityId;
