@@ -361,8 +361,7 @@ export default function BasicsTab({
                             <label className="form-label mb-0">Slug</label>
 
                             <select
-                                className="form-select form-select-sm"
-                                style={{ maxWidth: '180px' }}
+                                className="form-select form-select-sm slug-city-select"
                                 value={slugCityId || ''}
                                 onChange={(e) => setSlugCityId(e.target.value ? Number(e.target.value) : null)}
                                 disabled={!selectedCities?.length}
@@ -432,16 +431,13 @@ export default function BasicsTab({
 
                         {showGeoDropdown && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 dropdown-height">
                                 {countries
                                     .filter((c) => c.name.toLowerCase().includes(geoSearch.toLowerCase()))
                                     .map((node) => (
                                         <div
                                             key={node.countryId}
-                                            className="p-2"
-                                            style={{ cursor: 'pointer' }}
+                                            className="p-2 dropdown-option-pointer"
                                             onClick={() => {
                                                 setSelectedGeoNode(node);
                                                 setGeoSearch(node.name);
@@ -502,16 +498,13 @@ export default function BasicsTab({
 
                         {showRegionDropdown && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 dropdown-height">
                                 {regions
                                     .filter((r) => r.name.toLowerCase().includes(regionSearch.toLowerCase()))
                                     .map((region) => (
                                         <div
                                             key={region.regionId}
-                                            className="p-2"
-                                            style={{ cursor: 'pointer' }}
+                                            className="p-2 dropdown-option-pointer"
                                             onClick={() => {
                                                 setRegionSearch(region.name);
                                                 setShowRegionDropdown(false);
@@ -597,16 +590,13 @@ export default function BasicsTab({
 
                         {showCityDropdown && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 dropdown-height">
                                 {cities
                                     .filter((c) => c.name.toLowerCase().includes(citySearch.toLowerCase()))
                                     .map((city) => (
                                         <div
                                             key={city.cityId}
-                                            className="p-2"
-                                            style={{ cursor: 'pointer' }}
+                                            className="p-2 dropdown-option-pointer"
                                             onClick={() => {
                                                 addCity(city);
                                             }}
@@ -654,16 +644,13 @@ export default function BasicsTab({
 
                         {showDistrictDropdown && (
                             <div
-                                className="border bg-white position-absolute w-100 mt-1"
-                                style={{ maxHeight: '200px', overflowY: 'auto', zIndex: 1000 }}
-                            >
+                                className="border bg-white position-absolute w-100 mt-1 dropdown-height">
                                 {districts
                                     .filter((d) => d.name.toLowerCase().includes(districtSearch.toLowerCase()))
                                     .map((district) => (
                                         <div
                                             key={district.districtId}
-                                            className="p-2"
-                                            style={{ cursor: 'pointer' }}
+                                            className="p-2 dropdown-option-pointer"
                                             onClick={() => {
                                                 setDistrictSearch(district.name);
                                                 setShowDistrictDropdown(false);
@@ -726,27 +713,28 @@ export default function BasicsTab({
                     </div>
                 </div>
 
-                <div className="d-flex justify-content-between">
-                    <button className="btn btn-outline-secondary" type="button" onClick={handleCancel}>
-                        Cancel
-                    </button>
+                {!isEdit && (
+                    <div className="d-flex justify-content-between">
+                        <button className="btn btn-outline-secondary" type="button" onClick={handleCancel}>
+                            Cancel
+                        </button>
 
-                    <button
-                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
-                        onClick={handleNextClick}
-                        type="button"
-                        disabled={loading}
-                        style={{ minWidth: '100px' }}
-                    >
-                        {loading ? (
-                            <>
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            </>
-                        ) : (
-                            'Next'
-                        )}
-                    </button>
-                </div>
+                        <button
+                            className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center btn-min-width-100"
+                            onClick={handleNextClick}
+                            type="button"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                </>
+                            ) : (
+                                'Next'
+                            )}
+                        </button>
+                    </div>
+                )}
             </form>
         </>
     );

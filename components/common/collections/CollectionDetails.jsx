@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
 import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
 import HeroSection from '@/components/sections/HeroSection';
@@ -62,6 +62,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const loadRequestInFlightRef = useRef(false);
     const pageRef = useRef(currentPage || 1);
     const [timestamp, setTimestamp] = useState('');
+
     const [viewMode, setViewMode] = useState('list');
     const [isMobileViewport, setIsMobileViewport] = useState(false);
 
@@ -185,11 +186,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     };
 
     const getImageUrl = (photo) => {
-        const normalizedUrl = normalizeImageUrl(photo);
-        if (normalizedUrl === defaultImage) return defaultImage;
-        const sep = normalizedUrl.includes('?') ? '&' : '?';
-        return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
+        return normalizeImageUrl(photo);
     };
+
     function decodeHtml(html) {
         if (!html) return '';
 
@@ -215,6 +214,16 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return decoded;
     }
+
+    const getRatingText = (score) => {
+        const value = Number(score);
+        if (!value) return 'Not rated';
+        if (value >= 9) return 'Exceptional';
+        if (value >= 8) return 'Excellent';
+        if (value >= 7) return 'Very good';
+        if (value >= 6) return 'Good';
+        return 'Pleasant';
+    };
 
     // Load more hotels handler
     const loadMoreHotels = async () => {
@@ -270,7 +279,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return () => observer.disconnect();
     }, [hasMore, loading, page, collectionId, pageSize, currency, totalCount, allHotels.length]);
-    
     useEffect(() => {
         const timer = window.setTimeout(() => {
             setTimestamp(Date.now().toString());
@@ -278,7 +286,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return () => window.clearTimeout(timer);
     }, []);
-
     useEffect(() => {
         const syncViewport = () => {
             setIsMobileViewport(window.innerWidth < 768);
@@ -295,9 +302,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
         }
     }, [isMobileViewport, viewMode]);
 
-    const CountryName = Array.isArray(basic) && basic.length > 0 ? basic[0].countryName : basic?.countryName; 
+    const CountryName = Array.isArray(basic) && basic.length > 0 ? basic[0].countryName : basic?.countryName;
     const RegionName = Array.isArray(basic) && basic.length > 0 ? basic[0].regionName : basic?.regionName;
-    const CityName = Array.isArray(basic) && basic.length > 0 ? basic[0].cityName : basic?.cityName;
     const CollectionName = Array.isArray(basic) && basic.length > 0 ? basic[0].name : basic?.name;
 
     const CountryUrl = Array.isArray(basic) && basic.length > 0 ? basic[0].countryUrl : basic?.countryUrl;
@@ -306,15 +312,70 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const slugParts = CollectionUrl?.replace(/^\/+/, '').split('/').filter(Boolean) || [];
     const hasCity = slugParts.length > 1;
 
-     const slugCity = hasCity ? slugParts[0] : null;   
-     const formattedCity = slugCity
-    ? slugCity
-        .split('-')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ')
-    : null;
+    const slugCity = hasCity ? slugParts[0] : null;
+    const formattedCity = slugCity
+        ? slugCity
+              .split('-')
+              .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(' ')
+        : null;
     const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
 
+    if (!allHotels.length) {
+        return (
+            <div className="container py-5">
+                <div
+                    className="mx-auto text-center rounded-4 shadow-sm border-0 overflow-hidden"
+                    style={{
+                        maxWidth: '760px',
+                        background: 'linear-gradient(135deg, #fff7ef 0%, #ffffff 45%, #f4f8fc 100%)',
+                        border: '1px solid rgba(240, 131, 30, 0.12)'
+                    }}
+                >
+                    <div
+                        style={{
+                            padding: '32px 24px',
+                            background:
+                                'radial-gradient(circle at top, rgba(240, 131, 30, 0.16) 0%, rgba(240, 131, 30, 0.04) 28%, transparent 55%)'
+                        }}
+                    >
+                        <div
+                            className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                            style={{
+                                width: '72px',
+                                height: '72px',
+                                background: '#f0831e',
+                                color: '#fff',
+                                boxShadow: '0 12px 28px rgba(240, 131, 30, 0.28)'
+                            }}
+                        >
+                            <FaHotel size={30} />
+                        </div>
+
+                        <h3 className="fw-bold mb-2" style={{ color: '#1d2b3a' }}>
+                            No hotels found
+                        </h3>
+                        <p className="text-muted mb-4" style={{ maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 }}>
+                            We couldn’t find any hotels for this destination right now. Try changing your filters, checking nearby areas, or
+                            searching again with different dates.
+                        </p>
+
+                        <div className="d-flex flex-wrap justify-content-center gap-3" style={{ color: '#5f6b7a', fontSize: '14px' }}>
+                            <div className="d-flex align-items-center gap-2">
+                                <span
+                                    className="rounded-circle d-inline-flex align-items-center justify-content-center"
+                                    style={{ width: '34px', height: '34px', background: '#fff1e3', color: '#f0831e' }}
+                                >
+                                    <FaHotel size={14} />
+                                </span>
+                                <span>Try a different destination</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     return (
         <>
             <HeroSection variant="common" />
@@ -322,72 +383,58 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
             {!collection ? (
                 <div className="container py-5 text-center">
                     <h3>Collection not found</h3>
-                    <Link href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
+                    <AppLink href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
                         Back to Home
-                    </Link>
+                    </AppLink>
                 </div>
             ) : (
                 <>
-                    {/* <div className="py-2">
-                        <div className="container">
-                            <div className="d-flex align-items-center small">
-                                <Link href="/" className="text-dark text-decoration-none">
-                                    Home
-                                </Link>
-                                <span className="mx-2 text-muted">•</span>
-                                <span className="fw-semibold text-decoration-none text-primary">{basic[0]?.name}</span>
-                            </div>
-                        </div>
-                    </div> */}
                     <div className="py-3 mx-2">
                         <div className="container">
                             <nav aria-label="breadcrumb" className="mb-0">
                                 <ol className="breadcrumb mb-0">
                                     <li className="breadcrumb-item small-para-14-px">
-                                        <Link href="/" className="text-dark text-decoration-none">
+                                        <AppLink href="/" className="text-dark text-decoration-none">
                                             Home
-                                        </Link>
+                                        </AppLink>
                                     </li>
                                     {!hasCity ? (
                                         <li className="breadcrumb-item small-para-14-px active">
-                                            <Link href={`/${CollectionUrl?.replace(/^\//, '')}`} className="text-decoration-none">
+                                            <AppLink href={`/${CollectionUrl?.replace(/^\//, '')}`} className="text-decoration-none">
                                                 {CollectionName}
-                                            </Link>
+                                            </AppLink>
                                         </li>
                                     ) : (
                                         <>
                                             {CountryName && (
                                                 <li className="breadcrumb-item small-para-14-px">
-                                                    <Link
+                                                    <AppLink
                                                         href={`/${CountryUrl?.replace(/^\//, '')}`}
                                                         className="text-dark text-decoration-none"
                                                     >
                                                         {CountryName}
-                                                    </Link>
+                                                    </AppLink>
                                                 </li>
                                             )}
                                             {RegionName && (
                                                 <li className="breadcrumb-item small-para-14-px">
-                                                    <Link
+                                                    <AppLink
                                                         href={`/${RegionUrl?.replace(/^\//, '')}`}
                                                         className="text-dark text-decoration-none"
                                                     >
                                                         {RegionName}
-                                                    </Link>
+                                                    </AppLink>
                                                 </li>
                                             )}
                                             <li className="breadcrumb-item small-para-14-px">
-                                                <Link href={`/${slugCity}`} className="text-dark text-decoration-none">
+                                                <AppLink href={`/${slugCity}`} className="text-dark text-decoration-none">
                                                     {formattedCity}
-                                                </Link>
+                                                </AppLink>
                                             </li>
                                             <li className="breadcrumb-item small-para-14-px active">
-                                                <Link
-                                                    href={`/${CollectionUrl?.replace(/^\//, '')}`}
-                                                    className="text-decoration-none"
-                                                >
+                                                <AppLink href={`/${CollectionUrl?.replace(/^\//, '')}`} className="text-decoration-none">
                                                     {CollectionName}
-                                                </Link>
+                                                </AppLink>
                                             </li>
                                         </>
                                     )}
@@ -417,9 +464,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                             <span>
                                                 {Array.isArray(basic) && basic.length > 0
                                                     ? basic
-                                                        .map((item) => item.cityName || item.regionName || item.countryName)
-                                                        .filter(Boolean)
-                                                        .join(', ')
+                                                          .map((item) => item.cityName || item.regionName || item.countryName)
+                                                          .filter(Boolean)
+                                                          .join(', ')
                                                     : basic?.cityName || basic?.districtName || basic?.regionName || basic?.countryName}
                                             </span>
                                         </div>
@@ -452,6 +499,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                     <div className={`${effectiveViewMode === 'grid' ? 'row g-3 grid-view' : 'd-flex flex-column gap-3'}`}>
                                         {allHotels.map((hotel, index) => {
                                             const hotelKey = getHotelKey(hotel, index);
+                                     
+
                                             return (
                                                 <div key={hotelKey} className={effectiveViewMode === 'grid' ? 'col-12 col-md-6' : ''}>
                                                     <div
@@ -475,7 +524,14 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             <div
                                                                 className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-4'} collection-hotel-image-col`}
                                                             >
-                                                                <div className="position-relative collection-hotel-image-wrap">
+                                                                <div
+                                                                    className="position-relative collection-hotel-image-wrap rounded-4 overflow-hidden"
+                                                                    style={{
+                                                                        backgroundImage: `url(${defaultImage})`,
+                                                                        backgroundSize: 'cover',
+                                                                        backgroundPosition: 'center'
+                                                                    }}
+                                                                >
                                                                     {(() => {
                                                                         const rate = getHotelRate(getBookingId(hotel));
                                                                         const badges = rate?.badges || [];
@@ -499,16 +555,16 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                                 isMobileViewport
                                                                                                     ? { top: `${10 + idx * 24}px` }
                                                                                                     : {
-                                                                                                        top:
-                                                                                                            idx === 0
-                                                                                                                ? '12px'
-                                                                                                                : `${12 + idx * 30}px`,
-                                                                                                        left: '12px',
-                                                                                                        background: '#28a745',
-                                                                                                        borderRadius: '20px',
-                                                                                                        fontSize: '12px',
-                                                                                                        zIndex: 2
-                                                                                                    }
+                                                                                                          top:
+                                                                                                              idx === 0
+                                                                                                                  ? '12px'
+                                                                                                                  : `${12 + idx * 30}px`,
+                                                                                                          left: '12px',
+                                                                                                          background: '#28a745',
+                                                                                                          borderRadius: '20px',
+                                                                                                          fontSize: '12px',
+                                                                                                          zIndex: 2
+                                                                                                      }
                                                                                             }
                                                                                         >
                                                                                             {badge}
@@ -541,13 +597,14 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                 <div className="text-decoration-none">
                                                                     <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-header">
                                                                         <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row">
-                                                                            <Link
+                                                                            <AppLink
                                                                                 href={`${hotel.urlName}`}
                                                                                 className="font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link collection-hotel-title"
                                                                                 onClick={(e) => e.stopPropagation()}
+                                                                                style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                                                                             >
                                                                                 {hotel.hotelName}
-                                                                            </Link>
+                                                                            </AppLink>
                                                                             <div className="text-warning collection-hotel-stars">
                                                                                 {[...Array(5)].map((_, i) => (
                                                                                     <MdOutlineStarPurple500
@@ -560,10 +617,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         </div>
 
                                                                         <div className="d-flex collection-hotel-review-row">
-                                                                            <div
-                                                                                className="rating-box me-2 collection-hotel-rating-box"
-                                                                                style={{ borderRadius: '10px 10px 10px 0px' }}
-                                                                            >
+                                                                            <div className="rating-box me-2 collection-hotel-rating-box border-radius">
                                                                                 <span className="m-auto">
                                                                                     {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
                                                                                 </span>
@@ -583,14 +637,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         </div>
                                                                     </div>
 
-                                                                    <div
-                                                                        className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities"
-                                                                        style={{
-                                                                            overflow: 'hidden',
-                                                                            columnGap: '4px',
-                                                                            whiteSpace: 'nowrap'
-                                                                        }}
-                                                                    >
+                                                                    <div className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities overflow">
                                                                         {hotel.hotelFacilities && (
                                                                             <>
                                                                                 {hotel.hotelFacilities
@@ -599,27 +646,14 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                     .map((facility, idx) => (
                                                                                         <span
                                                                                             key={idx}
-                                                                                            className="badge bg-light text-dark border me-1 mb-1"
-                                                                                            style={{
-                                                                                                fontSize: '11px',
-                                                                                                lineHeight: '1.2',
-                                                                                                whiteSpace: 'nowrap',
-                                                                                                maxWidth: '135px',
-                                                                                                overflow: 'hidden',
-                                                                                                textOverflow: 'ellipsis',
-                                                                                                display: 'inline-block',
-                                                                                                padding: '4px 8px'
-                                                                                            }}
+                                                                                            className="badge bg-light text-dark border me-1 mb-1 ellips"
                                                                                             title={facility.trim()}
                                                                                         >
                                                                                             {facility.trim()}
                                                                                         </span>
                                                                                     ))}
                                                                                 {hotel.hotelFacilities.split('|').length > 5 && (
-                                                                                    <span
-                                                                                        className="rating"
-                                                                                        style={{ fontSize: '11px', lineHeight: '1.2' }}
-                                                                                    >
+                                                                                    <span className="rating star-rating">
                                                                                         +{hotel.hotelFacilities.split('|').length - 5} more
                                                                                     </span>
                                                                                 )}
@@ -639,20 +673,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                             {hotel.distanceFromAirport}
                                                                         </p>
                                                                     )}
-
-                                                                    {/* DESCRIPTION */}
-                                                                    {/* {hotel.hotelDescription && (
-                                                        <p className="small-para-14-px text-black mb-3">
-                                                            {hotel.hotelDescription.length > 200
-                                                                ? `${hotel.hotelDescription.slice(0, 200)}... `
-                                                                : hotel.hotelDescription}
-                                                            {hotel.hotelDescription.length > 200 && (
-                                                                <span className="rating">
-                                                                    more
-                                                                </span>
-                                                            )}
-                                                        </p>
-                                                    )} */}
 
                                                                     <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-meta-row">
                                                                         <div className="mb-2 mb-md-0 collection-hotel-meta-copy">
@@ -704,10 +724,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                                 );
 
                                                                                 return (
-                                                                                    <div
-                                                                                        className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block"
-                                                                                        style={{ overflow: 'visible', minHeight: '98px' }}
-                                                                                    >
+                                                                                    <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block hotel-price">
                                                                                         <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                                             1 night, 2 adults
                                                                                         </p>
@@ -757,7 +774,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                             effectiveViewMode === 'grid' ? { paddingTop: '6px' } : undefined
                                                                         }
                                                                     >
-                                                                        <Link
+                                                                        <AppLink
                                                                             className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
                                                                             href={`${hotel.url}`}
                                                                             target="_blank"
@@ -766,7 +783,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         >
                                                                             <span>See Availability</span>
                                                                             <i className="fa-solid fa-arrow-right ms-2"></i>
-                                                                        </Link>
+                                                                        </AppLink>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -776,7 +793,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                             );
                                         })}
                                     </div>
-
                                     {hasMore && (
                                         <div ref={loadMoreTriggerRef} className="text-center py-4">
                                             <p className="text-muted mb-0">{loading ? 'Loading more...' : 'Loading more...'}</p>

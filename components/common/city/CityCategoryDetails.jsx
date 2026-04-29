@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
+import AppLink from '@/components/common/AppLink';
+import ListingSidebar, { getVisibleSidebarSections } from '@/components/common/sidebar/ListingSidebar';
 import CityHotelList from './CityHotelList';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import SeoDetailsCard from '@/components/common/SeoDetailsCard';
@@ -11,6 +11,7 @@ import { getSidebarData } from '@/lib/api/sidebarapi';
 import ListingLayout from '@/components/common/listing/ListingLayout';
 import { buildCategorySeo } from '@/lib/seo';
 import { FaMapMarkerAlt } from 'react-icons/fa';
+import HotelListToolbar from '@/components/common/listing/HotelListToolbar';
 import {
     buildCategoryListingPath,
     buildCategorySidebarSections,
@@ -175,6 +176,17 @@ export default function CityCategoryDetails({
     const [pageDescription, setPageDescription] = useState(
         normalizeOptionalText(initialData?.metaDescription) || normalizeOptionalText(initialData?.content)
     );
+    const [viewMode, setViewMode] = useState('list');
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
+
+    useEffect(() => {
+        const syncViewport = () => {
+            setIsMobileViewport(window.innerWidth < 768);
+        };
+        syncViewport();
+        window.addEventListener('resize', syncViewport);
+        return () => window.removeEventListener('resize', syncViewport);
+    }, []);
 
     const slugKey = useMemo(() => `${toSlug(citySlug)}|${toSlug(categorySlug)}`, [citySlug, categorySlug]);
 
@@ -471,31 +483,31 @@ export default function CityCategoryDetails({
     const breadcrumb = (
         <div className="container">
             <div className="d-flex align-items-center small flex-wrap">
-                <Link href="/destinations" className="text-dark text-decoration-none">
+                <AppLink href="/destinations" className="text-dark text-decoration-none">
                     All countries
-                </Link>
+                </AppLink>
                 {countryBreadcrumbLabel && countryBreadcrumbHref && (
                     <>
                         <span className="mx-2 text-muted">&bull;</span>
-                        <Link href={countryBreadcrumbHref} className="text-dark text-decoration-none">
+                        <AppLink href={countryBreadcrumbHref} className="text-dark text-decoration-none">
                             {countryBreadcrumbLabel}
-                        </Link>
+                        </AppLink>
                     </>
                 )}
                 {regionBreadcrumbLabel && regionBreadcrumbHref && (
                     <>
                         <span className="mx-2 text-muted">&bull;</span>
-                        <Link href={regionBreadcrumbHref} className="text-dark text-decoration-none">
+                        <AppLink href={regionBreadcrumbHref} className="text-dark text-decoration-none">
                             {regionBreadcrumbLabel}
-                        </Link>
+                        </AppLink>
                     </>
                 )}
                 {!isRegionContext && cityBreadcrumbLabel && cityBreadcrumbHref && (
                     <>
                         <span className="mx-2 text-muted">&bull;</span>
-                        <Link href={cityBreadcrumbHref} className="text-dark text-decoration-none">
+                        <AppLink href={cityBreadcrumbHref} className="text-dark text-decoration-none">
                             {cityBreadcrumbLabel}
-                        </Link>
+                        </AppLink>
                     </>
                 )}
                 <span className="mx-2 text-muted">&bull;</span>
@@ -520,7 +532,8 @@ export default function CityCategoryDetails({
         </section>
     );
 
-    const sidebar = (
+    const hasSidebar = useMemo(() => getVisibleSidebarSections(sidebarSections).length > 0, [sidebarSections]);
+    const sidebar = hasSidebar ? (
         <div className="position-sticky" style={{ top: '16px' }}>
             <ListingSidebar
                 title="Filters"
@@ -531,7 +544,7 @@ export default function CityCategoryDetails({
                 }}
             />
         </div>
-    );
+    ) : null;
 
     const pageTitle = categoryName || formatCityName(categorySlug);
     const seo = buildCategorySeo({
@@ -586,7 +599,21 @@ export default function CityCategoryDetails({
         };
     }, [metaDescription, pageTitle, seo.canonicalUrl]);
 
-    const topContent = <SeoDetailsCard metaTitle={pageTitle} metaDescription={metaDescription} canonicalPath={seo.canonicalPath} />;
+    const topContent = (
+        <div className="container p-0">
+            <SeoDetailsCard metaTitle={pageTitle} metaDescription={metaDescription} canonicalPath={seo.canonicalPath} />
+            {!isMobileViewport && (
+                <HotelListToolbar
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                    mapVisible={isHotelMapVisible}
+                    onMapToggle={() => setIsHotelMapVisible((prev) => !prev)}
+                    resultsCount={totalCount || hotelRows.length}
+                    className="mb-2"
+                />
+            )}
+        </div>
+    );
 
     if (loading) {
         return (
@@ -641,6 +668,9 @@ export default function CityCategoryDetails({
                         pageIntentCookieName={pageIntentCookieName}
                         mapVisible={isHotelMapVisible}
                         onMapVisibleChange={setIsHotelMapVisible}
+                        viewMode={viewMode}
+                        onViewModeChange={setViewMode}
+                        showToolbar={false}
                     />
                 ) : (
                     <div className="text-center py-5">

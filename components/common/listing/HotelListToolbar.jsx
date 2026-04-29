@@ -4,17 +4,22 @@ import { FaMapMarkerAlt, FaList, FaThLarge } from 'react-icons/fa';
 
 export default function HotelListToolbar({
     viewMode = 'list',
-    onViewModeChange = () => { },
+    onViewModeChange = () => {},
     mapVisible = false,
-    onMapToggle = () => { },
-    className = '',
-    resultsCount = 0
+    onMapToggle = () => {},
+    resultsCount = null,
+    className = ''
 }) {
+    if (resultsCount !== null && Number(resultsCount) <= 0) {
+        return null;
+    }
+
     const isList = viewMode === 'list';
+    const rootClassName = ['hotel-toolbar', className].filter(Boolean).join(' ');
 
     return (
         <div
-            className={className}
+            className={rootClassName}
             style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -26,6 +31,7 @@ export default function HotelListToolbar({
             }}
         >
             <div
+                className="toolbar-switch"
                 style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -38,6 +44,7 @@ export default function HotelListToolbar({
             >
                 <button
                     type="button"
+                    className="toolbar-btn list-btn"
                     aria-pressed={isList}
                     onClick={() => onViewModeChange('list')}
                     style={{
@@ -61,6 +68,7 @@ export default function HotelListToolbar({
                 </button>
                 <button
                     type="button"
+                    className="toolbar-btn grid-btn"
                     aria-pressed={!isList}
                     onClick={() => onViewModeChange('grid')}
                     style={{
@@ -84,6 +92,7 @@ export default function HotelListToolbar({
                 </button>
                 <button
                     type="button"
+                    className="toolbar-btn map-btn"
                     onClick={onMapToggle}
                     style={{
                         padding: '8px 16px',

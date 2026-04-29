@@ -1,5 +1,5 @@
 const purgecss = require('@fullhuman/postcss-purgecss')({
-    content: ['./app/**/*.{js,jsx}', './components/**/*.{js,jsx}'],
+    content: ['./app/**/*.{js,jsx,ts,tsx}', './components/**/*.{js,jsx,ts,tsx}'],
     defaultExtractor: (content) => content.match(/[\w-/:]+(?<!:)/g) || [],
 
     safelist: [
@@ -7,6 +7,13 @@ const purgecss = require('@fullhuman/postcss-purgecss')({
         'show',
         'fade',
         'collapse',
+        'collapsing',
+        'modal-open',
+        /^react-datepicker/,
+        /^date-range-picker/,
+        /^country-date-range-picker/,
+        /^ck/,
+        /^ProseMirror/,
         /^swiper/,
         'nav',
         'nav-link',
@@ -15,6 +22,9 @@ const purgecss = require('@fullhuman/postcss-purgecss')({
         'property-grid-tabs',
         /^image-ribbon/,
         /^fa-/,
+        /^trust-/,
+        /^hotel-detail-/,
+        /^collection-hotel-/,
         /^info-window-/,
         /^custom-info-window-/,
         /^gm-style/,

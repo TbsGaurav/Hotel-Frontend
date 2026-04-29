@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
-import { FaMapMarkerAlt } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaHotel } from 'react-icons/fa';
 import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 import Image from 'next/image';
@@ -23,6 +23,7 @@ export default function CountryBrandHotelList({
     const defaultImage = '/image/property-img.webp';
     const [loadingMore, setLoadingMore] = useState(false);
     const [timestamp, setTimestamp] = useState('');
+
     const [currency, setCurrency] = useState(null);
     const [viewMode, setViewMode] = useState('list');
     const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -51,7 +52,6 @@ export default function CountryBrandHotelList({
         window.addEventListener('hotel-map-toggle', handler);
         return () => window.removeEventListener('hotel-map-toggle', handler);
     }, []);
-
     useEffect(() => {
         const timer = window.setTimeout(() => {
             setTimestamp(Date.now().toString());
@@ -144,8 +144,13 @@ export default function CountryBrandHotelList({
 
     const getImageUrl = (photo) => {
         if (!photo) return defaultImage;
-        const sep = photo.includes('?') ? '&' : '?';
-        return timestamp ? `${photo}${sep}t=${timestamp}` : photo;
+
+        const normalized = String(photo || '').trim();
+        if (!normalized || normalized === defaultImage) return defaultImage;
+
+        if (normalized.startsWith('//')) return `https:${normalized}`;
+        if (normalized.startsWith('/')) return normalized;
+        return normalized;
     };
 
     const getHotelRate = (bookingId) => allRates.find((rate) => String(rate?.id) === String(bookingId));
@@ -238,14 +243,6 @@ export default function CountryBrandHotelList({
         return () => observer.disconnect();
     }, [localHasMore, loadingMore, page, pageCookieName, pageIntentCookieName]);
 
-    if (!allHotels.length) {
-        return (
-            <div className="text-center py-5">
-                <p className="text-muted">No hotels available.</p>
-            </div>
-        );
-    }
-
     const groupedHotels = Object.values(
         allHotels.reduce((acc, hotel) => {
             const key = hotel.cityName;
@@ -293,11 +290,66 @@ export default function CountryBrandHotelList({
     };
 
     const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
-    const hotelsByViewMode =
-        effectiveViewMode === 'grid' ? [{ cityName: 'all-hotels', cityUrlName: '', hotels: allHotels }] : groupedHotels;
+    const hotelsByViewMode = groupedHotels;
+    const renderGroups = effectiveViewMode === 'grid' ? [{ cityName: '', cityUrlName: '', hotels: allHotels }] : hotelsByViewMode;
+
+    if (!allHotels.length) {
+        return (
+            <div className="container py-5">
+                <div
+                    className="mx-auto text-center rounded-4 shadow-sm border-0 overflow-hidden"
+                    style={{
+                        maxWidth: '760px',
+                        background: 'linear-gradient(135deg, #fff7ef 0%, #ffffff 45%, #f4f8fc 100%)',
+                        border: '1px solid rgba(240, 131, 30, 0.12)'
+                    }}
+                >
+                    <div
+                        style={{
+                            padding: '32px 24px',
+                            background:
+                                'radial-gradient(circle at top, rgba(240, 131, 30, 0.16) 0%, rgba(240, 131, 30, 0.04) 28%, transparent 55%)'
+                        }}
+                    >
+                        <div
+                            className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                            style={{
+                                width: '72px',
+                                height: '72px',
+                                background: '#f0831e',
+                                color: '#fff',
+                                boxShadow: '0 12px 28px rgba(240, 131, 30, 0.28)'
+                            }}
+                        >
+                            <FaHotel size={30} />
+                        </div>
+
+                        <h3 className="fw-bold mb-2" style={{ color: '#1d2b3a' }}>
+                            No hotels found
+                        </h3>
+                        <p className="text-muted mb-4" style={{ maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 }}>
+                            We couldn’t find any hotels for this destination right now. Try changing your filters, checking nearby areas, or
+                            searching again with different dates.
+                        </p>
+                        <div className="d-flex flex-wrap justify-content-center gap-3" style={{ color: '#5f6b7a', fontSize: '14px' }}>
+                            <div className="d-flex align-items-center gap-2">
+                                <span
+                                    className="rounded-circle d-inline-flex align-items-center justify-content-center"
+                                    style={{ width: '34px', height: '34px', background: '#fff1e3', color: '#f0831e' }}
+                                >
+                                    <FaHotel size={14} />
+                                </span>
+                                <span>Try a different destination</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="container">
+        <div className="p-0">
             {!isMobileViewport ? (
                 <HotelListToolbar
                     viewMode={viewMode}
@@ -305,20 +357,21 @@ export default function CountryBrandHotelList({
                     mapVisible={isMapVisible}
                     onMapToggle={() => setIsMapVisible(!isMapVisible)}
                     resultsCount={allHotels.length}
+                    className="mb-2"
                 />
             ) : null}
 
             {isMapVisible ? <HotelMapView hotels={allHotels} className="mb-4" /> : null}
 
-            <div className={`${effectiveViewMode === 'grid' ? 'row g-3 grid-view' : 'd-flex flex-column gap-3'}`}>
-                {hotelsByViewMode.map((city) => (
-                    <div key={city.cityName} className="d-flex flex-column gap-3">
-                        {effectiveViewMode !== 'grid' ? (
-                            <Link href={getCityBrandPath(city.cityUrlName)} className="text-decoration-none">
-                                <h5 className="text-warning city-hover">
+            <div className="d-flex flex-column gap-3">
+                {renderGroups.map((city, cityIndex) => (
+                    <div key={city.cityName || `city-${cityIndex}`} className="d-flex flex-column gap-3">
+                        {effectiveViewMode !== 'grid' && city.cityName ? (
+                            <AppLink href={getCityBrandPath(city.cityUrlName)} className="text-decoration-none">
+                                <h5 className="city-hover mb-0">
                                     {formattedBrand} {city.cityName}
                                 </h5>
-                            </Link>
+                            </AppLink>
                         ) : null}
 
                         <div className={effectiveViewMode === 'grid' ? 'row g-3' : 'd-flex flex-column gap-3'}>
@@ -332,17 +385,21 @@ export default function CountryBrandHotelList({
                                 const infoBadges = badges.filter(
                                     (badge) => badge.toLowerCase().includes('free cancellation') || badge.toLowerCase().includes('pay at')
                                 );
-                                const facilities = hotel.hotelFacilities
-                                    ? hotel.hotelFacilities
-                                        .split('|')
-                                        .map((facility) => facility.trim())
-                                        .filter(Boolean)
-                                    : [];
+                                const gridColClass = effectiveViewMode === 'grid' ? 'col-12 col-md-6' : '';
 
                                 return (
-                                    <div key={hotelKey} className={effectiveViewMode === 'grid' ? 'col-12 col-md-6' : ''}>
+                                    <div key={hotelKey} className={gridColClass}>
+                                        {effectiveViewMode === 'grid' && hotel?.cityName ? (
+                                            <AppLink href={getCityBrandPath(hotel.cityUrlName)} className="text-decoration-none">
+                                                <h6 className="text-warning city-hover mb-2">
+                                                    {formattedBrand} {hotel.cityName}
+                                                </h6>
+                                            </AppLink>
+                                        ) : null}
                                         <div
-                                            className={`card border-0 rounded-4 hotel-list-card collection-hotel-card ${effectiveViewMode === 'grid' ? 'p-3 h-100' : 'p-3 p-md-4'}`}
+                                            className={`card border-0 rounded-4 hotel-list-card collection-hotel-card ${
+                                                effectiveViewMode === 'grid' ? 'p-3 d-flex flex-column flex-grow-1' : 'p-3 p-md-4'
+                                            }`}
                                             style={{
                                                 boxShadow: '0 4px 18px rgba(0,0,0,0.08)',
                                                 minHeight: effectiveViewMode === 'grid' && !isMobileViewport ? '620px' : undefined
@@ -361,7 +418,14 @@ export default function CountryBrandHotelList({
                                                 <div
                                                     className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-4'} collection-hotel-image-col`}
                                                 >
-                                                    <div className="position-relative collection-hotel-image-wrap">
+                                                    <div
+                                                        className="position-relative collection-hotel-image-wrap rounded-4 overflow-hidden"
+                                                        style={{
+                                                            backgroundImage: `url(${defaultImage})`,
+                                                            backgroundSize: 'cover',
+                                                            backgroundPosition: 'center'
+                                                        }}
+                                                    >
                                                         {imageBadges.length > 0 && (
                                                             <>
                                                                 {imageBadges.map((badge, idx) => (
@@ -376,13 +440,13 @@ export default function CountryBrandHotelList({
                                                                             isMobileViewport
                                                                                 ? { top: `${10 + idx * 24}px` }
                                                                                 : {
-                                                                                    top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                                    left: '12px',
-                                                                                    background: '#28a745',
-                                                                                    borderRadius: '20px',
-                                                                                    fontSize: '12px',
-                                                                                    zIndex: 2
-                                                                                }
+                                                                                      top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                                      left: '12px',
+                                                                                      background: '#28a745',
+                                                                                      borderRadius: '20px',
+                                                                                      fontSize: '12px',
+                                                                                      zIndex: 2
+                                                                                  }
                                                                         }
                                                                     >
                                                                         {badge}
@@ -410,13 +474,14 @@ export default function CountryBrandHotelList({
                                                     <div className="text-decoration-none">
                                                         <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-header">
                                                             <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-2 mb-md-0 collection-hotel-title-row">
-                                                                <Link
+                                                                <AppLink
                                                                     href={`${hotel.urlName}`}
                                                                     className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
                                                                     onClick={(e) => e.stopPropagation()}
+                                                                    style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                                                                 >
                                                                     {hotel.hotelName}
-                                                                </Link>
+                                                                </AppLink>
                                                                 <div className="text-warning mt-1 mt-md-0 collection-hotel-stars">
                                                                     {[...Array(5)].map((_, i) => (
                                                                         <MdOutlineStarPurple500
@@ -429,10 +494,7 @@ export default function CountryBrandHotelList({
                                                             </div>
 
                                                             <div className="d-flex collection-hotel-review-row">
-                                                                <div
-                                                                    className="rating-box me-2 collection-hotel-rating-box"
-                                                                    style={{ borderRadius: '10px 10px 10px 0px' }}
-                                                                >
+                                                                <div className="rating-box me-2 collection-hotel-rating-box border-radius">
                                                                     <span className="m-auto">
                                                                         {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
                                                                     </span>
@@ -452,10 +514,7 @@ export default function CountryBrandHotelList({
                                                             </div>
                                                         </div>
 
-                                                        <div
-                                                            className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities"
-                                                            style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}
-                                                        >
+                                                        <div className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities overflow">
                                                             {hotel.hotelFacilities && (
                                                                 <>
                                                                     {hotel.hotelFacilities
@@ -464,27 +523,14 @@ export default function CountryBrandHotelList({
                                                                         .map((facility, idx) => (
                                                                             <span
                                                                                 key={idx}
-                                                                                className="badge bg-light text-dark border me-1 mb-1"
-                                                                                style={{
-                                                                                    fontSize: '11px',
-                                                                                    lineHeight: '1.2',
-                                                                                    whiteSpace: 'nowrap',
-                                                                                    maxWidth: '135px',
-                                                                                    overflow: 'hidden',
-                                                                                    textOverflow: 'ellipsis',
-                                                                                    display: 'inline-block',
-                                                                                    padding: '4px 8px'
-                                                                                }}
+                                                                                className="badge bg-light text-dark border me-1 mb-1 ellips"
                                                                                 title={facility.trim()}
                                                                             >
                                                                                 {facility.trim()}
                                                                             </span>
                                                                         ))}
                                                                     {hotel.hotelFacilities.split('|').length > 5 && (
-                                                                        <span
-                                                                            className="rating"
-                                                                            style={{ fontSize: '11px', lineHeight: '1.2' }}
-                                                                        >
+                                                                        <span className="rating star-rating">
                                                                             +{hotel.hotelFacilities.split('|').length - 5} more
                                                                         </span>
                                                                     )}
@@ -582,7 +628,7 @@ export default function CountryBrandHotelList({
                                                             className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col"
                                                             style={effectiveViewMode === 'grid' ? { paddingTop: '6px' } : undefined}
                                                         >
-                                                            <Link
+                                                            <AppLink
                                                                 className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
                                                                 href={`${hotel.url}`}
                                                                 target="_blank"
@@ -591,7 +637,7 @@ export default function CountryBrandHotelList({
                                                             >
                                                                 <span>See Availability</span>
                                                                 <i className="fa-solid fa-arrow-right ms-2"></i>
-                                                            </Link>
+                                                            </AppLink>
                                                         </div>
                                                     </div>
                                                 </div>

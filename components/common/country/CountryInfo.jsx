@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import SeoDetailsCard from '@/components/common/SeoDetailsCard';
 
 export default function CountryIntro({ countryName, seo = {} }) {
@@ -7,15 +7,15 @@ export default function CountryIntro({ countryName, seo = {} }) {
             <div className="py-2 accordion-main">
                 <div className="container">
                     <div className="d-flex align-items-center small">
-                        <Link href="/destinations" className="text-dark text-decoration-none">
+                        <AppLink href="/destinations" className="text-dark text-decoration-none">
                             All Countries
-                        </Link>
+                        </AppLink>
 
                         <span className="mx-2 text-muted">•</span>
 
-                        <Link href={seo?.canonicalPath || `/${countryName}`} className="fw-semibold text-decoration-none">
+                        <AppLink href={seo?.canonicalPath || `/${countryName}`} className="fw-semibold text-decoration-none">
                             {countryName}
-                        </Link>
+                        </AppLink>
                     </div>
                 </div>
             </div>

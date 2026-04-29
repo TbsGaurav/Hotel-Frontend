@@ -1,7 +1,7 @@
 import HeroSection from '@/components/sections/HeroSection';
 import Dropdown from '@/components/ui/Dropdown';
 import { getBrandCountries } from '@/lib/api/public/brandapi';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 
 export default async function BrandPage({ params }) {
     const { brand } = await params;
@@ -41,6 +41,8 @@ export default async function BrandPage({ params }) {
         href: `/${country.toLowerCase().replace(/\s+/g, '-')}/${brand}`
     }));
 
+    const hasBrandData = Array.isArray(brandData) && brandData.length > 0;
+
     return (
         <>
             <HeroSection variant="common" />
@@ -50,9 +52,9 @@ export default async function BrandPage({ params }) {
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href="/brands" className="text-dark text-decoration-none">
+                                <AppLink href="/brands" className="text-dark text-decoration-none">
                                     All Brands
-                                </Link>
+                                </AppLink>
 
                                 <span className="mx-2 text-muted">•</span>
 
@@ -71,13 +73,19 @@ export default async function BrandPage({ params }) {
                     </div>
                 </div>
                 <div className="container">
-                    <Dropdown
-                        id="brand-countries"
-                        title={`${brandName}`}
-                        items={items}
-                        parentId="brandAccordion"
-                        defaultOpen={true}
-                    />
+                    {hasBrandData ? (
+                        <Dropdown
+                            id="brand-countries"
+                            title={`${brandName}`}
+                            items={items}
+                            parentId="brandAccordion"
+                            defaultOpen={true}
+                        />
+                    ) : (
+                        <div className="text-center py-5">
+                            <p className="text-muted mb-0">No data available for this brand.</p>
+                        </div>
+                    )}
                 </div>
             </section>
         </>

@@ -1,16 +1,34 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
-import { FaMapMarkerAlt, FaCamera, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import {
+    FaMapMarkerAlt,
+    FaCamera,
+    FaTimes,
+    FaChevronLeft,
+    FaChevronRight,
+    FaLock,
+    FaTag,
+    FaCheck,
+    FaRegStar,
+    FaUsers,
+    FaMoneyBillWave,
+    FaBed,
+    FaWifi,
+    FaCoffee,
+    FaParking,
+    FaSwimmingPool
+} from 'react-icons/fa';
 import { SiAmericanexpress, SiVisa, SiMastercard, SiDinersclub, SiJcb, SiWesternunion } from 'react-icons/si';
 import HeroSection from '@/components/sections/HeroSection';
-import { saveCustomerReview } from '@/lib/api/public/hotelapi';
+import { getHotelRates, saveCustomerReview } from '@/lib/api/public/hotelapi';
 import { toast } from 'react-hot-toast';
 import * as yup from 'yup';
 import Image from 'next/image';
+import { getUserCurrency } from '@/lib/getUserCurrency';
 
-export default function HotelDetails({ initialData }) {
+export default function HotelDetails({ initialData, initialRate = null, initialRateCurrency = 'USD' }) {
     const hotelData = initialData;
     const loading = !initialData;
     const hotelInfo = hotelData?.hotel;
@@ -20,6 +38,10 @@ export default function HotelDetails({ initialData }) {
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [activeTab, setActiveTab] = useState('overview');
     const [timestamp, setTimestamp] = useState('');
+    const [currency, setCurrency] = useState(initialRateCurrency || 'USD');
+    const [hotelRate, setHotelRate] = useState(initialRate);
+    const [rateCurrency, setRateCurrency] = useState(initialRate ? initialRateCurrency : null);
+    const [isRateLoading, setIsRateLoading] = useState(false);
     const [overallReviewRating, setOverallReviewRating] = useState(0);
     const [categoryRatings, setCategoryRatings] = useState({
         service: 0,
@@ -126,6 +148,13 @@ export default function HotelDetails({ initialData }) {
         }
     };
 
+    const scrollToTab = (tabKey) => {
+        setActiveTab(tabKey);
+        setTimeout(() => {
+            document.getElementById('hotel-details-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 0);
+    };
+
     const createReviewPayload = () => {
         const hotelId = hotelInfo?.hotelId ?? hotelInfo?.id ?? null;
         const hotelAddress = hotelInfo?.address || hotelInfo?.hotelAddress || '';
@@ -228,6 +257,78 @@ export default function HotelDetails({ initialData }) {
     }, []);
 
     useEffect(() => {
+        let cancelled = false;
+
+        async function initCurrency() {
+            try {
+                const cur = await getUserCurrency();
+                if (!cancelled) {
+                    setCurrency(cur);
+                }
+            } catch (currencyError) {
+                console.error('Currency init failed', currencyError);
+            }
+        }
+
+        initCurrency();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        const bookingId = Number.isInteger(Number(hotelInfo?.bookingId)) ? Number(hotelInfo.bookingId) : null;
+
+        if (!currency || !bookingId) {
+            setHotelRate(null);
+            setRateCurrency(null);
+            return;
+        }
+
+        let cancelled = false;
+
+        async function syncRate() {
+            try {
+                setIsRateLoading(true);
+                const ratesPayload = {
+                    bookingIds: [bookingId],
+                    currency,
+                    rooms: 1,
+                    adults: 2,
+                    childs: 0,
+                    device: 'desktop',
+                    checkIn: null,
+                    checkOut: null
+                };
+
+                const ratesRes = await getHotelRates(ratesPayload);
+                const rates = ratesRes?.data || [];
+                const resolvedRate = rates.find((rate) => String(rate?.id) === String(bookingId)) || null;
+
+                if (!cancelled) {
+                    setHotelRate(resolvedRate);
+                    setRateCurrency(currency);
+                }
+            } catch (rateError) {
+                console.error('Error fetching hotel rate:', rateError);
+                if (!cancelled) {
+                    setHotelRate(null);
+                    setRateCurrency(currency);
+                }
+            } finally {
+                if (!cancelled) setIsRateLoading(false);
+            }
+        }
+
+        syncRate();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [currency, hotelInfo?.bookingId]);
+
+    useEffect(() => {
         if (!showPhotoModal || allPhotos.length <= 1) return undefined;
 
         const autoSlide = setInterval(() => {
@@ -239,12 +340,12 @@ export default function HotelDetails({ initialData }) {
 
     // Generate cache-busted URL
     const getImageUrl = (photo) => {
-        const normalizedUrl = normalizeImageUrl(photo);
-        if (normalizedUrl === defaultImage) return defaultImage;
-        const sep = normalizedUrl.includes('?') ? '&' : '?';
-        return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
+        return normalizeImageUrl(photo);
     };
-
+    useEffect(() => {
+        const img = new window.Image();
+        img.src = defaultImage;
+    }, []);
     const openPhotoModal = (index = 0) => {
         setCurrentPhotoIndex(index);
         setShowPhotoModal(true);
@@ -292,9 +393,9 @@ export default function HotelDetails({ initialData }) {
                 <HeroSection variant="common" />
                 <div className="container py-5 text-center">
                     <h3>{error || 'Hotel not found'}</h3>
-                    <Link href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
+                    <AppLink href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
                         Back to Home
-                    </Link>
+                    </AppLink>
                 </div>
             </>
         );
@@ -401,23 +502,139 @@ export default function HotelDetails({ initialData }) {
                 <HeroSection variant="common" />
                 <div className="container py-5 text-center">
                     <h3>{error || 'Hotel not found'}</h3>
-                    <Link href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
+                    <AppLink href="/" className="theme-button-orange rounded-1 mt-3 d-inline-block">
                         Back to Home
-                    </Link>
+                    </AppLink>
                 </div>
             </>
         );
     }
+    const TRUST_KEYWORDS = [
+        {
+            key: 'location',
+            label: 'Great location',
+            keywords: [
+                'great location',
+                'location',
+                'near',
+                'nearby',
+                'central',
+                'downtown',
+                'station',
+                'metro',
+                'subway',
+                'walk',
+                'walking distance',
+                'beach',
+                'airport'
+            ]
+        },
+        { key: 'cleanliness', label: 'Clean rooms', keywords: ['clean', 'cleanliness', 'spotless', 'hygiene', 'neat'] },
+        { key: 'staff', label: 'Friendly staff', keywords: ['staff', 'friendly', 'helpful', 'polite', 'service', 'host'] },
+        { key: 'value', label: 'Good value', keywords: ['value', 'worth', 'price', 'affordable', 'reasonable'] },
+        { key: 'rooms', label: 'Comfortable rooms', keywords: ['room', 'rooms', 'bed', 'comfortable', 'spacious', 'quiet', 'sleep'] },
+        { key: 'wifi', label: 'Free Wi‑Fi', keywords: ['wifi', 'wi-fi', 'wi fi', 'internet', 'free wifi', 'free wi-fi'] },
+        { key: 'breakfast', label: 'Breakfast available', keywords: ['breakfast', 'morning meal'] },
+        { key: 'parking', label: 'Parking available', keywords: ['parking', 'car park', 'garage'] },
+        { key: 'pool', label: 'Pool', keywords: ['pool', 'swimming'] }
+    ];
+
+    const TRUST_SIGNAL_META = {
+        location: { icon: <FaMapMarkerAlt /> },
+        cleanliness: { icon: <FaCheck /> },
+        staff: { icon: <FaUsers /> },
+        value: { icon: <FaMoneyBillWave /> },
+        rooms: { icon: <FaBed /> },
+        wifi: { icon: <FaWifi /> },
+        breakfast: { icon: <FaCoffee /> },
+        parking: { icon: <FaParking /> },
+        pool: { icon: <FaSwimmingPool /> }
+    };
+
+    const normalizeTrustText = (value) => String(value || '').toLowerCase();
+
+    function extractTrustSignals({ reviews = [], max = 10 } = {}) {
+        const scored = TRUST_KEYWORDS.map((def) => {
+            const reviewHits = reviews.reduce((acc, r) => {
+                const text = normalizeTrustText(r?.positive);
+                if (!text) return acc;
+                return def.keywords.some((kw) => text.includes(normalizeTrustText(kw))) ? acc + 1 : acc;
+            }, 0);
+
+            return { ...def, score: reviewHits };
+        })
+            .filter((d) => d.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, max);
+
+        return scored;
+    }
 
     const hotelFacilities = hotelData.hotelFacilities || [];
     const hotelReviews = hotelData.hotelReviews || [];
+    const trustSignals = extractTrustSignals({ reviews: hotelReviews, max: 10 });
+
     function toSlug(value = '') {
         return value.toLowerCase().replace(/\s+/g, '-');
     }
-    const openMap = (lat, lng) => {
-        if (!lat || !lng) return;
-        window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+
+    const formatOriginalPrice = (currentPriceStr, originalPrice) => {
+        if (!currentPriceStr || !originalPrice) return null;
+
+        const match = String(currentPriceStr).match(/^[^\d-]+/u);
+        if (match) {
+            const detectedCurrency = match[0].trim();
+            const formattedNum = Number(originalPrice).toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+            return `${detectedCurrency}${formattedNum}`;
+        }
+
+        return `$${Number(originalPrice).toLocaleString('en-US', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        })}`;
     };
+
+    const renderPriceBlock = (variant = 'default') => {
+        const rate = hotelRate;
+        const hasPrice = Boolean(rate?.price?.book);
+        const dealInfo = rate?.deal_info || {};
+        const originalPrice = dealInfo?.public_price;
+        const formattedOriginal = hasPrice ? formatOriginalPrice(rate.price.book, originalPrice) : null;
+        const sizeStyle = variant === 'compact' ? { fontSize: '20px' } : { fontSize: '24px' };
+
+        if (!hasPrice) {
+            return null;
+        }
+
+        return (
+            <div className="price-block p-1 rounded mb-2 ms-auto text-end collection-hotel-price-block">
+                <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">1 night, 2 adults</p>
+
+                {formattedOriginal && originalPrice > rate.price.total && (
+                    <p
+                        className="para-12px mb-0 text-end collection-hotel-original-price"
+                        style={{ color: 'red', textDecoration: 'line-through' }}
+                    >
+                        {formattedOriginal}
+                    </p>
+                )}
+
+                <div className="d-flex align-items-baseline justify-content-end collection-hotel-current-price-row">
+                    <span className="text-theme-orange fw-bold collection-hotel-current-price" style={sizeStyle}>
+                        {rate?.price?.book || ''}{' '}
+                    </span>
+                </div>
+                <p className="para-12px text-muted mb-0 text-end collection-hotel-price-caption">Includes taxes and charges</p>
+            </div>
+        );
+    };
+    // const openMap = (lat, lng) => {
+    //     if (!lat || !lng) return;
+    //     window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+    // };
 
     return (
         <>
@@ -430,39 +647,39 @@ export default function HotelDetails({ initialData }) {
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href="/destinations" className="text-dark text-decoration-none">
+                                <AppLink href="/destinations" className="text-dark text-decoration-none">
                                     All Countries
-                                </Link>
+                                </AppLink>
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href={`/${hotelInfo.countryUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
+                                <AppLink href={`/${hotelInfo.countryUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
                                     {hotelInfo.country}
-                                </Link>
+                                </AppLink>
                             </li>
 
                             {hotelInfo.region && (
                                 <li className="breadcrumb-item small-para-14-px">
-                                    <Link href={`${hotelInfo.regionUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
+                                    <AppLink href={`${hotelInfo.regionUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
                                         {hotelInfo.region}
-                                    </Link>
+                                    </AppLink>
                                 </li>
                             )}
 
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href={`${hotelInfo.cityUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
+                                <AppLink href={`${hotelInfo.cityUrl?.toLowerCase()}`} className="text-dark text-decoration-none">
                                     {hotelInfo.city}
-                                </Link>
+                                </AppLink>
                             </li>
 
                             {/* ✅ Clickable active */}
                             <li className="breadcrumb-item small-para-14-px active">
-                                <Link
+                                <AppLink
                                     href={`${hotelInfo.cityUrl?.toLowerCase()}/${toSlug(hotelInfo.hotelName)}`}
                                     className="text-decoration-none"
                                 >
                                     {hotelInfo.hotelName}
-                                </Link>
+                                </AppLink>
                             </li>
                         </ol>
                     </nav>
@@ -470,37 +687,32 @@ export default function HotelDetails({ initialData }) {
             </div>
 
             {/* Hotel Header Info - Above Images */}
-            <section className="py-4 p-1">
+            <section className="py-3 p-1">
                 <div className="container">
-                    <div className="d-flex align-items-start flex-column flex-md-row mb-3 hotel-detail-header">
+                    <div className="d-flex align-items-start flex-column flex-md-row hotel-detail-header">
                         {' '}
                         <div className="me-auto">
-                            <div className="d-flex align-items-center mb-2">
+                            <div className="d-flex mb-2 vertical-align-top block-display">
                                 <h4 className="fw-600 mb-0 me-3 fs-5 fw-bold hotel-detail-title"> {hotelInfo.hotelName}</h4>
-                                <div className="text-warning d-flex align-items-center me-3">
-                                    {[...Array(5)].map((_, i) => (
-                                        <MdOutlineStarPurple500 key={i} size={18} color={i < hotelInfo.stars ? '#f0831e' : '#ddd'} />
-                                    ))}
+                                <div className="d-flex gap-1 mt-1">
+                                    <div className="text-warning d-flex me-3">
+                                        {[...Array(5)].map((_, i) => (
+                                            <MdOutlineStarPurple500 key={i} size={18} color={i < hotelInfo.stars ? '#f0831e' : '#ddd'} />
+                                        ))}
+                                    </div>
+                                    <span className="text-white px-3 py-1 mb-2 d-inline-block orange-bg me-3">
+                                        {hotelInfo.hotelType || 'Apartment Hotel'}
+                                    </span>
                                 </div>
-                                <span
-                                    className="text-white px-3 py-1 mb-2 d-inline-block"
-                                    style={{
-                                        background: '#ff7a00',
-                                        borderRadius: '20px',
-                                        fontSize: '12px'
-                                    }}
-                                >
-                                    {hotelInfo.hotelType || 'Apartment Hotel'}
-                                </span>
                             </div>
                             <div className="hotel-detail-location mb-2">
                                 <p
                                     className="hotel-address-text mb-1"
-                                    style={{ cursor: 'pointer' }}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        openMap(hotelInfo.latitude, hotelInfo.longitude);
-                                    }}
+                                    // style={{ cursor: 'pointer' }}
+                                    // onClick={(e) => {
+                                    //     e.stopPropagation();
+                                    //     openMap(hotelInfo.latitude, hotelInfo.longitude);
+                                    // }}
                                 >
                                     {hotelInfo.address}
                                 </p>
@@ -514,41 +726,45 @@ export default function HotelDetails({ initialData }) {
                         <div className="hotel-detail-review mb-2">
                             {' '}
                             <div className="d-flex align-items-start mt-3 mt-md-0 me-3">
-                                <div
-                                    className="d-flex flex-column align-items-center justify-content-center p-2"
-                                    style={{
-                                        background: '#003580',
-                                        borderRadius: '10px 10px 10px 0px',
-                                        width: '40px',
-                                        height: '40px',
-                                        fontSize: '12px'
-                                    }}
-                                >
+                                <div className="rating-box me-2 collection-hotel-rating-box border-radius">
                                     <span className="text-white  fs-9">{hotelInfo.reviewScore}</span>
                                 </div>
-                                <div className="ms-2 d-flex flex-column justify-content-center">
+                                <div className="ms-0 d-flex flex-column justify-content-center">
                                     <span className="fw-bold">{hotelInfo.ratingText}</span>
                                     <span className="text-muted small">{hotelInfo.reviewCount} verified reviews</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="d-none d-md-flex align-items-center ms-auto hotel-detail-price-btn-desktop ">
-                            <Link
+                        <div className="d-flex d-lg-none hotel-detail-price-summary-mobile">{renderPriceBlock('compact')}</div>
+                        <div className="d-none d-md-flex d-lg-none flex-column align-items-end ms-auto hotel-detail-price-btn-desktop">
+                            <AppLink
                                 href={hotelInfo.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="theme-button-blue d-flex align-items-center justify-content-center px-3"
-                                style={{ height: '48px', borderRadius: '6px' }}
+                                style={{ borderRadius: '6px' }}
                             >
                                 See Rooms & Prices
-                            </Link>
+                            </AppLink>
+                        </div>
+                        <div className="d-none d-lg-flex flex-column align-items-end ms-auto hotel-detail-price-btn-desktop">
+                            {renderPriceBlock('default')}
+                            <AppLink
+                                href={hotelInfo.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="theme-button-blue d-flex align-items-center justify-content-center px-3"
+                                style={{ borderRadius: '6px' }}
+                            >
+                                See Rooms & Prices
+                            </AppLink>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Image Gallery with Carousel */}
-            <section className="py-4 p-1">
+            <section className="py-3 p-1">
                 <div className="container">
                     <div className="row g-2">
                         {/* Main image with carousel */}
@@ -557,7 +773,13 @@ export default function HotelDetails({ initialData }) {
                             <div
                                 id="hotelCarousel"
                                 className="carousel slide rounded-4 overflow-hidden position-relative"
-                                style={{ height: '400px' }}
+                                style={{
+                                    height: '460px',
+                                    backgroundImage: `url(${defaultImage})`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                    width: '100%'
+                                }}
                             >
                                 <div className="carousel-indicators">
                                     <button type="button" data-bs-target="#hotelCarousel" data-bs-slide-to="0" className="active"></button>
@@ -622,7 +844,14 @@ export default function HotelDetails({ initialData }) {
                                     <div key={idx} className="col-12 mb-2">
                                         <div
                                             className="rounded-4 overflow-hidden position-relative photo-hover-container"
-                                            style={{ height: '190px', cursor: 'pointer' }}
+                                            style={{
+                                                height: '222px',
+                                                backgroundImage: `url(${defaultImage})`,
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center',
+                                                marginLeft: '15px',
+                                                width: '96%'
+                                            }}
                                             onClick={() => openPhotoModal(idx + 1)}
                                         >
                                             <Image
@@ -630,7 +859,7 @@ export default function HotelDetails({ initialData }) {
                                                 className="w-100 h-100"
                                                 alt="hotel"
                                                 fill
-                                                sizes="33vw"
+                                                sizes="35vw"
                                                 unoptimized={isExternalImageUrl(getImageUrl(photo.photo))}
                                                 onError={handleImageError}
                                             />
@@ -655,15 +884,14 @@ export default function HotelDetails({ initialData }) {
                         </div>
                     </div>
                     <div className="mt-3 d-block d-md-none hotel-detail-price-btn">
-                        {' '}
-                        <Link
+                        <AppLink
                             href={hotelInfo.url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="theme-button-blue rounded d-flex align-items-center justify-content-center py-2 px-4"
                         >
                             See Rooms & Prices
-                        </Link>
+                        </AppLink>
                     </div>
                 </div>
                 {/* View all photos button */}
@@ -678,9 +906,75 @@ export default function HotelDetails({ initialData }) {
                     </button>
                 </div> */}
             </section>
+            {/* Trust signals */}
+            <section className="py-4 p-1">
+                <div className="container">
+                    <div className="trust-block position-relative border rounded-4 p-4 p-md-5 overflow-hidden">
+                        <div className="trust-block__header mb-3 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+                            <div>
+                                <h5 className="mb-1 fw-bold">Why people book this hotel</h5>
+                                {/* <p className="mb-0 text-muted trust-block__subtitle">Highlights pulled from traveller reviews.</p> */}
+                            </div>
+                        </div>
+
+                        <div className="row g-2 g-md-3">
+                            {[
+                                // {
+                                //     key: 'verified_reviews',
+                                //     label: 'Verified reviews',
+                                //     description: `${typeof hotelInfo?.reviewCount === 'number' ? hotelInfo.reviewCount : Number(hotelInfo?.reviewCount) || 0} reviews`,
+                                //     icon: <FaRegStar />,
+                                //     onClick: () => scrollToTab('reviews')
+                                // },
+                                ...trustSignals.map((signal) => ({
+                                    key: signal.key,
+                                    label: signal.label,
+                                    description: '',
+                                    icon: TRUST_SIGNAL_META[signal.key]?.icon || <FaCheck />
+                                }))
+                            ]
+                                .slice(0, 6)
+                                .map((item) => (
+                                    <div key={item.key} className="col-6 col-md-4 col-lg-3">
+                                        {item.onClick ? (
+                                            <button
+                                                type="button"
+                                                className="trust-item w-100 text-start border rounded-4 bg-white p-3 p-md-4 h-100 d-flex gap-2 gap-md-3 align-items-center"
+                                                onClick={item.onClick}
+                                            >
+                                                <span className="trust-block__icon" aria-hidden="true">
+                                                    {item.icon}
+                                                </span>
+                                                <span className="d-flex flex-column">
+                                                    <span className="d-flex align-items-center gap-2 fw-bold">
+                                                        {item.label}{' '}
+                                                        <span className="trust-check" aria-hidden="true">
+                                                            <FaCheck size={12} />
+                                                        </span>
+                                                    </span>
+                                                    {item.description ? <span className="text-muted small">{item.description}</span> : null}
+                                                </span>
+                                            </button>
+                                        ) : (
+                                            <div className="trust-item border rounded-4 bg-white p-3 p-md-4 h-100 d-flex gap-2 gap-md-3 align-items-center">
+                                                <span className="trust-block__icon" aria-hidden="true">
+                                                    {item.icon}
+                                                </span>
+                                                <div className="d-flex flex-column">
+                                                    <div className="fw-bold">{item.label}</div>
+                                                    {item.description ? <div className="text-muted small">{item.description}</div> : null}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             {/* Tabs Section */}
-            <section className="py-4 p-1">
+            <section className="py-4 p-1" id="hotel-details-tabs">
                 <div className="container">
                     {' '}
                     {/* Tab Navigation */}
@@ -763,20 +1057,7 @@ export default function HotelDetails({ initialData }) {
                                                         <div className="border rounded-4 p-4 bg-white">
                                                             <div className="d-flex">
                                                                 {/* Avatar */}
-                                                                <div
-                                                                    className="rounded-circle d-flex align-items-center justify-content-center me-3"
-                                                                    style={{
-                                                                        width: '50px',
-                                                                        height: '50px',
-                                                                        minWidth: '50px',
-                                                                        background: '#e6eef6',
-                                                                        color: '#5f7f9c',
-                                                                        fontWeight: '600',
-                                                                        fontSize: '18px',
-                                                                        lineHeight: '1',
-                                                                        flexShrink: 0
-                                                                    }}
-                                                                >
+                                                                <div className="rounded-circle d-flex align-items-center justify-content-center me-3 circle">
                                                                     {review.travellerName
                                                                         ? review.travellerName.charAt(0).toUpperCase()
                                                                         : 'S'}
@@ -854,34 +1135,26 @@ export default function HotelDetails({ initialData }) {
                                     <div className="mb-4">
                                         <div className="row g-2">
                                             <div className="row mb-4">
-                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
-                                                    Check-in
-                                                </span>
+                                                <span className="fw-bold font-size-18">Check-in</span>
                                                 <span className="text-muted">
                                                     From {hotelInfo.checkIn ? hotelInfo.checkIn.slice(0, 5) : '00:00'} to 23:59
                                                 </span>
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
-                                                    Check-out
-                                                </span>
+                                                <span className="fw-bold font-size-18">Check-out</span>
                                                 <span className="text-muted">
                                                     Until {hotelInfo.checkOut ? hotelInfo.checkOut.slice(0, 5) : '11:00'}
                                                 </span>
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
-                                                    Cancellation & prepayment
-                                                </span>
+                                                <span className="fw-bold font-size-18">Cancellation & prepayment</span>
                                                 <span className="text-muted">
                                                     {hotelInfo.cancellationPolicy ||
                                                         'Cancellation and prepayment policies vary by room type. Please check your booking details before finalizing.'}
                                                 </span>
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
-                                                    Accepted credit cards
-                                                </span>
+                                                <span className="fw-bold font-size-18">Accepted credit cards</span>
                                                 <span className="text-muted">
                                                     {hotelInfo.acceptedCreditCards ||
                                                         'The hotel reserves the right to pre-authorise credit cards prior to arrival.'}
@@ -896,9 +1169,7 @@ export default function HotelDetails({ initialData }) {
                                             </div> */}
                                             </div>
                                             <div className="row mb-4">
-                                                <span className="fw-bold" style={{ fontSize: '18px' }}>
-                                                    The fine print
-                                                </span>
+                                                <span className="fw-bold font-size-18">The fine print</span>
                                                 <span className="text-muted">{hotelInfo.hotelPolicy || 'No special policies listed.'}</span>
                                             </div>
                                             <div className="d-flex justify-content-start align-items-center mb-2 gap-4">

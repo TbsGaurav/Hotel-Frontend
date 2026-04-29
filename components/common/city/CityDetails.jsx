@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { cookies } from 'next/headers';
 import HeroSection from '@/components/sections/HeroSection';
 import CityHotelListingWithMap from './CityHotelListingWithMap';
@@ -62,15 +62,23 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
     let regionName = '';
     let regionUrl = '';
     let firstHotel = null;
-    let resolvedCountryId = null;
+
+    const cookieCountryIdRaw = cookieStore.get('countryId')?.value ?? cookieStore.get('countryid')?.value ?? null;
+    const cookieCountryId = Number(cookieCountryIdRaw);
+    let resolvedCountryId = Number.isInteger(cookieCountryId) && cookieCountryId > 0 ? cookieCountryId : null;
 
     if (citySlug) {
         try {
             for (let pageNumber = 1; pageNumber <= currentPage; pageNumber++) {
-                const pageResponse =
-                    pageNumber === 1
-                        ? await getHotelList(citySlug, { pageNumber, pageSize: PAGE_SIZE })
-                        : await getHotelList(citySlug, { countryId: resolvedCountryId, pageNumber, pageSize: PAGE_SIZE });
+                let pageResponse = await getHotelList(citySlug, { countryId: resolvedCountryId, pageNumber, pageSize: PAGE_SIZE });
+
+                if (pageNumber === 1 && (resolvedCountryId === null || resolvedCountryId === undefined)) {
+                    const responseCountryId = Number(pageResponse?.countryId);
+                    if (Number.isInteger(responseCountryId) && responseCountryId > 0) {
+                        resolvedCountryId = responseCountryId;
+                        pageResponse = await getHotelList(citySlug, { countryId: resolvedCountryId, pageNumber, pageSize: PAGE_SIZE });
+                    }
+                }
                 const nextHotels = pageResponse?.hotels || [];
 
                 if (!nextHotels.length) {
@@ -80,7 +88,7 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
                 if (pageNumber === 1) {
                     totalCount = pageResponse?.totalCount || nextHotels.length;
                     content = nextHotels[0]?.content || '';
-                    resolvedCountryId = pageResponse?.countryId ?? null;
+                    resolvedCountryId = resolvedCountryId ?? (pageResponse?.countryId ?? null);
 
                     // Extract IDs from API response (not from first hotel)
                     const apiCityId = pageResponse?.cityId;
@@ -158,31 +166,31 @@ export default async function CityDetails({ params, resolvedSlugData = {} }) {
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href="/destinations" className="text-dark text-decoration-none">
+                                <AppLink href="/destinations" className="text-dark text-decoration-none">
                                     All Countries
-                                </Link>
+                                </AppLink>
                             </li>
 
                             {countryName && (
                                 <li className="breadcrumb-item small-para-14-px">
-                                    <Link href={`/${toSlug(countryUrl)}`} className="text-dark text-decoration-none">
+                                    <AppLink href={`/${toSlug(countryUrl)}`} className="text-dark text-decoration-none">
                                         {countryName}
-                                    </Link>
+                                    </AppLink>
                                 </li>
                             )}
 
                             {regionName && (
                                 <li className="breadcrumb-item small-para-14-px">
-                                    <Link href={`${toSlug(regionUrl)}`} className="text-dark text-decoration-none">
+                                    <AppLink href={`${toSlug(regionUrl)}`} className="text-dark text-decoration-none">
                                         {regionName}
-                                    </Link>
+                                    </AppLink>
                                 </li>
                             )}
 
                             <li className="breadcrumb-item small-para-14-px active">
-                                <Link href={`/${citySlugPath}`} className="text-decoration-none">
+                                <AppLink href={`/${citySlugPath}`} className="text-decoration-none">
                                     {cityName}
-                                </Link>
+                                </AppLink>
                             </li>
                         </ol>
                     </nav>

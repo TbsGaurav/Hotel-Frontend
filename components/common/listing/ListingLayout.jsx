@@ -15,6 +15,9 @@ export default function ListingLayout({
     sidebarClassName = 'col-lg-3 order-2 order-lg-1',
     mainClassName = 'col-lg-9 order-1 order-lg-2'
 }) {
+    const hasSidebar = Boolean(sidebar);
+    const effectiveMainClassName = hasSidebar ? mainClassName : 'col-12';
+
     return (
         <>
             {showHero ? <HeroSection variant="common" /> : null}
@@ -27,8 +30,8 @@ export default function ListingLayout({
                 {topContent}
 
                 <div className={rowClassName}>
-                    <div className={sidebarClassName}>{sidebar}</div>
-                    <div className={mainClassName}>{main}</div>
+                    {hasSidebar ? <div className={sidebarClassName}>{sidebar}</div> : null}
+                    <div className={effectiveMainClassName}>{main}</div>
                 </div>
             </section>
         </>

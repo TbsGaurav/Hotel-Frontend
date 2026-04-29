@@ -1,7 +1,7 @@
 'use client';
 import LoginModal from '@/components/common/models/LoginModel';
 import Image from 'next/image';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import React, { useRef, useState, useEffect } from 'react';
 import { currencies } from '@/lib/constants/currencies';
 import { getUserCurrency } from '@/lib/getUserCurrency';
@@ -76,7 +76,8 @@ export default function Header() {
     };
 
     const changeCurrency = (cur) => {
-        localStorage.setItem("currency", cur);
+        localStorage.setItem("currencyOverride", cur);
+        localStorage.removeItem("currency");
         setCurrency(cur);
         setIsCurrencyOpen(false);
         window.location.reload();
@@ -89,7 +90,7 @@ export default function Header() {
                 <div className="container">
                     <div className="row">
                         <div className="col-6 col-md-3 d-flex justify-content-between justify-content-md-start">
-                            <Link href="/" className="my-auto">
+                            <AppLink href="/" className="my-auto">
                                 <Image
                                     src="/image/logo.webp"
                                     alt="Hotel.com.au Logo"
@@ -97,7 +98,7 @@ export default function Header() {
                                     height={40}
                                     priority
                                 />
-                            </Link>
+                            </AppLink>
                         </div>
                         <div className="col-6 col-md-9 d-flex">
                             <div className="w-100 my-auto d-flex justify-content-end">
@@ -206,18 +207,18 @@ export default function Header() {
                                                 <div>
                                                     <ul className="list-unstyled main-menu">
                                                         <li>
-                                                            <Link href="/hotel-list" onClick={handleCloseOffcanvas}>
+                                                            <AppLink href="/hotel-list" onClick={handleCloseOffcanvas}>
                                                                 Find Hotel Deals
-                                                            </Link>
+                                                            </AppLink>
                                                         </li>
                                                         <li>
-                                                            <Link
+                                                            <AppLink
                                                                 href="/destinations"
                                                                 className="d-flex align-items-center"
                                                                 onClick={handleCloseOffcanvas}
                                                             >
                                                                 Destinations
-                                                            </Link>
+                                                            </AppLink>
                                                         </li>
                                                         <li>
                                                             <a href="#" onClick={handleCloseOffcanvas}>
@@ -230,9 +231,9 @@ export default function Header() {
                                                             </a>
                                                         </li>
                                                         <li>
-                                                            <Link href="/" onClick={handleCloseOffcanvas}>
+                                                            <AppLink href="/" onClick={handleCloseOffcanvas}>
                                                                 Home
-                                                            </Link>
+                                                            </AppLink>
                                                         </li>
                                                         <li>
                                                             <a href="#" onClick={handleCloseOffcanvas}>
@@ -245,9 +246,9 @@ export default function Header() {
                                                             </a>
                                                         </li>
                                                         <li>
-                                                            <Link href="/brands" onClick={handleCloseOffcanvas}>
+                                                            <AppLink href="/brands" onClick={handleCloseOffcanvas}>
                                                                 All Brands
-                                                            </Link>
+                                                            </AppLink>
                                                         </li>
                                                     </ul>
                                                 </div>

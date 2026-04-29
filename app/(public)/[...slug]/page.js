@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { getCountryByUrlName, resolveSlug } from '@/lib/api/public/countryapi';
-import { getHotelList } from '@/lib/api/public/hotelapi';
 import { resolveCategoryFromRegionSlug, resolveCategoryFromSlug } from '@/lib/api/public/cityCategoryapi';
 import CountryDetails from '@/components/common/country/CountryDetails';
 import RegionDetails from '@/components/common/region/RegionDetails';
@@ -11,6 +10,8 @@ import CityDetails from '@/components/common/city/CityDetails';
 import CityCategoryRouteApp from '@/components/common/city/CityCategoryRouteApp';
 import HotelDetailsWrapper from '@/components/common/hotel/HotelDetailsWrapper';
 import CityBrandDetails from '@/components/common/brand/CityBrandDetails';
+import CityHotelsByBrandDetails from '@/components/common/brand/CityHotelsByBrandDetails';
+import CityHotelsByStreetDetails from '@/components/common/brand/CityHotelsByStreetDetails';
 import { buildBrandSeo, buildCountrySeo, buildCitySeo, buildRegionSeo } from '@/lib/seo';
 
 function normalizeEntityType(value) {
@@ -42,10 +43,70 @@ function decodeUntilStable(value = '', maxPasses = 3) {
     return current;
 }
 
+function stripHtm(value = '') {
+    return String(value || '').replace(/\.htm$/i, '');
+}
+
+function isCityHotelsByBrandSlug(slugArray = []) {
+    if (slugArray.length !== 2) return false;
+    const citySlug = String(slugArray[0] || '').trim();
+    const second = stripHtm(slugArray[1]);
+    return citySlug && second === `${citySlug}-hotels-by-brand`;
+}
+
+function isCityHotelsByStreetSlug(slugArray = []) {
+    if (slugArray.length !== 2) return false;
+    const citySlug = String(slugArray[0] || '').trim();
+    const second = stripHtm(slugArray[1]);
+    return citySlug && second === `${citySlug}-hotels-by-street`;
+}
+
 export async function generateMetadata({ params }) {
     const { slug } = await params;
     const slugArray = slug || [];
     const fullSlug = `/${slugArray.join('/')}`;
+
+    if (isCityHotelsByBrandSlug(slugArray)) {
+        const result = await resolveSlug(fullSlug);
+        const data = result?.status === 'success' ? result.data || {} : {};
+        const entityType = normalizeEntityType(data?.entityType ?? data?.EntityType);
+
+        if (entityType === 'brandcity') {
+            const citySlug = String(slugArray[0] || '').trim();
+            const cityName = decodeUntilStable(data?.entityName || citySlug || '')
+                .split('-')
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+
+            const title = cityName ? `Hotel Brands in ${cityName}` : 'Hotel Brands';
+
+            return {
+                title,
+                description: title,
+                alternates: {
+                    canonical: `/${citySlug}/${String(slugArray[1] || '').trim()}.htm`
+                }
+            };
+        }
+    }
+
+    if (isCityHotelsByStreetSlug(slugArray)) {
+        const citySlug = String(slugArray[0] || '').trim();
+        const cityName = decodeUntilStable(citySlug || '')
+            .split('-')
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+
+        const title = cityName ? `Hotel Streets in ${cityName}` : 'Hotel Streets';
+
+        return {
+            title,
+            description: title,
+            alternates: {
+                canonical: `/${citySlug}/${String(slugArray[1] || '').trim()}.htm`
+            }
+        };
+    }
 
     if (slugArray.length === 1) {
         const result = await resolveSlug(fullSlug);
@@ -151,6 +212,11 @@ export default async function DynamicPage({ params, searchParams }) {
     const primarySlug = slugArray[0] || '';
     const categorySlug = slugArray.slice(1).join('/');
     const resolvedSearchParams = await searchParams;
+
+    if (isCityHotelsByStreetSlug(slugArray)) {
+        return <CityHotelsByStreetDetails citySlug={slugArray[0]} />;
+    }
+
     const result = await resolveSlug(fullSlug);
 
     if (result?.status === 'success') {
@@ -195,6 +261,10 @@ export default async function DynamicPage({ params, searchParams }) {
 
         if (slugArray.length === 2 && entityType === 'citybrand') {
             return <CityBrandDetails city={slugArray[0]} params={params} resolvedSlugData={data} />;
+        }
+
+        if (isCityHotelsByBrandSlug(slugArray) && entityType === 'brandcity') {
+            return <CityHotelsByBrandDetails citySlug={slugArray[0]} />;
         }
     }
 

@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import Image from 'next/image';
 import { MdOutlineStarPurple500 } from 'react-icons/md';
-import { FaMapMarkerAlt } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaHotel, FaSearch, FaRegCompass } from 'react-icons/fa';
 import { getHotelList, getHotelRates } from '@/lib/api/public/hotelapi';
 import { getUserCurrency } from '@/lib/getUserCurrency';
 import HotelMapView from '@/components/common/listing/HotelMapView';
@@ -24,7 +24,10 @@ export default function CityHotelList({
     pageIntentCookieName = '',
     pageCookieName,
     mapVisible = false,
-    onMapVisibleChange = null
+    onMapVisibleChange = null,
+    viewMode: controlledViewMode = 'list',
+    onViewModeChange = null,
+    showToolbar = true
 }) {
     const [loading, setLoading] = useState(false);
     const [allHotels, setAllHotels] = useState(hotels || []);
@@ -32,9 +35,10 @@ export default function CityHotelList({
     const [page, setPage] = useState(currentPage || 1);
     const [hasMore, setHasMore] = useState((hotels?.length || 0) < (totalCount || 0) || (hotels?.length || 0) === pageSize);
     const [currency, setCurrency] = useState(null);
-    const [viewMode, setViewMode] = useState('list');
+    const [uncontrolledViewMode, setUncontrolledViewMode] = useState('list');
     const [isMobileViewport, setIsMobileViewport] = useState(false);
     const [timestamp, setTimestamp] = useState('');
+
     const [failedImageKeys, setFailedImageKeys] = useState(() => new Set());
     const loadMoreTriggerRef = useRef(null);
     const loadRequestInFlightRef = useRef(false);
@@ -82,12 +86,6 @@ export default function CityHotelList({
 
         return () => window.clearTimeout(timer);
     }, []);
-
-    useEffect(() => {
-        if (isMobileViewport && viewMode !== 'list') {
-            setViewMode('list');
-        }
-    }, [isMobileViewport, viewMode]);
 
     useEffect(() => {
         const syncViewport = () => {
@@ -206,10 +204,7 @@ export default function CityHotelList({
     };
 
     const getImageUrl = (photo) => {
-        const normalizedUrl = normalizeImageUrl(photo);
-        if (normalizedUrl === defaultImage) return defaultImage;
-        const sep = normalizedUrl.includes('?') ? '&' : '?';
-        return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
+        return normalizeImageUrl(photo);
     };
 
     const getHotelRate = (bookingId) => allRates.find((rate) => String(rate?.id) === String(bookingId));
@@ -285,13 +280,13 @@ export default function CityHotelList({
                     setPage(resolvedPageNo);
                     setHasMore(
                         listGrew &&
-                        computeHasMore({
-                            loadedCount: mergedHotels.length,
-                            knownTotalCount: resolvedTotalCount,
-                            currentPageNumber: resolvedPageNo,
-                            currentPageSize: resolvedPageSize,
-                            lastBatchSize: normalizedHotels.length
-                        })
+                            computeHasMore({
+                                loadedCount: mergedHotels.length,
+                                knownTotalCount: resolvedTotalCount,
+                                currentPageNumber: resolvedPageNo,
+                                currentPageSize: resolvedPageSize,
+                                lastBatchSize: normalizedHotels.length
+                            })
                     );
 
                     if (pageCookieName) {
@@ -375,8 +370,56 @@ export default function CityHotelList({
 
     if (!allHotels.length) {
         return (
-            <div className="text-center py-5">
-                <p className="text-muted">No hotels available.</p>
+            <div className="container py-5">
+                <div
+                    className="mx-auto text-center rounded-4 shadow-sm border-0 overflow-hidden"
+                    style={{
+                        maxWidth: '760px',
+                        background: 'linear-gradient(135deg, #fff7ef 0%, #ffffff 45%, #f4f8fc 100%)',
+                        border: '1px solid rgba(240, 131, 30, 0.12)'
+                    }}
+                >
+                    <div
+                        style={{
+                            padding: '32px 24px',
+                            background:
+                                'radial-gradient(circle at top, rgba(240, 131, 30, 0.16) 0%, rgba(240, 131, 30, 0.04) 28%, transparent 55%)'
+                        }}
+                    >
+                        <div
+                            className="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                            style={{
+                                width: '72px',
+                                height: '72px',
+                                background: '#f0831e',
+                                color: '#fff',
+                                boxShadow: '0 12px 28px rgba(240, 131, 30, 0.28)'
+                            }}
+                        >
+                            <FaHotel size={30} />
+                        </div>
+
+                        <h3 className="fw-bold mb-2" style={{ color: '#1d2b3a' }}>
+                            No hotels found
+                        </h3>
+                        <p className="text-muted mb-4" style={{ maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 }}>
+                            We couldn’t find any hotels for this destination right now. Try changing your filters, checking nearby areas, or
+                            searching again with different dates.
+                        </p>
+
+                        <div className="d-flex flex-wrap justify-content-center gap-3" style={{ color: '#5f6b7a', fontSize: '14px' }}>
+                            <div className="d-flex align-items-center gap-2">
+                                <span
+                                    className="rounded-circle d-inline-flex align-items-center justify-content-center"
+                                    style={{ width: '34px', height: '34px', background: '#fff1e3', color: '#f0831e' }}
+                                >
+                                    <FaHotel size={14} />
+                                </span>
+                                <span>Try a different destination</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -386,15 +429,18 @@ export default function CityHotelList({
         window.open(url, '_blank', 'noopener,noreferrer');
     };
 
-    const effectiveViewMode = isMobileViewport ? 'list' : viewMode;
+    const isControlled = typeof onViewModeChange === 'function';
+    const activeViewMode = isControlled ? controlledViewMode : uncontrolledViewMode;
+    const setViewMode = isControlled ? onViewModeChange : setUncontrolledViewMode;
+    const effectiveViewMode = isMobileViewport ? 'list' : activeViewMode;
 
     return (
-        <div className="container p-0">
+        <div className="p-0">
             {content && <div className="text-muted mb-4" dangerouslySetInnerHTML={{ __html: content }} />}
 
-            {!isMobileViewport ? (
+            {showToolbar && !isMobileViewport ? (
                 <HotelListToolbar
-                    viewMode={viewMode}
+                    viewMode={activeViewMode}
                     onViewModeChange={setViewMode}
                     mapVisible={mapVisible}
                     onMapToggle={() => {
@@ -405,6 +451,7 @@ export default function CityHotelList({
                         }
                     }}
                     resultsCount={allHotels.length}
+                    className="mb-2"
                 />
             ) : null}
 
@@ -449,28 +496,33 @@ export default function CityHotelList({
                             >
                                 <div className="row g-3 collection-hotel-card-row">
                                     <div className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-4'} collection-hotel-image-col`}>
-                                        <div className="position-relative collection-hotel-image-wrap">
+                                        <div
+                                            className="position-relative collection-hotel-image-wrap rounded-4 overflow-hidden"
+                                            style={{
+                                                backgroundImage: `url(${defaultImage})`,
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center'
+                                            }}
+                                        >
                                             {imageBadges.length > 0 && (
                                                 <>
                                                     {imageBadges.map((badge, idx) => (
                                                         <span
                                                             key={idx}
                                                             className={
-                                                                isMobileViewport
-                                                                    ? 'image-ribbon'
-                                                                    : 'position-absolute text-white px-3 py-1'
+                                                                isMobileViewport ? 'image-ribbon' : 'position-absolute text-white px-3 py-1'
                                                             }
                                                             style={
                                                                 isMobileViewport
                                                                     ? { top: `${10 + idx * 24}px` }
                                                                     : {
-                                                                        top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                        left: '12px',
-                                                                        background: '#28a745',
-                                                                        borderRadius: '20px',
-                                                                        fontSize: '12px',
-                                                                        zIndex: 2
-                                                                    }
+                                                                          top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                          left: '12px',
+                                                                          background: '#28a745',
+                                                                          borderRadius: '20px',
+                                                                          fontSize: '12px',
+                                                                          zIndex: 2
+                                                                      }
                                                             }
                                                         >
                                                             {badge}
@@ -499,13 +551,14 @@ export default function CityHotelList({
                                             <div className="d-flex flex-column flex-md-row align-items-start justify-content-between mb-2 collection-hotel-header">
                                                 <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center mb-2 mb-md-0 collection-hotel-title-row">
                                                     {/* <div className="d-flex flex-wrap align-items-center mb-2 mb-md-0 collection-hotel-title-row"> */}
-                                                    <Link
+                                                    <AppLink
                                                         href={`${hotel.urlName}`}
                                                         className="property-grid-title font-size-16 font-size-md-18 my-auto me-2 me-md-3 hotel-name-link"
                                                         onClick={(e) => e.stopPropagation()}
+                                                        style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}
                                                     >
                                                         {hotel.hotelName}
-                                                    </Link>
+                                                    </AppLink>
                                                     <div className="text-warning mt-1 mt-md-0 collection-hotel-stars">
                                                         {[...Array(5)].map((_, i) => (
                                                             <MdOutlineStarPurple500
@@ -518,10 +571,7 @@ export default function CityHotelList({
                                                 </div>
 
                                                 <div className="d-flex collection-hotel-review-row">
-                                                    <div
-                                                        className="rating-box me-2 collection-hotel-rating-box"
-                                                        style={{ borderRadius: '10px 10px 10px 0px' }}
-                                                    >
+                                                    <div className="rating-box me-2 collection-hotel-rating-box border-radius">
                                                         <span className="m-auto">
                                                             {hotel.reviewScore === 0 ? 'N/A' : hotel.reviewScore}
                                                         </span>
@@ -541,10 +591,7 @@ export default function CityHotelList({
                                                 </div>
                                             </div>
 
-                                            <div
-                                                className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities"
-                                                style={{ overflow: 'hidden', columnGap: '4px', whiteSpace: 'nowrap' }}
-                                            >
+                                            <div className="d-flex align-items-center flex-nowrap mb-2 collection-hotel-facilities overflow">
                                                 {hotelFacilitiesText && (
                                                     <>
                                                         {hotelFacilitiesText
@@ -555,17 +602,7 @@ export default function CityHotelList({
                                                             .map((facility, idx) => (
                                                                 <span
                                                                     key={idx}
-                                                                    className="badge bg-light text-dark border me-1 mb-1"
-                                                                    style={{
-                                                                        fontSize: '11px',
-                                                                        lineHeight: '1.2',
-                                                                        whiteSpace: 'nowrap',
-                                                                        maxWidth: '135px',
-                                                                        overflow: 'hidden',
-                                                                        textOverflow: 'ellipsis',
-                                                                        display: 'inline-block',
-                                                                        padding: '4px 8px'
-                                                                    }}
+                                                                    className="badge bg-light text-dark border me-1 mb-1 ellips"
                                                                     title={facility}
                                                                 >
                                                                     {facility}
@@ -575,15 +612,15 @@ export default function CityHotelList({
                                                             .split('|')
                                                             .map((facility) => facility.trim())
                                                             .filter(Boolean).length > 5 && (
-                                                                <span className="rating" style={{ fontSize: '11px', lineHeight: '1.2' }}>
-                                                                    +
-                                                                    {hotelFacilitiesText
-                                                                        .split('|')
-                                                                        .map((facility) => facility.trim())
-                                                                        .filter(Boolean).length - 5}{' '}
-                                                                    more
-                                                                </span>
-                                                            )}
+                                                            <span className="rating star-rating">
+                                                                +
+                                                                {hotelFacilitiesText
+                                                                    .split('|')
+                                                                    .map((facility) => facility.trim())
+                                                                    .filter(Boolean).length - 5}{' '}
+                                                                more
+                                                            </span>
+                                                        )}
                                                     </>
                                                 )}
                                             </div>
@@ -624,14 +661,29 @@ export default function CityHotelList({
                                                 </div>
 
                                                 {(() => {
-                                                    if (!rate?.price) return null;
+                                                    if (!rate?.price) {
+                                                        return (
+                                                            <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
+                                                                <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                                    1 night, 2 adults
+                                                                </p>
+                                                                <div className="d-flex align-items-baseline justify-content-end collection-hotel-current-price-row">
+                                                                    <span
+                                                                        className="text-theme-orange fw-bold collection-hotel-current-price"
+                                                                        style={{ fontSize: '16px' }}
+                                                                    >
+                                                                        Check Price
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
 
                                                     const dealInfo = rate?.deal_info || {};
                                                     const originalPrice = dealInfo?.public_price;
                                                     const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
 
                                                     return (
-                                                        // <div className="price-block p-1 rounded mb-3 collection-hotel-price-block">
                                                         <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
                                                             <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
                                                                 1 night, 2 adults
@@ -665,7 +717,7 @@ export default function CityHotelList({
                                                 className="d-flex justify-content-end mt-3 collection-hotel-cta-row collection-hotel-cta-col"
                                                 style={effectiveViewMode === 'grid' ? { paddingTop: '6px' } : undefined}
                                             >
-                                                <Link
+                                                <AppLink
                                                     className="theme-button-blue rounded-4 d-inline-flex align-items-center justify-content-center gap-2 px-4 py-2 hotel-availability-button button-new"
                                                     href={`${hotel.url}`}
                                                     target="_blank"
@@ -674,7 +726,7 @@ export default function CityHotelList({
                                                 >
                                                     <span>See Availability</span>
                                                     <i className="fa-solid fa-arrow-right ms-2"></i>
-                                                </Link>
+                                                </AppLink>
                                             </div>
                                         </div>
                                     </div>

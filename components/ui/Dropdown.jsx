@@ -1,19 +1,16 @@
-
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import AppLink from '../common/AppLink';
 
 const DROPDOWN_TOGGLE_EVENT = 'shared-dropdown-toggle';
 
-export default function Dropdown({
-    id,
-    title,
-    items = [],
-    parentId,
-    defaultOpen = false
-}) {
+export default function Dropdown({ id, title, items = [], parentId, defaultOpen = false }) {
+    if (!items || items.length === 0) {
+        return null; 
+    }
+
     const [isOpen, setIsOpen] = useState(defaultOpen);
 
     const headingId = `heading-${id}`;
@@ -74,11 +71,7 @@ export default function Dropdown({
                     </button>
                 </h2>
 
-                <div
-                    id={collapseId}
-                    className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`}
-                    aria-labelledby={headingId}
-                >
+                <div id={collapseId} className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`} aria-labelledby={headingId}>
                     <div className="accordion-body accordion-main">
                         <div className="row">
                             {items.length === 0 ? (
@@ -87,18 +80,18 @@ export default function Dropdown({
                                 items.map((item, index) => (
                                     <div key={index} className="col-6 col-md-4 col-lg-3 country-list">
                                         {item.href ? (
-                                            <Link href={item.href} className="text-decoration-none text-dark" prefetch={false}>
+                                            <AppLink href={item.href} className="text-decoration-none text-dark" prefetch={false}>
                                                 {item.label}
-                                            </Link>
+                                            </AppLink>
                                         ) : (
                                             <span className="text-dark">• {item.label}</span>
                                         )}
 
                                         {item.count != null && (
                                             <div className="property-count">
-                                                <Link href={item.href} className="text-decoration-none property-link" prefetch={false}>
-                                                    ({item.count} properties)
-                                                </Link>
+                                                <AppLink href={item.href} className="text-decoration-none property-link" prefetch={false}>
+                                                    ({item.count} {Number(item.count) === 1 ? 'property' : 'properties'})
+                                                </AppLink>
                                             </div>
                                         )}
                                     </div>

@@ -90,8 +90,7 @@ export default function PreviewUI({ initialData, id }) {
             <div className="d-flex align-items-center justify-content-between mb-4">
                 <div className="d-flex align-items-center">
                     <i
-                        className="bi bi-arrow-left me-2 fs-5"
-                        style={{ cursor: 'pointer' }}
+                        className="bi bi-arrow-left me-2 fs-5 dropdown-option-pointer"
                         onClick={() => router.push(ADMIN_ROUTES.collections)}
                     ></i>
                     <h5 className="mb-0">Collection Preview</h5>

@@ -1,17 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
+import { useRouter } from 'next/navigation';
 import { fetchClient } from '@/lib/api/public/fetchClient';
 
 const ALPHABETS = ['Top Cities', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
 const DROPDOWN_TOGGLE_EVENT = 'shared-dropdown-toggle';
 
-export default function CityDropdown({ countryName, initialCities = [], parentId }) {
+export default function CityDropdown({ countryName, countrySlug = '', initialCities = [], parentId }) {
     const [cities, setCities] = useState(initialCities);
     const [activeLetter, setActiveLetter] = useState('Top Cities');
     const [loading, setLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const router = useRouter();
     const instanceIdRef = useRef(`city-dropdown-${Math.random().toString(36).slice(2, 10)}`);
 
     const ITEM_TYPE = {
@@ -23,6 +25,21 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
 
     const handleToggle = () => {
         setIsOpen((prev) => !prev);
+    };
+
+    const handleCityClick = (event, city) => {
+        const href = String(city?.urlName || '').trim();
+        if (!href) return;
+
+        const rawCountryId = city?.countryId ?? city?.CountryId ?? null;
+        const countryId = Number(rawCountryId);
+
+        if (Number.isInteger(countryId) && countryId > 0) {
+            document.cookie = `countryId=${countryId}; path=/; SameSite=Lax; Max-Age=600`;
+        }
+
+        event.preventDefault();
+        router.push(href);
     };
 
     useEffect(() => {
@@ -60,15 +77,15 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
             setActiveLetter(letter);
             setLoading(true);
 
-            const endpoint =
-                letter === 'Top Cities'
-                    ? `/countries/${countryName}`
-                    : `/countries/${countryName}?alphabet=${letter.toLowerCase()}`;
+            const resolvedCountrySegment = String(countrySlug || '').trim().replace(/^\/+/, '') || String(countryName || '').trim();
+            const countrySegment = encodeURIComponent(resolvedCountrySegment);
+            const endpoint = letter === 'Top Cities'
+                ? `/countries/${countrySegment}`
+                : `/countries/${countrySegment}?alphabet=${letter.toLowerCase()}`;
 
             const json = await fetchClient(endpoint);
 
-            const cityData =
-                json?.data?.countryData?.filter((item) => Number(item.type) === ITEM_TYPE.City) || [];
+            const cityData = json?.data?.countryData?.filter((item) => Number(item.type) === ITEM_TYPE.City) || [];
 
             setCities(cityData);
         } catch (error) {
@@ -100,11 +117,7 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
                     </button>
                 </h2>
 
-                <div
-                    id="collapseCities"
-                    className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`}
-                    aria-labelledby="headingCities"
-                >
+                <div id="collapseCities" className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`} aria-labelledby="headingCities">
                     <div className="accordion-body accordion-main">
                         <div className="d-flex flex-wrap gap-2 mb-4 mt-2">
                             {ALPHABETS.map((letter) => (
@@ -120,18 +133,21 @@ export default function CityDropdown({ countryName, initialCities = [], parentId
 
                         {loading ? (
                             <p className="mb-0">Loading cities...</p>
+                        ) : cities.length === 0 ? (
+                            <p className="text-muted">No cities available</p>
                         ) : (
                             <div className="row">
                                 {cities.map((city) => (
                                     <div key={city.id} className="col-6 col-md-4 col-lg-3 country-list">
                                         {city.urlName ? (
-                                            <Link
+                                            <AppLink
                                                 href={`${city.urlName}`}
                                                 className="text-decoration-none text-dark"
                                                 prefetch={false}
+                                                onClick={(event) => handleCityClick(event, city)}
                                             >
                                                 {city.itemName}
-                                            </Link>
+                                            </AppLink>
                                         ) : (
                                             <span className="text-dark">{city.itemName}</span>
                                         )}

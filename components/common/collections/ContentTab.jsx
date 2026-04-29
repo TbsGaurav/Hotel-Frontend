@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), { ssr: false });
 
-export default function ContentTab({ data, setData, onNext, onBack, loading }) {
+export default function ContentTab({ data, setData, onNext, onBack, loading, isEdit = false }) {
     const [errors, setErrors] = useState({});
     const handleNextClick = () => {
         // if (!validateForm()) return;
@@ -50,8 +50,6 @@ export default function ContentTab({ data, setData, onNext, onBack, loading }) {
         if (!data.introLongCopy?.trim()) {
             newErrors.introLongCopy = 'Intro Long Copy is required';
         }
-
-    
 
         setErrors(newErrors);
 
@@ -287,30 +285,30 @@ export default function ContentTab({ data, setData, onNext, onBack, loading }) {
                 </div>
             </div>
 
-            <div className="d-flex justify-content-between mt-4">
-                <button className="btn btn-outline-secondary" onClick={onBack}>
-                    Back
-                </button>
-
-                <div>
-                    <button
-                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
-                        onClick={handleNextClick}
-                        // onClick={onNext}
-                        type="button"
-                        disabled={loading}
-                        style={{ minWidth: '100px' }}
-                    >
-                        {loading ? (
-                            <>
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            </>
-                        ) : (
-                            'Next'
-                        )}
+            {!isEdit && (
+                <div className="d-flex justify-content-between mt-4">
+                    <button className="btn btn-outline-secondary" onClick={onBack}>
+                        Back
                     </button>
+
+                    <div>
+                        <button
+                            className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center btn-min-width-100"
+                            onClick={handleNextClick}
+                            type="button"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                </>
+                            ) : (
+                                'Next'
+                            )}
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
         </>
     );
 }

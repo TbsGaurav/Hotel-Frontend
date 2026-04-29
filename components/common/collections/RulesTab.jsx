@@ -19,7 +19,8 @@ export default function RulesTab({
     removeRule,
     onNext,
     onBack,
-    loading
+    loading,
+    isEdit = false
 }) {
     const [errors, setErrors] = useState({});
     const operators = ruleField ? getOperatorsForField(ruleField) : [];
@@ -112,7 +113,7 @@ export default function RulesTab({
                                     const ops = getOperatorsForField(field);
                                     setRuleOperator(ops[0]?.value || '');
 
-                                if (field === 'GeoContainment') {
+                                    if (field === 'GeoContainment') {
                                         setRuleValue(geoNodeLabel || '');
                                     } else {
                                         setRuleValue('');
@@ -284,28 +285,28 @@ export default function RulesTab({
             )}
 
             {/* ================= NAVIGATION ================= */}
-            <div className="d-flex justify-content-between">
-                <button type="button" className="btn btn-outline-secondary" onClick={onBack}>
-                    Back
-                </button>
+            {!isEdit && (
+                <div className="d-flex justify-content-between">
+                    <button type="button" className="btn btn-outline-secondary" onClick={onBack}>
+                        Back
+                    </button>
 
-                <button
-                    className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center"
-                    onClick={handleNextClick}
-                    type="button"
-                    disabled={loading}
-                    style={{ minWidth: '100px' }}
-                >
-                    {loading ? (
-                        <>
-                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            {/* Loading... */}
-                        </>
-                    ) : (
-                        'Next'
-                    )}
-                </button>
-            </div>
+                    <button
+                        className="theme-button-orange rounded-2 d-flex align-items-center justify-content-center btn-min-width-100"
+                        onClick={handleNextClick}
+                        type="button"
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            </>
+                        ) : (
+                            'Next'
+                        )}
+                    </button>
+                </div>
+            )}
         </>
     );
 }

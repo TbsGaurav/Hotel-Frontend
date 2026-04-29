@@ -1,13 +1,11 @@
-import Link from 'next/link';
+import AppLink from '@/components/common/AppLink';
 import { cookies } from 'next/headers';
 import HeroSection from '@/components/sections/HeroSection';
 import Dropdown from '@/components/ui/Dropdown';
 import { getCitiesByRegion } from '@/lib/api/public/regionapi';
 import { getHotelList } from '@/lib/api/public/hotelapi';
 import { getSidebarData } from '@/lib/api/sidebarapi';
-import CityHotelList from '../city/CityHotelList';
 import { formatCountryName } from '@/lib/utils';
-import ListingSidebar from '@/components/common/sidebar/ListingSidebar';
 import { buildSidebarSections } from '@/lib/mappers/sidebarMapper';
 import MobileFilterDrawer from '@/components/ui/MobileFilterDrawer';
 import { buildCategoryListingPath } from '@/lib/api/public/cityCategoryapi';
@@ -223,21 +221,21 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                     <nav aria-label="breadcrumb" className="mb-0">
                         <ol className="breadcrumb mb-0">
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href="/destinations" className="text-dark text-decoration-none">
+                                <AppLink href="/destinations" className="text-dark text-decoration-none">
                                     All Countries
-                                </Link>
+                                </AppLink>
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px">
-                                <Link href={`/${countrySlug}`} className="text-dark text-decoration-none">
+                                <AppLink href={`/${toSlug(countrySlug)}`} className="text-dark text-decoration-none">
                                     {countryName}
-                                </Link>
+                                </AppLink>
                             </li>
 
                             <li className="breadcrumb-item small-para-14-px active text-capitalize">
-                                <Link href={`/${countrySlug}/${regionSlug}`} className="text-decoration-none">
+                                <AppLink href={`/${toSlug(countrySlug)}/${toSlug(regionSlug)}`} className="text-decoration-none">
                                     {regionName}
-                                </Link>
+                                </AppLink>
                             </li>
                         </ol>
                     </nav>
@@ -248,23 +246,20 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                 <div className="container">
                     <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
 
-                    <div className="row g-4 align-items-start">
-                        <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
-                        <hr className="my-5" />
+                    <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
 
-                        <RegionHotelListingWithMap
-                            sidebarSections={sidebarSectionsWithLinks}
-                            hotels={hotels}
-                            totalCount={totalCount}
-                            currentPage={currentPage}
-                            pageSize={REGION_PAGE_SIZE}
-                            citySlug={urlName}
-                            pageCookieName={regionPageCookieName}
-                            pageIntentCookieName={pageIntentCookieName}
-                            regionHotelsSource={fallbackRegionHotels}
-                            content={description}
-                        />
-                    </div>
+                    <RegionHotelListingWithMap
+                        sidebarSections={sidebarSectionsWithLinks}
+                        hotels={hotels}
+                        totalCount={totalCount}
+                        currentPage={currentPage}
+                        pageSize={REGION_PAGE_SIZE}
+                        citySlug={urlName}
+                        pageCookieName={regionPageCookieName}
+                        pageIntentCookieName={pageIntentCookieName}
+                        regionHotelsSource={fallbackRegionHotels}
+                        content={description}
+                    />
                 </div>
             </section>
         </>
