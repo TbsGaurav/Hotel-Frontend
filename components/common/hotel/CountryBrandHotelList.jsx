@@ -85,6 +85,18 @@ export default function CountryBrandHotelList({
         initCurrency();
     }, []);
 
+    useEffect(() => {
+        const handler = (event) => {
+            const nextCurrency = event?.detail?.currency;
+            if (nextCurrency) {
+                setCurrency(nextCurrency);
+            }
+        };
+
+        window.addEventListener('currencychange', handler);
+        return () => window.removeEventListener('currencychange', handler);
+    }, []);
+
     const getBookingId = (hotel) => hotel?.bookingId ?? null;
 
     const fetchRatesForHotels = async (hotelsToRate, selectedCurrency) => {
