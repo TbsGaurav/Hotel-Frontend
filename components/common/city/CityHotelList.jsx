@@ -38,6 +38,7 @@ export default function CityHotelList({
     const [uncontrolledViewMode, setUncontrolledViewMode] = useState('list');
     const [isMobileViewport, setIsMobileViewport] = useState(false);
     const [timestamp, setTimestamp] = useState('');
+
     const [failedImageKeys, setFailedImageKeys] = useState(() => new Set());
     const loadMoreTriggerRef = useRef(null);
     const loadRequestInFlightRef = useRef(false);
@@ -203,10 +204,7 @@ export default function CityHotelList({
     };
 
     const getImageUrl = (photo) => {
-        const normalizedUrl = normalizeImageUrl(photo);
-        if (normalizedUrl === defaultImage) return defaultImage;
-        const sep = normalizedUrl.includes('?') ? '&' : '?';
-        return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
+        return normalizeImageUrl(photo);
     };
 
     const getHotelRate = (bookingId) => allRates.find((rate) => String(rate?.id) === String(bookingId));
@@ -498,7 +496,14 @@ export default function CityHotelList({
                             >
                                 <div className="row g-3 collection-hotel-card-row">
                                     <div className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-4'} collection-hotel-image-col`}>
-                                        <div className="position-relative collection-hotel-image-wrap">
+                                        <div
+                                            className="position-relative collection-hotel-image-wrap rounded-4 overflow-hidden"
+                                            style={{
+                                                backgroundImage: `url(${defaultImage})`,
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center'
+                                            }}
+                                        >
                                             {imageBadges.length > 0 && (
                                                 <>
                                                     {imageBadges.map((badge, idx) => (

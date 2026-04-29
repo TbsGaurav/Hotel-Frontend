@@ -2411,7 +2411,7 @@ input[type='range']:active::-webkit-slider-thumb {
 .city-hover {
     cursor: pointer;
     transition: color 0.3s ease;
-    color:#f0831e !important;
+    color: #f0831e !important;
 }
 
 .city-hover:hover {
@@ -2797,6 +2797,7 @@ input[type='range']:active::-webkit-slider-thumb {
         height: 300px;
     }
 }
+
 @media (min-width: 768px) {
     .hotel-detail-review {
         margin-left: auto;
@@ -2815,6 +2816,83 @@ input[type='range']:active::-webkit-slider-thumb {
         font-size: 15px;
         font-weight: 600;
     }
+}
+
+/* Hotel detail trust block */
+.trust-block__subtitle {
+    max-width: 560px;
+}
+
+.trust-block {
+    background: linear-gradient(180deg, #f7f8fa 0%, #ffffff 100%);
+    border-color: rgba(11, 31, 58, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.trust-block__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(240, 131, 30, 0.14);
+    color: #f0831e;
+    border: 1px solid rgba(240, 131, 30, 0.22);
+    flex: 0 0 auto;
+    box-shadow: 0 10px 22px rgba(240, 131, 30, 0.12);
+}
+
+.trust-block__icon i {
+    font-size: 18px;
+}
+
+.trust-block::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(500px 220px at 20% 0%, rgba(240, 131, 30, 0.16) 0%, rgba(240, 131, 30, 0) 65%),
+        radial-gradient(420px 240px at 95% 20%, rgba(0, 113, 194, 0.08) 0%, rgba(0, 113, 194, 0) 70%);
+    opacity: 0.9;
+}
+
+.trust-block__header,
+.trust-block .row {
+    position: relative;
+    z-index: 1;
+}
+
+.trust-block .trust-item {
+    transition:
+        box-shadow 0.2s ease,
+        transform 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.trust-block .trust-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    border-color: rgba(240, 131, 30, 0.28) !important;
+}
+
+/* Trust item check */
+.trust-block .trust-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: rgba(25, 135, 84, 0.12);
+    color: #198754;
+    font-weight: 800;
+    flex: 0 0 auto;
+}
+
+.trust-block .badge {
+    white-space: nowrap;
 }
 .custom-tabs .nav-link {
     border: none;
@@ -3630,11 +3708,12 @@ input[type='range']:active::-webkit-slider-thumb {
 .border-radius {
     border-radius: 10px 10px 10px 0px;
 }
-.dropdown-height{
-    max-height:200px;
-    overflow-Y:auto; 
+.dropdown-height {
+    max-height: 200px;
+    overflow-y: auto;
     z-index: 1000;
-}.vertical-align-top {
+}
+.vertical-align-top {
     align-items: flex-start;
 }
 .shadow {

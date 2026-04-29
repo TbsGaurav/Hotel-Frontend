@@ -247,7 +247,6 @@ export default async function RegionDetails({ params, regionId, resolvedSlugData
                     <SeoDetailsCard metaTitle={seo.metaTitle} metaDescription={seo.metaDescription} canonicalPath={seo.canonicalPath} />
 
                     <Dropdown id="regions" parentId="countryAccordion" title="Cities" items={cityItems} defaultOpen />
-                    <hr className="my-5" />
 
                     <RegionHotelListingWithMap
                         sidebarSections={sidebarSectionsWithLinks}

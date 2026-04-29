@@ -238,13 +238,13 @@ export default function HotelDetails({ initialData }) {
     }, [showPhotoModal, allPhotos.length]);
 
     // Generate cache-busted URL
-    const getImageUrl = (photo) => {
-        const normalizedUrl = normalizeImageUrl(photo);
-        if (normalizedUrl === defaultImage) return defaultImage;
-        const sep = normalizedUrl.includes('?') ? '&' : '?';
-        return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
+     const getImageUrl = (photo) => {
+        return normalizeImageUrl(photo);
     };
-
+useEffect(() => {
+        const img = new window.Image();
+        img.src = defaultImage;
+    }, []);
     const openPhotoModal = (index = 0) => {
         setCurrentPhotoIndex(index);
         setShowPhotoModal(true);
@@ -543,7 +543,12 @@ export default function HotelDetails({ initialData }) {
                             <div
                                 id="hotelCarousel"
                                 className="carousel slide rounded-4 overflow-hidden position-relative"
-                                style={{ height: '400px' }}
+                                style={{
+                                    height: '460px',
+                                    backgroundImage: `url(${defaultImage})`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center'
+                                }}
                             >
                                 <div className="carousel-indicators">
                                     <button type="button" data-bs-target="#hotelCarousel" data-bs-slide-to="0" className="active"></button>
@@ -608,7 +613,12 @@ export default function HotelDetails({ initialData }) {
                                     <div key={idx} className="col-12 mb-2">
                                         <div
                                             className="rounded-4 overflow-hidden position-relative photo-hover-container"
-                                            style={{ height: '190px', cursor: 'pointer' }}
+                                            style={{
+                                                height: '190px',
+                                                backgroundImage: `url(${defaultImage})`,
+                                                backgroundSize: 'cover',
+                                                backgroundPosition: 'center'
+                                            }}
                                             onClick={() => openPhotoModal(idx + 1)}
                                         >
                                             <Image

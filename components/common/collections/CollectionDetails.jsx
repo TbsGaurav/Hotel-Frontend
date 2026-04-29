@@ -62,6 +62,7 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     const loadRequestInFlightRef = useRef(false);
     const pageRef = useRef(currentPage || 1);
     const [timestamp, setTimestamp] = useState('');
+
     const [viewMode, setViewMode] = useState('list');
     const [isMobileViewport, setIsMobileViewport] = useState(false);
 
@@ -185,11 +186,9 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
     };
 
     const getImageUrl = (photo) => {
-        const normalizedUrl = normalizeImageUrl(photo);
-        if (normalizedUrl === defaultImage) return defaultImage;
-        const sep = normalizedUrl.includes('?') ? '&' : '?';
-        return timestamp ? `${normalizedUrl}${sep}t=${timestamp}` : normalizedUrl;
+        return normalizeImageUrl(photo);
     };
+
     function decodeHtml(html) {
         if (!html) return '';
 
@@ -215,6 +214,16 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return decoded;
     }
+
+    const getRatingText = (score) => {
+        const value = Number(score);
+        if (!value) return 'Not rated';
+        if (value >= 9) return 'Exceptional';
+        if (value >= 8) return 'Excellent';
+        if (value >= 7) return 'Very good';
+        if (value >= 6) return 'Good';
+        return 'Pleasant';
+    };
 
     // Load more hotels handler
     const loadMoreHotels = async () => {
@@ -270,7 +279,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return () => observer.disconnect();
     }, [hasMore, loading, page, collectionId, pageSize, currency, totalCount, allHotels.length]);
-
     useEffect(() => {
         const timer = window.setTimeout(() => {
             setTimestamp(Date.now().toString());
@@ -278,7 +286,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
 
         return () => window.clearTimeout(timer);
     }, []);
-
     useEffect(() => {
         const syncViewport = () => {
             setIsMobileViewport(window.innerWidth < 768);
@@ -382,17 +389,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                 </div>
             ) : (
                 <>
-                    {/* <div className="py-2">
-                        <div className="container">
-                            <div className="d-flex align-items-center small">
-                                <AppLink href="/" className="text-dark text-decoration-none">
-                                    Home
-                                </AppLink>
-                                <span className="mx-2 text-muted">•</span>
-                                <span className="fw-semibold text-decoration-none text-primary">{basic[0]?.name}</span>
-                            </div>
-                        </div>
-                    </div> */}
                     <div className="py-3 mx-2">
                         <div className="container">
                             <nav aria-label="breadcrumb" className="mb-0">
@@ -503,6 +499,8 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                     <div className={`${effectiveViewMode === 'grid' ? 'row g-3 grid-view' : 'd-flex flex-column gap-3'}`}>
                                         {allHotels.map((hotel, index) => {
                                             const hotelKey = getHotelKey(hotel, index);
+                                     
+
                                             return (
                                                 <div key={hotelKey} className={effectiveViewMode === 'grid' ? 'col-12 col-md-6' : ''}>
                                                     <div
@@ -526,7 +524,14 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                             <div
                                                                 className={`col-12 ${effectiveViewMode === 'grid' ? '' : 'col-md-4'} collection-hotel-image-col`}
                                                             >
-                                                                <div className="position-relative collection-hotel-image-wrap">
+                                                                <div
+                                                                    className="position-relative collection-hotel-image-wrap rounded-4 overflow-hidden"
+                                                                    style={{
+                                                                        backgroundImage: `url(${defaultImage})`,
+                                                                        backgroundSize: 'cover',
+                                                                        backgroundPosition: 'center'
+                                                                    }}
+                                                                >
                                                                     {(() => {
                                                                         const rate = getHotelRate(getBookingId(hotel));
                                                                         const badges = rate?.badges || [];
@@ -669,20 +674,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                                                         </p>
                                                                     )}
 
-                                                                    {/* DESCRIPTION */}
-                                                                    {/* {hotel.hotelDescription && (
-                                                        <p className="small-para-14-px text-black mb-3">
-                                                            {hotel.hotelDescription.length > 200
-                                                                ? `${hotel.hotelDescription.slice(0, 200)}... `
-                                                                : hotel.hotelDescription}
-                                                            {hotel.hotelDescription.length > 200 && (
-                                                                <span className="rating">
-                                                                    more
-                                                                </span>
-                                                            )}
-                                                        </p>
-                                                    )} */}
-
                                                                     <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-2 collection-hotel-meta-row">
                                                                         <div className="mb-2 mb-md-0 collection-hotel-meta-copy">
                                                                             <p className="para text-primary mb-0 collection-hotel-pay-later">
@@ -802,7 +793,6 @@ export default function CollectionDetails({ collection, hotels, hotelRates, tota
                                             );
                                         })}
                                     </div>
-
                                     {hasMore && (
                                         <div ref={loadMoreTriggerRef} className="text-center py-4">
                                             <p className="text-muted mb-0">{loading ? 'Loading more...' : 'Loading more...'}</p>

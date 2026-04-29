@@ -7,8 +7,13 @@ export default function HotelListToolbar({
     onViewModeChange = () => {},
     mapVisible = false,
     onMapToggle = () => {},
+    resultsCount = null,
     className = ''
 }) {
+    if (resultsCount !== null && Number(resultsCount) <= 0) {
+        return null;
+    }
+
     const isList = viewMode === 'list';
     const rootClassName = ['hotel-toolbar', className].filter(Boolean).join(' ');
 
