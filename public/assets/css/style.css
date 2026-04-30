@@ -3111,7 +3111,7 @@ input[type='range']:active::-webkit-slider-thumb {
     text-overflow: ellipsis;
     overflow: hidden;
     margin-right: 8px !important;
-    word-break: break-all;
+
 }
 .breadcrumb-wrapper {
     padding-right: 20px;
