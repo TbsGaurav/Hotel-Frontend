@@ -107,6 +107,18 @@ export default function CityHotelList({
     }, []);
 
     useEffect(() => {
+        const handler = (event) => {
+            const nextCurrency = event?.detail?.currency;
+            if (nextCurrency) {
+                setCurrency(nextCurrency);
+            }
+        };
+
+        window.addEventListener('currencychange', handler);
+        return () => window.removeEventListener('currencychange', handler);
+    }, []);
+
+    useEffect(() => {
         const timer = window.setTimeout(() => {
             const dedupedHotels = dedupeHotels(hotels || []);
             setAllHotels(dedupedHotels);
@@ -280,13 +292,13 @@ export default function CityHotelList({
                     setPage(resolvedPageNo);
                     setHasMore(
                         listGrew &&
-                            computeHasMore({
-                                loadedCount: mergedHotels.length,
-                                knownTotalCount: resolvedTotalCount,
-                                currentPageNumber: resolvedPageNo,
-                                currentPageSize: resolvedPageSize,
-                                lastBatchSize: normalizedHotels.length
-                            })
+                        computeHasMore({
+                            loadedCount: mergedHotels.length,
+                            knownTotalCount: resolvedTotalCount,
+                            currentPageNumber: resolvedPageNo,
+                            currentPageSize: resolvedPageSize,
+                            lastBatchSize: normalizedHotels.length
+                        })
                     );
 
                     if (pageCookieName) {
@@ -516,13 +528,13 @@ export default function CityHotelList({
                                                                 isMobileViewport
                                                                     ? { top: `${10 + idx * 24}px` }
                                                                     : {
-                                                                          top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
-                                                                          left: '12px',
-                                                                          background: '#28a745',
-                                                                          borderRadius: '20px',
-                                                                          fontSize: '12px',
-                                                                          zIndex: 2
-                                                                      }
+                                                                        top: idx === 0 ? '12px' : `${12 + idx * 30}px`,
+                                                                        left: '12px',
+                                                                        background: '#28a745',
+                                                                        borderRadius: '20px',
+                                                                        fontSize: '12px',
+                                                                        zIndex: 2
+                                                                    }
                                                             }
                                                         >
                                                             {badge}
@@ -612,15 +624,15 @@ export default function CityHotelList({
                                                             .split('|')
                                                             .map((facility) => facility.trim())
                                                             .filter(Boolean).length > 5 && (
-                                                            <span className="rating star-rating">
-                                                                +
-                                                                {hotelFacilitiesText
-                                                                    .split('|')
-                                                                    .map((facility) => facility.trim())
-                                                                    .filter(Boolean).length - 5}{' '}
-                                                                more
-                                                            </span>
-                                                        )}
+                                                                <span className="rating star-rating">
+                                                                    +
+                                                                    {hotelFacilitiesText
+                                                                        .split('|')
+                                                                        .map((facility) => facility.trim())
+                                                                        .filter(Boolean).length - 5}{' '}
+                                                                    more
+                                                                </span>
+                                                            )}
                                                     </>
                                                 )}
                                             </div>
@@ -661,35 +673,19 @@ export default function CityHotelList({
                                                 </div>
 
                                                 {(() => {
-                                                    if (!rate?.price) {
-                                                        return (
-                                                            <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
-                                                                <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
-                                                                    1 night, 2 adults
-                                                                </p>
-                                                                <div className="d-flex align-items-baseline justify-content-end collection-hotel-current-price-row">
-                                                                    <span
-                                                                        className="text-theme-orange fw-bold collection-hotel-current-price"
-                                                                        style={{ fontSize: '16px' }}
-                                                                    >
-                                                                        Check Price
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    }
-
                                                     const dealInfo = rate?.deal_info || {};
                                                     const originalPrice = dealInfo?.public_price;
-                                                    const formattedOriginal = formatOriginalPrice(rate.price.book, originalPrice);
+                                                    const formattedOriginal = formatOriginalPrice(rate?.price?.book, originalPrice);
 
                                                     return (
                                                         <div className="price-block p-1 rounded mb-3 ms-auto text-end collection-hotel-price-block price-bottom">
-                                                            <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
-                                                                1 night, 2 adults
-                                                            </p>
+                                                            {(rate?.price?.book || rate?.price?.total) &&
+                                                                <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                                    1 night, 2 adults
+                                                                </p>
+                                                            }
 
-                                                            {formattedOriginal && originalPrice > rate.price.total && (
+                                                            {formattedOriginal && originalPrice > rate?.price?.total && (
                                                                 <p
                                                                     className="para-12px mb-0 text-end collection-hotel-original-price"
                                                                     style={{ color: 'red', textDecoration: 'line-through' }}
@@ -703,12 +699,14 @@ export default function CityHotelList({
                                                                     className="text-theme-orange fw-bold collection-hotel-current-price"
                                                                     style={{ fontSize: '24px' }}
                                                                 >
-                                                                    {rate.price.book}
+                                                                    {rate?.price?.book}
                                                                 </span>
                                                             </div>
-                                                            <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
-                                                                Includes taxes and charges
-                                                            </p>
+                                                            {(rate?.price?.book || rate?.price?.total) &&
+                                                                <p className="para-12px text-muted mb-1 text-end collection-hotel-price-caption">
+                                                                    Includes taxes and charges
+                                                                </p>
+                                                            }
                                                         </div>
                                                     );
                                                 })()}

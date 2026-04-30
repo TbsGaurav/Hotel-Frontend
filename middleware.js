@@ -2,9 +2,16 @@ import { NextResponse } from 'next/server';
 
 export function middleware(request) {
     const { pathname, search } = request.nextUrl;
+    const searchParams = request.nextUrl.searchParams;
+
+    const isRscRequest =
+        searchParams.has('_rsc') ||
+        request.headers.get('RSC') === '1' ||
+        request.headers.get('Next-Router-Prefetch') === '1' ||
+        request.headers.get('Next-Router-State-Tree') !== null;
 
     // 1. Skip root and files that already have an extension (other than .htm)
-    if (pathname === '/' || pathname.startsWith('/_next') || pathname.startsWith('/api')) {
+    if (isRscRequest || pathname === '/' || pathname.startsWith('/_next') || pathname.startsWith('/api')) {
         return NextResponse.next();
     }
 

@@ -76,10 +76,11 @@ export default function Header() {
     };
 
     const changeCurrency = (cur) => {
-        localStorage.setItem("currency", cur);
+        localStorage.setItem("currencyOverride", cur);
+        localStorage.removeItem("currency");
         setCurrency(cur);
         setIsCurrencyOpen(false);
-        window.location.reload();
+        window.dispatchEvent(new CustomEvent('currencychange', { detail: { currency: cur } }));
     };
 
     return (
